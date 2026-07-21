@@ -34,6 +34,7 @@ The repository currently contains:
 - a specialist model router with audited LongCat and Qwen pipelines;
 - a Finance Data MCP server exposing exactly six approved read-only research tools;
 - deterministic market-fact verification against persisted evidence.
+- a dry-run-first Hermes installer with backups, an MCP allowlist, and WeCom cron migration.
 
 ## Finance Data MCP tools
 
@@ -71,6 +72,17 @@ Run the MCP server over stdio (the default and recommended local Hermes transpor
 ```powershell
 uv run aiquant-lite-mcp
 ```
+
+Connect an existing Hermes 0.18 installation after previewing the changes:
+
+```powershell
+$env:HERMES_HOME = "E:\hermes"
+uv run python scripts/configure_hermes_integration.py
+uv run python scripts/configure_hermes_integration.py --apply
+```
+
+See [docs/hermes-integration.md](docs/hermes-integration.md) for backup, verification, and
+delivery details. Local Hermes configuration and credentials remain outside this repository.
 
 For local Streamable HTTP instead:
 
@@ -112,10 +124,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
 
 ## Roadmap
 
-- connect the Finance Data MCP server to Hermes;
 - add risk-level and budget-aware model routing;
 - add MiMo/DeepSeek specialist roles and high-risk escalation;
-- migrate scheduled reports from generic web search to the local data and evidence layer;
+- validate the migrated scheduled report across a full trading week;
 - collect 30-day reliability, latency, cost, coverage, and human-review metrics.
 
 ## License
