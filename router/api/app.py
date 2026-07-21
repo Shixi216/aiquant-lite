@@ -24,10 +24,11 @@ from router.schemas import (
 )
 from router.services import RouterInvocationService
 from router.services.routing_policy import routing_policy_catalog
+from trading.routes import router as trading_router
 
 
 SERVICE_NAME = "Hermes OPC Agent Router"
-SERVICE_VERSION = "0.7.0"
+SERVICE_VERSION = "0.8.0"
 DATA_HUB_URL = "http://127.0.0.1:8766"
 
 
@@ -217,3 +218,4 @@ def get_audit_task(
 
 app.include_router(announcement_pipeline_router)
 app.include_router(news_pipeline_router)
+app.include_router(trading_router)

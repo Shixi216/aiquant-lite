@@ -22,6 +22,7 @@ dist/
 # Test, lint, and editor state
 .pytest_cache/
 .ruff_cache/
+.uv-cache/
 .mypy_cache/
 .coverage
 htmlcov/

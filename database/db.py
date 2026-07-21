@@ -92,6 +92,40 @@ SCHEMA_STATEMENTS = [
         created_at TIMESTAMPTZ NOT NULL
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS decision_traces (
+        trace_id VARCHAR PRIMARY KEY,
+        symbol VARCHAR NOT NULL,
+        as_of_date DATE NOT NULL,
+        final_action VARCHAR NOT NULL,
+        vetoed BOOLEAN NOT NULL,
+        trace_json JSON NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS trading_orders (
+        order_id VARCHAR PRIMARY KEY,
+        client_order_id VARCHAR UNIQUE NOT NULL,
+        symbol VARCHAR NOT NULL,
+        side VARCHAR NOT NULL,
+        quantity BIGINT NOT NULL,
+        mode VARCHAR NOT NULL,
+        status VARCHAR NOT NULL,
+        fill_price DOUBLE,
+        fee DOUBLE NOT NULL,
+        reason VARCHAR,
+        order_json JSON NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL
+    )
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS paper_accounts (
+        account_id VARCHAR PRIMARY KEY,
+        account_json JSON NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL
+    )
+    """,
 ]
 
 

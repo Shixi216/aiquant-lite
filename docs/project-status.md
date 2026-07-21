@@ -1,9 +1,9 @@
 # Project status and runtime
 
-> Status date: 2026-07-21
+> Status date: 2026-07-22
 
-`aiquant-lite` is a runnable local A-share research MVP, not a completed production system. The
-original project plan is approximately **75% complete**.
+`aiquant-lite` is a runnable local A-share research MVP with an auditable backtesting and
+paper-trading v1. It is not a completed live-trading production system.
 
 - The real-data, real-provider, Hermes/MCP, risk-review, and audit path works locally.
 - LongCat news processing and DeepSeek risk control are enabled in the generic Router.
@@ -11,7 +11,10 @@ original project plan is approximately **75% complete**.
 - MiMo connectivity works, while audited multimodal inputs and vision handlers remain unfinished.
 - The migrated daily report still needs a full trading-week and 30-day reliability run.
 - Human review persistence APIs, cost calculation, and experiment dashboards remain unfinished.
-- No broker or live-order execution capability exists.
+- Parallel technical/fundamental analysis, strategy generation, hard risk veto, adversarial
+  review, bounded portfolio optimization, backtesting, paper positions, and protective exits work.
+- A broker-neutral interface and fail-closed live adapter exist, but no real broker adapter has
+  been selected, certified, reconciled, or enabled.
 
 ## Runtime flow
 

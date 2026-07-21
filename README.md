@@ -6,8 +6,8 @@
 structured market data from model reasoning so that an LLM never needs to invent prices,
 financial figures, or announcement metadata.
 
-> Status: runnable local research MVP; approximately 75% of the original plan is complete.
-> Research and simulated-analysis use only. It does not place orders and is not investment advice.
+> Status: runnable local research, backtesting, and paper-trading beta. Live broker execution is
+> deliberately locked. This project is not investment advice.
 
 ## Is the project complete?
 
@@ -18,10 +18,14 @@ The core MVP is complete, but the full project plan is not:
 - LongCat news processing and DeepSeek high-risk review have completed real provider calls;
 - 30-day reliability evidence, human approval workflows, cost metrics, complete multimodal roles,
   and a separate report agent remain unfinished;
-- there is no broker order execution capability.
+- auditable strategy generation, parallel technical/fundamental agents, risk veto, adversarial
+  review, portfolio optimization, backtesting, paper positions, and protective exits are available;
+- a fail-closed broker interface exists, but no real broker adapter has been certified.
 
 See [docs/project-status.md](docs/project-status.md) and the detailed
 [Chinese status report](docs/project-status.zh-CN.md).
+The new trading engine is documented in
+[Chinese](docs/trading-engine.zh-CN.md).
 
 ## Runtime in plain language
 
