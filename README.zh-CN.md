@@ -35,6 +35,7 @@ DuckDB 审计与证据存储
 - 基于已持久化证据的确定性市场事实核验；
 - 支持备份、回滚、MCP 白名单和企业微信定时任务迁移的 Hermes 安装器；
 - 可审计的风险等级与模型调用预算控制。
+- 可配置的 DeepSeek、MiMo Provider，以及安全的高风险复核降级机制。
 
 ## Finance Data MCP 工具
 
@@ -119,6 +120,38 @@ uv run aiquant-lite-mcp
 最终决策通过 `RouterInvokeResponse.routing` 返回，并和 Agent 结果一起写入审计记录。
 可通过 `GET /v1/routing/policy` 查看不含凭据的公开策略矩阵。
 
+对于 `high` 和 `critical` 请求，如果 DeepSeek 已配置，Router 会在同一个 `task_id` 和
+物理调用预算内自动执行一次 `risk_controller` 复核。结果通过 `risk_review.status` 返回：
+
+- `completed`：已获得并校验结构化复核结果；
+- `unavailable`：风险控制 Provider 尚未配置；
+- `failed`：Provider 调用或结构化输出校验失败；
+- `budget_exhausted`：本次请求已用完允许的物理模型调用次数。
+
+以上所有状态都不会取消人工复核要求。自动复核是额外防线，不能替代人工审批。
+
+## 专业模型 Provider
+
+DeepSeek 使用官方 OpenAI 兼容端点，默认模型为 `deepseek-v4-pro`：
+
+```dotenv
+DEEPSEEK_API_KEY=
+OPC_DEEPSEEK_BASE_URL=https://api.deepseek.com
+OPC_DEEPSEEK_MODEL=deepseek-v4-pro
+```
+
+MiMo 已注册为 OpenAI 兼容 Provider，但必须显式配置端点，避免项目在未经确认的情况下将
+私有材料发送给假定的第三方地址：
+
+```dotenv
+XIAOMI_API_KEY=
+OPC_MIMO_BASE_URL=
+OPC_MIMO_MODEL=mimo-v2.5
+```
+
+MiMo Provider 适配器已经可用。Router 仍需先加入可审计的图片输入协议，之后才会启用
+视觉角色。
+
 ## 安全与隐私
 
 - `.env`、凭据备份、数据库、运行日志、下载的文档和缓存均被 Git 排除；
@@ -141,7 +174,8 @@ uv run ruff check .
 
 ## 路线图
 
-- 接入 MiMo/DeepSeek 专业角色与高风险自动升级；
+- 增加可审计的多模态请求协议并启用 MiMo 视觉角色；
+- 将人工复核要求接入明确的审批队列；
 - 对迁移后的定时日报进行完整交易周验证；
 - 累积 30 天可靠性、延迟、成本、覆盖率和人工复核指标。
 

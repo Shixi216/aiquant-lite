@@ -5,6 +5,9 @@ from time import perf_counter
 
 from router.registry import get_role
 from router.schemas import (
+    RiskReviewOutput,
+    RiskReviewResult,
+    RiskReviewStatus,
     RouterInvokeRequest,
     RouterInvokeResponse,
 )
@@ -26,6 +29,7 @@ from router.services.provider_retry import (
 from router.services.role_handler_registry import (
     get_role_handler,
 )
+from router.services.risk_controller_handler import build_risk_review_prompt
 from router.services.routing_policy import (
     ModelCallBudgetExceeded,
     RoutingPolicyService,
@@ -197,6 +201,165 @@ class RouterInvocationService:
             "Provider 重试循环意外结束"
         )
 
+    async def _run_risk_review(
+        self,
+        *,
+        request: RouterInvokeRequest,
+        task_id: str,
+        primary_role: str,
+        primary_response: RouterInvokeResponse,
+        max_physical_calls: int,
+        call_ids: list[str],
+    ) -> RiskReviewResult | None:
+        if request.risk_level.value not in {"high", "critical"}:
+            return None
+        if primary_role == "risk_controller":
+            return None
+
+        risk_role = get_role("risk_controller")
+        if risk_role is None or not risk_role.enabled:
+            return RiskReviewResult(
+                status=RiskReviewStatus.UNAVAILABLE,
+                reason="risk_controller is not configured; human review remains required",
+            )
+
+        handler = get_role_handler(risk_role.role)
+        provider = get_model_provider(risk_role.provider)
+        if handler is None or provider is None:
+            return RiskReviewResult(
+                status=RiskReviewStatus.UNAVAILABLE,
+                reason="risk_controller implementation is unavailable; human review remains required",
+            )
+
+        remaining_calls = max_physical_calls - len(call_ids)
+        if remaining_calls <= 0:
+            return RiskReviewResult(
+                status=RiskReviewStatus.BUDGET_EXHAUSTED,
+                reason="model call budget exhausted; human review remains required",
+            )
+
+        review_request = RouterInvokeRequest(
+            role="risk_controller",
+            symbol=request.symbol,
+            prompt=build_risk_review_prompt(
+                original_role=primary_role,
+                symbol=request.symbol,
+                risk_level=request.risk_level.value,
+                original_prompt=request.prompt,
+                original_output=primary_response.content,
+            ),
+            temperature=0,
+            max_tokens=min(1024, remaining_calls * 512),
+            risk_level=request.risk_level,
+            budget_tier=request.budget_tier,
+        )
+        review_call_ids: list[str] = []
+
+        async def invoke_review_model(
+            *,
+            prompt: str,
+            system_prompt: str,
+            temperature: float,
+            max_tokens: int,
+        ) -> tuple[RouterInvokeResponse, str]:
+            available = max_physical_calls - len(call_ids)
+            if available <= 0:
+                raise ModelCallBudgetExceeded("risk review model call budget exhausted")
+            try:
+                response, physical_call_ids = await self._invoke_provider_with_retry(
+                    task_id=task_id,
+                    role=risk_role.role,
+                    model=risk_role.preferred_model,
+                    provider=provider,
+                    prompt=prompt,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    max_attempts=min(self.retry_policy.max_attempts, available),
+                )
+            except ProviderCallSequenceError as exc:
+                ids = list(exc.call_ids)
+                call_ids.extend(ids)
+                review_call_ids.extend(ids)
+                raise
+            call_ids.extend(physical_call_ids)
+            review_call_ids.extend(physical_call_ids)
+            return response, physical_call_ids[-1]
+
+        try:
+            result = await handler.run(
+                request=review_request,
+                task_id=task_id,
+                invoke_model=invoke_review_model,
+            )
+            output = RiskReviewOutput.model_validate(result.result_payload)
+        except ModelCallBudgetExceeded:
+            return RiskReviewResult(
+                status=RiskReviewStatus.BUDGET_EXHAUSTED,
+                call_ids=review_call_ids,
+                reason="model call budget exhausted; human review remains required",
+            )
+        except ProviderCallSequenceError as exc:
+            review = RiskReviewResult(
+                status=RiskReviewStatus.FAILED,
+                provider=risk_role.provider,
+                model=risk_role.preferred_model,
+                call_ids=review_call_ids,
+                reason=(
+                    "risk_controller provider failed: "
+                    f"{provider_error_type(exc.original_exception)}; human review remains required"
+                ),
+            )
+            self.audit_store.record_agent_result(
+                task_id=task_id,
+                agent_role=risk_role.role,
+                provider=risk_role.provider,
+                model=risk_role.preferred_model,
+                confidence=None,
+                success=False,
+                result_payload=review.model_dump(mode="json"),
+            )
+            return review
+        except Exception as exc:
+            review = RiskReviewResult(
+                status=RiskReviewStatus.FAILED,
+                provider=risk_role.provider,
+                model=risk_role.preferred_model,
+                call_ids=review_call_ids,
+                reason=(
+                    "risk_controller validation failed: "
+                    f"{provider_error_type(exc)}; human review remains required"
+                ),
+            )
+            self.audit_store.record_agent_result(
+                task_id=task_id,
+                agent_role=risk_role.role,
+                provider=risk_role.provider,
+                model=risk_role.preferred_model,
+                confidence=None,
+                success=False,
+                result_payload=review.model_dump(mode="json"),
+            )
+            return review
+
+        review = RiskReviewResult(
+            status=RiskReviewStatus.COMPLETED,
+            provider=result.response.provider,
+            model=result.response.model,
+            call_ids=review_call_ids,
+            output=output,
+        )
+        self.audit_store.record_agent_result(
+            task_id=task_id,
+            agent_role=risk_role.role,
+            provider=result.response.provider,
+            model=result.response.model,
+            confidence=output.confidence,
+            success=True,
+            result_payload=review.model_dump(mode="json"),
+        )
+        return review
+
     async def invoke(
         self,
         request: RouterInvokeRequest,
@@ -316,11 +479,21 @@ class RouterInvocationService:
                 invoke_model=invoke_model,
             )
 
+            risk_review = await self._run_risk_review(
+                request=request,
+                task_id=task_id,
+                primary_role=role.role,
+                primary_response=result.response,
+                max_physical_calls=routing.max_physical_calls,
+                call_ids=call_ids,
+            )
+
             final_response = (
                 result.response.model_copy(
                     update={
                         "call_ids": list(call_ids),
                         "routing": routing,
+                        "risk_review": risk_review,
                     }
                 )
             )
@@ -344,6 +517,11 @@ class RouterInvocationService:
                     ),
                     "routing": routing.model_dump(
                         mode="json"
+                    ),
+                    "risk_review": (
+                        risk_review.model_dump(mode="json")
+                        if risk_review is not None
+                        else None
                     ),
                     "output": result.result_payload,
                 },

@@ -24,6 +24,10 @@ from router.schemas.invocation import (
 from router.schemas.routing import (
     BudgetTier as BudgetTier,
     RiskLevel as RiskLevel,
+    RiskReviewDecision as RiskReviewDecision,
+    RiskReviewOutput as RiskReviewOutput,
+    RiskReviewResult as RiskReviewResult,
+    RiskReviewStatus as RiskReviewStatus,
     RoutingDecision as RoutingDecision,
 )
 from router.schemas.news import (
@@ -55,5 +59,9 @@ __all__ = [
     "RouterInvokeResponse",
     "BudgetTier",
     "RiskLevel",
+    "RiskReviewDecision",
+    "RiskReviewOutput",
+    "RiskReviewResult",
+    "RiskReviewStatus",
     "RoutingDecision",
 ]

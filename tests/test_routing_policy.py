@@ -29,6 +29,18 @@ def enabled_role() -> RoleSpec:
     )
 
 
+def risk_role(*, enabled: bool) -> RoleSpec:
+    return RoleSpec(
+        role="risk_controller",
+        display_name="Risk controller",
+        provider="deepseek",
+        preferred_model="DeepSeek V4 Pro",
+        task_type="risk_analysis",
+        description="Test risk role",
+        enabled=enabled,
+    )
+
+
 def test_low_risk_economy_budget_has_small_deterministic_limits():
     decision = RoutingPolicyService().decide(
         role=enabled_role(),
@@ -145,7 +157,10 @@ async def test_invocation_applies_risk_caps_and_records_decision(monkeypatch: py
     service = RouterInvocationService()
     service.audit_store = FakeAuditStore()
 
-    monkeypatch.setattr("router.services.invocation.get_role", lambda _: enabled_role())
+    monkeypatch.setattr(
+        "router.services.invocation.get_role",
+        lambda name: enabled_role() if name == "news_processor" else risk_role(enabled=False),
+    )
     monkeypatch.setattr("router.services.invocation.get_model_provider", lambda _: provider)
     monkeypatch.setattr("router.services.invocation.get_role_handler", lambda _: OneCallHandler())
 
@@ -164,7 +179,12 @@ async def test_invocation_applies_risk_caps_and_records_decision(monkeypatch: py
     assert provider.calls[0]["max_tokens"] == 2048
     assert response.routing is not None
     assert response.routing.human_review_required is True
-    assert service.audit_store.results[0]["result_payload"]["routing"]["risk_level"] == "high"
+    assert response.risk_review is not None
+    assert response.risk_review.status == "unavailable"
+    primary_audit = next(
+        item for item in service.audit_store.results if item["agent_role"] == "news_processor"
+    )
+    assert primary_audit["result_payload"]["routing"]["risk_level"] == "high"
 
 
 class TwoCallHandler:
@@ -205,3 +225,70 @@ async def test_economy_tier_blocks_second_physical_call(monkeypatch: pytest.Monk
         )
 
     assert len(provider.calls) == 1
+
+
+class RiskProvider(FakeProvider):
+    provider_name = "deepseek"
+
+    async def invoke(self, **payload: Any) -> RouterInvokeResponse:
+        self.calls.append(payload)
+        return RouterInvokeResponse(
+            role=payload["role"],
+            provider=self.provider_name,
+            model="deepseek-v4-pro",
+            content=(
+                '{"decision":"revise","assessed_risk_level":"high",'
+                '"findings":["evidence gap"],"required_actions":["human review"],'
+                '"confidence":0.91}'
+            ),
+            latency_ms=8,
+        )
+
+
+@pytest.mark.asyncio
+async def test_high_risk_runs_automated_risk_controller_in_same_task(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    primary_provider = FakeProvider()
+    review_provider = RiskProvider()
+    service = RouterInvocationService()
+    service.audit_store = FakeAuditStore()
+
+    monkeypatch.setattr(
+        "router.services.invocation.get_role",
+        lambda name: enabled_role() if name == "news_processor" else risk_role(enabled=True),
+    )
+    monkeypatch.setattr(
+        "router.services.invocation.get_model_provider",
+        lambda name: review_provider if name == "deepseek" else primary_provider,
+    )
+
+    from router.services.risk_controller_handler import RiskControllerHandler
+
+    monkeypatch.setattr(
+        "router.services.invocation.get_role_handler",
+        lambda name: RiskControllerHandler() if name == "risk_controller" else OneCallHandler(),
+    )
+
+    response = await service.invoke(
+        RouterInvokeRequest(
+            role="news_processor",
+            symbol="300502",
+            prompt="test high-risk conclusion",
+            risk_level=RiskLevel.HIGH,
+            budget_tier=BudgetTier.STANDARD,
+        )
+    )
+
+    assert len(primary_provider.calls) == 1
+    assert len(review_provider.calls) == 1
+    assert response.risk_review is not None
+    assert response.risk_review.status == "completed"
+    assert response.risk_review.output is not None
+    assert response.risk_review.output.decision == "revise"
+    assert response.risk_review.output.required_actions == ["human review"]
+    review_audit = next(
+        item for item in service.audit_store.results if item["agent_role"] == "risk_controller"
+    )
+    assert review_audit["success"] is True
+    assert review_audit["result_payload"]["status"] == "completed"

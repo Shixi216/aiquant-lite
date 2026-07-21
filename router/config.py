@@ -64,6 +64,51 @@ class RouterSettings(BaseSettings):
         ),
     )
 
+    deepseek_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "OPC_DEEPSEEK_API_KEY",
+            "DEEPSEEK_API_KEY",
+        ),
+    )
+    deepseek_base_url: str = Field(
+        default="https://api.deepseek.com",
+        validation_alias=AliasChoices(
+            "OPC_DEEPSEEK_BASE_URL",
+            "DEEPSEEK_BASE_URL",
+        ),
+    )
+    deepseek_model: str = Field(
+        default="deepseek-v4-pro",
+        validation_alias=AliasChoices(
+            "OPC_DEEPSEEK_MODEL",
+            "DEEPSEEK_MODEL",
+        ),
+    )
+
+    mimo_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "OPC_MIMO_API_KEY",
+            "MIMO_API_KEY",
+            "XIAOMI_API_KEY",
+        ),
+    )
+    mimo_base_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "OPC_MIMO_BASE_URL",
+            "MIMO_BASE_URL",
+        ),
+    )
+    mimo_model: str = Field(
+        default="mimo-v2.5",
+        validation_alias=AliasChoices(
+            "OPC_MIMO_MODEL",
+            "MIMO_MODEL",
+        ),
+    )
+
     @property
     def longcat_ready(self) -> bool:
         if self.longcat_api_key is None:
@@ -87,6 +132,26 @@ class RouterSettings(BaseSettings):
             self.qwen_api_key.get_secret_value().strip()
             and self.qwen_base_url.strip()
             and self.qwen_model.strip()
+        )
+
+    @property
+    def deepseek_ready(self) -> bool:
+        if self.deepseek_api_key is None:
+            return False
+        return bool(
+            self.deepseek_api_key.get_secret_value().strip()
+            and self.deepseek_base_url.strip()
+            and self.deepseek_model.strip()
+        )
+
+    @property
+    def mimo_ready(self) -> bool:
+        if self.mimo_api_key is None or self.mimo_base_url is None:
+            return False
+        return bool(
+            self.mimo_api_key.get_secret_value().strip()
+            and self.mimo_base_url.strip()
+            and self.mimo_model.strip()
         )
 
 

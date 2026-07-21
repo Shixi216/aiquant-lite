@@ -75,6 +75,9 @@ def _role_enabled(spec: RoleSpec) -> bool:
     if spec.role == "news_processor":
         return router_settings.longcat_ready
 
+    if spec.role == "risk_controller":
+        return router_settings.deepseek_ready
+
     return False
 
 

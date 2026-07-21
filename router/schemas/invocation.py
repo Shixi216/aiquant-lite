@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from router.schemas.routing import BudgetTier, RiskLevel, RoutingDecision
+from router.schemas.routing import (
+    BudgetTier,
+    RiskLevel,
+    RiskReviewResult,
+    RoutingDecision,
+)
 
 
 class RouterInvokeRequest(BaseModel):
@@ -51,3 +56,4 @@ class RouterInvokeResponse(BaseModel):
     task_id: str | None = None
     call_ids: list[str] = Field(default_factory=list)
     routing: RoutingDecision | None = None
+    risk_review: RiskReviewResult | None = None

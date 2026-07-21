@@ -22,6 +22,46 @@ class BudgetTier(StrEnum):
     PREMIUM = "premium"
 
 
+class RiskReviewStatus(StrEnum):
+    """Outcome of the optional automated risk-controller escalation."""
+
+    COMPLETED = "completed"
+    UNAVAILABLE = "unavailable"
+    FAILED = "failed"
+    BUDGET_EXHAUSTED = "budget_exhausted"
+
+
+class RiskReviewDecision(StrEnum):
+    APPROVE = "approve"
+    REVISE = "revise"
+    REJECT = "reject"
+
+
+class RiskReviewOutput(BaseModel):
+    """Validated JSON contract produced by the risk controller."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    decision: RiskReviewDecision
+    assessed_risk_level: RiskLevel
+    findings: list[str] = Field(default_factory=list, max_length=20)
+    required_actions: list[str] = Field(default_factory=list, max_length=20)
+    confidence: float = Field(ge=0, le=1)
+
+
+class RiskReviewResult(BaseModel):
+    """Safe escalation result attached to the original Router response."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: RiskReviewStatus
+    provider: str | None = None
+    model: str | None = None
+    call_ids: list[str] = Field(default_factory=list)
+    output: RiskReviewOutput | None = None
+    reason: str | None = None
+
+
 class RoutingDecision(BaseModel):
     """Auditable controls applied before a provider is called."""
 

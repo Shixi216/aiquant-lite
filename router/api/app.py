@@ -27,7 +27,7 @@ from router.services.routing_policy import routing_policy_catalog
 
 
 SERVICE_NAME = "Hermes OPC Agent Router"
-SERVICE_VERSION = "0.6.0"
+SERVICE_VERSION = "0.7.0"
 DATA_HUB_URL = "http://127.0.0.1:8766"
 
 

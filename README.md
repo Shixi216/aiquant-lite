@@ -38,6 +38,7 @@ The repository currently contains:
 - deterministic market-fact verification against persisted evidence;
 - a dry-run-first Hermes installer with backups, an MCP allowlist, and WeCom cron migration.
 - deterministic risk-level and model-call-budget controls with auditable decisions.
+- configurable DeepSeek and MiMo providers, with safe high-risk review fallback behavior.
 
 ## Finance Data MCP tools
 
@@ -120,6 +121,40 @@ any provider call:
 The applied decision is returned in `RouterInvokeResponse.routing` and persisted with the audit
 result. Inspect the public policy matrix at `GET /v1/routing/policy`.
 
+For `high` and `critical` requests, the Router also attempts an automated `risk_controller`
+review inside the same task and physical-call budget when DeepSeek is configured. The result is
+returned as `risk_review.status`:
+
+- `completed`: a validated structured review is available;
+- `unavailable`: the risk provider is not configured;
+- `failed`: the provider call or structured-output validation failed;
+- `budget_exhausted`: the request used all permitted physical calls.
+
+All four cases retain the human-review requirement. Automated review is defense in depth, not a
+replacement for approval.
+
+## Specialist providers
+
+DeepSeek uses its official OpenAI-compatible endpoint and defaults to `deepseek-v4-pro`:
+
+```dotenv
+DEEPSEEK_API_KEY=
+OPC_DEEPSEEK_BASE_URL=https://api.deepseek.com
+OPC_DEEPSEEK_MODEL=deepseek-v4-pro
+```
+
+MiMo is registered as an OpenAI-compatible provider, but its endpoint must be configured
+explicitly so the project never silently routes private data through an assumed third party:
+
+```dotenv
+XIAOMI_API_KEY=
+OPC_MIMO_BASE_URL=
+OPC_MIMO_MODEL=mimo-v2.5
+```
+
+The MiMo adapter is ready for provider-level integration. Vision roles remain disabled until the
+Router request contract supports audited image inputs.
+
 ## Security and privacy
 
 - `.env`, credential backups, databases, runtime logs, downloaded documents, and caches are
@@ -143,7 +178,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
 
 ## Roadmap
 
-- add MiMo/DeepSeek specialist roles and high-risk escalation;
+- add audited multimodal request payloads and activate MiMo vision roles;
+- connect human-review requirements to an explicit approval queue;
 - validate the migrated scheduled report across a full trading week;
 - collect 30-day reliability, latency, cost, coverage, and human-review metrics.
 

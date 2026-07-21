@@ -5,6 +5,7 @@ from collections.abc import Callable
 from router.services.news_processor_handler import (
     NewsProcessorHandler,
 )
+from router.services.risk_controller_handler import RiskControllerHandler
 from router.services.role_handler import RoleHandler
 
 
@@ -13,6 +14,7 @@ HandlerFactory = Callable[[], RoleHandler]
 
 _HANDLER_FACTORIES: dict[str, HandlerFactory] = {
     "news_processor": NewsProcessorHandler,
+    "risk_controller": RiskControllerHandler,
 }
 
 
