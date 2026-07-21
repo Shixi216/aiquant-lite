@@ -1,2 +1,2 @@
-# Tongji-AIQuant
+# aiquant-lite
 
