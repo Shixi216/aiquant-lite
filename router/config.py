@@ -99,6 +99,7 @@ class RouterSettings(BaseSettings):
         validation_alias=AliasChoices(
             "OPC_MIMO_BASE_URL",
             "MIMO_BASE_URL",
+            "XIAOMI_BASE_URL",
         ),
     )
     mimo_model: str = Field(

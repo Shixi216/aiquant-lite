@@ -71,7 +71,7 @@ uv run python scripts/run_router_api.py
 通过 stdio 启动 MCP 服务，这是本地 Hermes 集成的默认推荐方式：
 
 ```powershell
-uv run aiquant-lite-mcp
+uv run python -m mcp_servers.finance_data.server
 ```
 
 先预览、再连接现有 Hermes 0.18 安装：
@@ -89,7 +89,7 @@ uv run python scripts/configure_hermes_integration.py --apply
 
 ```powershell
 $env:OPC_MCP_TRANSPORT = "streamable-http"
-uv run aiquant-lite-mcp
+uv run python -m mcp_servers.finance_data.server
 ```
 
 此时端点为 `http://127.0.0.1:8767/mcp`。在没有认证和网络访问控制的情况下，不要将其
@@ -152,6 +152,36 @@ OPC_MIMO_MODEL=mimo-v2.5
 MiMo Provider 适配器已经可用。Router 仍需先加入可审计的图片输入协议，之后才会启用
 视觉角色。
 
+### 本地私有配置
+
+如果 Provider 凭据已经保存在 Hermes 中，可以先预览、再执行白名单同步：
+
+```powershell
+uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env
+uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env --apply
+```
+
+同步器只复制当前项目实际使用的数据、搜索和模型变量。QQ、企业微信、TokenHub 和其他
+消息渠道凭据继续留在 Hermes 主目录。命令不会打印任何值，并会将项目旧 `.env` 备份到
+被 Git 忽略的 `backups/local-env/`。
+
+可以先进行无推理费用的模型发现，再按需执行最小真实调用：
+
+```powershell
+uv run python -m scripts.check_live_specialist_providers
+uv run python -m scripts.check_live_specialist_providers --invoke  # 可能产生 API 费用
+uv run python -m scripts.check_live_risk_escalation                # 写入审计任务
+```
+
+不要将真实凭据粘贴到源码、Commit、Issue、Pull Request 或诊断日志中。任何已经离开预期
+密钥存储位置的凭据都应尽快轮换。
+
+## 实盘边界
+
+本仓库目前不会向券商发送订单，研究输出不得直接连接真实资金账户。在未来启用任何实盘
+适配器之前，必须完整实现并验证 [实盘准备清单](docs/live-trading-readiness.zh-CN.md)，包括
+模拟盘、订单限额、幂等、紧急停止、成交对账、人工审批和事故回滚。
+
 ## 安全与隐私
 
 - `.env`、凭据备份、数据库、运行日志、下载的文档和缓存均被 Git 排除；
@@ -176,6 +206,7 @@ uv run ruff check .
 
 - 增加可审计的多模态请求协议并启用 MiMo 视觉角色；
 - 将人工复核要求接入明确的审批队列；
+- 在接入任何下单适配器前实现模拟盘和券商安全门槛；
 - 对迁移后的定时日报进行完整交易周验证；
 - 累积 30 天可靠性、延迟、成本、覆盖率和人工复核指标。
 

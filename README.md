@@ -74,7 +74,7 @@ uv run python scripts/run_router_api.py
 Run the MCP server over stdio (the default and recommended local Hermes transport):
 
 ```powershell
-uv run aiquant-lite-mcp
+uv run python -m mcp_servers.finance_data.server
 ```
 
 Connect an existing Hermes 0.18 installation after previewing the changes:
@@ -92,7 +92,7 @@ For local Streamable HTTP instead:
 
 ```powershell
 $env:OPC_MCP_TRANSPORT = "streamable-http"
-uv run aiquant-lite-mcp
+uv run python -m mcp_servers.finance_data.server
 ```
 
 The endpoint is then `http://127.0.0.1:8767/mcp`. Do not bind it to a public interface without
@@ -155,6 +155,38 @@ OPC_MIMO_MODEL=mimo-v2.5
 The MiMo adapter is ready for provider-level integration. Vision roles remain disabled until the
 Router request contract supports audited image inputs.
 
+### Local private configuration
+
+If Hermes already contains the provider credentials, preview and apply the allowlisted sync:
+
+```powershell
+uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env
+uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env --apply
+```
+
+Only currently used data, search, and model settings are copied. QQ, WeCom, TokenHub, and other
+messaging credentials remain in the Hermes home. Values are never printed, and the previous
+project `.env` is backed up under the ignored `backups/local-env/` directory.
+
+Discover current model IDs without inference, then make minimal live calls when intended:
+
+```powershell
+uv run python -m scripts.check_live_specialist_providers
+uv run python -m scripts.check_live_specialist_providers --invoke  # may incur API charges
+uv run python -m scripts.check_live_risk_escalation                # writes an audit task
+```
+
+Never paste real credentials into source files, commits, issues, pull requests, or diagnostic
+logs. Rotate any credential that has been disclosed outside its intended secret store.
+
+## Live-trading boundary
+
+This repository does not submit broker orders. Research output must not be wired directly to a
+real-money account. Before any future live-trading adapter is enabled, every gate in
+[docs/live-trading-readiness.md](docs/live-trading-readiness.md) must be implemented and tested,
+including paper trading, order limits, idempotency, a kill switch, reconciliation, human approval,
+and incident rollback.
+
 ## Security and privacy
 
 - `.env`, credential backups, databases, runtime logs, downloaded documents, and caches are
@@ -180,6 +212,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
 
 - add audited multimodal request payloads and activate MiMo vision roles;
 - connect human-review requirements to an explicit approval queue;
+- implement the paper-trading and broker-safety gates before any order adapter;
 - validate the migrated scheduled report across a full trading week;
 - collect 30-day reliability, latency, cost, coverage, and human-review metrics.
 
