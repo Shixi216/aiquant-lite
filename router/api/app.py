@@ -23,10 +23,11 @@ from router.schemas import (
     RouterInvokeResponse,
 )
 from router.services import RouterInvocationService
+from router.services.routing_policy import routing_policy_catalog
 
 
 SERVICE_NAME = "Hermes OPC Agent Router"
-SERVICE_VERSION = "0.5.0"
+SERVICE_VERSION = "0.6.0"
 DATA_HUB_URL = "http://127.0.0.1:8766"
 
 
@@ -66,6 +67,7 @@ def root() -> dict[str, Any]:
         "health_url": "/health",
         "roles_url": "/v1/roles",
         "invoke_url": "/v1/invoke",
+        "routing_policy_url": "/v1/routing/policy",
         "docs_url": "/docs",
     }
 
@@ -115,6 +117,12 @@ def roles() -> dict[str, Any]:
         ),
         "roles": items,
     }
+
+
+@app.get("/v1/routing/policy")
+def routing_policy() -> dict[str, object]:
+    """Expose the deterministic policy matrix without provider credentials."""
+    return routing_policy_catalog()
 
 
 @app.get("/v1/roles/{role_name}", response_model=None)

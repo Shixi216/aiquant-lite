@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from router.schemas.routing import BudgetTier, RiskLevel, RoutingDecision
+
 
 class RouterInvokeRequest(BaseModel):
     """Request sent to one specialist role."""
@@ -28,6 +30,8 @@ class RouterInvokeRequest(BaseModel):
         ge=16,
         le=8192,
     )
+    risk_level: RiskLevel = RiskLevel.MEDIUM
+    budget_tier: BudgetTier = BudgetTier.STANDARD
 
 
 class RouterInvokeResponse(BaseModel):
@@ -46,3 +50,4 @@ class RouterInvokeResponse(BaseModel):
     attempts: int = Field(default=1, ge=1, le=3)
     task_id: str | None = None
     call_ids: list[str] = Field(default_factory=list)
+    routing: RoutingDecision | None = None

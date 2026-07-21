@@ -26,6 +26,10 @@ from router.services.provider_retry import (
 from router.services.role_handler_registry import (
     get_role_handler,
 )
+from router.services.routing_policy import (
+    ModelCallBudgetExceeded,
+    RoutingPolicyService,
+)
 
 
 class RouterInvocationService:
@@ -37,6 +41,7 @@ class RouterInvocationService:
         retry_policy: (
             ProviderRetryPolicy | None
         ) = None,
+        routing_policy: RoutingPolicyService | None = None,
     ) -> None:
         self.audit_store = AuditStore()
 
@@ -44,6 +49,7 @@ class RouterInvocationService:
             retry_policy
             or DEFAULT_PROVIDER_RETRY_POLICY
         )
+        self.routing_policy = routing_policy or RoutingPolicyService()
 
     async def _invoke_provider(
         self,
@@ -117,6 +123,7 @@ class RouterInvocationService:
         system_prompt: str,
         temperature: float,
         max_tokens: int,
+        max_attempts: int,
     ) -> tuple[
         RouterInvokeResponse,
         list[str],
@@ -125,7 +132,7 @@ class RouterInvocationService:
 
         for attempt in range(
             1,
-            self.retry_policy.max_attempts + 1,
+            max_attempts + 1,
         ):
             try:
                 response, call_id = (
@@ -158,7 +165,7 @@ class RouterInvocationService:
 
                 exhausted = (
                     attempt
-                    >= self.retry_policy.max_attempts
+                    >= max_attempts
                 )
 
                 if not retryable or exhausted:
@@ -225,6 +232,12 @@ class RouterInvocationService:
                 f"{role.provider}"
             )
 
+        routing = self.routing_policy.decide(
+            role=role,
+            risk_level=request.risk_level,
+            budget_tier=request.budget_tier,
+        )
+
         task_id = self.audit_store.create_task(
             task_type="router_invoke",
             symbol=request.symbol,
@@ -243,6 +256,14 @@ class RouterInvocationService:
             temperature: float,
             max_tokens: int,
         ) -> tuple[RouterInvokeResponse, str]:
+            remaining_calls = (
+                routing.max_physical_calls - len(call_ids)
+            )
+            if remaining_calls <= 0:
+                raise ModelCallBudgetExceeded(
+                    "model call budget exhausted before provider invocation"
+                )
+
             try:
                 response, physical_call_ids = (
                     await self
@@ -253,8 +274,18 @@ class RouterInvocationService:
                         provider=provider,
                         prompt=prompt,
                         system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
+                        temperature=min(
+                            temperature,
+                            routing.temperature_cap,
+                        ),
+                        max_tokens=min(
+                            max_tokens,
+                            routing.max_output_tokens_per_call,
+                        ),
+                        max_attempts=min(
+                            self.retry_policy.max_attempts,
+                            remaining_calls,
+                        ),
                     )
                 )
 
@@ -289,6 +320,7 @@ class RouterInvocationService:
                 result.response.model_copy(
                     update={
                         "call_ids": list(call_ids),
+                        "routing": routing,
                     }
                 )
             )
@@ -309,6 +341,9 @@ class RouterInvocationService:
                     ),
                     "call_ids": (
                         final_response.call_ids
+                    ),
+                    "routing": routing.model_dump(
+                        mode="json"
                     ),
                     "output": result.result_payload,
                 },
@@ -337,6 +372,9 @@ class RouterInvocationService:
                         str(exc)[:2000]
                     ),
                     "call_ids": call_ids,
+                    "routing": routing.model_dump(
+                        mode="json"
+                    ),
                 },
             )
 

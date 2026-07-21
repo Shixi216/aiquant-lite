@@ -21,6 +21,11 @@ from router.schemas.invocation import (
     RouterInvokeRequest as RouterInvokeRequest,
     RouterInvokeResponse as RouterInvokeResponse,
 )
+from router.schemas.routing import (
+    BudgetTier as BudgetTier,
+    RiskLevel as RiskLevel,
+    RoutingDecision as RoutingDecision,
+)
 from router.schemas.news import (
     NewsProcessorOutput as NewsProcessorOutput,
 )
@@ -48,4 +53,7 @@ __all__ = [
     "NewsSourceBundle",
     "RouterInvokeRequest",
     "RouterInvokeResponse",
+    "BudgetTier",
+    "RiskLevel",
+    "RoutingDecision",
 ]

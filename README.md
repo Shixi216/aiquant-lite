@@ -1,5 +1,7 @@
 # aiquant-lite
 
+[简体中文](README.zh-CN.md) | English
+
 `aiquant-lite` is a local-first, evidence-aware A-share research workspace. It separates
 structured market data from model reasoning so that an LLM never needs to invent prices,
 financial figures, or announcement metadata.
@@ -33,8 +35,9 @@ The repository currently contains:
 - cross-source daily-bar verification and source-attributed records;
 - a specialist model router with audited LongCat and Qwen pipelines;
 - a Finance Data MCP server exposing exactly six approved read-only research tools;
-- deterministic market-fact verification against persisted evidence.
+- deterministic market-fact verification against persisted evidence;
 - a dry-run-first Hermes installer with backups, an MCP allowlist, and WeCom cron migration.
+- deterministic risk-level and model-call-budget controls with auditable decisions.
 
 ## Finance Data MCP tools
 
@@ -101,6 +104,22 @@ independent stored sources agree within the configured tolerance. A single verif
 announcement is sufficient for facts directly contained in that announcement. Conflicts and
 missing evidence are returned explicitly instead of being silently resolved.
 
+## Risk and budget routing
+
+Generic Router requests accept `risk_level` (`low`, `medium`, `high`, or `critical`) and
+`budget_tier` (`economy`, `standard`, or `premium`). The policy is deterministic and runs before
+any provider call:
+
+- budget tiers cap output tokens per call and the total number of physical model calls;
+- risk levels cap sampling temperature;
+- high and critical results are marked as requiring human review and request escalation to the
+  `risk_controller` role when that role becomes available;
+- incompatible combinations, such as critical risk with a standard budget, are rejected before
+  credentials or provider capacity are consumed.
+
+The applied decision is returned in `RouterInvokeResponse.routing` and persisted with the audit
+result. Inspect the public policy matrix at `GET /v1/routing/policy`.
+
 ## Security and privacy
 
 - `.env`, credential backups, databases, runtime logs, downloaded documents, and caches are
@@ -124,7 +143,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
 
 ## Roadmap
 
-- add risk-level and budget-aware model routing;
 - add MiMo/DeepSeek specialist roles and high-risk escalation;
 - validate the migrated scheduled report across a full trading week;
 - collect 30-day reliability, latency, cost, coverage, and human-review metrics.
