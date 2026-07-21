@@ -7,14 +7,18 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import Field
 
+from data_hub.services.daily_bars_service import DailyBarsService
+from trading.adapter_registry import BrokerAdapterRegistry
+from trading.adapters import CiticQmtXtquantPlaceholder
 from trading.backtest import run_backtest
-from trading.broker import DisabledLiveBroker, LiveTradingDisabledError, PaperBroker
+from trading.broker import LiveTradingDisabledError, PaperBroker
 from trading.persistence import TradingAuditStore
 from trading.portfolio import optimize_portfolio
 from trading.replay import render_daily_review_markdown
 from trading.schemas import (
     BacktestRequest,
     BacktestResult,
+    BrokerCatalog,
     DailyReview,
     DecisionRequest,
     DecisionFromDataRequest,
@@ -28,14 +32,16 @@ from trading.schemas import (
     TradingModel,
 )
 from trading.service import TradingDecisionService
-from data_hub.services.daily_bars_service import DailyBarsService
 
 
 router = APIRouter(prefix="/v1/trading", tags=["trading"])
 decision_service = TradingDecisionService()
 audit_store = TradingAuditStore()
 paper_broker = PaperBroker()
-live_broker = DisabledLiveBroker()
+live_broker = CiticQmtXtquantPlaceholder()
+broker_registry = BrokerAdapterRegistry(active_adapter_id=paper_broker.adapter_id)
+broker_registry.register(paper_broker)
+broker_registry.register(live_broker)
 _paper_state_loaded = False
 
 
@@ -135,6 +141,11 @@ def submit_paper_order(request: PaperOrderRequest) -> OrderResult:
     audit_store.record_order(result)
     audit_store.record_paper_account(paper_broker.account())
     return result
+
+
+@router.get("/brokers", response_model=BrokerCatalog)
+def broker_catalog() -> BrokerCatalog:
+    return broker_registry.catalog()
 
 
 @router.post("/paper/protective-exits", response_model=list[OrderResult])

@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+import sys
 from datetime import date, datetime, timedelta
 
 import pytest
 
 from trading.backtest import run_backtest
+from trading.adapter_registry import BrokerAdapterRegistry
+from trading.adapters.qmt_xtquant import (
+    CiticQmtXtquantPlaceholder,
+    QmtPermissionNotConfirmedError,
+)
 from trading.broker import DisabledLiveBroker, LiveTradingDisabledError, PaperBroker
 from trading.portfolio import optimize_portfolio
 from trading.schemas import (
@@ -171,3 +177,48 @@ def test_paper_broker_executes_stop_loss_and_live_broker_fails_closed():
 
     with pytest.raises(LiveTradingDisabledError, match="Live trading is disabled"):
         DisabledLiveBroker().submit_order(buy, limits)
+
+
+def test_citic_qmt_placeholder_never_imports_or_executes_xtquant():
+    adapter = CiticQmtXtquantPlaceholder()
+    capabilities = adapter.capabilities()
+
+    assert "xtquant" not in sys.modules
+    assert capabilities.broker_name == "中信证券"
+    assert capabilities.mode == "live_disabled"
+    assert capabilities.execution_enabled is False
+    assert capabilities.environment_probed is False
+    assert capabilities.credentials_stored is False
+    assert "submit_order" in capabilities.planned_operations
+
+    intent = OrderIntent(
+        symbol="600000",
+        side=OrderSide.BUY,
+        quantity=100,
+        reference_price=10,
+        price_time=datetime.now().astimezone(),
+        approved_by="tester",
+    )
+    with pytest.raises(QmtPermissionNotConfirmedError, match="Paper trading remains active"):
+        adapter.submit_order(intent, RiskLimits())
+    with pytest.raises(QmtPermissionNotConfirmedError):
+        adapter.account_snapshot()
+    with pytest.raises(QmtPermissionNotConfirmedError):
+        adapter.list_orders()
+    with pytest.raises(QmtPermissionNotConfirmedError):
+        adapter.list_trades()
+    with pytest.raises(QmtPermissionNotConfirmedError):
+        adapter.cancel_order("never-sent")
+
+
+def test_broker_registry_keeps_paper_as_only_active_adapter():
+    registry = BrokerAdapterRegistry(active_adapter_id="paper")
+    registry.register(PaperBroker())
+    registry.register(CiticQmtXtquantPlaceholder())
+    catalog = registry.catalog()
+
+    assert catalog.active_adapter_id == "paper"
+    assert [item.adapter_id for item in catalog.adapters] == ["citic_qmt_xtquant", "paper"]
+    qmt = catalog.adapters[0].model_dump()
+    forbidden_keys = {"account", "account_id", "password", "trading_password", "cookie", "secret", "key"}
+    assert forbidden_keys.isdisjoint(qmt)

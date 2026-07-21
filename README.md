@@ -21,6 +21,8 @@ The core MVP is complete, but the full project plan is not:
 - auditable strategy generation, parallel technical/fundamental agents, risk veto, adversarial
   review, portfolio optimization, backtesting, paper positions, and protective exits are available;
 - a fail-closed broker interface exists, but no real broker adapter has been certified.
+- CITIC Securities QMT/xtquant is reserved as a future replaceable adapter; it remains entirely
+  disabled pending entitlement and simulation-environment confirmation.
 
 See [docs/project-status.md](docs/project-status.md) and the detailed
 [Chinese status report](docs/project-status.zh-CN.md).

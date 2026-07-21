@@ -13,8 +13,10 @@ paper-trading v1. It is not a completed live-trading production system.
 - Human review persistence APIs, cost calculation, and experiment dashboards remain unfinished.
 - Parallel technical/fundamental analysis, strategy generation, hard risk veto, adversarial
   review, bounded portfolio optimization, backtesting, paper positions, and protective exits work.
-- A broker-neutral interface and fail-closed live adapter exist, but no real broker adapter has
-  been selected, certified, reconciled, or enabled.
+- A broker-neutral interface and fail-closed placeholder exist, but no executable real broker
+  adapter has been implemented, certified, reconciled, or enabled.
+- CITIC Securities QMT/xtquant is now the reserved future adapter, with no runtime probing,
+  credential fields, dependency import, or execution path until entitlements are confirmed.
 
 ## Runtime flow
 

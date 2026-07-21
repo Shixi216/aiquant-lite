@@ -28,7 +28,7 @@ from trading.routes import router as trading_router
 
 
 SERVICE_NAME = "Hermes OPC Agent Router"
-SERVICE_VERSION = "0.8.0"
+SERVICE_VERSION = "0.8.1"
 DATA_HUB_URL = "http://127.0.0.1:8766"
 
 

@@ -29,6 +29,38 @@ class OrderStatus(StrEnum):
     FILLED = "filled"
 
 
+class BrokerMode(StrEnum):
+    PAPER = "paper"
+    LIVE_DISABLED = "live_disabled"
+
+
+class BrokerCapabilities(TradingModel):
+    adapter_id: str
+    broker_name: str
+    mode: BrokerMode
+    status: str
+    available: bool
+    execution_enabled: bool
+    environment_probed: bool = False
+    credentials_stored: bool = False
+    supported_operations: list[str] = Field(default_factory=list)
+    planned_operations: list[str] = Field(default_factory=list)
+    blockers: list[str] = Field(default_factory=list)
+    security_guards: list[str] = Field(default_factory=list)
+
+
+class BrokerCatalog(TradingModel):
+    active_adapter_id: str
+    adapters: list[BrokerCapabilities]
+
+
+class CancelOrderResult(TradingModel):
+    adapter_id: str
+    client_order_id: str
+    accepted: bool
+    reason: str
+
+
 class Bar(TradingModel):
     trade_date: date
     open: float = Field(gt=0)
@@ -194,10 +226,13 @@ class Position(TradingModel):
     realized_pnl: float = 0
 
 
-class PaperAccount(TradingModel):
+class BrokerAccountSnapshot(TradingModel):
     cash: float = Field(ge=0)
     positions: dict[str, Position]
     equity: float = Field(ge=0)
+
+
+class PaperAccount(BrokerAccountSnapshot):
     kill_switch: bool
 
 

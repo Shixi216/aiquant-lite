@@ -5,6 +5,10 @@ from datetime import datetime
 
 from trading.risk import validate_order_clock
 from trading.schemas import (
+    BrokerCapabilities,
+    BrokerAccountSnapshot,
+    BrokerMode,
+    CancelOrderResult,
     OrderIntent,
     OrderResult,
     OrderSide,
@@ -16,6 +20,25 @@ from trading.schemas import (
 
 
 class BrokerAdapter(ABC):
+    @property
+    @abstractmethod
+    def adapter_id(self) -> str: ...
+
+    @abstractmethod
+    def capabilities(self) -> BrokerCapabilities: ...
+
+    @abstractmethod
+    def account_snapshot(self) -> BrokerAccountSnapshot: ...
+
+    @abstractmethod
+    def list_orders(self) -> list[OrderResult]: ...
+
+    @abstractmethod
+    def list_trades(self) -> list[OrderResult]: ...
+
+    @abstractmethod
+    def cancel_order(self, client_order_id: str) -> CancelOrderResult: ...
+
     @abstractmethod
     def submit_order(self, intent: OrderIntent, limits: RiskLimits) -> OrderResult: ...
 
@@ -27,11 +50,43 @@ class LiveTradingDisabledError(RuntimeError):
 class DisabledLiveBroker(BrokerAdapter):
     """Permanent fail-closed placeholder until a named broker passes certification."""
 
-    def submit_order(self, intent: OrderIntent, limits: RiskLimits) -> OrderResult:
+    @property
+    def adapter_id(self) -> str:
+        return "live_unconfigured"
+
+    def capabilities(self) -> BrokerCapabilities:
+        return BrokerCapabilities(
+            adapter_id=self.adapter_id,
+            broker_name="unconfigured",
+            mode=BrokerMode.LIVE_DISABLED,
+            status="disabled",
+            available=False,
+            execution_enabled=False,
+            blockers=["No broker adapter has been certified"],
+            security_guards=["All operations fail closed"],
+        )
+
+    @staticmethod
+    def _raise_disabled() -> None:
         raise LiveTradingDisabledError(
             "Live trading is disabled: no certified broker adapter, sandbox acceptance, "
             "reconciliation, two-person approval, or production kill switch is configured."
         )
+
+    def account_snapshot(self) -> BrokerAccountSnapshot:
+        self._raise_disabled()
+
+    def list_orders(self) -> list[OrderResult]:
+        self._raise_disabled()
+
+    def list_trades(self) -> list[OrderResult]:
+        self._raise_disabled()
+
+    def cancel_order(self, client_order_id: str) -> CancelOrderResult:
+        self._raise_disabled()
+
+    def submit_order(self, intent: OrderIntent, limits: RiskLimits) -> OrderResult:
+        self._raise_disabled()
 
 
 class PaperBroker(BrokerAdapter):
@@ -41,6 +96,59 @@ class PaperBroker(BrokerAdapter):
         self.kill_switch = False
         self.positions: dict[str, Position] = {}
         self.orders: dict[str, OrderResult] = {}
+
+    @property
+    def adapter_id(self) -> str:
+        return "paper"
+
+    def capabilities(self) -> BrokerCapabilities:
+        return BrokerCapabilities(
+            adapter_id=self.adapter_id,
+            broker_name="aiquant-lite local simulator",
+            mode=BrokerMode.PAPER,
+            status="active",
+            available=True,
+            execution_enabled=True,
+            supported_operations=[
+                "account_snapshot",
+                "list_orders",
+                "list_trades",
+                "submit_order",
+                "protective_exits",
+            ],
+            blockers=[],
+            security_guards=[
+                "No real brokerage connection",
+                "Human approval identity required by default",
+                "Idempotent client order IDs",
+                "Deterministic exposure and cash limits",
+            ],
+        )
+
+    def account_snapshot(self) -> PaperAccount:
+        return self.account()
+
+    def list_orders(self) -> list[OrderResult]:
+        return sorted(self.orders.values(), key=lambda order: order.created_at)
+
+    def list_trades(self) -> list[OrderResult]:
+        return [order for order in self.list_orders() if order.status == OrderStatus.FILLED]
+
+    def cancel_order(self, client_order_id: str) -> CancelOrderResult:
+        order = self.orders.get(client_order_id)
+        if order is None:
+            return CancelOrderResult(
+                adapter_id=self.adapter_id,
+                client_order_id=client_order_id,
+                accepted=False,
+                reason="Paper order was not found",
+            )
+        return CancelOrderResult(
+            adapter_id=self.adapter_id,
+            client_order_id=client_order_id,
+            accepted=False,
+            reason="Paper orders are filled or rejected immediately and cannot be cancelled",
+        )
 
     def restore(self, account: PaperAccount) -> None:
         self.cash = account.cash

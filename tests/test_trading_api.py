@@ -63,7 +63,20 @@ def test_trading_routes_persist_decision_and_live_order_is_locked(tmp_path):
             },
         )
         assert live.status_code == 423
-        assert "Live trading is disabled" in live.json()["detail"]
+        assert "CITIC QMT/xtquant is reserved but disabled" in live.json()["detail"]
+
+        brokers = client.get("/v1/trading/brokers")
+        assert brokers.status_code == 200
+        catalog = brokers.json()
+        assert catalog["active_adapter_id"] == "paper"
+        qmt = next(
+            adapter
+            for adapter in catalog["adapters"]
+            if adapter["adapter_id"] == "citic_qmt_xtquant"
+        )
+        assert qmt["execution_enabled"] is False
+        assert qmt["environment_probed"] is False
+        assert qmt["credentials_stored"] is False
     finally:
         settings.opc_database_path = original_path
 
