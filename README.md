@@ -6,8 +6,41 @@
 structured market data from model reasoning so that an LLM never needs to invent prices,
 financial figures, or announcement metadata.
 
-> Status: early public prototype. Research and simulated-analysis use only; it does not place
-> orders and must not be treated as investment advice.
+> Status: runnable local research MVP; approximately 75% of the original plan is complete.
+> Research and simulated-analysis use only. It does not place orders and is not investment advice.
+
+## Is the project complete?
+
+The core MVP is complete, but the full project plan is not:
+
+- real data, the six-tool MCP, Hermes/WeCom entry, model routing, risk budgets, and the main audit
+  path work locally;
+- LongCat news processing and DeepSeek high-risk review have completed real provider calls;
+- 30-day reliability evidence, human approval workflows, cost metrics, complete multimodal roles,
+  and a separate report agent remain unfinished;
+- there is no broker order execution capability.
+
+See [docs/project-status.md](docs/project-status.md) and the detailed
+[Chinese status report](docs/project-status.zh-CN.md).
+
+## Runtime in plain language
+
+```mermaid
+flowchart LR
+    U["WeCom / QQ"] --> H["Hermes control plane"]
+    H --> M["Finance Data MCP"]
+    M --> D["Local Data Hub"]
+    H --> R["Agent Router"]
+    R --> L["LongCat news processing"]
+    R --> K["DeepSeek risk review"]
+    D --> A["DuckDB audit ledger"]
+    R --> A
+    A --> H
+```
+
+Hermes receives and schedules work. The Data Hub supplies attributed facts. The Router chooses a
+specialist under risk and budget limits. DeepSeek reviews high-risk output. DuckDB records the
+evidence and calls before Hermes returns the result.
 
 ## Architecture
 
@@ -210,6 +243,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
 
 ## Roadmap
 
+- validate the daily report for one full week and collect 30 trading days of metrics;
+- add human-review APIs and an approval interface for `human_reviews`;
+- calculate provider cost and aggregate reliability metrics;
 - add audited multimodal request payloads and activate MiMo vision roles;
 - connect human-review requirements to an explicit approval queue;
 - implement the paper-trading and broker-safety gates before any order adapter;
