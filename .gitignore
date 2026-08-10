@@ -16,7 +16,8 @@ env/
 __pycache__/
 *.py[cod]
 *.egg-info/
-build/
+.build-cache/
+.build-tools/
 dist/
 
 # Test, lint, and editor state
@@ -33,11 +34,16 @@ htmlcov/
 # Runtime state and fetched third-party content
 cache/
 logs/
+runtime/
 reports/*
 !reports/.gitkeep
-database/*.db
-database/*.sqlite
-database/*.duckdb
+backups/
+tmp/
+*.duckdb
+*.duckdb.*
+*.db
+*.sqlite
+*.sqlite3
 database/*.wal
 *.pid
 
@@ -45,5 +51,7 @@ database/*.wal
 config/local.yaml
 *.bak
 *.backup-*
-backups/
+**/local-env/
+*.secrets
+*.secret
 scripts/archive/

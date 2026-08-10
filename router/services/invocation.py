@@ -491,6 +491,7 @@ class RouterInvocationService:
             final_response = (
                 result.response.model_copy(
                     update={
+                        "task_id": task_id,
                         "call_ids": list(call_ids),
                         "routing": routing,
                         "risk_review": risk_review,

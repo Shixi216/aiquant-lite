@@ -49,7 +49,7 @@ class RouterSettings(BaseSettings):
         ),
     )
     qwen_base_url: str | None = Field(
-        default=None,
+        default="https://dashscope.aliyuncs.com/compatible-mode/v1",
         validation_alias=AliasChoices(
             "OPC_QWEN_BASE_URL",
             "DASHSCOPE_BASE_URL",

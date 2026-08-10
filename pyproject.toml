@@ -1,6 +1,6 @@
 [project]
 name = "hermes-opc"
-version = "0.1.0"
+version = "0.10.0"
 description = "A-share research multi-agent workspace powered by Hermes"
 requires-python = ">=3.11,<3.12"
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "pymupdf>=1.28,<2",
+    "pyside6>=6.8,<7",
     "python-dotenv>=1.2.2",
     "pytz>=2026.2",
     "pyyaml>=6.0.3",
@@ -25,6 +26,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pyinstaller>=6.16,<7",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.21",

@@ -1,98 +1,122 @@
-# aiquant-lite
+<div align="center">
 
-[简体中文](README.zh-CN.md) | English
+[English](README.en.md) | 简体中文
 
-`aiquant-lite` is a local-first, evidence-aware A-share research workspace. It separates
-structured market data from model reasoning so that an LLM never needs to invent prices,
-financial figures, or announcement metadata.
+# AIQUANT-LITE
 
-> Status: runnable local research, backtesting, and paper-trading beta. Live broker execution is
-> deliberately locked. This project is not investment advice.
+### 本地优先的 A 股 AI + Quant 投研与决策支持框架
 
-## Is the project complete?
+从全市场扫描到可审计决策，把 A 股投研流程做成一套本地、可解释、可验证的系统。
 
-The core MVP is complete, but the full project plan is not:
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.139+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![DuckDB](https://img.shields.io/badge/DuckDB-Single--Owner-FFF000?logo=duckdb&logoColor=black)](https://duckdb.org/)
+[![Tests](https://img.shields.io/badge/tests-1%2C285%20passed-brightgreen)](#测试与质量边界)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-- real data, the six-tool MCP, Hermes/WeCom entry, model routing, risk budgets, and the main audit
-  path work locally;
-- LongCat news processing and DeepSeek high-risk review have completed real provider calls;
-- 30-day reliability evidence, human approval workflows, cost metrics, complete multimodal roles,
-  and a separate report agent remain unfinished;
-- auditable strategy generation, parallel technical/fundamental agents, risk veto, adversarial
-  review, portfolio optimization, backtesting, paper positions, and protective exits are available;
-- a fail-closed broker interface exists, but no real broker adapter has been certified.
-- CITIC Securities QMT/xtquant is reserved as a future replaceable adapter; it remains entirely
-  disabled pending entitlement and simulation-environment confirmation.
+**研究与决策支持，不是自动实盘交易。**
 
-See [docs/project-status.md](docs/project-status.md) and the detailed
-[Chinese status report](docs/project-status.zh-CN.md).
-The new trading engine is documented in
-[Chinese](docs/trading-engine.zh-CN.md).
+</div>
 
-## Runtime in plain language
+## 项目定位
 
-```mermaid
-flowchart LR
-    U["WeCom / QQ"] --> H["Hermes control plane"]
-    H --> M["Finance Data MCP"]
-    M --> D["Local Data Hub"]
-    H --> R["Agent Router"]
-    R --> L["LongCat news processing"]
-    R --> K["DeepSeek risk review"]
-    D --> A["DuckDB audit ledger"]
-    R --> A
-    A --> H
-```
+**AIQUANT-LITE 是面向 A 股市场的本地化 AI + Quant 投研、扫描、风险控制和决策支持系统。**
 
-Hermes receives and schedules work. The Data Hub supplies attributed facts. The Router chooses a
-specialist under risk and budget limits. DeepSeek reviews high-risk output. DuckDB records the
-evidence and calls before Hermes returns the result.
+它将结构化市场数据、确定性规则和多模型 Agent 分工组合在一条可审计链路中：先找事实，再做研究；先检查数据时点与风险，再生成决策包。
 
-## Architecture
+> 本项目不是自动实盘交易系统，不提供券商自动下单，不承诺收益，也不构成投资建议。
+
+## 为什么是 AIQUANT-LITE
+
+| 能力 | 当前实现 |
+|---|---|
+| 全市场扫描 | 本地确定性筛选、排序与结果卡；扫描阶段不调用模型、不生成交易指令 |
+| 五维研究 | 技术面、基本面、情绪、政策/新闻、资金面；正式评分保持技术面 60% + 基本面 40% |
+| 风险优先 | Point-in-Time、数据状态、持仓状态和硬风险 VETO 优先于正向评分 |
+| 可审计决策 | `DecisionEngine` 生成动作、仓位和价格区间；`DecisionPacket` 冻结、版本化并以 SHA-256 校验 |
+| 多源数据 | Tushare Pro、AKShare、BaoStock、CNInfo 等结构化来源，保留来源与校验状态 |
+| 多模型协作 | LongCat、Qwen、DeepSeek、MiMo 按研究综合、公告核验、风险复核和视觉角色路由 |
+| 策略研究 | Shadow、A/B 回放、Walk-Forward、参数敏感性与市场环境归因 |
+| 本地模拟 | Paper Trading、模拟账户、手工成交事实账本与只读复盘；与真实券商账户隔离 |
+| 多用户隔离 | 以 `local_user_id` 作为业务数据隔离主键，外部渠道映射到本地用户 |
+| 数据库拓扑 | Router 是正常在线状态下主 DuckDB 的唯一 Owner，其他组件通过 Router 访问 |
+| 多入口 | CLI、FastAPI、Finance Data MCP、Hermes；企业微信能力为本地渲染/模拟与配置检查 |
+
+### 正式分与增强层
+
+正式决策权重固定为：
 
 ```text
-Hermes / another MCP client
-          |
-          v
-Finance Data MCP  ---->  Agent Router
-          |                 |-- LongCat: news processing
-          |                 `-- Qwen: announcement verification
-          v
-Local Data Hub
-  |-- Tushare Pro
-  |-- AKShare / public exchange sources
-  `-- BaoStock
-          |
-          v
-DuckDB audit and evidence store
+Formal Score = Technical 60% + Fundamental 40%
 ```
 
-The repository currently contains:
+情绪、政策/新闻、资金面和五因子综合目前属于 Shadow/增强研究层，正式权重为 `0`。这让实验输入可以被观察和回放，而不会静默改变正式策略。
 
-- a FastAPI data service for stock basics, daily bars, quotes, financial statements,
-  announcements, and finance news;
-- cross-source daily-bar verification and source-attributed records;
-- a specialist model router with audited LongCat and Qwen pipelines;
-- a Finance Data MCP server exposing exactly six approved read-only research tools;
-- deterministic market-fact verification against persisted evidence;
-- a dry-run-first Hermes installer with backups, an MCP allowlist, and WeCom cron migration.
-- deterministic risk-level and model-call-budget controls with auditable decisions.
-- configurable DeepSeek and MiMo providers, with safe high-risk review fallback behavior.
+## 系统工作流
 
-## Finance Data MCP tools
+```mermaid
+flowchart TD
+    U["User / Hermes / CLI"] --> R["Router"]
+    R --> D["Data Hub"]
+    D --> S["Market Scanner"]
+    S --> F["Five-Dimension Research"]
+    F --> P["Point-in-Time & Data Status"]
+    P --> V["Risk VETO"]
+    V --> E["DecisionEngine"]
+    E --> K["Immutable DecisionPacket"]
+    K --> O["Research / Simulation / Manual Decision"]
+```
 
-| Tool | Purpose |
+确定性边界先于模型输出：数据失败、过期、时点不合法或硬风险触发时，系统会降级、等待或 VETO，而不是用模型补齐事实。
+
+## 数据库架构
+
+```mermaid
+flowchart TD
+    C["Hermes / MCP / Scanner / Data Hub"] --> R["Router"]
+    R --> DB["Single-Owner DuckDB"]
+    DB --> A["Evidence / Audit / DecisionPacket / Simulation"]
+```
+
+正常在线状态下，Router 是主库唯一直接访问者。非 Owner 在线进程会被连接守卫拒绝；离线维护需要先停止 Router。项目不采用“数据库锁后杀进程重试”的旧方案。
+
+## 模块结构
+
+```text
+aiquant-lite/
+├─ data_hub/              # 行情、财务、公告、新闻、历史数据与全市场数据层
+├─ router/                # Agent 路由、风险预算、审计与统一 API
+├─ trading/
+│  ├─ scanner/            # 全市场扫描与候选排序
+│  ├─ research/           # 五维研究、PIT、Shadow 与实验
+│  ├─ decision_support/   # DecisionEngine、VETO、DecisionPacket、仓位与计划
+│  ├─ simulation/         # 本地模拟账户和组合研究
+│  └─ review/             # 只读复盘
+├─ manual_tracking/       # 用户已在外部完成的成交/持仓事实
+├─ mcp_servers/           # Finance Data MCP
+├─ database/migrations/   # 数据库迁移代码
+├─ desktop/               # 本地桌面工作区
+├─ scripts/               # 运维、回填、诊断和验证入口
+└─ tests/                 # 单元、集成、边界与迁移测试
+```
+
+## 技术栈
+
+| 层 | 技术 |
 |---|---|
-| `get_realtime_quote` | Return a realtime quote or a verified latest-close fallback |
-| `get_daily_bars` | Fetch and cross-check daily bars from structured providers |
-| `get_financial_statement` | Return the three major statements for a reporting period |
-| `list_announcements` | List source-attributed CNInfo announcements |
-| `search_finance_news` | Search media reports while preserving unverified status |
-| `verify_market_fact` | Compare a claimed value with persisted, attributed evidence |
+| Runtime | Python 3.11, asyncio |
+| API / Protocol | FastAPI, Pydantic, MCP |
+| Storage | DuckDB, Single-Owner Router topology |
+| Data | Tushare, AKShare, BaoStock, CNInfo, pandas |
+| Agent routing | LongCat, Qwen, DeepSeek, MiMo（按需配置） |
+| Desktop / Delivery | PySide6, PyInstaller, Inno Setup |
+| Quality | pytest, Ruff, deterministic safety checks |
 
-## Quick start
+## Quick Start
 
-Requirements: Python 3.11 and [uv](https://docs.astral.sh/uv/).
+### 1. 安装
+
+需要 Python `3.11` 与 [uv](https://docs.astral.sh/uv/)。
 
 ```powershell
 git clone https://github.com/Shixi216/aiquant-lite.git
@@ -101,163 +125,98 @@ uv sync --dev
 Copy-Item .env.example .env
 ```
 
-Add only the provider credentials you intend to use to `.env`. Never commit that file.
+只在本地 `.env` 中填写实际使用的凭证。未配置的模型角色会保持禁用或安全降级。
 
-Run the REST services:
+### 2. 启动前检查
 
 ```powershell
-uv run python scripts/run_data_api.py
-uv run python scripts/run_router_api.py
+uv run python -m scripts.preflight_check
+uv run python -m scripts.check_no_live_execution
 ```
 
-Run the MCP server over stdio (the default and recommended local Hermes transport):
+### 3. 启动本地服务
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File scripts\start_hermes_opc.ps1
+powershell -ExecutionPolicy Bypass -File scripts\status_hermes_opc.ps1
+```
+
+也可以分别启动：
+
+```powershell
+uv run python -m scripts.run_router_api
+uv run python -m scripts.run_data_api
 uv run python -m mcp_servers.finance_data.server
 ```
 
-Connect an existing Hermes 0.18 installation after previewing the changes:
+默认服务与 MCP 面向本机使用。不要在缺少认证和网络控制时绑定到公网地址。
+
+### 4. 研究入口
 
 ```powershell
-$env:HERMES_HOME = "E:\hermes"
-uv run python scripts/configure_hermes_integration.py
-uv run python scripts/configure_hermes_integration.py --apply
+uv run python -m scripts.scanner_cli --help
+uv run python -m scripts.stock_report --help
+uv run python -m scripts.experiment_cli --help
+uv run python -m scripts.history_cli --help
 ```
 
-See [docs/hermes-integration.md](docs/hermes-integration.md) for backup, verification, and
-delivery details. Local Hermes configuration and credentials remain outside this repository.
+## Screenshots / Demo
 
-For local Streamable HTTP instead:
+公开仓库不放置真实持仓、真实交易、聊天记录或个人配置截图。当前主页使用 Mermaid 展示安全的系统流程和数据库拓扑；后续 Demo 只使用合成数据。
 
-```powershell
-$env:OPC_MCP_TRANSPORT = "streamable-http"
-uv run python -m mcp_servers.finance_data.server
-```
+## 测试与质量边界
 
-The endpoint is then `http://127.0.0.1:8767/mcp`. Do not bind it to a public interface without
-adding authentication and network controls.
+当前工作区已完整通过 **1,285 项测试**，覆盖：
 
-## Verification policy
-
-`verify_market_fact` never calls an LLM. A structured fact is verified only when at least two
-independent stored sources agree within the configured tolerance. A single verified official
-announcement is sufficient for facts directly contained in that announcement. Conflicts and
-missing evidence are returned explicitly instead of being silently resolved.
-
-## Risk and budget routing
-
-Generic Router requests accept `risk_level` (`low`, `medium`, `high`, or `critical`) and
-`budget_tier` (`economy`, `standard`, or `premium`). The policy is deterministic and runs before
-any provider call:
-
-- budget tiers cap output tokens per call and the total number of physical model calls;
-- risk levels cap sampling temperature;
-- high and critical results are marked as requiring human review and request escalation to the
-  `risk_controller` role when that role becomes available;
-- incompatible combinations, such as critical risk with a standard budget, are rejected before
-  credentials or provider capacity are consumed.
-
-The applied decision is returned in `RouterInvokeResponse.routing` and persisted with the audit
-result. Inspect the public policy matrix at `GET /v1/routing/policy`.
-
-For `high` and `critical` requests, the Router also attempts an automated `risk_controller`
-review inside the same task and physical-call budget when DeepSeek is configured. The result is
-returned as `risk_review.status`:
-
-- `completed`: a validated structured review is available;
-- `unavailable`: the risk provider is not configured;
-- `failed`: the provider call or structured-output validation failed;
-- `budget_exhausted`: the request used all permitted physical calls.
-
-All four cases retain the human-review requirement. Automated review is defense in depth, not a
-replacement for approval.
-
-## Specialist providers
-
-DeepSeek uses its official OpenAI-compatible endpoint and defaults to `deepseek-v4-pro`:
-
-```dotenv
-DEEPSEEK_API_KEY=
-OPC_DEEPSEEK_BASE_URL=https://api.deepseek.com
-OPC_DEEPSEEK_MODEL=deepseek-v4-pro
-```
-
-MiMo is registered as an OpenAI-compatible provider, but its endpoint must be configured
-explicitly so the project never silently routes private data through an assumed third party:
-
-```dotenv
-XIAOMI_API_KEY=
-OPC_MIMO_BASE_URL=
-OPC_MIMO_MODEL=mimo-v2.5
-```
-
-The MiMo adapter is ready for provider-level integration. Vision roles remain disabled until the
-Router request contract supports audited image inputs.
-
-### Local private configuration
-
-If Hermes already contains the provider credentials, preview and apply the allowlisted sync:
-
-```powershell
-uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env
-uv run python -m scripts.sync_local_provider_env --source E:\hermes\.env --apply
-```
-
-Only currently used data, search, and model settings are copied. QQ, WeCom, TokenHub, and other
-messaging credentials remain in the Hermes home. Values are never printed, and the previous
-project `.env` is backed up under the ignored `backups/local-env/` directory.
-
-Discover current model IDs without inference, then make minimal live calls when intended:
-
-```powershell
-uv run python -m scripts.check_live_specialist_providers
-uv run python -m scripts.check_live_specialist_providers --invoke  # may incur API charges
-uv run python -m scripts.check_live_risk_escalation                # writes an audit task
-```
-
-Never paste real credentials into source files, commits, issues, pull requests, or diagnostic
-logs. Rotate any credential that has been disclosed outside its intended secret store.
-
-## Live-trading boundary
-
-This repository does not submit broker orders. Research output must not be wired directly to a
-real-money account. Before any future live-trading adapter is enabled, every gate in
-[docs/live-trading-readiness.md](docs/live-trading-readiness.md) must be implemented and tested,
-including paper trading, order limits, idempotency, a kill switch, reconciliation, human approval,
-and incident rollback.
-
-## Security and privacy
-
-- `.env`, credential backups, databases, runtime logs, downloaded documents, and caches are
-  excluded from Git.
-- `.env.example` contains names only and no usable credentials.
-- MCP defaults to local-only binding and exposes a small allowlist of read-only tools.
-- Provider output is treated as untrusted data; media reports are not promoted to facts.
-- Before every public release, run the tests and scan the staged diff for secrets.
-
-If you discover a security issue, follow [SECURITY.md](SECURITY.md) instead of opening a public
-issue containing sensitive details.
-
-## Development
+- Router 单 Owner 数据库拓扑与并发边界；
+- 无券商依赖、无实盘路由、无决策到真实订单路径；
+- Point-in-Time、正式 60/40、VETO 与动作一致性；
+- DecisionPacket 不可变性、哈希校验与版本链；
+- 全市场扫描、历史数据、Shadow/A-B、Walk-Forward 与参数敏感性；
+- 多用户隔离、模拟交易、手工事实账本与只读复盘；
+- Windows 桌面交付与 Hermes 集成。
 
 ```powershell
 uv run pytest
 uv run ruff check .
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution expectations.
+测试通过不代表策略可稳定盈利；回测和实验结果也不能替代未来市场验证。
+
+## Security
+
+- `.env`、密钥、DuckDB、日志、报告、备份、缓存和本地运行状态不进入 Git；
+- `.env.example` 仅包含变量名、空值和安全示例默认值；
+- 主 DuckDB 只允许 Router 在线持有；
+- Provider 输出按不可信输入处理，错误信息会脱敏；
+- 公开 Issue、PR、日志和截图中不得粘贴真实凭证或用户数据。
+
+安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
+
+## 文档
+
+- [架构说明](docs/architecture.md)
+- [API Reference](docs/api-reference.md)
+- [数据管线](docs/data-pipeline.md)
+- [Scanner](docs/scanner.md)
+- [运维手册](docs/operations.md)
+- [安全说明](docs/security.md)
+- [已知限制](docs/limitations.md)
+- [Hermes 集成](docs/hermes-integration.md)
 
 ## Roadmap
 
-- validate the daily report for one full week and collect 30 trading days of metrics;
-- add human-review APIs and an approval interface for `human_reviews`;
-- calculate provider cost and aggregate reliability metrics;
-- add audited multimodal request payloads and activate MiMo vision roles;
-- connect human-review requirements to an explicit approval queue;
-- implement the paper-trading and broker-safety gates before any order adapter;
-- validate the migrated scheduled report across a full trading week;
-- collect 30-day reliability, latency, cost, coverage, and human-review metrics.
+- 扩充正式 Point-in-Time 基本面覆盖与持续质量度量；
+- 完善人工审批队列和审计界面；
+- 累积跨市场环境的 Walk-Forward 与长期 Shadow 证据；
+- 增加模型成本、可靠性和数据覆盖仪表盘；
+- 在审计输入契约完备后逐步开放多模态研究角色；
+- 使用合成数据提供公开 Demo。
+
+## Disclaimer
+
+本项目仅用于研究、教育、回测、模拟和人工决策支持。任何评分、候选、风险提示、仓位建议或价格区间都不构成证券投资建议。市场有风险，使用者应自行判断并承担责任。
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](LICENSE)

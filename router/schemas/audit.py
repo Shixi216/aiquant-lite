@@ -21,6 +21,10 @@ class ModelCallAudit(BaseModel):
     success: bool
     error_type: str | None
     error_message: str | None
+    prompt_version: str | None = None
+    input_hash: str | None = None
+    retry_count: int = 0
+    schema_validation: str | None = None
     created_at: datetime
 
 
@@ -74,3 +78,4 @@ class TaskAuditListResponse(BaseModel):
 
     count: int
     tasks: list[TaskAuditSummary]
+    invalid_record_count: int = Field(default=0, ge=0)

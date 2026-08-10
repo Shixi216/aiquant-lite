@@ -39,7 +39,7 @@ def _normalize_symbol(value: str) -> tuple[str, str]:
         exchange = normalized.split(".", 1)[1]
     elif code.startswith(("5", "6", "9")):
         exchange = "SH"
-    elif code.startswith(("4", "8")):
+    elif code.startswith(("4", "8", "920")):
         exchange = "BJ"
     else:
         exchange = "SZ"
@@ -81,6 +81,7 @@ class BaoStockProvider:
         symbol: str,
         start_date: str,
         end_date: str,
+        adjustment_type: str = "RAW",
     ) -> list[MarketRecord]:
         baostock_code, canonical_symbol = _normalize_symbol(symbol)
         start = _format_date(start_date)
@@ -88,6 +89,14 @@ class BaoStockProvider:
 
         if start > end:
             raise ValueError("start_date 不能晚于 end_date")
+
+        adjustflag = {
+            "RAW": "3",
+            "FORWARD_ADJUSTED": "2",
+            "BACKWARD_ADJUSTED": "1",
+        }.get(adjustment_type)
+        if adjustflag is None:
+            raise ValueError(f"unsupported adjustment_type: {adjustment_type}")
 
         login_result = bs.login()
 
@@ -107,7 +116,7 @@ class BaoStockProvider:
                 start_date=start,
                 end_date=end,
                 frequency="d",
-                adjustflag="3",
+                adjustflag=adjustflag,
             )
 
             if query.error_code != "0":
@@ -145,6 +154,10 @@ class BaoStockProvider:
                     "volume": _to_float(row.get("volume")),
                     "amount": _to_float(row.get("amount")),
                     "adjustflag": row.get("adjustflag"),
+                    "adjustment_type": adjustment_type,
+                    "provider_adjustment": adjustflag,
+                    "volume_unit": "SHARES",
+                    "amount_unit": "CNY",
                 }
 
                 hash_payload = {
@@ -165,15 +178,17 @@ class BaoStockProvider:
                     tzinfo=SHANGHAI_TZ,
                 )
 
+                digest = _content_hash(hash_payload)
                 records.append(
                     MarketRecord(
+                        record_id=f"raw_daily_{digest[:32]}",
                         symbol=canonical_symbol,
                         data_type=DataType.DAILY_BAR,
                         event_time=event_time,
                         source_name="BaoStock",
                         source_level=SourceLevel.STRUCTURED,
                         verified=False,
-                        content_hash=_content_hash(hash_payload),
+                        content_hash=digest,
                         data=payload,
                     )
                 )

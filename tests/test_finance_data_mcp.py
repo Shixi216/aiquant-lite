@@ -5,19 +5,13 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from mcp_servers.finance_data.server import mcp
+from router.integration.tools import TOOL_NAMES
 
 
 def test_finance_data_mcp_exposes_only_approved_tools() -> None:
     names = {tool.name for tool in mcp._tool_manager.list_tools()}
 
-    assert names == {
-        "get_realtime_quote",
-        "get_daily_bars",
-        "get_financial_statement",
-        "list_announcements",
-        "search_finance_news",
-        "verify_market_fact",
-    }
+    assert names == set(TOOL_NAMES)
 
 
 def test_finance_data_mcp_is_local_by_default() -> None:
@@ -39,11 +33,4 @@ async def test_stdio_client_can_initialize_and_list_tools() -> None:
             await session.initialize()
             result = await session.list_tools()
 
-    assert {tool.name for tool in result.tools} == {
-        "get_realtime_quote",
-        "get_daily_bars",
-        "get_financial_statement",
-        "list_announcements",
-        "search_finance_news",
-        "verify_market_fact",
-    }
+    assert {tool.name for tool in result.tools} == set(TOOL_NAMES)

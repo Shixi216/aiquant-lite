@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from time import perf_counter
 from zoneinfo import ZoneInfo
 
-import akshare as ak
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from config.network import configure_network_policy
@@ -96,6 +95,7 @@ class RealtimeQuoteService:
         reraise=True,
     )
     def _fetch_akshare(self, code: str) -> dict[str, object]:
+        import akshare as ak  # 延迟加载（避免模块级 import 耗时）
         frame = ak.stock_bid_ask_em(symbol=code)
 
         if frame.empty:
@@ -111,12 +111,86 @@ class RealtimeQuoteService:
             for _, row in frame.iterrows()
         }
 
+    @staticmethod
+    def _fetch_tencent(code: str) -> dict[str, object]:
+        """腾讯实时行情源（qt.gtimg.cn）。
+
+        东方财富 push2 接口对非浏览器 TLS 指纹/高频请求实施风控，
+        腾讯行情接口更稳定，作为实时报价首选源。
+        字段分隔符为 '~'，编码 GBK。
+        """
+        import requests as _requests
+
+        symbol = code
+        market = "sh" if code.startswith("6") else "sz"
+
+        response = _requests.get(
+            f"https://qt.gtimg.cn/q={market}{code}",
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/126.0.0.0 Safari/537.36"
+                ),
+                "Referer": "https://gu.qq.com/",
+                "Accept": "*/*",
+            },
+            timeout=8,
+        )
+        response.raise_for_status()
+        response.encoding = "gbk"
+
+        text = response.text.strip()
+        if "=" not in text:
+            raise RuntimeError("腾讯行情返回格式异常")
+
+        payload = text.split("=", 1)[1].strip().strip('"')
+        parts = payload.split("~")
+
+        if len(parts) < 40:
+            raise RuntimeError(f"腾讯行情字段不足：{len(parts)}")
+
+        def _num(index: int) -> float | None:
+            raw = parts[index] if index < len(parts) else ""
+            try:
+                value = float(raw)
+            except (TypeError, ValueError):
+                return None
+            return value if value else None
+
+        values: dict[str, object] = {
+            "最新": _num(3),
+            "昨收": _num(4),
+            "今开": _num(5),
+            "涨跌": _num(31),
+            "涨幅": _num(32),
+            "最高": _num(33),
+            "最低": _num(34),
+            "成交量": _num(6),
+            "换手": _num(38),
+            "量比": _num(49),
+            "名称": parts[1] if len(parts) > 1 else None,
+            "时间": parts[30] if len(parts) > 30 else None,
+        }
+
+        if values["最新"] is None or float(values["最新"]) <= 0:
+            raise RuntimeError("腾讯行情没有返回有效最新价")
+
+        return values
+
     def _create_realtime_record(
         self,
         code: str,
         symbol: str,
     ) -> MarketRecord:
-        values = self._fetch_akshare(code)
+        # 腾讯源优先（东财 push2 对非浏览器指纹有风控）
+        try:
+            values = self._fetch_tencent(code)
+            source_name = "Tencent Realtime (qt.gtimg.cn)"
+        except Exception:
+            values = self._fetch_akshare(code)
+            source_name = "AKShare / Eastmoney Realtime"
+
         latest = _to_float(values.get("最新"))
 
         if latest is None or latest <= 0:
@@ -145,8 +219,6 @@ class RealtimeQuoteService:
             "sell_1_volume": _to_float(values.get("sell_1_vol")),
             "fetched_at": event_time.isoformat(),
         }
-
-        source_name = "AKShare / Eastmoney Realtime"
 
         return MarketRecord(
             symbol=symbol,
@@ -255,7 +327,7 @@ class RealtimeQuoteService:
 
             provider_runs.append(
                 ProviderRun(
-                    provider="AKShare / Eastmoney Realtime",
+                    provider="Tencent / AKShare Realtime",
                     success=True,
                     record_count=1,
                     latency_ms=round(
@@ -278,7 +350,7 @@ class RealtimeQuoteService:
         except Exception as exc:
             provider_runs.append(
                 ProviderRun(
-                    provider="AKShare / Eastmoney Realtime",
+                    provider="Tencent / AKShare Realtime",
                     success=False,
                     record_count=0,
                     latency_ms=round(

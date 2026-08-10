@@ -7,11 +7,14 @@ No credential or channel value is printed.
 
 from __future__ import annotations
 
+# ruff: noqa: E402
+
 import argparse
 import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -19,16 +22,29 @@ from typing import Any
 
 import yaml
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from config.utf8 import UTF8_ERRORS, utf8_child_environment
+
 SERVER_NAME = "finance_data"
 MANAGED_START = "  # BEGIN AIQUANT-LITE MANAGED: finance_data MCP"
 MANAGED_END = "  # END AIQUANT-LITE MANAGED: finance_data MCP"
 TOOL_NAMES = (
+    "get_stock_basic",
+    "get_market_snapshot",
     "get_realtime_quote",
     "get_daily_bars",
     "get_financial_statement",
     "list_announcements",
     "search_finance_news",
     "verify_market_fact",
+    "parse_market_scanner_query",
+    "scan_a_share_market",
+    "research_candidates",
+    "create_explicit_decision",
+    "get_experiment_report",
 )
 
 DAILY_REPORT_PROMPT = """生成 {date} 的自选股收盘日报。
@@ -77,6 +93,8 @@ def _managed_mcp_block(project_root: Path) -> str:
         '      - "mcp_servers.finance_data.server"',
         "    env:",
         f"      PYTHONPATH: {_yaml_string(str(project_root))}",
+        '      PYTHONUTF8: "1"',
+        '      PYTHONIOENCODING: "utf-8:backslashreplace"',
         "    enabled: true",
         "    timeout: 180",
         "    connect_timeout: 60",
@@ -256,7 +274,7 @@ def _update_cron_job(
         "print(json.dumps({'name':r.get('name'),'deliver':r.get('deliver'),"
         "'enabled_toolsets':r.get('enabled_toolsets'),'workdir':r.get('workdir')}))"
     )
-    environment = os.environ.copy()
+    environment = utf8_child_environment()
     environment["HERMES_HOME"] = str(hermes_home)
     payload = {"job_name": job_name, **updates}
     result = subprocess.run(
@@ -267,6 +285,7 @@ def _update_cron_job(
         capture_output=True,
         text=True,
         encoding="utf-8",
+        errors=UTF8_ERRORS,
         timeout=30,
         check=False,
     )

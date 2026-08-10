@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -14,11 +15,16 @@ from router.schemas import AnnouncementDocument
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CACHE_DIR = (
-    PROJECT_ROOT
-    / "cache"
-    / "announcements"
-)
+
+
+def default_cache_dir() -> Path:
+    user_data_dir = os.getenv("HERMES_OPC_USER_DATA_DIR", "").strip()
+    if user_data_dir:
+        return Path(user_data_dir) / "cache" / "announcements"
+    return PROJECT_ROOT / "cache" / "announcements"
+
+
+DEFAULT_CACHE_DIR = default_cache_dir()
 
 ALLOWED_DETAIL_HOSTS = {
     "www.cninfo.com.cn",

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
+
+from pydantic import ValidationError
 
 from database.db import get_connection
 from router.schemas.audit import (
@@ -36,11 +39,24 @@ def decode_json_object(
 class AuditQueryStore:
     """Read-only access to Router audit records."""
 
+    @staticmethod
+    def _connect():
+        last_error: Exception | None = None
+        for attempt in range(4):
+            try:
+                return get_connection(read_only=True)
+            except Exception as exc:
+                last_error = exc
+                if attempt < 3:
+                    time.sleep(0.05 * (attempt + 1))
+        assert last_error is not None
+        raise last_error
+
     def get_task(
         self,
         task_id: str,
     ) -> TaskAuditDetail | None:
-        connection = get_connection()
+        connection = self._connect()
 
         try:
             task_row = connection.execute(
@@ -77,6 +93,10 @@ class AuditQueryStore:
                     success,
                     error_type,
                     error_message,
+                    prompt_version,
+                    input_hash,
+                    retry_count,
+                    schema_validation,
                     created_at
                 FROM model_calls
                 WHERE task_id = ?
@@ -121,7 +141,11 @@ class AuditQueryStore:
                 success=row[9],
                 error_type=row[10],
                 error_message=row[11],
-                created_at=row[12],
+                prompt_version=row[12],
+                input_hash=row[13],
+                retry_count=row[14],
+                schema_validation=row[15],
+                created_at=row[16],
             )
             for row in call_rows
         ]
@@ -180,7 +204,7 @@ class AuditQueryStore:
 
         parameters.append(limit)
 
-        connection = get_connection()
+        connection = self._connect()
 
         try:
             rows = connection.execute(
@@ -212,21 +236,27 @@ class AuditQueryStore:
         finally:
             connection.close()
 
-        tasks = [
-            TaskAuditSummary(
-                task_id=row[0],
-                task_type=row[1],
-                symbol=row[2],
-                status=row[3],
-                created_at=row[4],
-                updated_at=row[5],
-                model_call_count=row[6],
-                result_count=row[7],
-            )
-            for row in rows
-        ]
+        tasks: list[TaskAuditSummary] = []
+        invalid_record_count = 0
+        for row in rows:
+            try:
+                task = TaskAuditSummary(
+                    task_id=row[0],
+                    task_type=row[1],
+                    symbol=row[2],
+                    status=row[3],
+                    created_at=row[4],
+                    updated_at=row[5],
+                    model_call_count=row[6],
+                    result_count=row[7],
+                )
+            except (ValidationError, TypeError, ValueError):
+                invalid_record_count += 1
+                continue
+            tasks.append(task)
 
         return TaskAuditListResponse(
             count=len(tasks),
             tasks=tasks,
+            invalid_record_count=invalid_record_count,
         )

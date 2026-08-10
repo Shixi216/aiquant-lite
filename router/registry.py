@@ -20,6 +20,14 @@ class RoleSpec(BaseModel):
 
 
 ROLE_SPECS: dict[str, RoleSpec] = {
+    "research_synthesizer": RoleSpec(
+        role="research_synthesizer",
+        display_name="个股研究综合 Agent",
+        provider="longcat",
+        preferred_model="LongCat-2.0",
+        task_type="research_synthesis",
+        description="基于本地点时五维证据生成RESEARCH结构化摘要。",
+    ),
     "announcement_verifier": RoleSpec(
         role="announcement_verifier",
         display_name="公告核验 Agent",
@@ -72,11 +80,17 @@ ROLE_SPECS: dict[str, RoleSpec] = {
 
 
 def _role_enabled(spec: RoleSpec) -> bool:
-    if spec.role == "news_processor":
+    if spec.role in {"news_processor", "research_synthesizer"}:
         return router_settings.longcat_ready
 
     if spec.role == "risk_controller":
         return router_settings.deepseek_ready
+
+    if spec.role == "announcement_verifier":
+        return router_settings.qwen_ready
+
+    if spec.role in {"vision_reader", "complex_vision"}:
+        return router_settings.mimo_ready
 
     return False
 

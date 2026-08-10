@@ -5,7 +5,6 @@ import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-import akshare as ak
 import pandas as pd
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -36,7 +35,7 @@ def _normalize_symbol(value: str) -> tuple[str, str]:
         exchange = normalized.split(".", 1)[1]
     elif code.startswith(("5", "6", "9")):
         exchange = "SH"
-    elif code.startswith(("4", "8")):
+    elif code.startswith(("4", "8", "920")):
         exchange = "BJ"
     else:
         exchange = "SZ"
@@ -77,13 +76,22 @@ class AKShareProvider:
         code: str,
         start_date: str,
         end_date: str,
+        adjustment_type: str = "RAW",
     ) -> pd.DataFrame:
+        adjustment = {
+            "RAW": "",
+            "FORWARD_ADJUSTED": "qfq",
+            "BACKWARD_ADJUSTED": "hfq",
+        }.get(adjustment_type)
+        if adjustment is None:
+            raise ValueError(f"unsupported adjustment_type: {adjustment_type}")
+        import akshare as ak  # 延迟加载
         return ak.stock_zh_a_hist(
             symbol=code,
             period="daily",
             start_date=start_date,
             end_date=end_date,
-            adjust="",
+            adjust=adjustment,
         )
 
     def get_daily_bars(
@@ -91,6 +99,7 @@ class AKShareProvider:
         symbol: str,
         start_date: str,
         end_date: str,
+        adjustment_type: str = "RAW",
     ) -> list[MarketRecord]:
         code, canonical_symbol = _normalize_symbol(symbol)
         start = _normalize_date(start_date)
@@ -103,6 +112,7 @@ class AKShareProvider:
             code=code,
             start_date=start,
             end_date=end,
+            adjustment_type=adjustment_type,
         )
 
         if frame.empty:
@@ -132,6 +142,14 @@ class AKShareProvider:
                 "pct_chg": _to_float(row.get("涨跌幅")),
                 "change": _to_float(row.get("涨跌额")),
                 "turnover_rate": _to_float(row.get("换手率")),
+                "adjustment_type": adjustment_type,
+                "provider_adjustment": {
+                    "RAW": "",
+                    "FORWARD_ADJUSTED": "qfq",
+                    "BACKWARD_ADJUSTED": "hfq",
+                }[adjustment_type],
+                "volume_unit": "LOTS",
+                "amount_unit": "CNY",
             }
 
             hash_payload = {
@@ -152,15 +170,17 @@ class AKShareProvider:
                 tzinfo=SHANGHAI_TZ,
             )
 
+            digest = _content_hash(hash_payload)
             records.append(
                 MarketRecord(
+                    record_id=f"raw_daily_{digest[:32]}",
                     symbol=canonical_symbol,
                     data_type=DataType.DAILY_BAR,
                     event_time=event_time,
                     source_name="AKShare / Eastmoney",
                     source_level=SourceLevel.PUBLIC_WEB,
                     verified=False,
-                    content_hash=_content_hash(hash_payload),
+                    content_hash=digest,
                     data=payload,
                 )
             )

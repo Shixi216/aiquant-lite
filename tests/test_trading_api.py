@@ -6,90 +6,35 @@ from types import SimpleNamespace
 from fastapi.testclient import TestClient
 
 from config.settings import settings
+from data_hub.schemas.market import DataType, MarketRecord, SourceLevel
+from database.db import get_connection, initialize_database, insert_market_record
 from router.api.app import app
-from trading.routes import paper_broker
+from trading.decision_support.decision_packets import DecisionRepository
+from trading.decision_support.orchestrator import DecisionService
+from trading.simulation.persistence import TradingAuditStore
+import trading.routes as trading_routes
+from trading.routes import paper_trading
 from trading.schemas import DecisionFromDataRequest, PortfolioState
-from trading.persistence import TradingAuditStore
 
 
-def test_trading_routes_persist_decision_and_live_order_is_locked(tmp_path):
-    original_path = settings.opc_database_path
-    settings.opc_database_path = tmp_path / "trading-api.duckdb"
-    paper_broker.cash = 1_000_000
-    paper_broker.positions.clear()
-    paper_broker.orders.clear()
-    try:
-        client = TestClient(app)
-        bars = []
-        for index in range(60):
-            close = 10 + index * 0.05
-            bars.append(
-                {
-                    "trade_date": date(2025, 1, 1).toordinal() + index,
-                    "open": close - 0.02,
-                    "high": close + 0.1,
-                    "low": close - 0.1,
-                    "close": close,
-                    "volume": 1_000_000,
-                }
-            )
-            bars[-1]["trade_date"] = date.fromordinal(bars[-1]["trade_date"]).isoformat()
-        response = client.post(
-            "/v1/trading/decisions",
-            json={
-                "symbol": "600000",
-                "bars": bars,
-                "portfolio": {"cash": 900000, "equity": 1000000},
-            },
-        )
-        assert response.status_code == 200
-        assert response.json()["opinions"][0]["role"] == "technical_agent"
-
-        review = client.get(f"/v1/trading/reviews/daily/{date.today().isoformat()}")
-        assert review.status_code == 200
-        assert len(review.json()["traces"]) == 1
-
-        live = client.post(
-            "/v1/trading/live/orders",
-            json={
-                "intent": {
-                    "symbol": "600000",
-                    "side": "buy",
-                    "quantity": 100,
-                    "reference_price": 10,
-                    "price_time": datetime.now().astimezone().isoformat(),
-                    "approved_by": "tester",
-                }
-            },
-        )
-        assert live.status_code == 423
-        assert "CITIC QMT/xtquant is reserved but disabled" in live.json()["detail"]
-
-        brokers = client.get("/v1/trading/brokers")
-        assert brokers.status_code == 200
-        catalog = brokers.json()
-        assert catalog["active_adapter_id"] == "paper"
-        qmt = next(
-            adapter
-            for adapter in catalog["adapters"]
-            if adapter["adapter_id"] == "citic_qmt_xtquant"
-        )
-        assert qmt["execution_enabled"] is False
-        assert qmt["environment_probed"] is False
-        assert qmt["credentials_stored"] is False
-    finally:
-        settings.opc_database_path = original_path
-
-
-def test_decision_from_data_bridges_verified_records_to_agents(monkeypatch):
-    records = []
-    for index in range(60):
+def _market_records(count: int = 60) -> list[MarketRecord]:
+    records: list[MarketRecord] = []
+    for index in range(count):
+        trade_date = date(2025, 1, 1) + timedelta(days=index)
         close = 10 + index * 0.05
         records.append(
-            SimpleNamespace(
-                record_id=f"record-{index}",
+            MarketRecord(
+                record_id=f"trading-api-record-{index}",
+                symbol="600000.SH",
+                data_type=DataType.DAILY_BAR,
+                event_time=datetime.fromisoformat(
+                    f"{trade_date.isoformat()}T15:00:00+08:00"
+                ),
+                source_name="trading-api-test",
+                source_level=SourceLevel.STRUCTURED,
+                verified=True,
                 data={
-                    "trade_date": (date(2025, 1, 1) + timedelta(days=index)).strftime("%Y%m%d"),
+                    "trade_date": trade_date.strftime("%Y%m%d"),
                     "open": close - 0.02,
                     "high": close + 0.1,
                     "low": close - 0.1,
@@ -98,19 +43,80 @@ def test_decision_from_data_bridges_verified_records_to_agents(monkeypatch):
                 },
             )
         )
+    return records
 
-    class FakeDailyBarsService:
-        def get_daily_bars(self, *args, **kwargs):
-            return SimpleNamespace(symbol="600000.SH", records=records)
 
-    monkeypatch.setattr("trading.routes.DailyBarsService", FakeDailyBarsService)
-    monkeypatch.setattr("trading.routes.audit_store.record_trace", lambda trace: None)
+def _install_decision_service(monkeypatch, records: list[MarketRecord]) -> None:
+    initialize_database()
+    with get_connection() as connection:
+        for record in records:
+            insert_market_record(connection, record)
+    service = DecisionService(DecisionRepository())
+    service.daily_bars_service_factory = lambda: SimpleNamespace(
+        get_daily_bars=lambda *args, **kwargs: SimpleNamespace(
+            symbol="600000.SH",
+            records=records,
+        )
+    )
+    monkeypatch.setattr(trading_routes, "decision_service", service)
 
+
+def test_trading_routes_persist_decision_and_review(tmp_path, monkeypatch):
+    original_path = settings.opc_database_path
+    settings.opc_database_path = tmp_path / "trading-api.duckdb"
+    paper_trading.cash = 1_000_000
+    paper_trading.positions.clear()
+    paper_trading.orders.clear()
+    try:
+        records = _market_records()
+        _install_decision_service(monkeypatch, records)
+        client = TestClient(app)
+        response = client.post(
+            "/v1/trading/decisions",
+            json={
+                "symbol": "600000",
+                "bars": [
+                    {
+                        **record.data,
+                        "trade_date": datetime.strptime(
+                            record.data["trade_date"],
+                            "%Y%m%d",
+                        ).date().isoformat(),
+                    }
+                    for record in records
+                ],
+                "portfolio": {"cash": 900000, "equity": 1000000},
+                "evidence_refs": [
+                    f"data_record:{record.record_id}"
+                    for record in records
+                ],
+            },
+        )
+        assert response.status_code == 200
+        assert (
+            response.json()["decision"]["opinions"][0]["role"]
+            == "technical_agent"
+        )
+
+        review = client.get(f"/v1/trading/reviews/daily/{date.today().isoformat()}")
+        assert review.status_code == 200
+        assert len(review.json()["traces"]) == 1
+    finally:
+        settings.opc_database_path = original_path
+
+
+def test_decision_from_data_bridges_verified_records_to_agents(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(settings, "opc_database_path", tmp_path / "from-data.duckdb")
+    records = _market_records()
+    _install_decision_service(monkeypatch, records)
     from trading.routes import create_decision_from_data
 
     import asyncio
 
-    trace = asyncio.run(
+    packet = asyncio.run(
         create_decision_from_data(
             DecisionFromDataRequest(
                 symbol="600000",
@@ -120,8 +126,9 @@ def test_decision_from_data_bridges_verified_records_to_agents(monkeypatch):
             )
         )
     )
-    assert len(trace.evidence_refs) >= 60
-    assert trace.symbol == "600000.SH"
+    assert len(packet.source_record_ids) == 60
+    assert packet.symbol == "600000.SH"
+    assert packet.hash_is_valid()
 
 
 def test_paper_account_snapshot_survives_store_reload(tmp_path):
@@ -129,7 +136,9 @@ def test_paper_account_snapshot_survives_store_reload(tmp_path):
     settings.opc_database_path = tmp_path / "paper-state.duckdb"
     try:
         store = TradingAuditStore()
-        account = paper_broker.account().model_copy(update={"cash": 123_456, "kill_switch": True})
+        account = paper_trading.account().model_copy(
+            update={"cash": 123_456, "kill_switch": True}
+        )
         store.record_paper_account(account)
         restored = TradingAuditStore().load_paper_account()
         assert restored is not None

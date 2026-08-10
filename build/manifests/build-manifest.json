@@ -1,0 +1,13 @@
+{
+  "application_version": "0.10.0",
+  "build_time": "2026-07-31T14:01:47.339526+08:00",
+  "git_head": "7c02b41fb1b361de10e81f9be06b3b9bc7a273c7",
+  "working_tree_dirty": true,
+  "migration_version": "0111",
+  "router_api_version": "0.10.0",
+  "scanner_version": "v1",
+  "orchestration_version": "v1",
+  "experiment_version": "v1",
+  "desktop_version": "12D",
+  "build_channel": "candidate"
+}

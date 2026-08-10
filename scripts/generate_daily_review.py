@@ -3,8 +3,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 
-from trading.persistence import TradingAuditStore
-from trading.replay import render_daily_review_markdown
+from trading.review.daily import build_review_service
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,7 +15,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     review_date = date.fromisoformat(args.date)
-    print(render_daily_review_markdown(TradingAuditStore().daily_review(review_date)))
+    print(build_review_service().daily_review_markdown(review_date))
 
 
 if __name__ == "__main__":

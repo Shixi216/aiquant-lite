@@ -16,6 +16,7 @@ from data_hub.providers import (
 )
 from data_hub.schemas.market import MarketRecord
 from data_hub.schemas.service import DailyBarsResponse, ProviderRun
+from data_hub.services.canonicalization_service import CanonicalizationService
 from data_hub.verification import verify_daily_bars
 
 
@@ -127,6 +128,21 @@ class DailyBarsService:
                     """,
                     verified_hashes,
                 )
+
+        groups: dict[
+            tuple[str, str, object],
+            list[MarketRecord],
+        ] = {}
+        for record in records:
+            key = (
+                record.symbol,
+                record.data_type.value,
+                record.event_time,
+            )
+            groups.setdefault(key, []).append(record)
+        canonicalization = CanonicalizationService()
+        for group in groups.values():
+            canonicalization.canonicalize_market(group)
 
     def get_daily_bars(
         self,

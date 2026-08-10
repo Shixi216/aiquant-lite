@@ -7,7 +7,6 @@ from time import perf_counter
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
-import akshare as ak
 import pandas as pd
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -19,6 +18,7 @@ from database.db import (
 )
 from data_hub.schemas.market import DataType, MarketRecord, SourceLevel
 from data_hub.schemas.service import AnnouncementResponse, ProviderRun
+from data_hub.services.event_cluster_service import EventClusterService
 
 
 SHANGHAI_TZ = ZoneInfo("Asia/Shanghai")
@@ -141,14 +141,26 @@ class AnnouncementService:
         keyword: str,
         category: str,
     ) -> pd.DataFrame:
-        return ak.stock_zh_a_disclosure_report_cninfo(
-            symbol=code,
-            market="沪深京",
-            keyword=keyword,
-            category=category,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        import akshare as ak  # 延迟加载（避免模块级 import 耗时）
+        try:
+            return ak.stock_zh_a_disclosure_report_cninfo(
+                symbol=code,
+                market="沪深京",
+                keyword=keyword,
+                category=category,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        except KeyError as exc:
+            # AKShare 对"无公告"返回空 DataFrame（缺列）→ 视为正常空结果
+            if "columns" in str(exc) or "Index" in str(exc):
+                return pd.DataFrame(columns=["代码", "简称", "公告标题", "公告时间", "公告链接"])
+            raise
+        except (IndexError, ValueError) as exc:
+            # 空结果导致的取值异常同样视为正常空结果
+            if "empty" in str(exc).lower() or "length" in str(exc).lower():
+                return pd.DataFrame(columns=["代码", "简称", "公告标题", "公告时间", "公告链接"])
+            raise
 
     @staticmethod
     def _persist(records: list[MarketRecord]) -> None:
@@ -168,6 +180,8 @@ class AnnouncementService:
 
                 if existing is None:
                     insert_market_record(connection, record)
+        if records:
+            EventClusterService().cluster(records)
 
     def get_announcements(
         self,
@@ -205,6 +219,10 @@ class AnnouncementService:
                 f"{type(exc).__name__}: {exc}; "
                 f"latency={latency_ms}ms"
             ) from exc
+
+        # 无公告（正常情况，非接口故障）：返回空 records
+        if frame is None or frame.empty:
+            return []
 
         required = {
             "代码",

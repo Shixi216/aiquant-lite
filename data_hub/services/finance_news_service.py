@@ -7,7 +7,6 @@ from time import perf_counter
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
-import akshare as ak
 import pandas as pd
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -19,6 +18,7 @@ from database.db import (
 )
 from data_hub.schemas.market import DataType, MarketRecord, SourceLevel
 from data_hub.schemas.service import FinanceNewsResponse, ProviderRun
+from data_hub.services.event_cluster_service import EventClusterService
 
 
 SHANGHAI_TZ = ZoneInfo("Asia/Shanghai")
@@ -117,6 +117,7 @@ class FinanceNewsService:
         reraise=True,
     )
     def _fetch(self, query: str) -> pd.DataFrame:
+        import akshare as ak
         return ak.stock_news_em(symbol=query)
 
     @staticmethod
@@ -137,6 +138,8 @@ class FinanceNewsService:
 
                 if existing is None:
                     insert_market_record(connection, record)
+        if records:
+            EventClusterService().cluster(records)
 
     def get_finance_news(
         self,

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import logging
 from time import perf_counter
 
 from router.config import router_settings
+from router.integration.model_chain_logging import log_model_chain_stage
+from router.integration.identifiers import new_request_id
+from router.integration.sanitization import sanitize_error
 from router.providers import QwenProvider
 from router.schemas import (
     AnnouncementVerificationPipelineRequest,
@@ -16,9 +20,12 @@ from router.services.announcement_verifier import (
     AnnouncementVerifierService,
 )
 from router.services.audit import AuditStore
+from router.services.provider_registry import list_provider_names
+from router.services.provider_retry import provider_error_type
 
 
 ROLE_NAME = "announcement_verifier"
+LOGGER = logging.getLogger("uvicorn.error")
 
 
 def merge_response_usage(
@@ -49,9 +56,11 @@ class AuditedQwenProvider(QwenProvider):
         self,
         *,
         task_id: str,
+        request_id: str,
         audit_store: AuditStore,
     ) -> None:
         self.task_id = task_id
+        self.request_id = request_id
         self.audit_store = audit_store
         self.call_ids: list[str] = []
 
@@ -97,6 +106,20 @@ class AuditedQwenProvider(QwenProvider):
             )
 
             self.call_ids.append(call_id)
+            log_model_chain_stage(
+                logger=LOGGER,
+                request_id=self.request_id,
+                skill_id="announcement_verification",
+                provider_id="qwen",
+                provider_registered=True,
+                credential_loaded=router_settings.qwen_ready,
+                request_started=True,
+                response_received=False,
+                response_status=None,
+                audit_task_created=True,
+                error_code=provider_error_type(exc),
+                sanitized_error=exc,
+            )
             raise
 
         call_id = self.audit_store.record_model_call(
@@ -110,6 +133,18 @@ class AuditedQwenProvider(QwenProvider):
         )
 
         self.call_ids.append(call_id)
+        log_model_chain_stage(
+            logger=LOGGER,
+            request_id=self.request_id,
+            skill_id="announcement_verification",
+            provider_id=response.provider,
+            provider_registered=True,
+            credential_loaded=router_settings.qwen_ready,
+            request_started=True,
+            response_received=True,
+            response_status=200,
+            audit_task_created=True,
+        )
 
         return response
 
@@ -124,19 +159,54 @@ class AnnouncementVerificationPipelineService:
         self,
         request: AnnouncementVerificationPipelineRequest,
     ) -> AnnouncementVerificationPipelineResponse:
-        task_id = self.audit_store.create_task(
-            task_type=(
-                "announcement_verification_pipeline"
-            ),
-            symbol=request.symbol,
-            request_payload=request.model_dump(
-                mode="json",
-                exclude_none=True,
-            ),
+        request_id = new_request_id()
+        provider_registered = "qwen" in list_provider_names()
+        try:
+            task_id = self.audit_store.create_task(
+                task_type=(
+                    "announcement_verification_pipeline"
+                ),
+                symbol=request.symbol,
+                request_payload=request.model_dump(
+                    mode="json",
+                    exclude_none=True,
+                ),
+            )
+        except Exception as exc:
+            log_model_chain_stage(
+                logger=LOGGER,
+                request_id=request_id,
+                skill_id="announcement_verification",
+                provider_id="qwen",
+                provider_registered=provider_registered,
+                credential_loaded=router_settings.qwen_ready,
+                request_started=False,
+                response_received=False,
+                response_status=None,
+                audit_task_created=False,
+                error_code="AUDIT_TASK_CREATE_FAILED",
+                sanitized_error=exc,
+            )
+            raise RuntimeError(
+                "AUDIT_TASK_CREATE_FAILED"
+            ) from exc
+
+        log_model_chain_stage(
+            logger=LOGGER,
+            request_id=request_id,
+            skill_id="announcement_verification",
+            provider_id="qwen",
+            provider_registered=provider_registered,
+            credential_loaded=router_settings.qwen_ready,
+            request_started=False,
+            response_received=False,
+            response_status=None,
+            audit_task_created=True,
         )
 
         provider = AuditedQwenProvider(
             task_id=task_id,
+            request_id=request_id,
             audit_store=self.audit_store,
         )
 
@@ -250,8 +320,8 @@ class AnnouncementVerificationPipelineService:
                 confidence=None,
                 success=False,
                 result_payload={
-                    "error_type": type(exc).__name__,
-                    "error_message": str(exc)[:2000],
+                    "error_type": provider_error_type(exc),
+                    "error_message": sanitize_error(exc),
                     "call_ids": provider.call_ids,
                 },
             )
@@ -260,5 +330,20 @@ class AnnouncementVerificationPipelineService:
                 task_id,
                 "failed",
             )
+            if not provider.call_ids:
+                log_model_chain_stage(
+                    logger=LOGGER,
+                    request_id=request_id,
+                    skill_id="announcement_verification",
+                    provider_id="qwen",
+                    provider_registered=provider_registered,
+                    credential_loaded=router_settings.qwen_ready,
+                    request_started=False,
+                    response_received=False,
+                    response_status=None,
+                    audit_task_created=True,
+                    error_code=provider_error_type(exc),
+                    sanitized_error=exc,
+                )
 
             raise

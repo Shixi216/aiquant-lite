@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+# ruff: noqa: E402
+
 import argparse
 import subprocess
 import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from config.utf8 import utf8_child_environment
 
 
 DETACHED_PROCESS = 0x00000008
@@ -65,6 +73,7 @@ def launch(args: argparse.Namespace) -> int:
                 stdin=subprocess.DEVNULL,
                 stdout=stdout_file,
                 stderr=stderr_file,
+                env=utf8_child_environment(),
                 close_fds=True,
                 creationflags=primary_flags,
             )
@@ -78,6 +87,7 @@ def launch(args: argparse.Namespace) -> int:
                 stdin=subprocess.DEVNULL,
                 stdout=stdout_file,
                 stderr=stderr_file,
+                env=utf8_child_environment(),
                 close_fds=True,
                 creationflags=fallback_flags,
             )

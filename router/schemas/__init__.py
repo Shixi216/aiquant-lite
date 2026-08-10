@@ -39,6 +39,10 @@ from router.schemas.news_pipeline import (
     NewsPipelineResponse as NewsPipelineResponse,
     NewsSourceBundle as NewsSourceBundle,
 )
+from router.schemas.research import (
+    ResearchFactorObservation as ResearchFactorObservation,
+    ResearchSynthesisOutput as ResearchSynthesisOutput,
+)
 
 __all__ = [
     "AnnouncementDocument",
@@ -55,6 +59,8 @@ __all__ = [
     "NewsPipelineResponse",
     "NewsProcessorOutput",
     "NewsSourceBundle",
+    "ResearchFactorObservation",
+    "ResearchSynthesisOutput",
     "RouterInvokeRequest",
     "RouterInvokeResponse",
     "BudgetTier",

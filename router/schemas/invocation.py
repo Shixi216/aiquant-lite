@@ -15,6 +15,10 @@ class RouterInvokeRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    request_id: str | None = Field(
+        default=None,
+        pattern=r"^req_[0-9a-f]{24}$",
+    )
     role: str = Field(min_length=1, max_length=100)
     symbol: str | None = Field(
         default=None,

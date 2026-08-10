@@ -6,6 +6,7 @@ from typing import Any, Mapping
 from uuid import uuid4
 
 from database.db import get_connection
+from router.integration.sanitization import sanitize_error
 
 
 def utc_now() -> datetime:
@@ -150,6 +151,10 @@ class AuditStore:
         error_type: str | None = None,
         error_message: str | None = None,
         call_id: str | None = None,
+        prompt_version: str | None = None,
+        input_hash: str | None = None,
+        retry_count: int = 0,
+        schema_validation: str | None = None,
     ) -> str:
         resolved_call_id = (
             call_id or f"call_{uuid4().hex}"
@@ -159,7 +164,7 @@ class AuditStore:
         )
 
         safe_error = (
-            error_message[:2000]
+            sanitize_error(error_message)[:2000]
             if error_message
             else None
         )
@@ -182,9 +187,17 @@ class AuditStore:
                     success,
                     error_type,
                     error_message,
+                    prompt_version,
+                    input_hash,
+                    retry_count,
+                    schema_validation,
                     created_at
                 )
                 VALUES (
+                    ?,
+                    ?,
+                    ?,
+                    ?,
                     ?,
                     ?,
                     ?,
@@ -213,6 +226,10 @@ class AuditStore:
                     success,
                     error_type,
                     safe_error,
+                    prompt_version,
+                    input_hash,
+                    retry_count,
+                    schema_validation,
                     utc_now(),
                 ],
             )

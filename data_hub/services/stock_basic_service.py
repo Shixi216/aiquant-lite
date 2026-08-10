@@ -8,7 +8,6 @@ from typing import Callable
 from zoneinfo import ZoneInfo
 
 import baostock as bs
-import tushare as ts
 
 from config.network import configure_network_policy
 from config.settings import settings
@@ -94,6 +93,7 @@ class StockBasicService:
         if not settings.tushare_token:
             raise RuntimeError("TUSHARE_TOKEN 未配置")
 
+        import tushare as ts  # 延迟加载
         client = ts.pro_api(settings.tushare_token.strip())
 
         frame = client.stock_basic(

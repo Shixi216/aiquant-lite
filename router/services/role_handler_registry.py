@@ -6,6 +6,9 @@ from router.services.news_processor_handler import (
     NewsProcessorHandler,
 )
 from router.services.risk_controller_handler import RiskControllerHandler
+from router.services.research_synthesizer_handler import (
+    ResearchSynthesizerHandler,
+)
 from router.services.role_handler import RoleHandler
 
 
@@ -14,6 +17,7 @@ HandlerFactory = Callable[[], RoleHandler]
 
 _HANDLER_FACTORIES: dict[str, HandlerFactory] = {
     "news_processor": NewsProcessorHandler,
+    "research_synthesizer": ResearchSynthesizerHandler,
     "risk_controller": RiskControllerHandler,
 }
 
