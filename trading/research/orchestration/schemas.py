@@ -144,8 +144,8 @@ class ShadowComposite(OrchestrationModel):
     factor_output: FactorOutput
     score: float = Field(ge=-1, le=1)
     confidence: float = Field(ge=0, le=1)
-    shadow_mode: Literal[True] = True
-    formal_strategy_weight: Literal[0.0] = 0.0
+    shadow_mode: bool = True
+    formal_strategy_weight: float = 0.0
     configured_weights: dict[str, float]
     effective_weights: dict[str, float]
     factor_contributions: dict[str, float]
@@ -167,8 +167,8 @@ class FormalResult(OrchestrationModel):
     final_action: Action
     hard_veto: bool
     formal_weights: dict[str, float]
-    shadow_used_for_action: Literal[False] = False
-    shadow_used_for_veto: Literal[False] = False
+    shadow_used_for_action: bool = False
+    shadow_used_for_veto: bool = False
 
 
 class ScreeningRequest(OrchestrationModel):
@@ -258,6 +258,9 @@ class DecisionShadowRequest(OrchestrationModel):
     technical_confidence: float = Field(ge=0, le=1)
     fundamental_score: float = Field(ge=-1, le=1)
     fundamental_confidence: float = Field(ge=0, le=1)
+    sentiment_score: float | None = Field(default=None, ge=-1, le=1)
+    sentiment_confidence: float | None = Field(default=None, ge=0, le=1)
+    custom_formal_weights: dict[str, float] | None = None
     hard_veto: bool = False
     persist_shadow: bool = True
 
