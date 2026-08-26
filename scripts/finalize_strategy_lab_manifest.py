@@ -21,6 +21,23 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _head_commit(root: Path) -> str:
+    git_dir = root / ".git"
+    head = (git_dir / "HEAD").read_text(encoding="utf-8").strip()
+    if not head.startswith("ref: "):
+        return head
+    reference = head.removeprefix("ref: ")
+    loose = git_dir / reference
+    if loose.exists():
+        return loose.read_text(encoding="utf-8").strip()
+    for line in (git_dir / "packed-refs").read_text(encoding="utf-8").splitlines():
+        if line and not line.startswith(("#", "^")):
+            commit, name = line.split(" ", 1)
+            if name == reference:
+                return commit
+    return "UNKNOWN"
+
+
 def finalize() -> dict[str, object]:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     suite = element_tree.parse(JUNIT).getroot().find("testsuite")
@@ -28,6 +45,7 @@ def finalize() -> dict[str, object]:
         raise RuntimeError("pytest testsuite is missing")
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
     manifest["finalized_at"] = datetime.now().astimezone().isoformat()
+    manifest["research_checkpoint_commit"] = _head_commit(ROOT)
     manifest["validation"] = {
         "full_pytest": {
             "status": "PASS",

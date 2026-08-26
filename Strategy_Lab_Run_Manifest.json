@@ -3124,7 +3124,7 @@
       "external_trading_api_calls": 0
     }
   },
-  "finalized_at": "2026-08-26T20:20:30.965003+08:00",
+  "finalized_at": "2026-08-26T20:21:30.727937+08:00",
   "recovery": {
     "manifest": "E:\\hermes-opc\\Sentiment_V3_Recovery_Manifest.json",
     "backup": "E:\\hermes-opc\\recovery\\sentiment_v3_corrupt_20260826_133407",
@@ -3164,5 +3164,6 @@
       "size_bytes": 2580,
       "sha256": "c297302bbe242c913059573dc17d78a70e6fd6f2ec3841ea7908fc443a69444a"
     }
-  }
+  },
+  "research_checkpoint_commit": "b9a05d68449ac26e50dce79d9274041676869881"
 }
