@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "zero_byte_sources": [],
+  "import_graph": {
+    "status": "PASS",
+    "module_count": 35,
+    "modules": [
+      "trading.research.sentiment.v3",
+      "trading.research.sentiment.v3.adj_factor_batch_backfill",
+      "trading.research.sentiment.v3.adj_factor_coverage",
+      "trading.research.sentiment.v3.calculators",
+      "trading.research.sentiment.v3.capital",
+      "trading.research.sentiment.v3.capital_sources",
+      "trading.research.sentiment.v3.collectors",
+      "trading.research.sentiment.v3.evaluation",
+      "trading.research.sentiment.v3.evaluation_runner",
+      "trading.research.sentiment.v3.feature_assembly",
+      "trading.research.sentiment.v3.feature_correlation",
+      "trading.research.sentiment.v3.feature_registry",
+      "trading.research.sentiment.v3.hashing",
+      "trading.research.sentiment.v3.historical_replay",
+      "trading.research.sentiment.v3.historical_replay_build",
+      "trading.research.sentiment.v3.label_repository",
+      "trading.research.sentiment.v3.labels",
+      "trading.research.sentiment.v3.live_shadow",
+      "trading.research.sentiment.v3.market_providers",
+      "trading.research.sentiment.v3.multiple_testing",
+      "trading.research.sentiment.v3.reaction",
+      "trading.research.sentiment.v3.repository",
+      "trading.research.sentiment.v3.research_shadow",
+      "trading.research.sentiment.v3.s3b2_runner",
+      "trading.research.sentiment.v3.schemas",
+      "trading.research.sentiment.v3.sector_stock",
+      "trading.research.sentiment.v3.shadow_drift_monitor",
+      "trading.research.sentiment.v3.text_models",
+      "trading.research.sentiment.v3.text_pipeline",
+      "trading.research.sentiment.v3.universe",
+      "trading.research.strategy_lab",
+      "trading.research.strategy_lab.dataset_builder",
+      "trading.research.strategy_lab.evaluation",
+      "trading.research.strategy_lab.reporting",
+      "trading.research.strategy_lab.runner"
+    ]
+  },
+  "replay_packet_count": 2625560,
+  "historical_label_count": 2625560,
+  "replay_pit_violations": 0,
+  "label_time_violations": 0,
+  "fundamental_pit_violations": 0,
+  "feature_registry_versions": [
+    [
+      "20f80a62ec073fbe44622cdb6fbcba1c9b02c4abf66823989bc2bff0d9a8b726",
+      2238764
+    ]
+  ],
+  "candidate_count": 202,
+  "research_only_candidate_count": 202,
+  "creates_trade_candidate_count": 0,
+  "safety_counts": {
+    "trading_orders": 0
+  },
+  "real_fills": 0,
+  "real_position_changes": 0,
+  "external_trading_api_calls": 0
+}

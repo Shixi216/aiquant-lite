@@ -1,0 +1,3168 @@
+{
+  "schema_version": 1,
+  "run_id": "strategy-lab-20260826T195835",
+  "generated_at": "2026-08-26T19:58:35.977578+08:00",
+  "git_branch": "codex/sentiment-v3-recovery-strategy-lab",
+  "git_commit": "9a08e7f58588789658acb4a4982b5a92ae5e6670",
+  "protocol": "E:\\hermes-opc\\strategy_selection_protocol.json",
+  "data_inventory": {
+    "databases": [
+      {
+        "exists": true,
+        "path": "database/hermes_opc.duckdb",
+        "relevant_tables": [
+          {
+            "columns": [
+              {
+                "name": "observation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "request_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "local_user_id",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "observed_at",
+                "position": 5,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 6,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "snapshot_id",
+                "position": 7,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "legacy_formal_score",
+                "position": 8,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_formal_score",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "legacy_action",
+                "position": 10,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_action",
+                "position": 11,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "legacy_veto",
+                "position": 12,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_veto",
+                "position": 13,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "veto_source",
+                "position": 14,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_reason",
+                "position": 15,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_input_complete",
+                "position": 16,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_data_status",
+                "position": 17,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_point_in_time_ok",
+                "position": 18,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "account_context_source",
+                "position": 19,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "account_context_is_research_assumption",
+                "position": 20,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "position_ratio_source",
+                "position": 21,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_target_position",
+                "position": 22,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_entry_zone_json",
+                "position": 23,
+                "type": "JSON"
+              },
+              {
+                "name": "canonical_preferred_zone_json",
+                "position": 24,
+                "type": "JSON"
+              },
+              {
+                "name": "canonical_stop_loss",
+                "position": 25,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_take_profit_zone_json",
+                "position": 26,
+                "type": "JSON"
+              },
+              {
+                "name": "canonical_execution_status",
+                "position": 27,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "action_diverged",
+                "position": 28,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "veto_diverged",
+                "position": 29,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "score_diverged",
+                "position": 30,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "score_source_mismatch",
+                "position": 31,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "divergence_reason",
+                "position": 32,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "research_only",
+                "position": 33,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "affects_legacy_output",
+                "position": 34,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_order",
+                "position": 35,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_decision_packet",
+                "position": 36,
+                "type": "BOOLEAN"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": "2026-08-13 02:24:03.536691+08:00",
+                "min": "2026-08-13 02:22:09.525512+08:00"
+              }
+            },
+            "has_symbol": true,
+            "row_count": 2,
+            "score_columns": [
+              "legacy_formal_score",
+              "canonical_formal_score"
+            ],
+            "table": "canonical_decision_shadow_audit"
+          },
+          {
+            "columns": [
+              {
+                "name": "observation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "request_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "local_user_id",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "external_user_id",
+                "position": 5,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "channel",
+                "position": 6,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "user_context_source",
+                "position": 7,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "user_authenticated",
+                "position": 8,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "observed_at",
+                "position": 9,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 10,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "snapshot_id",
+                "position": 11,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "legacy_score",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_score",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "legacy_action",
+                "position": 14,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_action",
+                "position": 15,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "legacy_veto",
+                "position": 16,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_veto",
+                "position": 17,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_pit",
+                "position": 18,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_data_status",
+                "position": 19,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "score_source_status",
+                "position": 20,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_input_status",
+                "position": 21,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_source",
+                "position": 22,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_reason",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_event_count",
+                "position": 24,
+                "type": "BIGINT"
+              },
+              {
+                "name": "account_context_source",
+                "position": 25,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_current_position",
+                "position": 26,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_target_position",
+                "position": 27,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_price_zones_json",
+                "position": 28,
+                "type": "JSON"
+              },
+              {
+                "name": "canonical_execution_status",
+                "position": 29,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "latency_legacy_ms",
+                "position": 30,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "latency_canonical_ms",
+                "position": 31,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "legacy_success",
+                "position": 32,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_success",
+                "position": 33,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "legacy_error",
+                "position": 34,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "canonical_error",
+                "position": 35,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "action_diverged",
+                "position": 36,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "veto_diverged",
+                "position": 37,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "score_diverged",
+                "position": 38,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "divergence_categories_json",
+                "position": 39,
+                "type": "JSON"
+              },
+              {
+                "name": "divergence_reason",
+                "position": 40,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "score_bucket",
+                "position": 41,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "research_only",
+                "position": 42,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "affects_legacy_output",
+                "position": 43,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_order",
+                "position": 44,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_trade",
+                "position": 45,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_trade_plan",
+                "position": 46,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_decision_packet",
+                "position": 47,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "record_source",
+                "position": 48,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "legacy_technical_score",
+                "position": 49,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "legacy_fundamental_score",
+                "position": 50,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_technical_score",
+                "position": 51,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "canonical_fundamental_score",
+                "position": 52,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "shadow_overhead_ms",
+                "position": 53,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "pit_diverged",
+                "position": 54,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "canonical_error_type",
+                "position": 55,
+                "type": "VARCHAR"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": "2026-08-26 14:16:57.262070+08:00",
+                "min": "2025-01-20 15:00:00+08:00"
+              }
+            },
+            "has_symbol": true,
+            "row_count": 124,
+            "score_columns": [
+              "legacy_technical_score",
+              "legacy_fundamental_score",
+              "canonical_technical_score",
+              "canonical_fundamental_score"
+            ],
+            "table": "canonical_shadow_observations_v2"
+          },
+          {
+            "columns": [
+              {
+                "name": "observation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "run_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "signal_id",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "signal_type",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "signal_trade_date",
+                "position": 5,
+                "type": "DATE"
+              },
+              {
+                "name": "signal_generated_at",
+                "position": 6,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 7,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "actionable_from_trade_date",
+                "position": 8,
+                "type": "DATE"
+              },
+              {
+                "name": "symbol",
+                "position": 9,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "rank",
+                "position": 10,
+                "type": "BIGINT"
+              },
+              {
+                "name": "scanner_score",
+                "position": 11,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "technical_score",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "fundamental_score",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "formal_score",
+                "position": 14,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "formal_action",
+                "position": 15,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "shadow_score",
+                "position": 16,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "composite_confidence",
+                "position": 17,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "factor_coverage",
+                "position": 18,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "available_factors_json",
+                "position": 19,
+                "type": "JSON"
+              },
+              {
+                "name": "missing_factors_json",
+                "position": 20,
+                "type": "JSON"
+              },
+              {
+                "name": "anomaly_types_json",
+                "position": 21,
+                "type": "JSON"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 22,
+                "type": "JSON"
+              },
+              {
+                "name": "veto_status",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "query_plan_hash",
+                "position": 24,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "signal_snapshot_hash",
+                "position": 25,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "source_run_id",
+                "position": 26,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "stale_snapshot",
+                "position": 27,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "point_in_time_valid",
+                "position": 28,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "payload_json",
+                "position": 29,
+                "type": "JSON"
+              },
+              {
+                "name": "created_at",
+                "position": 30,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff",
+              "created_at"
+            ],
+            "date_ranges": {
+              "created_at": {
+                "max": "2026-07-30 04:06:47.468220+08:00",
+                "min": "2026-06-01 16:00:00+08:00"
+              },
+              "data_cutoff": {
+                "max": "2026-07-30 04:06:47.468220+08:00",
+                "min": "2026-06-01 16:00:00+08:00"
+              }
+            },
+            "has_symbol": true,
+            "row_count": 4120,
+            "score_columns": [
+              "technical_score",
+              "fundamental_score",
+              "formal_score"
+            ],
+            "table": "experiment_observations"
+          },
+          {
+            "columns": [
+              {
+                "name": "evaluation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "analysis_time",
+                "position": 3,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "formal_score",
+                "position": 4,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "formal_action",
+                "position": 5,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "shadow_score",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "composite_confidence",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "factor_coverage_json",
+                "position": 8,
+                "type": "JSON"
+              },
+              {
+                "name": "effective_weights_json",
+                "position": 9,
+                "type": "JSON"
+              },
+              {
+                "name": "return_1d",
+                "position": 10,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_3d",
+                "position": 11,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_5d",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_20d",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "maximum_upside",
+                "position": 14,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "maximum_drawdown",
+                "position": 15,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "risk_vetoed",
+                "position": 16,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "data_complete",
+                "position": 17,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "input_snapshot_hash",
+                "position": 18,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "evaluated_at",
+                "position": 19,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "generated_at",
+                "position": 20,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              }
+            ],
+            "date_columns": [],
+            "date_ranges": {},
+            "has_symbol": true,
+            "row_count": 1,
+            "score_columns": [
+              "formal_score"
+            ],
+            "table": "orchestration_evaluations"
+          },
+          {
+            "columns": [
+              {
+                "name": "observation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "observed_at",
+                "position": 3,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 4,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "source_bar_id",
+                "position": 5,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "source_close",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "bar_history_count",
+                "position": 7,
+                "type": "BIGINT"
+              },
+              {
+                "name": "feature_status",
+                "position": 8,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "original_technical_score",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "shadow_technical_score",
+                "position": 10,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "ma20_ma60_expansion",
+                "position": 11,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "ma60_slope_5",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "expansion_penalty",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "ma60_slope_penalty",
+                "position": 14,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "total_penalty",
+                "position": 15,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "a_formal_score",
+                "position": 16,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "b_shadow_formal_score",
+                "position": 17,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "a_action",
+                "position": 18,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "b_shadow_action",
+                "position": 19,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "action_diverged",
+                "position": 20,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "hard_veto",
+                "position": 21,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "official_result_hash",
+                "position": 22,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "algorithm_version",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "calibration_json",
+                "position": 24,
+                "type": "JSON"
+              },
+              {
+                "name": "created_at",
+                "position": 25,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "research_only",
+                "position": 26,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "affects_production",
+                "position": 27,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "creates_trade_records",
+                "position": 28,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "shadow_version",
+                "position": 29,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "parameter_hash",
+                "position": 30,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "shadow_code_version",
+                "position": 31,
+                "type": "VARCHAR"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff",
+              "created_at"
+            ],
+            "date_ranges": {
+              "created_at": {
+                "max": null,
+                "min": null
+              },
+              "data_cutoff": {
+                "max": null,
+                "min": null
+              }
+            },
+            "has_symbol": true,
+            "row_count": 0,
+            "score_columns": [
+              "original_technical_score",
+              "shadow_technical_score",
+              "a_formal_score",
+              "b_shadow_formal_score"
+            ],
+            "table": "overheat_shadow_observations"
+          },
+          {
+            "columns": [
+              {
+                "name": "policy_analysis_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_cluster_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_category",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_type",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "direction",
+                "position": 5,
+                "type": "BIGINT"
+              },
+              {
+                "name": "intensity",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "model_confidence",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "confidence",
+                "position": 8,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "fact_type",
+                "position": 9,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "source_level",
+                "position": 10,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "source_authority_weight",
+                "position": 11,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "freshness_weight",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "implementation_status",
+                "position": 13,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "implementation_confidence",
+                "position": 14,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "implementation_weight",
+                "position": 15,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "verification_status",
+                "position": 16,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "verification_weight",
+                "position": 17,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "relevance_weight",
+                "position": 18,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "policy_news_score",
+                "position": 19,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "impact_horizon",
+                "position": 20,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "text_completeness",
+                "position": 21,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "affected_symbols_json",
+                "position": 22,
+                "type": "JSON"
+              },
+              {
+                "name": "affected_sectors_json",
+                "position": 23,
+                "type": "JSON"
+              },
+              {
+                "name": "symbol_relevance_json",
+                "position": 24,
+                "type": "JSON"
+              },
+              {
+                "name": "sector_relevance_json",
+                "position": 25,
+                "type": "JSON"
+              },
+              {
+                "name": "summary",
+                "position": 26,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "key_facts_json",
+                "position": 27,
+                "type": "JSON"
+              },
+              {
+                "name": "amounts_json",
+                "position": 28,
+                "type": "JSON"
+              },
+              {
+                "name": "dates_json",
+                "position": 29,
+                "type": "JSON"
+              },
+              {
+                "name": "entities_json",
+                "position": 30,
+                "type": "JSON"
+              },
+              {
+                "name": "conditions_json",
+                "position": 31,
+                "type": "JSON"
+              },
+              {
+                "name": "shared_sentiment_analysis_ids_json",
+                "position": 32,
+                "type": "JSON"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 33,
+                "type": "JSON"
+              },
+              {
+                "name": "model_call_ids_json",
+                "position": 34,
+                "type": "JSON"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 35,
+                "type": "JSON"
+              },
+              {
+                "name": "extractor_version",
+                "position": 36,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "scorer_version",
+                "position": 37,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "prompt_version",
+                "position": 38,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "mapping_version",
+                "position": 39,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "input_snapshot_hash",
+                "position": 40,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_time",
+                "position": 41,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "publication_time",
+                "position": 42,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_available_time",
+                "position": 43,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "fetched_at",
+                "position": 44,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "implementation_time",
+                "position": 45,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "termination_time",
+                "position": 46,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 47,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "generated_at",
+                "position": 48,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "shadow_mode",
+                "position": 49,
+                "type": "BOOLEAN"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": "2026-07-16 21:30:06.462631+08:00",
+                "min": "2026-07-16 21:00:26.445734+08:00"
+              }
+            },
+            "has_symbol": false,
+            "row_count": 4,
+            "score_columns": [
+              "shared_sentiment_analysis_ids_json"
+            ],
+            "table": "policy_news_event_analyses"
+          },
+          {
+            "columns": [
+              {
+                "name": "snapshot_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "sector",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "analysis_mode",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 4,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "event_count",
+                "position": 5,
+                "type": "BIGINT"
+              },
+              {
+                "name": "positive_event_count",
+                "position": 6,
+                "type": "BIGINT"
+              },
+              {
+                "name": "negative_event_count",
+                "position": 7,
+                "type": "BIGINT"
+              },
+              {
+                "name": "neutral_event_count",
+                "position": 8,
+                "type": "BIGINT"
+              },
+              {
+                "name": "weighted_policy_score",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "high_authority_event_count",
+                "position": 10,
+                "type": "BIGINT"
+              },
+              {
+                "name": "implemented_event_count",
+                "position": 11,
+                "type": "BIGINT"
+              },
+              {
+                "name": "conflict_event_count",
+                "position": 12,
+                "type": "BIGINT"
+              },
+              {
+                "name": "confidence",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "horizon_scores_json",
+                "position": 14,
+                "type": "JSON"
+              },
+              {
+                "name": "top_positive_event_ids_json",
+                "position": 15,
+                "type": "JSON"
+              },
+              {
+                "name": "top_negative_event_ids_json",
+                "position": 16,
+                "type": "JSON"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 17,
+                "type": "JSON"
+              },
+              {
+                "name": "model_call_ids_json",
+                "position": 18,
+                "type": "JSON"
+              },
+              {
+                "name": "shared_sentiment_event_ids_json",
+                "position": 19,
+                "type": "JSON"
+              },
+              {
+                "name": "missing_fields_json",
+                "position": 20,
+                "type": "JSON"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 21,
+                "type": "JSON"
+              },
+              {
+                "name": "input_snapshot_hash",
+                "position": 22,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "algorithm_version",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "generated_at",
+                "position": 24,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "shadow_mode",
+                "position": 25,
+                "type": "BOOLEAN"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": null,
+                "min": null
+              }
+            },
+            "has_symbol": false,
+            "row_count": 0,
+            "score_columns": [
+              "shared_sentiment_event_ids_json"
+            ],
+            "table": "policy_news_sector_snapshots"
+          },
+          {
+            "columns": [
+              {
+                "name": "snapshot_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "analysis_mode",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 4,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "event_count",
+                "position": 5,
+                "type": "BIGINT"
+              },
+              {
+                "name": "positive_event_count",
+                "position": 6,
+                "type": "BIGINT"
+              },
+              {
+                "name": "negative_event_count",
+                "position": 7,
+                "type": "BIGINT"
+              },
+              {
+                "name": "neutral_event_count",
+                "position": 8,
+                "type": "BIGINT"
+              },
+              {
+                "name": "weighted_policy_score",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "high_authority_event_count",
+                "position": 10,
+                "type": "BIGINT"
+              },
+              {
+                "name": "implemented_event_count",
+                "position": 11,
+                "type": "BIGINT"
+              },
+              {
+                "name": "conflict_event_count",
+                "position": 12,
+                "type": "BIGINT"
+              },
+              {
+                "name": "confidence",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "horizon_scores_json",
+                "position": 14,
+                "type": "JSON"
+              },
+              {
+                "name": "top_positive_event_ids_json",
+                "position": 15,
+                "type": "JSON"
+              },
+              {
+                "name": "top_negative_event_ids_json",
+                "position": 16,
+                "type": "JSON"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 17,
+                "type": "JSON"
+              },
+              {
+                "name": "model_call_ids_json",
+                "position": 18,
+                "type": "JSON"
+              },
+              {
+                "name": "shared_sentiment_event_ids_json",
+                "position": 19,
+                "type": "JSON"
+              },
+              {
+                "name": "missing_fields_json",
+                "position": 20,
+                "type": "JSON"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 21,
+                "type": "JSON"
+              },
+              {
+                "name": "input_snapshot_hash",
+                "position": 22,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "algorithm_version",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "generated_at",
+                "position": 24,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "shadow_mode",
+                "position": 25,
+                "type": "BOOLEAN"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": "2026-07-22 12:16:11.777101+08:00",
+                "min": "2026-07-22 12:16:11.777101+08:00"
+              }
+            },
+            "has_symbol": true,
+            "row_count": 1,
+            "score_columns": [
+              "shared_sentiment_event_ids_json"
+            ],
+            "table": "policy_news_symbol_snapshots"
+          },
+          {
+            "columns": [
+              {
+                "name": "run_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "rank",
+                "position": 2,
+                "type": "BIGINT"
+              },
+              {
+                "name": "symbol",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "scanner_score",
+                "position": 4,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "technical_score",
+                "position": 5,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "capital_flow_score",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "shadow_composite_score",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "composite_confidence",
+                "position": 8,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "factor_coverage",
+                "position": 9,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "anomaly_types_json",
+                "position": 10,
+                "type": "JSON"
+              },
+              {
+                "name": "reason_codes_json",
+                "position": 11,
+                "type": "JSON"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 12,
+                "type": "JSON"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 13,
+                "type": "JSON"
+              },
+              {
+                "name": "payload_json",
+                "position": 14,
+                "type": "JSON"
+              },
+              {
+                "name": "generated_at",
+                "position": 15,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              }
+            ],
+            "date_columns": [],
+            "date_ranges": {},
+            "has_symbol": true,
+            "row_count": 20,
+            "score_columns": [
+              "technical_score"
+            ],
+            "table": "scanner_candidates"
+          },
+          {
+            "columns": [
+              {
+                "name": "backfill_run_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_cluster_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "status",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "sentiment_analysis_id",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "error_type",
+                "position": 5,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "error_message",
+                "position": 6,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "processed_at",
+                "position": 7,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              }
+            ],
+            "date_columns": [],
+            "date_ranges": {},
+            "has_symbol": false,
+            "row_count": 180,
+            "score_columns": [
+              "sentiment_analysis_id"
+            ],
+            "table": "sentiment_backfill_items"
+          },
+          {
+            "columns": [
+              {
+                "name": "evaluation_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "snapshot_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_time",
+                "position": 4,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "alert_or_snapshot_time",
+                "position": 5,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 6,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "sentiment_score",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "confidence",
+                "position": 8,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_1d",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_3d",
+                "position": 10,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "return_5d",
+                "position": 11,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "max_rise",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "max_drawdown",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "was_suspended",
+                "position": 14,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "was_limit_up",
+                "position": 15,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "was_limit_down",
+                "position": 16,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "data_complete",
+                "position": 17,
+                "type": "BOOLEAN"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 18,
+                "type": "JSON"
+              },
+              {
+                "name": "missing_fields_json",
+                "position": 19,
+                "type": "JSON"
+              },
+              {
+                "name": "generated_at",
+                "position": 20,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "algorithm_version",
+                "position": 21,
+                "type": "VARCHAR"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": null,
+                "min": null
+              }
+            },
+            "has_symbol": true,
+            "row_count": 0,
+            "score_columns": [
+              "sentiment_score"
+            ],
+            "table": "sentiment_evaluations"
+          },
+          {
+            "columns": [
+              {
+                "name": "sentiment_analysis_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_cluster_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "event_type",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "direction",
+                "position": 4,
+                "type": "BIGINT"
+              },
+              {
+                "name": "intensity",
+                "position": 5,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "model_confidence",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "confidence",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "source_level",
+                "position": 8,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "source_quality_weight",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "freshness_weight",
+                "position": 10,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "verification_status",
+                "position": 11,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "verification_weight",
+                "position": 12,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "relevance_weight",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "relevance_by_symbol_json",
+                "position": 14,
+                "type": "JSON"
+              },
+              {
+                "name": "event_score",
+                "position": 15,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "impact_horizon",
+                "position": 16,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "fact_type",
+                "position": 17,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "affected_symbols_json",
+                "position": 18,
+                "type": "JSON"
+              },
+              {
+                "name": "affected_sectors_json",
+                "position": 19,
+                "type": "JSON"
+              },
+              {
+                "name": "summary",
+                "position": 20,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "risk_flags_json",
+                "position": 21,
+                "type": "JSON"
+              },
+              {
+                "name": "evidence_ids_json",
+                "position": 22,
+                "type": "JSON"
+              },
+              {
+                "name": "model_call_ids_json",
+                "position": 23,
+                "type": "JSON"
+              },
+              {
+                "name": "extractor_version",
+                "position": 24,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "algorithm_version",
+                "position": 25,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "prompt_version",
+                "position": 26,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "input_snapshot_hash",
+                "position": 27,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "propagation_heat",
+                "position": 28,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 29,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "generated_at",
+                "position": 30,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "shadow_mode",
+                "position": 31,
+                "type": "BOOLEAN"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff"
+            ],
+            "date_ranges": {
+              "data_cutoff": {
+                "max": "2026-07-22 12:16:11.777101+08:00",
+                "min": "2026-07-16 21:00:26.431769+08:00"
+              }
+            },
+            "has_symbol": false,
+            "row_count": 90,
+            "score_columns": [
+              "sentiment_analysis_id"
+            ],
+            "table": "sentiment_event_analyses"
+          },
+          {
+            "columns": [
+              {
+                "name": "plan_id",
+                "position": 1,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "local_user_id",
+                "position": 2,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "symbol",
+                "position": 3,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "stock_name",
+                "position": 4,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "action",
+                "position": 5,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "current_position",
+                "position": 6,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "recommended_position",
+                "position": 7,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "position_change",
+                "position": 8,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "current_price",
+                "position": 9,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "entry_zone_json",
+                "position": 10,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "add_zone_json",
+                "position": 11,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "reduce_zone_json",
+                "position": 12,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "stop_loss_price",
+                "position": 13,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "stop_loss_condition",
+                "position": 14,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "take_profit_zone_json",
+                "position": 15,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "invalidation_condition",
+                "position": 16,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "expected_holding_period",
+                "position": 17,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "risk_reward_ratio",
+                "position": 18,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "formal_score",
+                "position": 19,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "enhanced_score",
+                "position": 20,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "confidence",
+                "position": 21,
+                "type": "DOUBLE"
+              },
+              {
+                "name": "data_status",
+                "position": 22,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "snapshot_id",
+                "position": 23,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "data_cutoff",
+                "position": 24,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "strategy_version",
+                "position": 25,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "veto_status",
+                "position": 26,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "supporting_evidence_json",
+                "position": 27,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "major_risks_json",
+                "position": 28,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "status",
+                "position": 29,
+                "type": "VARCHAR"
+              },
+              {
+                "name": "created_at",
+                "position": 30,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              },
+              {
+                "name": "expires_at",
+                "position": 31,
+                "type": "TIMESTAMP WITH TIME ZONE"
+              }
+            ],
+            "date_columns": [
+              "data_cutoff",
+              "created_at"
+            ],
+            "date_ranges": {
+              "created_at": {
+                "max": "2026-08-02 23:57:48.623607+08:00",
+                "min": "2026-08-02 23:54:44.815914+08:00"
+              },
+              "data_cutoff": {
+                "max": "2026-08-02 23:57:48.559728+08:00",
+                "min": "2026-08-02 23:54:44.753953+08:00"
+              }
+            },
+            "has_symbol": true,
+            "row_count": 2,
+            "score_columns": [
+              "formal_score"
+            ],
+            "table": "trade_plans"
+          }
+        ],
+        "table_count": 113
+      },
+      {
+        "exists": true,
+        "path": "database/sentiment_v3_replay.duckdb",
+        "relevant_tables": [],
+        "replay_feature_packets": {
+          "columns": [
+            {
+              "name": "packet_id",
+              "position": 1,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "symbol",
+              "position": 2,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "trade_date",
+              "position": 3,
+              "type": "DATE"
+            },
+            {
+              "name": "feature_trade_date",
+              "position": 4,
+              "type": "DATE"
+            },
+            {
+              "name": "decision_cutoff",
+              "position": 5,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "cutoff_policy_version",
+              "position": 6,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "record_source",
+              "position": 7,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "registry_version",
+              "position": 8,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "registry_content_hash",
+              "position": 9,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "research_set_hash",
+              "position": 10,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "universe_id",
+              "position": 11,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "universe_version",
+              "position": 12,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "market_snapshot_id",
+              "position": 13,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stock_snapshot_id",
+              "position": 14,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "margin_snapshot_id",
+              "position": 15,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "dragon_tiger_snapshot_id",
+              "position": 16,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "market_available_time",
+              "position": 17,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "stock_available_time",
+              "position": 18,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "margin_available_time",
+              "position": 19,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "dragon_tiger_available_time",
+              "position": 20,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "quality_status",
+              "position": 21,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "quality_flags_json",
+              "position": 22,
+              "type": "JSON"
+            },
+            {
+              "name": "feature_lineage_hash",
+              "position": 23,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "assembly_algorithm_version",
+              "position": 24,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "content_hash",
+              "position": 25,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "capital__dragon_tiger__has_dragon_tiger",
+              "position": 26,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "capital__dragon_tiger__institution_net_amount",
+              "position": 27,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__dragon_tiger__institution_seat_count",
+              "position": 28,
+              "type": "BIGINT"
+            },
+            {
+              "name": "capital__dragon_tiger__net_amount",
+              "position": 29,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_balance",
+              "position": 30,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_balance_change",
+              "position": 31,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_balance_change_pct",
+              "position": 32,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_buy",
+              "position": 33,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_net_buy",
+              "position": 34,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__margin__margin_repay",
+              "position": 35,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "capital__stock__turnover",
+              "position": 36,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__advance_decline_ratio",
+              "position": 37,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__advance_ratio",
+              "position": 38,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__advancers",
+              "position": 39,
+              "type": "BIGINT"
+            },
+            {
+              "name": "market__breadth_strength",
+              "position": 40,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__decline_ratio",
+              "position": 41,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__decliners",
+              "position": 42,
+              "type": "BIGINT"
+            },
+            {
+              "name": "market__market_turnover",
+              "position": 43,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__market_turnover_change",
+              "position": 44,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "market__unchanged",
+              "position": 45,
+              "type": "BIGINT"
+            },
+            {
+              "name": "stock__amplitude",
+              "position": 46,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__close_location_value",
+              "position": 47,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__gap_and_fade",
+              "position": 48,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__gap_and_follow_through",
+              "position": 49,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__high_to_close_drawdown",
+              "position": 50,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__intraday_return_pct",
+              "position": 51,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__is_broken_board",
+              "position": 52,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "stock__is_limit_down",
+              "position": 53,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "stock__is_limit_up",
+              "position": 54,
+              "type": "BOOLEAN"
+            },
+            {
+              "name": "stock__low_to_close_recovery",
+              "position": 55,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__open_gap_pct",
+              "position": 56,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__relative_market_return",
+              "position": 57,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__relative_market_volume",
+              "position": 58,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__return_pct",
+              "position": 59,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__turnover_change",
+              "position": 60,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__turnover_rate",
+              "position": 61,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__volume_change",
+              "position": 62,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stock__volume_ratio",
+              "position": 63,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "created_at",
+              "position": 64,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            }
+          ],
+          "row_count": 2625560
+        },
+        "replay_labels_wide": {
+          "columns": [
+            {
+              "name": "packet_id",
+              "position": 1,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "symbol",
+              "position": 2,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "trade_date",
+              "position": 3,
+              "type": "DATE"
+            },
+            {
+              "name": "decision_cutoff",
+              "position": 4,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            },
+            {
+              "name": "record_source",
+              "position": 5,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "label_schema_version",
+              "position": 6,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "label_algorithm_version",
+              "position": 7,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "return_algorithm_version",
+              "position": 8,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "mae_mfe_algorithm_version",
+              "position": 9,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "price_adjustment_method",
+              "position": 10,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "label_spec_set_hash",
+              "position": 11,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_1d__entry_date",
+              "position": 12,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_1d__exit_date",
+              "position": 13,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_1d__raw_return",
+              "position": 14,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_1d__adjusted_return",
+              "position": 15,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_1d__mae",
+              "position": 16,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_1d__mfe",
+              "position": 17,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_1d__status",
+              "position": 18,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_1d__missing_reason",
+              "position": 19,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_1d__spec_hash",
+              "position": 20,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_1d__entry_date",
+              "position": 21,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_1d__exit_date",
+              "position": 22,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_1d__raw_return",
+              "position": 23,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_1d__adjusted_return",
+              "position": 24,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_1d__mae",
+              "position": 25,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_1d__mfe",
+              "position": 26,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_1d__status",
+              "position": 27,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_1d__missing_reason",
+              "position": 28,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_1d__spec_hash",
+              "position": 29,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_3d__entry_date",
+              "position": 30,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_3d__exit_date",
+              "position": 31,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_3d__raw_return",
+              "position": 32,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_3d__adjusted_return",
+              "position": 33,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_3d__mae",
+              "position": 34,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_3d__mfe",
+              "position": 35,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_3d__status",
+              "position": 36,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_3d__missing_reason",
+              "position": 37,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_3d__spec_hash",
+              "position": 38,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_3d__entry_date",
+              "position": 39,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_3d__exit_date",
+              "position": 40,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_3d__raw_return",
+              "position": 41,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_3d__adjusted_return",
+              "position": 42,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_3d__mae",
+              "position": 43,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_3d__mfe",
+              "position": 44,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_3d__status",
+              "position": 45,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_3d__missing_reason",
+              "position": 46,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_3d__spec_hash",
+              "position": 47,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_5d__entry_date",
+              "position": 48,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_5d__exit_date",
+              "position": 49,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_5d__raw_return",
+              "position": 50,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_5d__adjusted_return",
+              "position": 51,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_5d__mae",
+              "position": 52,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_5d__mfe",
+              "position": 53,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_5d__status",
+              "position": 54,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_5d__missing_reason",
+              "position": 55,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_5d__spec_hash",
+              "position": 56,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_5d__entry_date",
+              "position": 57,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_5d__exit_date",
+              "position": 58,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_5d__raw_return",
+              "position": 59,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_5d__adjusted_return",
+              "position": 60,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_5d__mae",
+              "position": 61,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_5d__mfe",
+              "position": 62,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_5d__status",
+              "position": 63,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_5d__missing_reason",
+              "position": 64,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_5d__spec_hash",
+              "position": 65,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_10d__entry_date",
+              "position": 66,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_10d__exit_date",
+              "position": 67,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_10d__raw_return",
+              "position": 68,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_10d__adjusted_return",
+              "position": 69,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_10d__mae",
+              "position": 70,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_10d__mfe",
+              "position": 71,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_10d__status",
+              "position": 72,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_10d__missing_reason",
+              "position": 73,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_10d__spec_hash",
+              "position": 74,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_10d__entry_date",
+              "position": 75,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_10d__exit_date",
+              "position": 76,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_10d__raw_return",
+              "position": 77,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_10d__adjusted_return",
+              "position": 78,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_10d__mae",
+              "position": 79,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_10d__mfe",
+              "position": 80,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_10d__status",
+              "position": 81,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_10d__missing_reason",
+              "position": 82,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_10d__spec_hash",
+              "position": 83,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_20d__entry_date",
+              "position": 84,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_20d__exit_date",
+              "position": 85,
+              "type": "DATE"
+            },
+            {
+              "name": "stat_20d__raw_return",
+              "position": 86,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_20d__adjusted_return",
+              "position": 87,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_20d__mae",
+              "position": 88,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_20d__mfe",
+              "position": 89,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "stat_20d__status",
+              "position": 90,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_20d__missing_reason",
+              "position": 91,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "stat_20d__spec_hash",
+              "position": 92,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_20d__entry_date",
+              "position": 93,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_20d__exit_date",
+              "position": 94,
+              "type": "DATE"
+            },
+            {
+              "name": "exec_20d__raw_return",
+              "position": 95,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_20d__adjusted_return",
+              "position": 96,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_20d__mae",
+              "position": 97,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_20d__mfe",
+              "position": 98,
+              "type": "DOUBLE"
+            },
+            {
+              "name": "exec_20d__status",
+              "position": 99,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_20d__missing_reason",
+              "position": 100,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "exec_20d__spec_hash",
+              "position": 101,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "content_hash",
+              "position": 102,
+              "type": "VARCHAR"
+            },
+            {
+              "name": "created_at",
+              "position": 103,
+              "type": "TIMESTAMP WITH TIME ZONE"
+            }
+          ],
+          "row_count": 2625560
+        },
+        "table_count": 23
+      }
+    ],
+    "schema_version": 1
+  },
+  "dataset_metadata": {
+    "dataset_version": "strategy-lab-pit-dataset-v1",
+    "built_at": "2026-08-26T14:41:22.308477+08:00",
+    "research_only": true,
+    "creates_trade": false,
+    "source_hashes": {
+      "main_db_sha256": "a1098f6f5841803ab365909e5aff915e2f96234a64403e994b152605ecae864d",
+      "protocol_sha256": "fd4f238697e0bd8c419eab5cb9be7b7f487d7c6574aac46172dbd4949ead672a",
+      "replay_db_sha256": "044238d03e5e806d79d8cb4e033edaecfd505e613d7eb96bd578bbebd6e66c22"
+    },
+    "safety_before": {
+      "trading_orders": 0
+    },
+    "registry_content_hash": "20f80a62ec073fbe44622cdb6fbcba1c9b02c4abf66823989bc2bff0d9a8b726",
+    "packet_count": 2238764
+  },
+  "candidate_count": 202,
+  "formal_observations": 170982,
+  "formal_dates": 348,
+  "safety_before": {
+    "trading_orders": 0
+  },
+  "safety_after": {
+    "trading_orders": 0
+  },
+  "real_orders": 0,
+  "real_fills": 0,
+  "real_position_changes": 0,
+  "external_trading_api_calls": 0,
+  "git_push_performed": false,
+  "research_only": true,
+  "creates_trade": false,
+  "validation": {
+    "full_pytest": {
+      "status": "PASS",
+      "tests": 1676,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1009.464,
+      "junit": "E:\\hermes-opc\\recovery\\strategy_lab_final_pytest.xml"
+    },
+    "ruff_recovery_and_strategy_lab_scope": {
+      "status": "PASS",
+      "scope": [
+        "trading/research/sentiment/v3",
+        "trading/research/strategy_lab",
+        "Strategy Lab scripts and tests"
+      ]
+    },
+    "ruff_full_repository": {
+      "status": "BLOCKED_BY_PREEXISTING_WORKTREE_VIOLATIONS",
+      "all_worktree_violations": 90,
+      "git_tracked_violations": 29,
+      "note": "Unrelated existing and untracked user files were preserved; no lint result was hidden or reclassified as pass."
+    },
+    "check_no_live_execution": {
+      "status": "PASS",
+      "checks": 10
+    },
+    "pit_and_import_audit": {
+      "status": "PASS",
+      "zero_byte_sources": [],
+      "import_graph": {
+        "status": "PASS",
+        "module_count": 35,
+        "modules": [
+          "trading.research.sentiment.v3",
+          "trading.research.sentiment.v3.adj_factor_batch_backfill",
+          "trading.research.sentiment.v3.adj_factor_coverage",
+          "trading.research.sentiment.v3.calculators",
+          "trading.research.sentiment.v3.capital",
+          "trading.research.sentiment.v3.capital_sources",
+          "trading.research.sentiment.v3.collectors",
+          "trading.research.sentiment.v3.evaluation",
+          "trading.research.sentiment.v3.evaluation_runner",
+          "trading.research.sentiment.v3.feature_assembly",
+          "trading.research.sentiment.v3.feature_correlation",
+          "trading.research.sentiment.v3.feature_registry",
+          "trading.research.sentiment.v3.hashing",
+          "trading.research.sentiment.v3.historical_replay",
+          "trading.research.sentiment.v3.historical_replay_build",
+          "trading.research.sentiment.v3.label_repository",
+          "trading.research.sentiment.v3.labels",
+          "trading.research.sentiment.v3.live_shadow",
+          "trading.research.sentiment.v3.market_providers",
+          "trading.research.sentiment.v3.multiple_testing",
+          "trading.research.sentiment.v3.reaction",
+          "trading.research.sentiment.v3.repository",
+          "trading.research.sentiment.v3.research_shadow",
+          "trading.research.sentiment.v3.s3b2_runner",
+          "trading.research.sentiment.v3.schemas",
+          "trading.research.sentiment.v3.sector_stock",
+          "trading.research.sentiment.v3.shadow_drift_monitor",
+          "trading.research.sentiment.v3.text_models",
+          "trading.research.sentiment.v3.text_pipeline",
+          "trading.research.sentiment.v3.universe",
+          "trading.research.strategy_lab",
+          "trading.research.strategy_lab.dataset_builder",
+          "trading.research.strategy_lab.evaluation",
+          "trading.research.strategy_lab.reporting",
+          "trading.research.strategy_lab.runner"
+        ]
+      },
+      "replay_packet_count": 2625560,
+      "historical_label_count": 2625560,
+      "replay_pit_violations": 0,
+      "label_time_violations": 0,
+      "fundamental_pit_violations": 0,
+      "feature_registry_versions": [
+        [
+          "20f80a62ec073fbe44622cdb6fbcba1c9b02c4abf66823989bc2bff0d9a8b726",
+          2238764
+        ]
+      ],
+      "candidate_count": 202,
+      "research_only_candidate_count": 202,
+      "creates_trade_candidate_count": 0,
+      "safety_counts": {
+        "trading_orders": 0
+      },
+      "real_fills": 0,
+      "real_position_changes": 0,
+      "external_trading_api_calls": 0
+    }
+  },
+  "finalized_at": "2026-08-26T20:20:30.965003+08:00",
+  "recovery": {
+    "manifest": "E:\\hermes-opc\\Sentiment_V3_Recovery_Manifest.json",
+    "backup": "E:\\hermes-opc\\recovery\\sentiment_v3_corrupt_20260826_133407",
+    "recovered_source_files": 30,
+    "reconstructed_source_files": 0,
+    "zero_byte_source_files": 0,
+    "imported_modules": 35
+  },
+  "artifacts": {
+    "Strategy_Lab_Final_Report.md": {
+      "path": "E:\\hermes-opc\\Strategy_Lab_Final_Report.md",
+      "size_bytes": 4973,
+      "sha256": "ed823ba36aaa584b5a0bfde4b74cb6ead357b12ecb62e0aef4b0d6b59542848c"
+    },
+    "Strategy_Lab_Results.duckdb": {
+      "path": "E:\\hermes-opc\\Strategy_Lab_Results.duckdb",
+      "size_bytes": 1442328576,
+      "sha256": "82febb6f11a47f984a8fba6ff893009ae7dda2ab305d11c7fb70a19aa18d76ba"
+    },
+    "Strategy_Lab_Candidates.json": {
+      "path": "E:\\hermes-opc\\Strategy_Lab_Candidates.json",
+      "size_bytes": 57565,
+      "sha256": "17397f5c94f589ebcd64bc1ed31876e07c1268dd8a93af2129d8159416a5839d"
+    },
+    "Strategy_Lab_Rejected_Candidates.json": {
+      "path": "E:\\hermes-opc\\Strategy_Lab_Rejected_Candidates.json",
+      "size_bytes": 101242,
+      "sha256": "c3d69de343d783b3260614d87de68dffac50b619a6ee1dca97b394b8ef589acd"
+    },
+    "strategy_selection_protocol.json": {
+      "path": "E:\\hermes-opc\\strategy_selection_protocol.json",
+      "size_bytes": 5248,
+      "sha256": "fd4f238697e0bd8c419eab5cb9be7b7f487d7c6574aac46172dbd4949ead672a"
+    },
+    "final_audit.json": {
+      "path": "E:\\hermes-opc\\reports\\strategy_lab\\final_audit.json",
+      "size_bytes": 2580,
+      "sha256": "c297302bbe242c913059573dc17d78a70e6fd6f2ec3841ea7908fc443a69444a"
+    }
+  }
+}

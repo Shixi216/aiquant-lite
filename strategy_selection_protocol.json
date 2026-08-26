@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "protocol_id": "AIQUANT_LITE_STRATEGY_LAB_PROTOCOL_V1",
+  "frozen_at": "2026-08-26T14:20:00+08:00",
+  "objective": "Select the best reproducible PIT-safe out-of-sample strategy candidate without live trading.",
+  "research_only": true,
+  "creates_trade": false,
+  "known_prior_exposure": {
+    "sentiment_v3_2024_2026_results_previously_reviewed": true,
+    "final_2026_period_is_pristine_holdout": false,
+    "required_disclosure": "2026 results are quasi-OOS for new strategy combinations, not a pristine untouched holdout."
+  },
+  "data_rules": {
+    "join_keys": ["symbol", "trade_date", "decision_cutoff"],
+    "point_in_time_rule": "event_time and data_available_time must be no later than decision_cutoff",
+    "primary_label": "NEXT_OPEN_TO_CLOSE_20D",
+    "secondary_labels": [
+      "NEXT_OPEN_TO_CLOSE_1D",
+      "NEXT_OPEN_TO_CLOSE_5D",
+      "NEXT_OPEN_TO_CLOSE_10D"
+    ],
+    "statistical_diagnostics": [
+      "CLOSE_TO_CLOSE_1D",
+      "CLOSE_TO_CLOSE_5D",
+      "CLOSE_TO_CLOSE_10D",
+      "CLOSE_TO_CLOSE_20D"
+    ],
+    "missing_data": "Retain missingness, coverage, and has_event. Never drop a row only because a candidate feature is missing.",
+    "forbidden": [
+      "future fundamental snapshots",
+      "future constituent membership",
+      "random train test split",
+      "post-result label changes",
+      "post-result sample deletion"
+    ]
+  },
+  "portfolio_evaluation": {
+    "construction": "equal-weight long-only top decile with deterministic symbol tie-break",
+    "rebalance_horizons_trading_days": [1, 5, 10, 20],
+    "primary_rebalance_horizon": 20,
+    "cost_round_trip_bp": [0, 20, 40, 60],
+    "primary_cost_bp": 40,
+    "overlap_policy": "Primary portfolio uses non-overlapping horizon-aligned rebalances. Overlapping forward labels are diagnostics only.",
+    "turnover": "one-way constituent weight turnover at each rebalance",
+    "annualization_days": 252
+  },
+  "walk_forward": {
+    "mode": "purged rolling and expanding",
+    "train_windows_trading_days": [60, 120, 240],
+    "validation_window_trading_days": 40,
+    "purge_trading_days": 20,
+    "embargo_trading_days": 5,
+    "minimum_cross_section": 100,
+    "selection_uses_validation_only": true,
+    "final_reporting_periods": ["2024", "2025", "2026"]
+  },
+  "candidate_families": {
+    "legacy": ["tech_60_fund_40_sent_0"],
+    "static": {
+      "sentiment_weights": [0.05, 0.1, 0.15, 0.2, 0.25],
+      "fundamental_weights": [0.25, 0.3, 0.35, 0.4],
+      "technical_minimum": 0.35,
+      "required_named_points": ["55_35_10", "50_35_15", "50_30_20"]
+    },
+    "risk_overlay": {
+      "risk_penalties": [0.1, 0.2, 0.3, 0.5],
+      "position_scales": [0.0, 0.25, 0.5, 0.75],
+      "dragon_tiger_missing_modes": ["ZERO", "AVAILABLE_RENORMALIZE", "EVENT_GATED"]
+    },
+    "dynamic": {
+      "methods": ["ROLLING_RANK_IC", "RANK_IC_IR", "STABILITY_WEIGHTED_IC", "INVERSE_VOLATILITY"],
+      "shrinkage_to_legacy": [0.25, 0.5, 0.75],
+      "bounds": {
+        "technical": [0.35, 0.7],
+        "fundamental": [0.2, 0.5],
+        "sentiment": [0.0, 0.3]
+      }
+    },
+    "regime": ["breadth", "market_return", "turnover", "volatility", "speculation_cycle"],
+    "interaction": [
+      "technical_x_sentiment",
+      "fundamental_x_sentiment",
+      "momentum_x_sentiment",
+      "liquidity_x_sentiment",
+      "event_x_reaction"
+    ],
+    "ml_challengers": ["RIDGE", "LOGISTIC_RANK", "HIST_GRADIENT_BOOSTING"]
+  },
+  "primary_metrics": [
+    "net_oos_sharpe_40bp",
+    "net_oos_calmar_40bp",
+    "oos_rank_ic_20d",
+    "max_drawdown_40bp",
+    "tail_loss_40bp"
+  ],
+  "required_metrics": [
+    "cagr_proxy",
+    "sharpe",
+    "sortino",
+    "max_drawdown",
+    "calmar",
+    "win_rate",
+    "profit_factor",
+    "turnover",
+    "average_holding_period",
+    "ic",
+    "rank_ic",
+    "ic_ir",
+    "top_bottom_spread",
+    "tail_loss",
+    "monthly_stability",
+    "yearly_stability"
+  ],
+  "promotion_rules": {
+    "alpha_candidate": {
+      "net_sharpe_40bp_min": 0.5,
+      "delta_sharpe_vs_legacy_min": 0.15,
+      "oos_rank_ic_20d_min": 0.02,
+      "positive_years_min": 2,
+      "max_drawdown_relative_to_legacy_max": 1.1,
+      "neighbor_parameter_pass_ratio_min": 0.6
+    },
+    "defensive_candidate": {
+      "delta_sharpe_vs_legacy_min": -0.1,
+      "max_drawdown_improvement_min": 0.1,
+      "tail_loss_improvement_min": 0.1,
+      "stable_years_min": 2,
+      "neighbor_parameter_pass_ratio_min": 0.6
+    },
+    "complexity_rule": "A complex candidate must beat the best simple candidate after 40bp cost and remain positive in parameter-neighbor and subperiod checks.",
+    "multiple_testing": "Apply Benjamini-Hochberg FDR within each candidate family and label unadjusted discoveries as exploratory."
+  },
+  "search_stop": {
+    "success": "At least one alpha or defensive candidate passes all frozen promotion rules.",
+    "insufficient_evidence": "No candidate passes after baseline, ablation, walk-forward, cost, parameter, and subperiod checks."
+  },
+  "safety": {
+    "forbid_modules": ["execution", "broker", "order"],
+    "real_orders_required": 0,
+    "real_fills_required": 0,
+    "real_position_changes_required": 0,
+    "external_trading_api_calls_required": 0,
+    "git_push": false
+  }
+}
