@@ -19,6 +19,13 @@ class Settings(BaseSettings):
 
     # Financial data
     tushare_token: str | None = Field(default=None)
+    jinniu_api_key: str | None = Field(default=None, repr=False)
+    jinniu_base_url: str = Field(default="https://jinniu.lingxideai.com")
+    jinniu_api_path: str = Field(default="/api")
+    jinniu_timeout_seconds: float = Field(default=30.0, gt=0, le=120)
+    jinniu_max_retries: int = Field(default=3, ge=0, le=8)
+    jinniu_schema_version: str = Field(default="jinniu-shadow-v1")
+    jinniu_history_route_enabled: bool = Field(default=False)
 
     # Search
     tavily_api_key: str | None = Field(default=None)

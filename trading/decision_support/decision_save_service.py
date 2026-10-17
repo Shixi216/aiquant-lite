@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from trading.decision_support.decision_packet_v2 import (
-    DecisionPacketV2, DecisionPacketV2Repository, create_decision_packet,
+    DecisionPacketV2Repository, create_decision_packet,
 )
 from trading.decision_support.decision_response import DecisionResponse
 from trading.decision_support.permission_service import PermissionService
@@ -72,6 +72,10 @@ class DecisionSaveService:
                 "veto_triggered": response.veto_triggered,
                 "action_override": response.action_zh,
             },
+            frozen_entry_zone=list(response.frozen_entry_zone),
+            frozen_preferred_zone=list(response.frozen_preferred_zone),
+            frozen_stop_loss_price=response.frozen_stop_loss_price,
+            zone_version=response.zone_version,
         )
         self.packet_repo.save(packet)
         return {

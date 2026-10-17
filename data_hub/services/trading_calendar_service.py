@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import threading
-from datetime import date, datetime, timedelta, timezone, tzinfo
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 
 TZ = timezone(timedelta(hours=8))
@@ -114,7 +114,7 @@ class TradingCalendarService:
             cutoff_date = data_cutoff
 
         today = self._now().date()
-        now = self._now()
+        _now = self._now()
 
         # 上限 = min(今天, cutoff)
         upper = cutoff_date if (cutoff_date and cutoff_date < today) else today
@@ -163,7 +163,7 @@ class TradingCalendarService:
 
         # 开盘前/盘中判断（不写死15:00，用数据可用性）
         # 仅当 cutoff == 今天（或 cutoff 极接近当前）时才考虑"当日未完成"
-        now = self._now()
+        _now = self._now()
         is_recent = (upper >= today) or (
             cutoff_date is not None and cutoff_date == today
         )

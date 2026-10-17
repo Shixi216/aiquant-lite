@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, time, timedelta, timezone
-from math import prod
 from statistics import fmean, median
 from time import perf_counter
 

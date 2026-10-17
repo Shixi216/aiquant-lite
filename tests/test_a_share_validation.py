@@ -46,7 +46,7 @@ def _observation(
     regime: str = "SIDEWAYS",
 ) -> HistoricalParameterObservation:
     values = bars or _bars()
-    entry_date = values[0].trade_date
+    _entry_date = values[0].trade_date
     entry_open = float(values[0].open or 100)
     return HistoricalParameterObservation(
         symbol="600000.SH",

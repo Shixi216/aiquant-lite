@@ -30,6 +30,8 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+node_modules/
+.vite/
 
 # Runtime state and fetched third-party content
 cache/
@@ -51,6 +53,30 @@ database/*.wal
 config/local.yaml
 *.bak
 *.backup-*
+*.bak_*
+*.log
+*.wal
+.runtime/
+.pytest_tmp*/
+docs/tasks/
+archive/
+competition/
+evaluation/
+recovery/
+/config/historical_route_state.json
+/_*
+/Sentiment_V3_*.md
+/Sentiment_V3_*.json
+!/Sentiment_V3_Label_Spec_V1.md
+!/Sentiment_V3_Feature_Registry_V1.md
+!/Sentiment_V3_Evaluation_Framework_V1.md
+/Strategy_Lab_*.json
+/Strategy_Lab_*.md
+/MultiFactor_V1_*.json
+/MultiFactor_V1_*.md
+/Jinniu_Phase2_Shadow_Audit.md
+/Jinniu_Provider_Capability_Matrix.json
+/test_hermes.xlsx
 **/local-env/
 *.secrets
 *.secret

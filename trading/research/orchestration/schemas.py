@@ -109,6 +109,9 @@ class FactorBundle(OrchestrationModel):
     sentiment: FactorView | None = None
     policy_news: FactorView | None = None
     capital_flow: FactorView | None = None
+    # margin（两融净买入截面 rank）不进五维 factor_map/coverage——缺失不降级；
+    # 仅参与 PIT 与 STALE 门槛检查（与四维 composite 的 margin 维度对应）。
+    margin: FactorView | None = None
     available_factor_types: list[FactorType] = Field(default_factory=list)
     missing_factor_types: list[FactorType] = Field(default_factory=list)
     stale_factor_types: list[FactorType] = Field(default_factory=list)
@@ -144,8 +147,8 @@ class ShadowComposite(OrchestrationModel):
     factor_output: FactorOutput
     score: float = Field(ge=-1, le=1)
     confidence: float = Field(ge=0, le=1)
-    shadow_mode: Literal[True] = True
-    formal_strategy_weight: Literal[0.0] = 0.0
+    shadow_mode: bool = True
+    formal_strategy_weight: float = 0.0
     configured_weights: dict[str, float]
     effective_weights: dict[str, float]
     factor_contributions: dict[str, float]
@@ -167,8 +170,8 @@ class FormalResult(OrchestrationModel):
     final_action: Action
     hard_veto: bool
     formal_weights: dict[str, float]
-    shadow_used_for_action: Literal[False] = False
-    shadow_used_for_veto: Literal[False] = False
+    shadow_used_for_action: bool = False
+    shadow_used_for_veto: bool = False
 
 
 class ScreeningRequest(OrchestrationModel):
@@ -258,6 +261,9 @@ class DecisionShadowRequest(OrchestrationModel):
     technical_confidence: float = Field(ge=0, le=1)
     fundamental_score: float = Field(ge=-1, le=1)
     fundamental_confidence: float = Field(ge=0, le=1)
+    sentiment_score: float | None = Field(default=None, ge=-1, le=1)
+    sentiment_confidence: float | None = Field(default=None, ge=0, le=1)
+    custom_formal_weights: dict[str, float] | None = None
     hard_veto: bool = False
     persist_shadow: bool = True
 

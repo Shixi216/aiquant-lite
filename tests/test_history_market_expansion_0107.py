@@ -577,7 +577,7 @@ def test_18_data_available_time_respects_market_close(
     with get_connection() as connection:
         earliest_hour = connection.execute(
             """
-            SELECT MIN(EXTRACT(hour FROM data_available_time))
+            SELECT MIN(EXTRACT(hour FROM data_available_time AT TIME ZONE 'Asia/Shanghai'))
             FROM canonical_historical_bars
             """
         ).fetchone()[0]

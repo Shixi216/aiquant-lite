@@ -12,7 +12,7 @@ from trading.research.fundamental.models import (
 )
 
 
-FUNDAMENTAL_METRICS_VERSION = "fundamental-metrics-v1"
+FUNDAMENTAL_METRICS_VERSION = "fundamental-metrics-v2-official-roe"
 CORE_METRIC_FIELDS = (
     "pe_ttm",
     "pb",
@@ -130,6 +130,7 @@ def calculate_fundamental_metrics(
     balance = current.get("balancesheet")
     income = current.get("income")
     cashflow = current.get("cashflow")
+    indicator = current.get("fina_indicator")
 
     previous_balance = _comparable_record(
         all_records=all_records,
@@ -155,7 +156,7 @@ def calculate_fundamental_metrics(
         cashflow_payload.get("n_cashflow_act")
     )
 
-    roe: float | None = None
+    roe_self_calculated: float | None = None
     if balance is not None and previous_balance is not None:
         current_equity = _number(
             balance_payload.get("total_hldr_eqy_exc_min_int")
@@ -171,11 +172,23 @@ def calculate_fundamental_metrics(
             and previous_equity is not None
             and net_income is not None
         ):
-            roe = _ratio(
+            roe_self_calculated = _ratio(
                 net_income,
                 (current_equity + previous_equity) / 2,
                 risk_flags,
             )
+    indicator_payload = indicator.payload if indicator is not None else {}
+    official_roe = _number(indicator_payload.get("roe"))
+    official_roe_dt = _number(indicator_payload.get("roe_dt"))
+    roe = official_roe / 100 if official_roe is not None else roe_self_calculated
+    roe_dt = official_roe_dt / 100 if official_roe_dt is not None else None
+    roe_source = (
+        "Tushare官方加权口径"
+        if official_roe is not None
+        else "自算（官方缺失）"
+        if roe_self_calculated is not None
+        else None
+    )
     if roe is None:
         risk_flags.add(FundamentalRiskFlag.INSUFFICIENT_HISTORY)
 
@@ -198,6 +211,12 @@ def calculate_fundamental_metrics(
         )
         if profit_growth_ratio is not None:
             net_profit_growth = profit_growth_ratio - 1
+    official_revenue_growth = _number(indicator_payload.get("or_yoy"))
+    official_net_profit_growth = _number(indicator_payload.get("netprofit_yoy"))
+    if official_revenue_growth is not None:
+        revenue_growth = official_revenue_growth / 100
+    if official_net_profit_growth is not None:
+        net_profit_growth = official_net_profit_growth / 100
     if revenue_growth is None or net_profit_growth is None:
         risk_flags.add(FundamentalRiskFlag.INSUFFICIENT_HISTORY)
 
@@ -230,10 +249,31 @@ def calculate_fundamental_metrics(
     elif pe_ttm is not None or net_profit_growth is not None:
         risk_flags.add(FundamentalRiskFlag.INVALID_DENOMINATOR)
 
+    net_income_attr = _number(income_payload.get("n_income_attr_p"))
+    invest_income = _number(income_payload.get("invest_income"))
+    net_profit_deducted = _number(income_payload.get("dt_netprofit"))
+    if (
+        net_profit_deducted is None
+        and net_income_attr is not None
+        and invest_income is not None
+    ):
+        # 扣非字段缺失时用归母-投资收益近似（盈新发展案例：
+        # 归母8610万全由投资收益3.88亿撑起）
+        net_profit_deducted = net_income_attr - invest_income
+    invest_income_ratio: float | None = None
+    if (
+        invest_income is not None
+        and net_income_attr is not None
+        and net_income_attr > 0
+    ):
+        invest_income_ratio = invest_income / net_income_attr
+
     metrics = FundamentalMetrics(
         pe_ttm=pe_ttm,
         pb=pb,
         roe=roe,
+        roe_dt=roe_dt,
+        roe_source=roe_source,
         revenue_growth=revenue_growth,
         net_profit_growth=net_profit_growth,
         debt_ratio=debt_ratio,
@@ -244,6 +284,9 @@ def calculate_fundamental_metrics(
             else operating_cash_flow > 0
         ),
         peg=peg,
+        net_profit_deducted=net_profit_deducted,
+        invest_income=invest_income,
+        invest_income_ratio=invest_income_ratio,
         report_period=report_period,
         statement_types=sorted(current),
         accounting_scope=(

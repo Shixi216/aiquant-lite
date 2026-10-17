@@ -1,3 +1,5 @@
+# ruff: noqa: E402
+# Standalone CLI bootstrap configures paths or runtime before project imports.
 from __future__ import annotations
 
 import json

@@ -44,7 +44,7 @@ def main() -> None:
 
         # 5. 再次热调用 capabilities
         t4 = time.perf_counter()
-        r4 = client.get("/v1/capabilities")
+        _r4 = client.get("/v1/capabilities")
         t_cap2 = time.perf_counter() - t4
         print(f"⑤ capabilities热调用: {t_cap2:.3f}秒")
 

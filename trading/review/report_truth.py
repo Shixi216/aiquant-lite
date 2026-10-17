@@ -5,7 +5,7 @@ positions, decisions, frozen zones, or production parameters.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 from trading.decision_support.data_status import DataStatus

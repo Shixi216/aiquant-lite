@@ -18,10 +18,9 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from dataclasses import dataclass
+from datetime import timezone, timedelta
 from enum import StrEnum
-from typing import Optional
 
 TZ = timezone(timedelta(hours=8))
 
@@ -175,7 +174,7 @@ class TwoStagePipeline:
         pct = c["pct_chg"]
         vr = c["volume_ratio"]
         to = c["turnover"]
-        amount = c["amount_wan"]
+        _amount = c["amount_wan"]
 
         # 分时强度评分（0-1）
         score = 0.0

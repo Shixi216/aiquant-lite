@@ -44,10 +44,12 @@ WITH deduplicated AS (
     FROM canonical_historical_bars
     WHERE adjustment_type = 'RAW'
       AND verification_status <> 'CONFLICT'
-      AND data_available_time <= CAST(trade_date AS TIMESTAMP)
-          + INTERVAL '16 hours'
-      AND event_time <= CAST(trade_date AS TIMESTAMP)
-          + INTERVAL '16 hours'
+      AND data_available_time <= timezone(
+          'Asia/Shanghai', CAST(trade_date AS TIMESTAMP) + INTERVAL '16 hours'
+      )
+      AND event_time <= timezone(
+          'Asia/Shanghai', CAST(trade_date AS TIMESTAMP) + INTERVAL '16 hours'
+      )
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY symbol, trade_date
         ORDER BY generated_at DESC, bar_id

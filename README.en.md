@@ -1,220 +1,188 @@
 <div align="center">
 
-[简体中文](README.md) | English
+![AIQUANT-LITE — A-share research, engineered for clarity](docs/assets/hero.svg)
 
 # AIQUANT-LITE
 
-### A local-first AI + Quant research and decision-support framework for China's A-share market
+### An AI-native research workspace for China's A-share market
 
-From market-wide screening to auditable decisions—structured as a local, explainable, and testable research workflow.
+**Turn market data into research. Turn research into traceable decisions.**
 
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.139+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![DuckDB](https://img.shields.io/badge/DuckDB-Single--Owner-FFF000?logo=duckdb&logoColor=black)](https://duckdb.org/)
-[![Tests](https://img.shields.io/badge/tests-1%2C285%20passed-brightgreen)](#quality-and-testing)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+Market intelligence, quantitative factors, AI-assisted research, risk constraints and decision review in one local-first workspace.
 
-**Built for research and decision support—not automated live trading.**
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py)
+[![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py)
+[![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
+[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml)
+
+[简体中文](README.md) · English
 
 </div>
 
-## What is AIQUANT-LITE?
+## Research, connected
 
-**AIQUANT-LITE is a local AI + Quant research, screening, risk-control, and decision-support system for China's A-share market.**
+Built for individual researchers, quantitative developers and small research teams, AIQUANT-LITE connects **market observation → screening → company research → risk review → decision records → simulation and review**.
 
-It combines structured market data, deterministic policy, and specialized model roles in one auditable pipeline. Facts are collected before models reason; data timing and risk constraints are checked before a decision packet is produced.
+The Vue workspace brings these views together. The Python backend combines structured facts, deterministic calculations and optional specialized model roles, retaining source attribution, timestamps, coverage and availability so that results remain open to inspection.
 
-> This is not an automated live-trading system. It does not connect to a broker or submit live orders. It makes no return claims and is not investment advice.
+![Market dashboard — development sample](docs/assets/dashboard-demo.png)
 
-## Highlights
+<details>
+<summary><strong>Stock intelligence and chart preview</strong></summary>
 
-| Capability | Current implementation |
+![Stock overview — development sample](docs/assets/stock-overview-demo.png)
+
+![Stock research — development sample](docs/assets/stock-demo.png)
+
+</details>
+
+> Screenshots show the actual UI with development contract samples. Values illustrate layout and interactions; they are not live quotes, advice or performance results. Fixture mode is disabled in production.
+
+## Workspace capabilities
+
+| View | Research workflow |
 |---|---|
-| Market-wide screening | Deterministic local filters, ranking, and result cards; the scanner makes no model calls and emits no trade orders |
-| Five-dimension research | Technical, fundamental, sentiment, policy/news, and capital flow; formal scoring remains 60% technical + 40% fundamental |
-| Risk-first decisions | Point-in-Time checks, data status, position state, and hard Risk VETO take precedence over positive scores |
-| Auditable output | `DecisionEngine` resolves actions, sizing, and price zones; immutable `DecisionPacket` records are versioned and SHA-256 verified |
-| Multiple data sources | Tushare Pro, AKShare, BaoStock, CNInfo, and source-attributed verification paths |
-| Specialized model roles | LongCat, Qwen, DeepSeek, and MiMo can be routed to synthesis, announcement verification, risk review, and vision roles |
-| Strategy research | Shadow factors, A/B replay, Walk-Forward evaluation, parameter sensitivity, and market-regime attribution |
-| Local simulation | Paper accounts, portfolio research, a separate user-reported trade ledger, and read-only review workflows |
-| User isolation | `local_user_id` is the business-data isolation key; external channels map to local identities |
-| Safe database topology | Router is the sole online owner of the primary DuckDB; other components access it through Router |
-| Multiple entry points | CLI, FastAPI, Finance Data MCP, and Hermes; WeCom support is currently local rendering/simulation and configuration health checks |
+| **Market dashboard** | Breadth, price-change distribution, coverage, timestamps and provider state |
+| **Opportunity ranking** | Deterministic market screening, candidate filters and four-dimensional cross-sectional ranks |
+| **Stock intelligence** | Security identity, quote snapshots, financial records, factor details, frozen decision zones and candlestick charts |
+| **Quant lab** | Market sentiment, margin financing, Dragon-Tiger trading activity and daily-bar research panels |
+| **Strategy and capital research** | Research artifacts, sentiment experiments, Walk-Forward evaluation, cost sensitivity and strategy comparison |
+| **Decisions and review** | Risk VETO, action and sizing constraints, versioned packets, local simulation and user-entered trade facts |
 
-### Formal score and shadow research
+- **Source-attributed data** through Tushare, AKShare / Eastmoney, BaoStock and CNInfo adapters; optional Jinniu history integration remains experimental and requires separate configuration.
+- **Configurable AI roles** for synthesis, filing verification and risk review; provider access depends on credentials and service availability.
+- **Explicit time semantics** for trade dates, quote snapshots, score cutoffs and report generation, with Point-in-Time input contracts.
+- **Traceable decisions** with frozen zones, versions, linked evidence and hash verification.
+- **Visible degradation** when data is missing, stale or unavailable. Missing values remain missing.
+- **Composable access** through WebUI, CLI, FastAPI, Finance Data MCP, Hermes and desktop source modules.
 
-The production decision score is intentionally narrow:
+## Reference architectures
 
-```text
-Formal Score = Technical 60% + Fundamental 40%
-```
+The following projects provide architectural reference points. This is a comparison of direction, not a claim of feature, coverage, speed or investment-performance parity.
 
-Sentiment, policy/news, capital flow, and the five-factor composite remain shadow or enhancement inputs with formal weight `0`. They can be observed, replayed, and compared without silently changing the formal strategy.
+| Project | Official focus | AIQUANT-LITE's focus |
+|---|---|---|
+| **[Microsoft Qlib](https://github.com/microsoft/qlib)** | AI-oriented quantitative investment research with multiple ML paradigms | Connect factors and experiments to inspectable A-share research decisions |
+| **[OpenBB](https://github.com/openbq-org/OpenBB)** | Data integration infrastructure for analysts, quants and AI agents | Organize A-share sources, availability and research views in a local workspace |
+| **[QuantConnect LEAN](https://github.com/QuantConnect/Lean)** | Modular algorithmic trading, backtesting and execution infrastructure | Retain strategy evidence, risk constraints and review records within research and simulation |
 
-## Workflow
+These are references, not dependencies or partners. AIQUANT-LITE supports research and human decisions; the public implementation has no broker connection or automated live-order path.
+
+## Architecture
 
 ```mermaid
-flowchart TD
-    U["User / Hermes / CLI"] --> R["Router"]
-    R --> D["Data Hub"]
-    D --> S["Market Scanner"]
-    S --> F["Five-Dimension Research"]
-    F --> P["Point-in-Time & Data Status"]
-    P --> V["Risk VETO"]
-    V --> E["DecisionEngine"]
-    E --> K["Immutable DecisionPacket"]
-    K --> O["Research / Simulation / Manual Decision"]
+flowchart LR
+    WEB["Vue 3 · ECharts"] --> UI["WebUI · read-only APIs"]
+    UI --> R["Router · research orchestration"]
+    CLI["CLI · Hermes · MCP"] --> R
+    R --> DATA["Data Hub · source-attributed facts"]
+    R --> FACTOR["Screening · factors · experiments"]
+    R --> RISK["PIT · data status · Risk VETO"]
+    RISK --> PACKET["Versioned DecisionPacket"]
+    R --> DB[("Primary DuckDB · single owner")]
+    UI --> SIDE[("Read-only sidecars and artifacts")]
+    PACKET --> REVIEW["Human review · simulation"]
 ```
 
-Deterministic safeguards run before model output is accepted. Failed, stale, or temporally invalid data causes a downgrade, wait state, or VETO; models are not allowed to fabricate missing facts.
+Router is the sole online owner of the primary DuckDB. WebUI fact and scoring requests go through Router; approved read-only sidecars and research files serve chart and experiment views. Stop online database owners before direct offline maintenance.
 
-## Database topology
+### Scoring contracts
 
-```mermaid
-flowchart TD
-    C["Hermes / MCP / Scanner / Data Hub"] --> R["Router"]
-    R --> DB["Single-Owner DuckDB"]
-    DB --> A["Evidence / Audit / DecisionPacket / Simulation"]
-```
-
-In normal online operation, Router is the only process allowed to open the primary database directly. Non-owner connections are rejected. Offline maintenance requires Router to be stopped first; the runtime does not use the legacy “kill a process after a database lock” pattern.
-
-## Repository map
-
-```text
-aiquant-lite/
-├─ data_hub/              # Quotes, fundamentals, filings, news, history, market-wide data
-├─ router/                # Agent routing, risk budgets, audits, and unified APIs
-├─ trading/
-│  ├─ scanner/            # Market screening and candidate ranking
-│  ├─ research/           # Five dimensions, PIT, shadow factors, and experiments
-│  ├─ decision_support/   # DecisionEngine, VETO, DecisionPacket, sizing, and plans
-│  ├─ simulation/         # Local paper accounts and portfolio research
-│  └─ review/             # Read-only review workflows
-├─ manual_tracking/       # Facts about trades or positions entered by the user elsewhere
-├─ mcp_servers/           # Finance Data MCP
-├─ database/migrations/   # Database migrations
-├─ desktop/               # Local desktop workspace
-├─ scripts/               # Operations, backfills, diagnostics, and validation
-└─ tests/                 # Unit, integration, boundary, and migration tests
-```
-
-## Stack
-
-| Layer | Technology |
+| Path | Meaning |
 |---|---|
-| Runtime | Python 3.11, asyncio |
-| API / protocol | FastAPI, Pydantic, MCP |
-| Storage | DuckDB with a single-owner Router topology |
-| Data | Tushare, AKShare, BaoStock, CNInfo, pandas |
-| Model routing | LongCat, Qwen, DeepSeek, MiMo (optional and configuration-driven) |
-| Desktop / delivery | PySide6, PyInstaller, Inno Setup |
-| Quality | pytest, Ruff, deterministic safety checks |
+| `cross_section_4d` | Technical / fundamental / sentiment features / margin-financing ranks, weighted 30 / 30 / 25 / 15 over available inputs; cutoff queries read a historical section at or before that time |
+| `legacy_60_40_fallback` | 60% technical + 40% fundamental fallback, explicitly marked `degraded` when the cross section is unavailable |
+| Orchestration experiments | Separate two-factor, 50 / 35 / 15 three-factor and custom-weight research paths |
+
+Actions also depend on data state, position context, percentile thresholds and Risk VETO. See [architecture](docs/architecture.md) and [limitations](docs/limitations.md).
 
 ## Quick start
 
-Python `3.11` and [uv](https://docs.astral.sh/uv/) are required.
+Requires **Python 3.11** and [uv](https://docs.astral.sh/uv/). Web builds also require **Node.js 22.12+** and npm. Managed operations scripts target Windows; Python services can be launched individually on other systems.
 
 ```powershell
 git clone https://github.com/Shixi216/aiquant-lite.git
 cd aiquant-lite
-uv sync --dev
+uv sync --dev --frozen
 Copy-Item .env.example .env
+npm --prefix frontend ci
+npm --prefix frontend run build
 ```
 
-Add only the credentials you intend to use to the local `.env`. Missing provider credentials disable the corresponding roles or trigger a safe fallback.
+Configure only the data and model credentials you need in your local `.env`. Licensed data, personal databases and private research results are not distributed; a full research workflow requires your own data-source configuration and local data setup.
 
-Run the preflight and live-execution boundary checks:
-
-```powershell
-uv run python -m scripts.preflight_check
-uv run python -m scripts.check_no_live_execution
-```
-
-Start the managed Windows services:
+On Windows:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\start_hermes_opc.ps1
 powershell -ExecutionPolicy Bypass -File scripts\status_hermes_opc.ps1
 ```
 
-Or run each local service directly:
+Open **http://127.0.0.1:8767**. Router defaults to `8765`; Data Hub uses `8766`. Run `uv run python -m scripts.preflight_check` to inspect configuration and service state.
+
+Alternatively, start each service in its own terminal:
 
 ```powershell
 uv run python -m scripts.run_router_api
 uv run python -m scripts.run_data_api
-uv run python -m mcp_servers.finance_data.server
+uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8767
 ```
 
-Useful research entry points:
+### UI-only demo
+
+After building the frontend, start development contract samples without credentials or Router:
 
 ```powershell
-uv run python -m scripts.scanner_cli --help
-uv run python -m scripts.stock_report --help
-uv run python -m scripts.experiment_cli --help
-uv run python -m scripts.history_cli --help
+$env:WEBUI_DEV_FIXTURES="1"
+$env:HERMES_ENV="development"
+$env:ROUTER_URL="http://127.0.0.1:9"
+uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8877
 ```
 
-The default endpoints are intended for local use. Do not expose them publicly without authentication and network controls.
+Visit `http://127.0.0.1:8877`. Dashboard, opportunities and the sample stock view use fixtures; other views degrade with missing data. Use a fresh terminal or clear those variables before normal operation.
 
-## Screenshots and demos
+## Repository map
 
-The public repository intentionally contains no screenshots of real holdings, trades, conversations, or personal settings. The README uses Mermaid diagrams instead. Future demos should use synthetic data only.
+```text
+frontend/                  Vue 3 + TypeScript + ECharts workspace
+webui/                     GET-only view APIs, charts and artifact readers
+router/                    Model routing, research workflows, audits and APIs
+data_hub/                  Quotes, history, financials, filings and market facts
+trading/scanner/            Screening and candidate ranking
+trading/decision_support/   Scores, risk, actions, sizing and packets
+trading/research/           Factors, sentiment, fundamentals and experiments
+trading/simulation/         Local paper accounts and portfolio research
+manual_tracking/           Facts entered by the user about external trades
+desktop/                   PySide6 desktop source
+database/migrations/       Schema migrations
+scripts/                   Operations, research and validation commands
+tests/                     Unit, API, isolation and regression checks
+```
 
-## Quality and testing
+## Validation
 
-The current worktree passes **1,285 tests** across:
-
-- Router-owned DuckDB topology and concurrency boundaries;
-- broker-free dependencies, APIs, and decision-to-order paths;
-- Point-in-Time constraints, formal 60/40 scoring, VETO, and action consistency;
-- immutable DecisionPacket records, hashes, and version chains;
-- market-wide screening, historical data, shadow/A-B replay, Walk-Forward, and sensitivity analysis;
-- user isolation, paper trading, manual fact ledgers, and read-only reviews;
-- Windows desktop delivery and Hermes integration.
+Long combined test processes hit native crashes in the reviewed Windows / Python 3.11.1 environment. The supplied runner isolates test modules; the audit records both the completed checks and this unresolved limitation.
 
 ```powershell
-uv run pytest
 uv run ruff check .
+uv run python -m scripts.run_offline_tests --workers 2
+uv run python -m scripts.check_no_live_execution
+npm --prefix frontend test
+npm --prefix frontend run build
 ```
 
-Passing tests do not prove that a strategy will remain profitable. Backtests and experiments are evidence about past behavior, not guarantees about future markets.
+Run validation in an isolated environment with temporary databases. See the [release audit](docs/release-audit-2026-10-18.md) for this publication's exact scope and results. Offline checks do not establish external-provider connectivity, live data quality or long-term strategy performance.
 
-## Security
+## Documentation and direction
 
-- `.env`, credentials, DuckDB files, logs, reports, backups, caches, and runtime state stay out of Git.
-- `.env.example` contains variable names, empty values, and safe example defaults only.
-- Router is the sole online owner of the primary DuckDB.
-- Provider output is treated as untrusted input, and error output is sanitized.
-- Never paste real credentials or user data into issues, pull requests, logs, or screenshots.
+[Architecture](docs/architecture.md) · [API](docs/api-reference.md) · [Data pipeline](docs/data-pipeline.md) · [Operations](docs/operations.md) · [Hermes](docs/hermes-integration.md) · [Experiments](docs/experiments.md) · [PIT fundamentals](docs/fundamental-point-in-time.zh-CN.md)
 
-Please follow [SECURITY.md](SECURITY.md) for private vulnerability reporting.
+Next priorities: data-quality measurement, consistent score provenance, longer strategy evidence, reproducible research and workspace interaction improvements. Roadmap items are not delivered features.
 
-## Documentation
+## Security and license
 
-- [Architecture](docs/architecture.md)
-- [API reference](docs/api-reference.md)
-- [Data pipeline](docs/data-pipeline.md)
-- [Scanner](docs/scanner.md)
-- [Operations](docs/operations.md)
-- [Security](docs/security.md)
-- [Known limitations](docs/limitations.md)
-- [Hermes integration](docs/hermes-integration.md)
+Keep credentials in local `.env`; exclude databases, logs, caches, runtime state and private research outputs from the public repository. Services bind to loopback by default. Remote use requires authentication and network controls. See [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Roadmap
-
-- expand formal Point-in-Time fundamental coverage and continuous quality metrics;
-- complete the human approval queue and audit UI;
-- collect longer Walk-Forward and shadow evidence across market regimes;
-- add model-cost, reliability, and data-coverage dashboards;
-- enable multimodal roles only after audited input contracts are complete;
-- publish a synthetic-data demo.
-
-## Disclaimer
-
-AIQUANT-LITE is intended for research, education, backtesting, simulation, and manual decision support. Scores, candidates, risk flags, sizing suggestions, and price zones are not securities advice. Users remain responsible for their own decisions and risk.
-
-## License
-
-[MIT](LICENSE)
+For research, education, backtesting, simulation and human decision support. Not investment advice; no return guarantees. Third-party data and model use remains subject to the respective service terms. Source code is licensed under [MIT](LICENSE).

@@ -1,0 +1,80 @@
+{
+  "symbol": "600519.SH",
+  "identity": {"symbol": "600519.SH", "code": "600519", "name": "贵州茅台", "company_name": "贵州茅台酒股份有限公司", "exchange": "SH", "market": "A_SHARE", "board": "SH_MAIN", "list_date": "2001-08-27", "listing_status": "ACTIVE", "is_st": false, "is_suspended": false, "source": "BaoStock", "verification_status": "VERIFIED"},
+  "database_context": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.equity_context",
+    "data": {
+      "symbol": "600519.SH",
+      "identity": {"symbol": "600519.SH", "code": "600519", "name": "贵州茅台", "company_name": "贵州茅台酒股份有限公司", "exchange": "SH", "market": "A_SHARE", "board": "SH_MAIN", "list_date": "2001-08-27", "listing_status": "ACTIVE", "is_st": false, "is_suspended": false, "source": "BaoStock", "verification_status": "VERIFIED"},
+      "industry": {"name": "白酒", "classification_system": "申万", "verification_status": "VERIFIED"},
+      "quote": {"price": 1308.55, "previous_close": 1296.2, "open": 1298.0, "high": 1312.8, "low": 1290.1, "volume": 3845221, "amount": 5013280000, "change_pct": 0.95, "turnover_rate": 0.31, "snapshot_time": "2026-09-04T15:00:00+08:00", "source": "Tushare"},
+      "factors": [{"type": "TECHNICAL", "score": 0.72, "confidence": 0.83, "data_cutoff": "2026-09-04T15:00:00+08:00", "formal_status": "shadow", "algorithm_version": "technical-v2"}],
+      "financials": [{"data_type": "financial_indicator", "event_time": "2026-06-30T00:00:00+08:00", "data_cutoff": "2026-08-13T18:00:00+08:00", "source": "Tushare", "verification_status": "SINGLE_SOURCE", "confidence": 0.8, "metrics": {"roe": 0.312, "gross_margin": 0.921, "revenue_yoy": 0.114}, "algorithm_version": "canonical-v1"}],
+      "source": "router_main_database",
+      "calculation": "persisted_strategy_outputs"
+    }
+  },
+  "decision_card": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.decision_packet",
+    "data": {
+      "decision_id": "dec_1a2b3c4d5e6f7a8b",
+      "symbol": "600519.SH",
+      "name": "贵州茅台",
+      "industry": "白酒",
+      "action": "BUY",
+      "action_zh": "建仓",
+      "confidence": 0.72,
+      "formal_score": 0.8234,
+      "enhanced_score": null,
+      "data_cutoff": "2026-09-04T15:00:00+08:00",
+      "created_at": "2026-09-04T19:30:00+08:00",
+      "expires_at": "2026-09-09T19:30:00+08:00",
+      "zone_version": "V1",
+      "zone_generated_at": "2026-09-04T19:30:00+08:00",
+      "zone_valid_until": "2026-09-09T19:30:00+08:00",
+      "zone_expired": false,
+      "reference_price": 1308.55,
+      "has_frozen_plan": true,
+      "frozen_entry_zone": {"low": 1268.0, "high": 1292.0},
+      "frozen_preferred_zone": {"low": 1275.0, "high": 1285.0},
+      "frozen_stop_loss_price": 1215.0,
+      "veto_result": null,
+      "evidence_ids": ["rec-1", "rec-2"]
+    }
+  },
+  "four_dimensions": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.cross_section",
+    "data": {
+      "symbol": "600519.SH",
+      "score_source": "cross_section_4d",
+      "composite_score": 0.8234,
+      "tech_rank": 0.93,
+      "fund_rank": 0.88,
+      "sent_rank": 0.71,
+      "margin_rank": 0.64
+    }
+  },
+  "risk": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "webui_pure_function",
+    "data": {"risks": []}
+  },
+  "provenance": {
+    "data_source": "router_canonical",
+    "data_time": "2026-09-04",
+    "calculation_source": "router_canonical",
+    "formal_status": "formal"
+  },
+  "fixture_mode": true
+}

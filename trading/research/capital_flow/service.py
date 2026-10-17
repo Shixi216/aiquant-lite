@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from dataclasses import dataclass
 import math
@@ -67,6 +69,12 @@ class ScreeningPerformance:
     database_connection_count: int = 0
     network_request_count: int = 0
     model_call_count: int = 0
+
+
+# duckdb 全市场大查询 / pandas 计算必须离开事件循环线程：新版本组合
+# （pandas 3.x + duckdb 1.5.x）在 loop 线程执行时会破坏 GIL 状态导致
+# PyEval_SaveThread 段错误。专用单线程执行器串行化所有同步计算。
+_ANALYSIS_EXECUTOR = ThreadPoolExecutor(max_workers=1, thread_name_prefix="capital-flow")
 
 
 class CapitalFlowAnalysisService:
@@ -278,6 +286,14 @@ class CapitalFlowAnalysisService:
         self,
         request: CapitalFlowAnalyzeRequest,
     ) -> CapitalFlowAnalyzeResponse:
+        return await asyncio.get_running_loop().run_in_executor(
+            _ANALYSIS_EXECUTOR, self.analyze_sync, request
+        )
+
+    def analyze_sync(
+        self,
+        request: CapitalFlowAnalyzeRequest,
+    ) -> CapitalFlowAnalyzeResponse:
         now = datetime.now().astimezone()
         if request.data_cutoff > now:
             raise ValueError("data_cutoff must not be in the future")
@@ -466,17 +482,41 @@ class CapitalFlowAnalysisService:
         data_cutoff: datetime,
     ) -> FactorOutput | None:
         try:
-            response = await self.analyze(
-                CapitalFlowAnalyzeRequest(
-                    analysis_mode=AnalysisMode.DECISION,
-                    data_cutoff=data_cutoff,
-                    scope=CapitalFlowScope.SYMBOL,
-                    symbol=symbol,
-                    persist=True,
-                )
+            return await asyncio.get_running_loop().run_in_executor(
+                _ANALYSIS_EXECUTOR,
+                self._analyze_factor_for_decision_sync,
+                symbol,
+                data_cutoff,
             )
         except (KeyError, ValueError):
             return None
+
+    def _analyze_factor_for_decision_sync(
+        self,
+        symbol: str,
+        data_cutoff: datetime,
+    ) -> FactorOutput | None:
+        # 快速路径：当日已有快照直接出 factor，避免每次 /from-data 重跑
+        # 全市场大查询（bars 同日不变，DECISION 结果一致）。
+        existing = self.repository.latest_symbol_snapshot(
+            symbol=symbol,
+            data_cutoff=data_cutoff,
+        )
+        if (
+            existing is not None
+            and existing.analysis_mode == AnalysisMode.DECISION
+            and existing.data_cutoff.date() == data_cutoff.date()
+        ):
+            return self.factor_from_snapshot(existing, persist=False)
+        response = self.analyze_sync(
+            CapitalFlowAnalyzeRequest(
+                analysis_mode=AnalysisMode.DECISION,
+                data_cutoff=data_cutoff,
+                scope=CapitalFlowScope.SYMBOL,
+                symbol=symbol,
+                persist=True,
+            )
+        )
         result = response.result
         if not isinstance(result, CapitalFlowSymbolSnapshot):
             return None

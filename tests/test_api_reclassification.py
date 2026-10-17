@@ -183,7 +183,7 @@ def test_new_decision_routes(api_services) -> None:
         f"/v1/decisions/{decision_id}/challenge",
         json={"challenge": "Check whether momentum is overstated."},
     )
-    assert latest.status_code == 200
+    assert latest.status_code == 200, latest.text
     assert latest.json() == response.json()
     assert versions.status_code == 200
     assert versions.json() == [response.json()]

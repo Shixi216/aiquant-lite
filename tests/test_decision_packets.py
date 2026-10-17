@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import json
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 
 import pytest
@@ -103,6 +104,36 @@ def test_final_packet_cannot_be_modified(decision_context) -> None:
     changed = packet.rehashed_copy(confidence=0.1)
     with pytest.raises(DecisionImmutableError):
         repository.insert(changed)
+
+
+def test_packet_hash_survives_session_timezone_and_rejects_metadata_tampering(
+    decision_context, monkeypatch,
+) -> None:
+    import trading.decision_support.decision_packets.repository as module
+
+    repository = decision_context["repository"]
+    packet = decision_context["packet"]
+    original_connection = module.get_connection
+
+    @contextmanager
+    def utc_session(*args, **kwargs):
+        with original_connection(*args, **kwargs) as connection:
+            connection.execute("SET TimeZone='UTC'")
+            yield connection
+
+    monkeypatch.setattr(module, "get_connection", utc_session)
+    restored = repository.get(packet.decision_id, packet.decision_version)
+    assert restored.hash_is_valid()
+    assert restored.model_dump(mode="json") == packet.model_dump(mode="json")
+
+    with original_connection() as connection:
+        connection.execute(
+            "UPDATE decision_packets SET generated_at = generated_at + INTERVAL '1 second' "
+            "WHERE decision_id=? AND decision_version=?",
+            [packet.decision_id, packet.decision_version],
+        )
+    with pytest.raises(DecisionIntegrityError, match="timestamp metadata mismatch"):
+        repository.get(packet.decision_id, packet.decision_version)
 
 
 def test_new_version_does_not_overwrite_old_version(decision_context) -> None:

@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-import duckdb
 
 from config.settings import PROJECT_ROOT, settings
 from router.config import router_settings

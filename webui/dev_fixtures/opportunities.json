@@ -1,0 +1,57 @@
+{
+  "classification_source": "scanner_run:run-20260904-a",
+  "ranking_data_cutoff": "2026-08-30T15:00:00+08:00",
+  "thresholds": {
+    "data_cutoff": "2026-08-30T15:00:00+08:00",
+    "p50": 0.512, "p75": 0.663, "p90": 0.799, "p95": 0.884,
+    "strong_buy_q": 0.799, "buy_q": 0.663, "n_total": 5321,
+    "generated_at": "2026-08-30T18:02:11+08:00"
+  },
+  "total": 3,
+  "offset": 0,
+  "limit": 50,
+  "sort": "composite",
+  "items": [
+    {
+      "symbol": "600519.SH",
+      "name": "贵州茅台",
+      "industry": "白酒",
+      "tech_rank": 0.93, "fund_rank": 0.88, "sent_rank": 0.71, "margin_rank": 0.64,
+      "composite_score": 0.8234,
+      "scanner_bucket": "CORE",
+      "quote": {"price": 1308.55, "change_pct": 1.24, "turnover_rate": 0.83}
+    },
+    {
+      "symbol": "300750.SZ",
+      "name": "宁德时代",
+      "industry": "电池",
+      "tech_rank": 0.90, "fund_rank": 0.42, "sent_rank": 0.55, "margin_rank": 0.33,
+      "composite_score": 0.7712,
+      "scanner_bucket": "NEAR",
+      "quote": {"price": 21.34, "change_pct": -0.87, "turnover_rate": 2.11}
+    },
+    {
+      "symbol": "000001.SZ",
+      "name": "平安银行",
+      "industry": "银行",
+      "tech_rank": 0.44, "fund_rank": 0.51, "sent_rank": 0.66, "margin_rank": 0.70,
+      "composite_score": 0.5701,
+      "scanner_bucket": "CONTROL",
+      "quote": null
+    }
+  ],
+  "cross_section_block": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.cross_section",
+    "data": null
+  },
+  "provenance": {
+    "data_source": "router_canonical",
+    "data_time": "2026-08-30",
+    "calculation_source": "router_canonical",
+    "formal_status": "formal"
+  },
+  "fixture_mode": true
+}

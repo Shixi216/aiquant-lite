@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -537,9 +538,25 @@ def test_41_label_update_is_idempotent(
     assert unchanged == 1
 
 
+@pytest.mark.parametrize(
+    "session_timezone,available_hour,expected_count",
+    [("Asia/Tokyo", 16, 21), ("UTC", 16, 21), ("UTC", 17, 0)],
+)
 def test_42_replay_uses_batch_sql_and_creates_supported_groups(
     temporary_database: Path,
+    monkeypatch, session_timezone: str, available_hour: int, expected_count: int,
 ) -> None:
+    import trading.experiments.historical_replay as module
+
+    original_connection = module.get_connection
+
+    @contextmanager
+    def replay_session():
+        with original_connection() as connection:
+            connection.execute(f"SET TimeZone='{session_timezone}'")
+            yield connection
+
+    monkeypatch.setattr(module, "get_connection", replay_session)
     start = date(2026, 5, 1)
     dates = [start + timedelta(days=index) for index in range(41)]
     with duckdb.connect(str(temporary_database)) as connection:
@@ -548,7 +565,7 @@ def test_42_replay_uses_batch_sql_and_creates_supported_groups(
                 trade_date,
                 datetime.min.time(),
                 tzinfo=TZ,
-            ) + timedelta(hours=16)
+            ) + timedelta(hours=available_hour)
             connection.execute(
                 """
                 INSERT INTO trading_calendar_days
@@ -594,14 +611,14 @@ def test_42_replay_uses_batch_sql_and_creates_supported_groups(
         run_id="erun_" + "8" * 24,
         query_plan_hash="9" * 64,
     )
-    assert batch.signal_date_count == 21
-    assert {item.signal_type for item in batch.observations} == {
+    assert batch.signal_date_count == expected_count
+    assert {item.signal_type for item in batch.observations} == ({
         SignalType.SCANNER_ONLY,
         SignalType.TECHNICAL_ONLY,
         SignalType.AMOUNT_TOP20,
         SignalType.MOMENTUM_20D_TOP20,
         SignalType.RANDOM_TOP20,
-    }
+    } if expected_count else set())
     assert batch.database_query_count == 2
 
 

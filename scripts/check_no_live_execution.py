@@ -23,6 +23,7 @@ PRODUCTION_DIRECTORIES = (
     "config",
     "mcp_servers",
     "data_hub",
+    "webui",
 )
 
 BROKER_EXECUTION_DEPENDENCIES = {
@@ -235,6 +236,25 @@ STAGE11_INTEGRATION_ROUTE_METHODS = {
     ("GET", "/v1/integration/openapi-summary"),
     ("GET", "/v1/integration/experiments/{run_id}"),
 }
+V0112_TRADE_PLAN_ROUTE_METHODS = {
+    ("GET", "/v1/trade-plans"),
+    ("GET", "/v1/trade-plans/{plan_id}"),
+}
+V0112_PROVIDER_HEALTH_ROUTE_METHODS = {
+    ("GET", "/v1/providers/health"),
+}
+WEBUI_READ_ROUTE_METHODS = {
+    ("GET", "/v1/historical-bars/{symbol}"),
+    ("GET", "/v1/cross-section/latest"),
+    ("GET", "/v1/cross-section/{symbol}"),
+    ("GET", "/v1/decision-packets/v2/{symbol}/latest"),
+    ("GET", "/v1/scanner/runs"),
+    ("GET", "/v1/market-snapshots/latest/breadth"),
+    ("GET", "/v1/equity-context/overview"),
+    ("GET", "/v1/equity-context/search"),
+    ("GET", "/v1/equity-context/dragon-tiger"),
+    ("GET", "/v1/equity-context/stocks/{symbol}"),
+}
 CURRENT_ROUTE_METHODS = (
     STAGE5_ROUTE_METHODS
     | V0100_SENTIMENT_ROUTE_METHODS
@@ -245,6 +265,9 @@ CURRENT_ROUTE_METHODS = (
     | V0110_SCANNER_ROUTE_METHODS
     | V0111_EXPERIMENT_ROUTE_METHODS
     | STAGE11_INTEGRATION_ROUTE_METHODS
+    | V0112_TRADE_PLAN_ROUTE_METHODS
+    | V0112_PROVIDER_HEALTH_ROUTE_METHODS
+    | WEBUI_READ_ROUTE_METHODS
 )
 STAGE5_DATABASE_SCHEMA_HASH = (
     "1e5ce68d74bd0ddd0b1ca947da59d6d258f91dc33f96856b9b6d21c39c546c11"

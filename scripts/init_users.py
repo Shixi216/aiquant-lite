@@ -5,31 +5,36 @@
 """
 from __future__ import annotations
 
-import json
 import sys
+import argparse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Initialize explicitly configured local users")
+    parser.add_argument("--admin-external-id", required=True)
+    parser.add_argument("--admin-local-id", default="local_admin")
+    args = parser.parse_args()
+    if not args.admin_external_id.strip() or not args.admin_local_id.strip():
+        parser.error("administrator identifiers must not be empty")
     from trading.decision_support.user_repository import UserRepository
-    from trading.decision_support.permission_service import PermissionService
 
     repo = UserRepository()
-    svc = PermissionService(repo)
 
     print("=" * 50)
     print("三用户绑定初始化")
     print("=" * 50)
 
-    # 1. 管理员（现有企微用户 ZhangTianYi）
-    admin_id = "u_wecom_ZhangTianYi"
+    # 1. 由操作者显式指定管理员映射。
+    admin_id = args.admin_local_id.strip()
+    external_id = args.admin_external_id.strip()
     if repo.get_user(admin_id) is None:
         repo.create_user(admin_id, "管理员", "HIGH", is_admin=True)
         print(f"✅ 创建管理员: {admin_id}")
-    repo.bind_external_user("wecom", "ZhangTianYi", admin_id)
-    print(f"✅ 绑定企微: ZhangTianYi → {admin_id}")
+    repo.bind_external_user("wecom", external_id, admin_id)
+    print(f"✅ 绑定企微: {external_id} → {admin_id}")
 
     # 2. 三个普通用户位（待绑定，先创建空档案）
     for i in (1, 2, 3):
@@ -49,7 +54,7 @@ def main() -> None:
 
     # 4. 绑定关系表
     print("\n绑定关系:")
-    print("  wecom ZhangTianYi → u_wecom_ZhangTianYi（管理员）")
+    print(f"  wecom {external_id} → {admin_id}（管理员）")
     print("  wecom <待绑定> → user_1 / user_2 / user_3")
     print("\n提示: 新用户首次发言后，用 bind_external_user 绑定实际企微ID")
 

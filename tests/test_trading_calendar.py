@@ -20,7 +20,6 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -127,9 +126,8 @@ class TestOrderIndependence:
 
     def test_ascending_order_result(self):
         """日历升序返回 → 结果正确（不依赖顺序）"""
-        svc = TradingCalendarService()
+        _svc = TradingCalendarService()
         # 手动验证：构造升序数据
-        from datetime import datetime as dt
         items = [
             {"cal_date": date(2026, 7, 29), "is_open": 1},
             {"cal_date": date(2026, 7, 30), "is_open": 1},
@@ -143,7 +141,7 @@ class TestOrderIndependence:
 
     def test_descending_order_result(self):
         """日历降序返回 → 结果正确（不依赖顺序）"""
-        svc = TradingCalendarService()
+        _svc = TradingCalendarService()
         items = [
             {"cal_date": date(2026, 8, 2), "is_open": 0},
             {"cal_date": date(2026, 8, 1), "is_open": 0},

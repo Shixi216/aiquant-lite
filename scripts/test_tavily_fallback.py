@@ -12,10 +12,9 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import sys
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import timezone, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -25,12 +24,12 @@ TZ = timezone(timedelta(hours=8))
 async def run_scenario(name: str, monkey: dict) -> None:
     """monkey: 注入的故障（覆盖 tavily_search / _get_tavily_key）"""
     import trading.research.sentiment.tavily_enhancer as te
-    import pathlib, shutil
+    import tempfile
 
-    # 清 Tavily 缓存（避免命中旧缓存）
-    cache_dir = pathlib.Path("E:/hermes-opc/cache/tavily_events")
-    if cache_dir.exists():
-        shutil.rmtree(cache_dir)
+    # Use a disposable cache; never clear a user's persisted cache.
+    temporary_cache = tempfile.TemporaryDirectory(prefix="aiquant-tavily-")
+    original_cache = te.CACHE_DIR
+    te.CACHE_DIR = Path(temporary_cache.name)
 
     # 保存原函数
     orig_search = te.tavily_search
@@ -70,7 +69,7 @@ async def run_scenario(name: str, monkey: dict) -> None:
         print(f"降级原因: '{result.degraded_reason or '无（未降级）'}'")
         print(f"事件数: {len(result.events)}")
         print(f"耗时: {elapsed:.1f}秒")
-        print(f"崩溃: 否 ✅")
+        print("崩溃: 否 ✅")
         # 不崩溃 + 有降级标记 或 正常降级
         if result.degraded_reason or not result.events:
             print("降级处理: ✅ 安全降级（未假成功）")
@@ -81,6 +80,8 @@ async def run_scenario(name: str, monkey: dict) -> None:
     finally:
         te.tavily_search = orig_search
         te._get_tavily_key = orig_key
+        te.CACHE_DIR = original_cache
+        temporary_cache.cleanup()
 
 
 async def main():

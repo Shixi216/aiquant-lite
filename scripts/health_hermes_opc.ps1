@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "E:\hermes-opc"
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = "Stop"

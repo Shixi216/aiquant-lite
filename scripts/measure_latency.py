@@ -13,7 +13,6 @@
 """
 from __future__ import annotations
 
-import json
 import statistics
 import sys
 import time

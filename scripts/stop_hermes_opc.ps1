@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "E:\hermes-opc"
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = "Stop"
@@ -74,9 +74,16 @@ $state = Get-Content -LiteralPath $stateFile -Raw |
 ConvertFrom-Json
 
 try {
-    foreach ($serviceName in "router", "data_hub") {
+    foreach ($serviceName in "web_ui", "router", "data_hub") {
+        if ($state.services.PSObject.Properties.Name -notcontains $serviceName) {
+            continue
+        }
         $service = $state.services.$serviceName
-        $label = if ($serviceName -eq "router") { "Router" } else { "Data Hub" }
+        $label = switch ($serviceName) {
+            "router" { "Router" }
+            "data_hub" { "Data Hub" }
+            "web_ui" { "Web UI" }
+        }
 
         Stop-RecordedProcess `
             -Label $label `
@@ -101,6 +108,8 @@ Remove-Item `
         Join-Path $ProjectRoot "runtime\data_hub.launcher.pid"
     ), (
         Join-Path $ProjectRoot "runtime\router.launcher.pid"
+    ), (
+        Join-Path $ProjectRoot "runtime\web_ui.launcher.pid"
     ) `
     -Force `
     -ErrorAction SilentlyContinue

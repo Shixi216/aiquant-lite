@@ -9,17 +9,14 @@
 """
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from trading.decision_support.action import Action
 from trading.decision_support.execution_status import (
     ExecutionStatusSnapshot,
     compute_execution_status,
 )
-from trading.decision_support.decision_response import PriceZone
 
 TZ = timezone(timedelta(hours=8))
 
@@ -211,8 +208,8 @@ class TestPacketImmutability:
 
         # 模拟V2决策生成（新区间）
         v2_entry = [20.00, 21.50]
-        v2_preferred = [20.00, 20.60]
-        v2_stop = 19.50
+        _v2_preferred = [20.00, 20.60]
+        _v2_stop = 19.50
 
         # V1区间不受V2影响
         assert v1_entry == [21.07, 22.40]

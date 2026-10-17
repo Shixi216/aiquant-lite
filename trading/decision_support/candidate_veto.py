@@ -25,7 +25,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 # 16类VETO关键词（中文，命中即触发）
 VETO_KEYWORDS: dict[str, list[str]] = {

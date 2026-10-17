@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "E:\hermes-opc"
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,10 +12,13 @@ $logDirectory = Join-Path $ProjectRoot "logs\hermes-opc"
 $stateFile = Join-Path $runtimeDirectory "hermes_opc_state.json"
 $dataLauncherPidFile = Join-Path $runtimeDirectory "data_hub.launcher.pid"
 $routerLauncherPidFile = Join-Path $runtimeDirectory "router.launcher.pid"
+$webUiLauncherPidFile = Join-Path $runtimeDirectory "web_ui.launcher.pid"
 $dataStdout = Join-Path $logDirectory "data_hub.stdout.log"
 $dataStderr = Join-Path $logDirectory "data_hub.stderr.log"
 $routerStdout = Join-Path $logDirectory "router.stdout.log"
 $routerStderr = Join-Path $logDirectory "router.stderr.log"
+$webUiStdout = Join-Path $logDirectory "web_ui.stdout.log"
+$webUiStderr = Join-Path $logDirectory "web_ui.stderr.log"
 
 function Get-PortListener {
     param([int]$Port)
@@ -117,7 +120,7 @@ if (Test-Path -LiteralPath $stateFile) {
     )
 }
 
-foreach ($port in 8766, 8765) {
+foreach ($port in 8766, 8765, 8767) {
     $listener = Get-PortListener -Port $port
     if ($null -ne $listener) {
         throw "Port $port is already occupied by PID $($listener.OwningProcess)."
@@ -155,6 +158,8 @@ $dataLauncherPid = 0
 $dataServicePid = 0
 $routerLauncherPid = 0
 $routerServicePid = 0
+$webUiLauncherPid = 0
+$webUiServicePid = 0
 
 try {
     Write-Host "Starting Router $projectVersion..."
@@ -205,6 +210,30 @@ try {
     }
     $dataServicePid = [int]$dataListener.OwningProcess
 
+    Write-Host "Starting Web UI $projectVersion..."
+    & $uvPath run python -m scripts.detached_service_launcher `
+        --module "scripts.run_web_ui" `
+        --cwd $ProjectRoot `
+        --stdout $webUiStdout `
+        --stderr $webUiStderr `
+        --pid-file $webUiLauncherPidFile
+    if ($LASTEXITCODE -ne 0) {
+        throw "Web UI detached launcher failed."
+    }
+
+    $webUiLauncherPid = [int](
+        Get-Content -LiteralPath $webUiLauncherPidFile -Raw
+    ).Trim()
+    $webUiHealth = Wait-HermesHealth `
+        -Url "http://127.0.0.1:8767/health" `
+        -ExpectedService "Hermes OPC Web UI" `
+        -ExpectedVersion $projectVersion
+    $webUiListener = Get-PortListener -Port 8767
+    if ($null -eq $webUiListener) {
+        throw "Web UI is healthy but its port listener was not found."
+    }
+    $webUiServicePid = [int]$webUiListener.OwningProcess
+
     $state = [ordered]@{
         version = $projectVersion
         project_root = $ProjectRoot
@@ -230,6 +259,16 @@ try {
                 stdout_log = $routerStdout
                 stderr_log = $routerStderr
             }
+            web_ui = [ordered]@{
+                pid = $webUiServicePid
+                pid_start_time = Get-ProcessStartTime -ProcessId $webUiServicePid
+                launcher_pid = $webUiLauncherPid
+                launcher_pid_start_time = Get-ProcessStartTime -ProcessId $webUiLauncherPid
+                port = 8767
+                health_url = "http://127.0.0.1:8767/health"
+                stdout_log = $webUiStdout
+                stderr_log = $webUiStderr
+            }
         }
     }
     $state |
@@ -246,6 +285,10 @@ try {
     Write-Host "Router log: $routerStdout"
     Write-Host "Router API: http://127.0.0.1:8765"
     Write-Host "Router docs: http://127.0.0.1:8765/docs"
+    Write-Host "Web UI PID: $webUiServicePid"
+    Write-Host "Web UI log: $webUiStdout"
+    Write-Host "Web UI: http://127.0.0.1:8767"
+    Write-Host "Web UI frontend built: $($webUiHealth.dist_built)"
     Write-Host "Finance MCP: stdio/on-demand (managed by Hermes)"
     Write-Host "Registered roles: $($routerHealth.registered_roles)"
     Write-Host "Enabled roles: $($routerHealth.enabled_roles)"
@@ -255,6 +298,8 @@ catch {
     [Console]::Error.WriteLine(
         "Hermes-OPC startup failed: $($failure.Exception.Message)"
     )
+    Stop-StartedProcess -ProcessId $webUiServicePid
+    Stop-StartedProcess -ProcessId $webUiLauncherPid
     Stop-StartedProcess -ProcessId $routerServicePid
     Stop-StartedProcess -ProcessId $routerLauncherPid
     Stop-StartedProcess -ProcessId $dataServicePid

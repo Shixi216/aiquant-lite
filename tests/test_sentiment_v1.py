@@ -482,7 +482,7 @@ def test_07_retracted_event_scores_zero(sentiment_db: Path) -> None:
 # B. Model output and safe degradation
 
 
-def test_08_longcat_news_output_validates(
+def test_08_qwen_news_output_validates(
     sentiment_db: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -515,10 +515,10 @@ def test_09_qwen_announcement_output_validates(
 ) -> None:
     bundle = _seed_event(_record(record_id="a", title="合同公告"))
     fake = FakeProvider([_model_json()])
-    # 公告 → 路由 longcat（当前 _primary_route）
+    # 公告 → 路由 qwen（当前 _primary_route）
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     result = asyncio.run(
         SentimentEventExtractor(
@@ -526,7 +526,7 @@ def test_09_qwen_announcement_output_validates(
         ).extract(bundle, allow_model_calls=True)
     )
     assert result.used_model
-    assert result.provider == "longcat"
+    assert result.provider == "qwen"
 
 
 def test_10_invalid_json_repairs_at_most_once(
@@ -537,7 +537,7 @@ def test_10_invalid_json_repairs_at_most_once(
     fake = FakeProvider(["not-json", _model_json()])
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     result = asyncio.run(
         SentimentEventExtractor(
@@ -556,7 +556,7 @@ def test_11_failed_repair_marks_invalid(
     fake = FakeProvider(["bad", "still bad"])
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     result = asyncio.run(
         SentimentEventExtractor(
@@ -575,7 +575,7 @@ def test_12_model_failure_degrades_to_rules(
     fake = FakeProvider(["bad", "bad"])
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     result = asyncio.run(
         SentimentEventExtractor(
@@ -613,7 +613,7 @@ def test_14_deepseek_only_runs_on_escalation(
 ) -> None:
     bundle = _seed_event(_record(record_id="a", title="普通公告"))
     providers = {
-        "longcat": FakeProvider([_model_json(intensity=0.3, confidence=0.9)]),
+        "qwen": FakeProvider([_model_json(intensity=0.3, confidence=0.9)]),
         "deepseek": FakeProvider([_model_json(direction=-1)]),
     }
     monkeypatch.setattr(
@@ -625,7 +625,7 @@ def test_14_deepseek_only_runs_on_escalation(
             provider_factory=lambda name: providers[name]
         ).extract(bundle, allow_model_calls=True)
     )
-    assert providers["longcat"].calls == 1
+    assert providers["qwen"].calls == 1
     assert providers["deepseek"].calls == 0
 
 
@@ -644,7 +644,7 @@ def test_16_model_call_log_has_required_fields(
     fake = FakeProvider([_model_json()])
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     asyncio.run(
         SentimentEventExtractor(
@@ -959,7 +959,7 @@ def test_38_research_policy_allows_longcat_and_qwen() -> None:
     policy = policy_for(AnalysisMode.RESEARCH)
     assert policy.allow_model_calls
     extractor_source = inspect.getsource(event_extractor)
-    assert "longcat" in extractor_source
+    assert "qwen" in extractor_source
     assert "qwen" in extractor_source
 
 
@@ -1169,7 +1169,7 @@ def test_50_factor_can_trace_model_calls(
     fake = FakeProvider([_model_json()])
     monkeypatch.setattr(
         "trading.research.sentiment.event_extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     service = SentimentAnalysisService(
         extractor=SentimentEventExtractor(

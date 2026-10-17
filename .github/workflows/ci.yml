@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'zty/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: '1'
+      HERMES_ENV: testing
+      WEBUI_DEV_FIXTURES: '0'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Configure isolated database
+        shell: pwsh
+        run: |
+          $databasePath = Join-Path $env:RUNNER_TEMP 'aiquant-ci-main.duckdb'
+          "OPC_DATABASE_PATH=$databasePath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install locked dependencies
+        run: uv sync --dev --frozen
+      - name: Lint
+        run: uv run --frozen ruff check .
+      - name: Offline regression
+        run: uv run --frozen python -m scripts.run_offline_tests --workers 2 --output-dir "${{ runner.temp }}/aiquant-offline"
+      - name: Verify execution boundaries
+        run: uv run --frozen python -m scripts.check_no_live_execution
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+      - run: npm test
+      - run: npm run build

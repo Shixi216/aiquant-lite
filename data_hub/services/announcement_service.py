@@ -19,6 +19,10 @@ from database.db import (
 from data_hub.schemas.market import DataType, MarketRecord, SourceLevel
 from data_hub.schemas.service import AnnouncementResponse, ProviderRun
 from data_hub.services.event_cluster_service import EventClusterService
+from data_hub.services.announcement_eastmoney import (
+    EastmoneyAnnouncementService,
+    best_title_match,
+)
 
 
 SHANGHAI_TZ = ZoneInfo("Asia/Shanghai")
@@ -125,8 +129,9 @@ def _content_hash(
 class AnnouncementService:
     """Fetch and persist official listed-company announcements."""
 
-    def __init__(self) -> None:
+    def __init__(self, eastmoney_service: EastmoneyAnnouncementService | None = None) -> None:
         configure_network_policy()
+        self.eastmoney_service = eastmoney_service or EastmoneyAnnouncementService()
 
     @retry(
         stop=stop_after_attempt(2),
@@ -221,8 +226,20 @@ class AnnouncementService:
             ) from exc
 
         # 无公告（正常情况，非接口故障）：返回空 records
+        # 2026-09-29 第二批S1修复：返回类型统一为 AnnouncementResponse，
+        # 原返回 [] 会让调用方 resp.records 属性访问失败（stock_report
+        # 用 getattr 防护了，其他调用方未必）。
         if frame is None or frame.empty:
-            return []
+            return AnnouncementResponse(
+                symbol=canonical_symbol,
+                start_date=start,
+                end_date=end,
+                keyword=keyword,
+                category=category,
+                records=[],
+                provider_runs=[],
+                verified_count=0,
+            )
 
         required = {
             "代码",
@@ -252,6 +269,31 @@ class AnnouncementService:
         )
 
         records: list[MarketRecord] = []
+        provider_runs: list[ProviderRun] = []
+        eastmoney_records = []
+        eastmoney_started = perf_counter()
+        try:
+            eastmoney_records = self.eastmoney_service.fetch(code, start, end)
+            provider_runs.append(
+                ProviderRun(
+                    provider="Eastmoney Announcement",
+                    success=True,
+                    record_count=len(eastmoney_records),
+                    latency_ms=round((perf_counter() - eastmoney_started) * 1000),
+                )
+            )
+        except Exception as exc:
+            # 交叉源是增强项：失败或超时静默沿用巨潮，不阻塞报告。
+            provider_runs.append(
+                ProviderRun(
+                    provider="Eastmoney Announcement",
+                    success=False,
+                    record_count=0,
+                    latency_ms=round((perf_counter() - eastmoney_started) * 1000),
+                    error_type=type(exc).__name__,
+                    error_message=str(exc)[:300],
+                )
+            )
 
         for _, row in frame.iterrows():
             title = _clean_text(row.get("公告标题"))
@@ -262,10 +304,24 @@ class AnnouncementService:
             if not title or not source_url:
                 continue
 
+            raw_announcement_time = _clean_text(row.get("公告时间"))
             try:
                 event_time = _event_time(row.get("公告时间"))
             except ValueError:
                 continue
+
+            eastmoney_match = best_title_match(title, eastmoney_records)
+            disclosure_source = "CNInfo"
+            eastmoney_url = ""
+            content = ""
+            if eastmoney_match is not None:
+                eastmoney_url = eastmoney_match.url
+                content = eastmoney_match.content
+                if eastmoney_match.disclosure_time < event_time:
+                    event_time = eastmoney_match.disclosure_time
+                    disclosure_source = "CNInfo+Eastmoney (earlier: Eastmoney)"
+                else:
+                    disclosure_source = "CNInfo+Eastmoney (earlier: CNInfo)"
 
             official_url = _is_cninfo_url(source_url)
             announcement_time = event_time.strftime("%Y%m%d")
@@ -276,7 +332,12 @@ class AnnouncementService:
                 "short_name": short_name,
                 "title": title,
                 "announcement_date": announcement_time,
+                "disclosure_time": event_time.isoformat(),
+                "disclosure_source": disclosure_source,
+                "announcement_time_raw": raw_announcement_time,
                 "url": source_url,
+                "eastmoney_url": eastmoney_url,
+                "content": content,
                 "keyword": keyword,
                 "category": category,
                 "official_url": official_url,
@@ -307,11 +368,14 @@ class AnnouncementService:
 
         latency_ms = round((perf_counter() - started) * 1000)
 
-        provider_run = ProviderRun(
-            provider="CNInfo via AKShare",
-            success=True,
-            record_count=len(records),
-            latency_ms=latency_ms,
+        provider_runs.insert(
+            0,
+            ProviderRun(
+                provider="CNInfo via AKShare",
+                success=True,
+                record_count=len(records),
+                latency_ms=latency_ms,
+            ),
         )
 
         if persist:
@@ -324,7 +388,7 @@ class AnnouncementService:
             keyword=keyword,
             category=category,
             records=records,
-            provider_runs=[provider_run],
+            provider_runs=provider_runs,
             verified_count=sum(
                 1 for record in records if record.verified
             ),

@@ -442,7 +442,7 @@ async def test_10_qwen_output_passes_strict_schema(
 
 
 @pytest.mark.asyncio
-async def test_11_longcat_structures_media_content(
+async def test_11_qwen_structures_media_content(
     policy_db: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -460,7 +460,7 @@ async def test_11_longcat_structures_media_content(
     fake = _FakeProvider([json.dumps(_model_payload(), ensure_ascii=False)])
     monkeypatch.setattr(
         "trading.research.policy_news.extractor._provider_ready",
-        lambda name: name == "longcat",
+        lambda name: name == "qwen",
     )
     await PolicyNewsExtractor(
         provider_factory=lambda _: fake

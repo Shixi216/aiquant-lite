@@ -508,6 +508,30 @@ class ScannerRepository:
             ).fetchone()
         return None if row is None else _load(row[0])
 
+    def list_runs(self, limit: int = 10) -> list[dict[str, Any]]:
+        """Most recent persisted runs (empty list when none / table missing)."""
+        import duckdb
+
+        columns = [
+            "run_id", "query_id", "analysis_mode", "data_cutoff", "snapshot_id",
+            "universe_count", "scanned_count", "matched_count", "returned_count",
+            "status", "generated_at",
+        ]
+        with get_connection() as connection:
+            try:
+                rows = connection.execute(
+                    f"""
+                    SELECT {', '.join(columns)}
+                    FROM scanner_runs
+                    ORDER BY generated_at DESC, run_id DESC
+                    LIMIT ?
+                    """,
+                    [limit],
+                ).fetchall()
+            except duckdb.CatalogException:
+                return []
+        return [dict(zip(columns, row)) for row in rows]
+
     def run_candidates(self, run_id: str) -> list[dict[str, Any]]:
         with get_connection() as connection:
             rows = connection.execute(

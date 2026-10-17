@@ -14,6 +14,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
+from config.settings import settings
 from desktop.workspace.models import TaskStatus, TimelineKind
 from desktop.workspace.pages import ConversationPage, SkillCenterPage
 from desktop.workspace.query_plan import IncrementalQueryPlanModifier
@@ -317,7 +318,17 @@ def test_15_manual_trade_requires_two_stage_confirmation() -> None:
 
 def test_16_scanner_never_auto_enters_decision(
     service: TaskCenterService,
+    monkeypatch,
 ) -> None:
+    from types import SimpleNamespace
+
+    scanner = MarketScannerService()
+    monkeypatch.setattr(scanner, "scan", lambda request: SimpleNamespace(
+        universe_count=3, scanned_count=3, matched_count=0, returned_count=0,
+        snapshot_time=request.data_cutoff, stale=False, candidates=[],
+        network_request_count=0, model_call_count=0,
+    ))
+    monkeypatch.setattr(service, "scanner_factory", lambda: scanner)
     conversation = service.new_conversation()
     task = service.submit_message(
         conversation.conversation_id,
@@ -454,7 +465,7 @@ def test_27_deleting_conversation_does_not_delete_market_facts(
     注意：data_records 会随正常数据刷新增长，不能用固定总数断言。
     验证删除会话前后数据量不变（会话数据与市场数据隔离）。
     """
-    market_database = PROJECT_ROOT / "database" / "hermes_opc.duckdb"
+    market_database = Path(settings.opc_database_path)
     with duckdb.connect(str(market_database), read_only=True) as connection:
         before = int(connection.execute("SELECT count(*) FROM data_records").fetchone()[0])
     conversation = repository.create_conversation()

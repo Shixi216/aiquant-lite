@@ -41,7 +41,12 @@ def rising_bars(count: int = 100) -> list[Bar]:
 
 
 @pytest.mark.asyncio
-async def test_parallel_decision_produces_structured_trace_without_chain_of_thought():
+async def test_parallel_decision_produces_structured_trace_without_chain_of_thought(monkeypatch):
+    # 测试隔离：固定截面高分，避免 G 守卫回退使动作依赖 Router 运行状态
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.9, None),
+    )
     trace = await TradingDecisionService().decide(
         DecisionRequest(
             symbol="600000",

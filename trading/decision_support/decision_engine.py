@@ -18,9 +18,10 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta, timezone
 from typing import Optional
 
+from trading.decision_support.portfolio_context import PortfolioContext
 from trading.decision_support.action import Action, action_zh
 from trading.decision_support.action_resolver import (
     DecisionActionResolver, ResolverInput, ResolverOutput, VetoResult,
@@ -29,12 +30,13 @@ from trading.decision_support.data_status import DataStatus
 from trading.decision_support.decision_response import DecisionResponse, PriceZone
 from trading.decision_support.permission_service import PermissionService
 from trading.decision_support.position_sizer import PositionSizer, SizerInput, SizerOutput
-from trading.decision_support.price_zones import PriceZoneCalculator, Bar
+from trading.decision_support.price_zones import PriceZoneCalculator
 from trading.decision_support.task_context import TaskContext
+from trading.decision_support.thresholds import ActionThresholdsV2
 from trading.decision_support.trade_plan import TradePlan, TradePlanStatus
 from trading.decision_support.trade_plan_repository import TradePlanRepository
-from trading.decision_support.manual_position_manager import ManualPositionManager
-from trading.decision_support.paper_trading import PaperTradingService
+from trading.decision_support.manual_position_manager import Holding, ManualPositionManager
+from trading.decision_support.sentiment_v3_advisor import SentimentAdvisoryResult
 
 TZ = timezone(timedelta(hours=8))
 
@@ -45,6 +47,8 @@ class DecisionInput:
     formal_score: float
     technical_score: float
     fundamental_score: float
+    point_in_time_ok: bool
+    account_context: PortfolioContext
     sentiment_score: float = 0.0
     policy_score: float = 0.0
     capital_score: float = 0.0
@@ -59,6 +63,10 @@ class DecisionInput:
     enhanced_score: Optional[float] = None
     consistency_status: str = "NA"
     inconsistency_reason: str = ""
+    holding: Optional[Holding] = None
+    holding_context_provided: bool = False
+    sentiment_v3_advisory: SentimentAdvisoryResult | None = None
+    position_ratio_source: str = "UNSPECIFIED"
 
 
 class DecisionEngine:
@@ -72,10 +80,12 @@ class DecisionEngine:
         zones: PriceZoneCalculator | None = None,
         plan_repo: TradePlanRepository | None = None,
         manual_positions: ManualPositionManager | None = None,
+        thresholds: ActionThresholdsV2 | None = None,
     ):
         self.permissions = permission_service or PermissionService()
-        self.resolver = resolver or DecisionActionResolver()
-        self.sizer = sizer or PositionSizer()
+        thresholds = thresholds or ActionThresholdsV2.from_table()
+        self.resolver = resolver or DecisionActionResolver(thresholds)
+        self.sizer = sizer or PositionSizer(thresholds)
         self.zones = zones or PriceZoneCalculator()
         self.plan_repo = plan_repo or TradePlanRepository()
         self.manual_positions = manual_positions or ManualPositionManager()
@@ -90,11 +100,19 @@ class DecisionEngine:
         #    LEVEL3 写入权限由写入服务单独检查）
 
         # 3-5. 数据状态/VETO/持仓 → 动作
-        holding = (
-            self.manual_positions.get_holding(ctx.local_user_id, ctx.symbol)
-            if ctx.symbol
-            else None
-        )
+        holding = inp.holding
+        position_ratio_source = inp.position_ratio_source
+        if not inp.holding_context_provided:
+            holding = (
+                self.manual_positions.get_holding(ctx.local_user_id, ctx.symbol)
+                if ctx.symbol
+                else None
+            )
+            position_ratio_source = (
+                "MANUAL_LEDGER_QUANTITY_ONLY"
+                if holding is not None and holding.quantity > 0
+                else "NO_POSITION"
+            )
         has_position = holding is not None and holding.quantity > 0
 
         resolver_input = ResolverInput(
@@ -116,17 +134,30 @@ class DecisionEngine:
             user_risk_level="MEDIUM",
             snapshot_id=ctx.snapshot_id,
             data_cutoff=str(ctx.data_cutoff) if ctx.data_cutoff else "",
-            point_in_time_ok=True,
+            point_in_time_ok=inp.point_in_time_ok,
         )
+
+        # Sentiment V3 Advisory 注入
+        if inp.sentiment_v3_advisory is not None:
+            resolver_input.sentiment_risk_reminder = (
+                inp.sentiment_v3_advisory.risk_reminder
+            )
+            resolver_input.sentiment_v3_composite = (
+                inp.sentiment_v3_advisory.composite_score
+            )
+            resolver_input.sentiment_v3_risk_details = (
+                inp.sentiment_v3_advisory.risk_details
+            )
+
         out: ResolverOutput = self.resolver.resolve(resolver_input)
 
         # 6-8. 仓位计算
         sizer_input = SizerInput(
-            total_assets=100_000.0,
-            available_cash=100_000.0,
+            total_assets=inp.account_context.total_assets,
+            available_cash=inp.account_context.available_cash,
             current_position_ratio=holding.position_ratio if holding else 0.0,
             formal_score=inp.formal_score,
-            confidence=inp.confidence,
+            confidence=out.confidence,
             data_status=inp.data_status,
             veto_triggered=inp.veto.veto_triggered if inp.veto else False,
             action=out.action,
@@ -136,7 +167,7 @@ class DecisionEngine:
         # 9. 价格区间
         zone_dict = self.zones.build_zones(
             inp.bars or [], inp.current_price, out.action,
-            confidence=inp.confidence,
+            confidence=out.confidence,
             average_cost=holding.average_cost if holding else None,
         )
 
@@ -157,13 +188,19 @@ class DecisionEngine:
             veto_triggered=out.veto_override,
             formal_score=inp.formal_score,
             enhanced_score=inp.enhanced_score,
-            confidence=inp.confidence,
+            confidence=out.confidence,
+            sentiment_v3_risk_reminder=resolver_input.sentiment_risk_reminder,
             consistency_status=inp.consistency_status,
             inconsistency_reason=inp.inconsistency_reason,
             current_position_ratio=sizing.current_position_ratio,
             target_position_ratio=sizing.target_position_ratio,
             position_change_ratio=sizing.position_change_ratio,
             recommended_batches=sizing.recommended_batches,
+            account_context_source=inp.account_context.source,
+            account_context_is_research_assumption=(
+                inp.account_context.is_research_assumption
+            ),
+            position_ratio_source=position_ratio_source,
             price_zones=PriceZone(
                 entry_zone=zone_dict.get("entry_zone", []),
                 preferred_zone=zone_dict.get("preferred_zone", []),

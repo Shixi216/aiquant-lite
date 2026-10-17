@@ -109,6 +109,14 @@ def format_decision_response(resp: DecisionResponse) -> str:
     if flags:
         lines.append("操作许可: " + "、".join(flags))
 
+    # Sentiment V3 风险提醒
+    sv3_reminder = getattr(resp, "sentiment_v3_risk_reminder", False)
+    if sv3_reminder:
+        lines.append(
+            "⚠️ 情绪风险提醒: 龙虎榜机构净流出+高换手+缺口未跟随"
+            "（历史验证20日收益差-4.35%，已降低置信度）"
+        )
+
     # VETO
     if resp.veto_triggered:
         lines.append("🚨 硬性风控已触发: 禁止建仓"
@@ -168,6 +176,7 @@ def translate_decision_fields(data: dict) -> dict:
         "major_risks": "主要风险", "missing_data": "缺失数据",
         "next_action": "下一步",
         "execution_status": "执行状态",
+        "sentiment_v3_risk_reminder": "情绪风险提醒",
     }
     translated = {}
     for k, v in data.items():

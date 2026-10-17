@@ -4,8 +4,13 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Iterable
 
+from trading.decision_support.portfolio_context import PortfolioContext
 from trading.decision_support.action_resolver import VetoResult
-from trading.decision_support.candidate_veto import CandidateVetoService
+from trading.decision_support.formal_veto import (
+    FormalRiskEvent,
+    FormalRiskInput,
+    evaluate_formal_veto,
+)
 from trading.decision_support.data_status import DataStatus
 from trading.decision_support.decision_engine import DecisionEngine, DecisionInput
 from trading.decision_support.price_zones import Bar as ZoneBar
@@ -172,27 +177,29 @@ def _snapshot(
     return snapshot, missing
 
 
-def _veto(value: FormalReplayInput) -> VetoResult:
-    titles = list(value.risk_event_titles)
-    if value.suspended:
-        titles.append("停牌")
-    if value.delisted:
-        titles.append("退市")
-    if value.st_status:
-        titles.append("ST风险")
-    result = CandidateVetoService().check_news_list(
-        titles,
-        source="historical PIT risk events",
+def _veto(value: FormalReplayInput) -> VetoResult | None:
+    events = tuple(
+        FormalRiskEvent(
+            event_id=f"historical-risk-{index}",
+            title=title,
+            risk_category="HISTORICAL_RISK_EVENT",
+            event_time=value.data_cutoff,
+            data_available_time=value.data_cutoff,
+            data_cutoff=value.data_cutoff,
+        )
+        for index, title in enumerate(value.risk_event_titles)
     )
-    return VetoResult(
-        veto_triggered=result.vetoed,
-        veto_type=result.veto_type,
-        veto_reason=result.reason,
-        evidence_source=result.evidence_source,
-        evidence_time=value.data_cutoff.isoformat(),
-        confidence=1.0 if result.vetoed else 0.0,
-        action_override="AVOID" if result.vetoed else "",
-    )
+    return evaluate_formal_veto(
+        FormalRiskInput(
+            events=events,
+            suspended=value.suspended,
+            delisted=value.delisted,
+            st_status=value.st_status,
+            event_coverage_complete=value.risk_event_coverage_complete,
+            security_status_complete=value.historical_universe_complete,
+            requested_cutoff=value.data_cutoff,
+        )
+    ).result
 
 
 class FormalStrategyReplayService:
@@ -226,7 +233,7 @@ class FormalStrategyReplayService:
                 technical_confidence=technical.confidence,
                 fundamental_score=fundamental.score,
                 fundamental_confidence=fundamental.confidence,
-                hard_veto=veto.veto_triggered,
+                hard_veto=bool(veto and veto.veto_triggered),
                 persist_shadow=False,
             )
         )
@@ -244,6 +251,9 @@ class FormalStrategyReplayService:
             data_status = DataStatus.DEGRADED
         else:
             data_status = DataStatus.FRESH
+        historical_point_in_time_ok = not any(
+            item.startswith("PIT_") for item in missing
+        )
         zone_bars = [
             ZoneBar(
                 trade_date=bar.trade_date,
@@ -275,6 +285,11 @@ class FormalStrategyReplayService:
                 formal_score=formal.score,
                 technical_score=technical.score,
                 fundamental_score=fundamental.score,
+                point_in_time_ok=historical_point_in_time_ok,
+                account_context=PortfolioContext.historical_simulated(
+                    local_user_id="formal-history-read-only",
+                    as_of=value.data_cutoff,
+                ),
                 confidence=formal.confidence,
                 data_status=data_status,
                 veto=veto,
@@ -290,9 +305,7 @@ class FormalStrategyReplayService:
             float(item) for item in response.frozen_preferred_zone
         )
         atr14 = self.engine.zones.compute_atr(zone_bars)
-        point_in_time_valid = (
-            data_status != DataStatus.FAILED and bool(entry_zone)
-        )
+        point_in_time_valid = historical_point_in_time_ok and bool(entry_zone)
         observation = HistoricalParameterObservation(
             symbol=value.symbol,
             signal_date=value.signal_date,

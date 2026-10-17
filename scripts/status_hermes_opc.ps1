@@ -1,5 +1,5 @@
 param(
-    [string]$ProjectRoot = "E:\hermes-opc"
+    [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot)
 )
 
 $ErrorActionPreference = "Stop"
@@ -108,6 +108,19 @@ Write-ServiceStatus `
     -Port 8765 `
     -HealthUrl "http://127.0.0.1:8765/health" `
     -RecordedService $(if ($state) { $state.services.router } else { $null })
+
+Write-ServiceStatus `
+    -Name "Web UI" `
+    -Port 8767 `
+    -HealthUrl "http://127.0.0.1:8767/health" `
+    -RecordedService $(
+        if ($state -and $state.services.PSObject.Properties.Name -contains "web_ui") {
+            $state.services.web_ui
+        }
+        else {
+            $null
+        }
+    )
 
 $roles = try {
     Invoke-RestMethod -Uri "http://127.0.0.1:8765/v1/roles" -TimeoutSec 3

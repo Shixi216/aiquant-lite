@@ -9,12 +9,12 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Optional
 
 TZ = timezone(timedelta(hours=8))
 
 COMMISSION_RATE = 0.0003   # 万三佣金
 STAMP_TAX_RATE = 0.0005    # 卖出印花税（0.05%）
+MIN_COMMISSION = 5.0       # 单笔最低佣金（券商惯例，2026-09-28 L8修复新增）
 
 
 @dataclass
@@ -119,10 +119,16 @@ class PaperTradingService:
     # ------------------------------------------------------------------
     def buy(self, local_user_id: str, symbol: str, quantity: float,
             price: float) -> PaperOrder:
-        """模拟建仓/加仓"""
+        """模拟建仓/加仓
+
+        2026-09-28修复（M3+L8，代码审查）：
+        - 买入手续费计入持仓成本（原实现只扣现金、不进成本，
+          导致 realized_pnl 系统性偏高——卖边扣费、买边白拿）
+        - 佣金加最低5元（券商惯例单笔最低佣金）
+        """
         account = self.get_account(local_user_id)
         amount = quantity * price
-        fee = amount * COMMISSION_RATE
+        fee = max(amount * COMMISSION_RATE, MIN_COMMISSION)
         total_cost = amount + fee
         if total_cost > account.cash:
             raise ValueError("现金不足（Paper账户）")
@@ -130,17 +136,15 @@ class PaperTradingService:
         pos = account.positions.get(symbol, {"quantity": 0, "avg_cost": 0.0})
         old_qty, old_cost = pos["quantity"], pos["avg_cost"]
         new_qty = old_qty + quantity
-        new_cost = (old_qty * old_cost + amount) / new_qty if new_qty > 0 else price
+        new_cost = (old_qty * old_cost + amount + fee) / new_qty if new_qty > 0 else price
         account.positions[symbol] = {"quantity": new_qty, "avg_cost": new_cost}
         account.cash -= total_cost
-        self._save(account)
-
         order = PaperOrder(
             order_id=f"po_{uuid.uuid4().hex[:16]}", local_user_id=local_user_id,
             symbol=symbol, side="BUY", quantity=quantity, price=price,
             fee=fee, created_at=datetime.now(tz=TZ),
         )
-        self._record_order(order)
+        self._commit_trade(account, order)
         return order
 
     def sell(self, local_user_id: str, symbol: str, quantity: float,
@@ -152,7 +156,8 @@ class PaperTradingService:
             raise ValueError("持仓不足（Paper账户）")
 
         amount = quantity * price
-        fee = amount * COMMISSION_RATE + amount * STAMP_TAX_RATE
+        # 2026-09-28修复（L8）：佣金最低5元 + 印花税
+        fee = max(amount * COMMISSION_RATE, MIN_COMMISSION) + amount * STAMP_TAX_RATE
         avg_cost = pos["avg_cost"]
         pnl = (price - avg_cost) * quantity - fee
 
@@ -163,14 +168,13 @@ class PaperTradingService:
             account.positions[symbol] = {"quantity": new_qty, "avg_cost": avg_cost}
         account.cash += amount - fee
         account.realized_pnl += pnl
-        self._save(account)
 
         order = PaperOrder(
             order_id=f"po_{uuid.uuid4().hex[:16]}", local_user_id=local_user_id,
             symbol=symbol, side="SELL", quantity=quantity, price=price,
             fee=fee, created_at=datetime.now(tz=TZ),
         )
-        self._record_order(order)
+        self._commit_trade(account, order)
         return order
 
     def close_all(self, local_user_id: str, symbol: str, price: float) -> list[PaperOrder]:
@@ -192,6 +196,44 @@ class PaperTradingService:
                 [order.order_id, order.local_user_id, order.symbol, order.side,
                  order.quantity, order.price, order.fee, order.status],
             )
+        finally:
+            con.close()
+
+    def _commit_trade(
+        self, account: PaperAccount, order: PaperOrder
+    ) -> None:
+        """账户变更+订单落库，单连接单事务（2026-09-29 M4修复）。
+
+        原实现 _save 与 _record_order 各开一次连接，中间崩溃会出现
+        "钱动了但订单缺失"或反向的账实不一致。合并为同一事务，
+        DuckDB autocommit 下用 BEGIN/COMMIT 显式包住两条写。
+        """
+        import json
+        con = self._connect()
+        try:
+            con.execute("BEGIN TRANSACTION")
+            con.execute(
+                """
+                INSERT OR REPLACE INTO paper_accounts_v2
+                (local_user_id, cash, initial_cash, realized_pnl, positions_json, updated_at)
+                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                """,
+                [account.local_user_id, account.cash, account.initial_cash,
+                 account.realized_pnl, json.dumps(account.positions, ensure_ascii=False)],
+            )
+            con.execute(
+                "INSERT INTO paper_orders (order_id, local_user_id, symbol, side, quantity, price, fee, status) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [order.order_id, order.local_user_id, order.symbol, order.side,
+                 order.quantity, order.price, order.fee, order.status],
+            )
+            con.execute("COMMIT")
+        except Exception:
+            try:
+                con.execute("ROLLBACK")
+            except Exception:
+                pass
+            raise
         finally:
             con.close()
 

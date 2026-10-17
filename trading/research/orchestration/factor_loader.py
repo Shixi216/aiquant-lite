@@ -37,6 +37,7 @@ _FIELD_NAMES = {
     FactorType.SENTIMENT: "sentiment",
     FactorType.POLICY_NEWS: "policy_news",
     FactorType.CAPITAL_FLOW: "capital_flow",
+    FactorType.MARGIN: "margin",
 }
 
 
@@ -309,9 +310,15 @@ class FactorLoader:
         factors: dict[FactorType, FactorView],
     ) -> FactorBundle:
         groups, shared_clusters = build_evidence_graph(factors)
+        # margin 不计入五维 coverage（分母保持 5），仅随 bundle 供 PIT/STALE 检查
+        coverage_factors = {
+            factor_type: factor
+            for factor_type, factor in factors.items()
+            if factor_type != FactorType.MARGIN
+        }
         available = [
             factor_type
-            for factor_type, factor in factors.items()
+            for factor_type, factor in coverage_factors.items()
             if availability_weight(
                 factor.availability_status,
                 analysis_mode=analysis_mode,
@@ -474,6 +481,14 @@ class FactorLoader:
             )
             if policy is not None:
                 factors[FactorType.POLICY_NEWS] = policy
+            margin = self._snapshot_factor(
+                data.margin_snapshots.get(symbol),
+                factor_type=FactorType.MARGIN,
+                analysis_mode=analysis_mode,
+                data_cutoff=data_cutoff,
+            )
+            if margin is not None:
+                factors[FactorType.MARGIN] = margin
             bundles.append(
                 self.build_bundle(
                     symbol=symbol,

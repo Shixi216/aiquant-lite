@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import timezone, timedelta
 from typing import Optional
 
 from trading.scanner.query_router import AnalysisHorizon, route_query
@@ -90,7 +90,6 @@ class UnifiedScanGateway:
         resp.latest_completed_trade_date = session.latest_completed_trade_date
 
         # 1. 意图路由 + 市场阶段联合判定（统一）
-        from trading.scanner.query_router import AnalysisHorizon, route_query
         horizon = route_query(req.query)
 
         # 盘中查询但非交易时段 → 按市场阶段修正
@@ -129,7 +128,7 @@ class UnifiedScanGateway:
 
         # 双时间轴快照ID
         resp.realtime_snapshot_id = result["data_time"].get("realtime_status", "")
-        rt_snap = result["data_time"].get("last_successful_snapshot_at", "")
+        _rt_snap = result["data_time"].get("last_successful_snapshot_at", "")
         resp.data_cutoff = result["data_time"].get("realtime", "")
         resp.candidates = result["candidates"]
         resp.research_results = result["research_results"]

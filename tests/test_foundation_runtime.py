@@ -218,7 +218,7 @@ def test_windows_start_script_uses_module_mode_and_preflight() -> None:
         encoding="utf-8"
     )
 
-    assert 'ProjectRoot = "E:\\hermes-opc"' in source
+    assert 'ProjectRoot = (Split-Path -Parent $PSScriptRoot)' in source
     assert '".uv-cache"' in source
     assert "scripts.preflight_check" in source
     assert '"scripts.run_data_api"' in source

@@ -16,6 +16,11 @@ import duckdb
 
 
 LOCK_RETRY_DELAYS_SECONDS = (0.15, 0.40, 1.00)
+# 2026-08-26 修复：进程内连接门锁获取超时。原实现 with _connect_gate(path)
+# 无超时等待——若某线程卡在 duckdb.connect（如写锁竞争时阻塞），会永久持有
+# gate 锁，导致 Router 进程所有数据库操作无限排队（health 秒回但研究端点
+# 全部超时的"半死"状态）。加超时后快速失败，防止级联阻塞。
+GATE_ACQUIRE_TIMEOUT_SECONDS = 8.0
 LOCK_ERROR_MARKERS = (
     "could not set lock",
     "conflicting lock",
@@ -205,11 +210,18 @@ class ManagedDuckDBConnection:
         # DuckDB may detach the last file handle while another worker thread is
         # opening the same database. Serialize only attach/detach operations;
         # query execution and transactions remain concurrent.
-        with _connect_gate(self._database_path):
+        gate = _connect_gate(self._database_path)
+        if not gate.acquire(timeout=GATE_ACQUIRE_TIMEOUT_SECONDS):
+            # 2026-08-26 修复：门锁超时则放弃关闭（连接交由 GC 兜底），
+            # 避免关闭线程被卡死的连接线程阻塞
+            return
+        try:
             if self._closed:
                 return
             self._connection.close()
             self._closed = True
+        finally:
+            gate.release()
         closed_at = datetime.now().astimezone()
         _write_log(
             self._configured_path,
@@ -250,7 +262,15 @@ def connect_database(
     while True:
         try:
             gate_started = time.perf_counter()
-            with _connect_gate(path):
+            gate = _connect_gate(path)
+            # 2026-08-26 修复：门锁加超时，防止线程卡在 duckdb.connect 时
+            # 永久持有锁导致全进程数据库操作排队
+            if not gate.acquire(timeout=GATE_ACQUIRE_TIMEOUT_SECONDS):
+                raise RuntimeError(
+                    f"数据库连接门锁获取超时（{GATE_ACQUIRE_TIMEOUT_SECONDS:.0f}s），"
+                    f"疑似其他线程卡在数据库连接上 @ {caller}"
+                )
+            try:
                 gate_wait_ms += (time.perf_counter() - gate_started) * 1000
                 connect_started = time.perf_counter()
                 try:
@@ -259,6 +279,8 @@ def connect_database(
                     duckdb_connect_ms += (
                         time.perf_counter() - connect_started
                     ) * 1000
+            finally:
+                gate.release()
             break
         except Exception as exc:
             holder_pid = _lock_holder_pid(exc)

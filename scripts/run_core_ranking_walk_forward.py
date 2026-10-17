@@ -1,9 +1,10 @@
+# ruff: noqa: E402
+# Standalone CLI bootstrap configures paths or runtime before project imports.
 """Research-only A/B/C core-candidate ranking walk-forward validation."""
 from __future__ import annotations
 
 import json
 import sys
-from collections import defaultdict
 from dataclasses import asdict
 from datetime import date, datetime
 from math import ceil

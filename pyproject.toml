@@ -36,6 +36,10 @@ dev = [
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "local_state: requires an explicitly prepared local research database",
+    "network: 需要真实网络/外部数据源的测试（可用 -m 'not network' 跳过）",
+]
 
 [tool.ruff]
 target-version = "py311"

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import math
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import asdict
 from datetime import date, datetime, time
 from pathlib import Path
 from statistics import fmean, median, pstdev
-from typing import Any, Iterable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -306,15 +306,15 @@ def _group_comparison(features: list[dict[str, Any]], returns: dict[str, float])
                 "median": None if not values else median(values),
             }
         p = group_values["profit"]
-        l = group_values["loss"]
+        losses = group_values["loss"]
         effect = None
-        if len(p) >= 2 and len(l) >= 2:
-            pooled = math.sqrt((pstdev(p) ** 2 + pstdev(l) ** 2) / 2)
+        if len(p) >= 2 and len(losses) >= 2:
+            pooled = math.sqrt((pstdev(p) ** 2 + pstdev(losses) ** 2) / 2)
             if pooled > 0:
-                effect = (fmean(p) - fmean(l)) / pooled
+                effect = (fmean(p) - fmean(losses)) / pooled
         entry["standardized_difference"] = effect
         result[field] = entry
-        if effect is not None and min(len(p), len(l)) >= 30:
+        if effect is not None and min(len(p), len(losses)) >= 30:
             effects.append((abs(effect), field, effect))
     result["largest_differences"] = [
         {"field": field, "standardized_difference": effect}

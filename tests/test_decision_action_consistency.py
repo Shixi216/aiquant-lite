@@ -1,11 +1,12 @@
 """正式动作与执行状态一致性测试
 
-核心验证：
+核心验证（rank 分位数阈值 v2：强买=P90 回退 0.42，可买=P75 回退 0.22）：
 1. DecisionEngine.decide() 是唯一正式决策来源
-2. formal_score=0.656 必须输出 BUY，不是 WAIT
+2. formal_score=0.656 必须输出 STRONG_BUY（≥P90），不是 WAIT
 3. 报告层不得改写正式动作
 4. VETO优先级高于一切价格区间
 5. 优选建仓区间计算正确
+6. confidence 只表示数据完整度，不参与动作映射
 """
 from __future__ import annotations
 
@@ -18,6 +19,7 @@ from trading.decision_support.conversation_formatter import (
     assert_action_consistency,
     format_decision_response,
 )
+from trading.decision_support.account_context import RESEARCH_DEFAULT_ACCOUNT_CONTEXT
 from trading.decision_support.data_status import DataStatus
 from trading.decision_support.decision_engine import DecisionEngine, DecisionInput
 from trading.decision_support.task_context import TaskContext
@@ -46,9 +48,9 @@ def make_bars():
         (22.38, 22.65, 22.00, 22.28), (22.24, 22.51, 21.88, 22.49),
         (22.35, 22.48, 21.62, 22.18),
     ]
-    for i, (o, h, l, c) in enumerate(prices):
+    for i, (o, h, low, c) in enumerate(prices):
         bars.append(Bar(trade_date=base + timedelta(days=i),
-                        open=o, high=h, low=l, close=c, volume=100000))
+                        open=o, high=h, low=low, close=c, volume=100000))
     return bars
 
 
@@ -65,7 +67,8 @@ def _input(temp_db, price=22.18, score=0.656, conf=0.67, veto=None, bars=None):
                       data_cutoff=datetime.now(tz=TZ))
     return DecisionInput(
         task=ctx, formal_score=score, technical_score=0.98,
-        fundamental_score=0.17, sentiment_score=-0.07,
+        fundamental_score=0.17, point_in_time_ok=True,
+        account_context=RESEARCH_DEFAULT_ACCOUNT_CONTEXT, sentiment_score=-0.07,
         policy_score=0.30, capital_score=-0.15, confidence=conf,
         data_status=DataStatus.FRESH, veto=veto,
         current_price=price, bars=bars or make_bars(),
@@ -74,14 +77,14 @@ def _input(temp_db, price=22.18, score=0.656, conf=0.67, veto=None, bars=None):
 
 
 # ═══════════════════════════════════════════════
-# 核心断言：formal_score=0.656 必须输出 BUY
+# 核心断言：formal_score=0.656 必须输出 STRONG_BUY
 # ═══════════════════════════════════════════════
 class TestCoreAssertion:
-    def test_0656_must_be_buy(self, temp_db):
+    def test_0656_must_be_strong_buy(self, temp_db):
         engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
         resp = engine.decide(_input(temp_db))
-        assert resp.action == Action.BUY, f"0.656应输出BUY，实际{resp.action}"
-        assert resp.action_zh == "建仓"
+        assert resp.action == Action.STRONG_BUY, f"0.656应输出STRONG_BUY，实际{resp.action}"
+        assert resp.action_zh == "强烈建仓"
         assert resp.allow_new_position is True
 
     def test_0656_not_wait(self, temp_db):
@@ -89,11 +92,28 @@ class TestCoreAssertion:
         resp = engine.decide(_input(temp_db))
         assert resp.action != Action.WAIT
 
-    def test_low_score_is_wait(self, temp_db):
+    def test_low_confidence_still_strong_buy(self, temp_db):
+        """confidence 剥离决策：低置信度不改变动作"""
+        engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
+        resp = engine.decide(_input(temp_db, conf=0.30))
+        assert resp.action == Action.STRONG_BUY
+
+    def test_mid_score_is_buy(self, temp_db):
+        """0.30（≥P75 回退 0.22）→ BUY"""
         engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
         resp = engine.decide(_input(temp_db, score=0.30))
+        assert resp.action == Action.BUY
+
+    def test_low_score_is_wait(self, temp_db):
+        engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
+        resp = engine.decide(_input(temp_db, score=0.10))
         assert resp.action == Action.WAIT
         assert resp.execution_status == "等待确认"
+
+    def test_negative_score_is_avoid(self, temp_db):
+        engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
+        resp = engine.decide(_input(temp_db, score=-0.30))
+        assert resp.action == Action.AVOID
 
 
 # ═══════════════════════════════════════════════
@@ -144,7 +164,7 @@ class TestPreferredZone:
 
     def test_empty_when_not_buy(self, temp_db):
         engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
-        resp = engine.decide(_input(temp_db, score=0.30))
+        resp = engine.decide(_input(temp_db, score=0.10))
         assert resp.price_zones.preferred_zone == []
 
 
@@ -182,7 +202,8 @@ class TestExecutionStatus:
     def test_target_position_and_batches(self, temp_db):
         engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
         resp = engine.decide(_input(temp_db))
-        assert resp.target_position_ratio == 0.12
+        # 0.656 ≥ P90（强买档）→ 目标 18%，0.18 调整幅度分 3 批
+        assert resp.target_position_ratio == 0.18
         assert resp.recommended_batches == 3
 
     def test_veto_gives_avoid(self, temp_db):

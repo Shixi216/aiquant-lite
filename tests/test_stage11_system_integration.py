@@ -144,6 +144,7 @@ def test_06_parse_mcp_invocation_is_local_and_non_recommendation() -> None:
     assert result["is_trade_recommendation"] is False
 
 
+@pytest.mark.local_state
 def test_07_parse_endpoint_never_calls_network_or_decision() -> None:
     response = client.post(
         "/v1/integration/workflow/parse",
@@ -282,6 +283,7 @@ def test_14_shadow_weight_cannot_be_promoted() -> None:
         )
 
 
+@pytest.mark.local_state
 def test_14b_missing_fundamental_suppresses_formal_action() -> None:
     symbol = "603980.SH"
     response = client.post(
@@ -473,6 +475,7 @@ def test_29_health_and_doctor_scripts_do_not_mutate_project() -> None:
         assert "out-file" not in text
 
 
+@pytest.mark.local_state
 def test_30_stage11_did_not_generate_experiment_records() -> None:
     assert _business_counts() == {
         "experiment_definitions": 2,
@@ -487,6 +490,7 @@ def test_30_stage11_did_not_generate_experiment_records() -> None:
     }
 
 
+@pytest.mark.local_state
 def test_31_scanner_cold_and_hot_performance_contract() -> None:
     ScannerFeatureLoader.clear_cache()
     service = MarketScannerService()

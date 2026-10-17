@@ -15,6 +15,7 @@ from trading.decision_support.decision_packets import (
     SourceTraceabilityError,
 )
 from trading.decision_support.orchestrator import DecisionService
+from trading.decision_support.trade_plan_repository import TradePlanRepository
 from manual_tracking.trades import (
     ManualPreviewExpiredError,
     ManualPreviewIntegrityError,
@@ -101,6 +102,7 @@ manual_position_router = APIRouter(
     tags=["manual-positions"],
 )
 legacy_router = APIRouter(prefix="/v1/trading", tags=["deprecated-trading-aliases"])
+plan_router = APIRouter(prefix="/v1/trade-plans", tags=["trade-plans"])
 
 audit_store = TradingAuditStore()
 decision_repository = DecisionRepository()
@@ -320,6 +322,28 @@ def get_daily_review(date: Date) -> DailyReview:
 @review_router.get("/daily/{date}/markdown", response_class=PlainTextResponse)
 def get_daily_review_markdown(date: Date) -> str:
     return review_service.daily_review_markdown(date)
+
+
+@plan_router.get("")
+def list_trade_plans(
+    local_user_id: str,
+    status: str | None = None,
+) -> list[dict]:
+    return [
+        plan.to_dict()
+        for plan in TradePlanRepository().list_plans(
+            local_user_id=local_user_id,
+            status=status,
+        )
+    ]
+
+
+@plan_router.get("/{plan_id}")
+def get_trade_plan(plan_id: str) -> dict:
+    plan = TradePlanRepository().get_plan(plan_id)
+    if plan is None:
+        raise HTTPException(status_code=404, detail="trade plan not found")
+    return plan.to_dict()
 
 
 @manual_trade_router.post("/previews", response_model=ManualTradePreview)
@@ -646,6 +670,7 @@ def deprecated_daily_review_markdown(
 router.include_router(decision_router)
 router.include_router(simulation_router)
 router.include_router(review_router)
+router.include_router(plan_router)
 router.include_router(manual_trade_router)
 router.include_router(manual_position_router)
 router.include_router(legacy_router)

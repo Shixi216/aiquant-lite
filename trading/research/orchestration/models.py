@@ -10,6 +10,7 @@ EVIDENCE_GRAPH_VERSION = "five-factor-evidence-graph-v1"
 CORRELATION_ALGORITHM_VERSION = "five-factor-correlation-v1"
 SHADOW_SCORER_VERSION = "shadow-composite-v1"
 FORMAL_STRATEGY_VERSION = "auditable_multi_factor_v1"
+FORMAL_THREE_FACTOR_STRATEGY_VERSION = "auditable_three_factor_v1"
 
 BASE_FACTOR_TYPES: tuple[FactorType, ...] = (
     FactorType.TECHNICAL,
@@ -30,6 +31,12 @@ SHADOW_CONFIGURED_WEIGHTS: dict[FactorType, float] = {
 FORMAL_WEIGHTS: dict[FactorType, float] = {
     FactorType.TECHNICAL: 0.60,
     FactorType.FUNDAMENTAL: 0.40,
+}
+
+FORMAL_THREE_FACTOR_WEIGHTS: dict[FactorType, float] = {
+    FactorType.TECHNICAL: 0.50,
+    FactorType.FUNDAMENTAL: 0.35,
+    FactorType.SENTIMENT: 0.15,
 }
 
 

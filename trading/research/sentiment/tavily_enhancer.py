@@ -27,11 +27,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
 
 TZ = timezone(timedelta(hours=8))
 
@@ -239,7 +237,7 @@ class TavilyEnhancer:
             f"{self.symbol} 风险 异动 公告",
         ]
         all_results: list[dict] = []
-        search_failed = False
+        _search_failed = False
 
         # 并发执行2次搜索（减少等待时间）
         from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -257,13 +255,13 @@ class TavilyEnhancer:
                         result.degraded_reason = "Tavily 返回空结果"
                 except TimeoutError:
                     result.degraded_reason = "Tavily 请求超时"
-                    search_failed = True
+                    _search_failed = True
                 except ConnectionError as exc:
                     result.degraded_reason = f"Tavily HTTP/网络错误: {str(exc)[:40]}"
-                    search_failed = True
+                    _search_failed = True
                 except Exception as exc:
                     result.degraded_reason = f"Tavily 搜索异常: {type(exc).__name__}"
-                    search_failed = True
+                    _search_failed = True
 
         # 无凭据检测
         if not _get_tavily_key():

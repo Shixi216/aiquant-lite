@@ -30,9 +30,10 @@ def test_stock_report_times_all_stages_and_never_repeats_pipeline(
         for stage in ("行情", "K线", "财务", "公告", "新闻", "数据库"):
             timings.record(stage, 0.001)
 
-    def fake_load(self, symbol):
+    def fake_load(self, symbol, performance, report_cutoff):
+        del performance, report_cutoff
         calls["load"] += 1
-        return bars, [], [], []
+        return bars, [], [], [], date(2026, 8, 10)
 
     class FakeDecisionEngine:
         def __init__(self, **kwargs):
@@ -44,6 +45,12 @@ def test_stock_report_times_all_stages_and_never_repeats_pipeline(
                 action_zh="等待",
                 execution_status="等待确认",
                 next_action="等待价格进入区间或信号确认",
+                current_position_ratio=0.0,
+                target_position_ratio=0.0,
+                recommended_batches=0,
+                frozen_entry_zone=None,
+                frozen_preferred_zone=None,
+                frozen_stop_loss_price=None,
             )
 
     monkeypatch.setattr(module, "fetch_and_persist", fake_fetch)
@@ -62,7 +69,9 @@ def test_stock_report_times_all_stages_and_never_repeats_pipeline(
     monkeypatch.setattr(
         module,
         "capital_flow_factor_enhanced",
-        lambda symbol, values: {"score": 0.0, "pv_label": "平稳", "label": "中性"},
+        lambda symbol, values, *, allow_external_fetch: {
+            "score": 0.0, "pv_label": "平稳", "label": "中性"
+        },
     )
     monkeypatch.setattr(
         module,

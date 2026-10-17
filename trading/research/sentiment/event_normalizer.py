@@ -14,6 +14,20 @@ _CLASSIFICATION_RULES: tuple[
     ...,
 ] = (
     (
+        ("获取订单受限", "订单受限", "订单限制", "限制获取订单"),
+        SentimentEventType.ORDER_RESTRICTION,
+        -1,
+        1.0,
+        ImpactHorizon.LONG_TERM,
+    ),
+    (
+        ("监管工作函", "监管函"),
+        SentimentEventType.REGULATORY_LETTER,
+        -1,
+        0.9,
+        ImpactHorizon.LONG_TERM,
+    ),
+    (
         ("业绩预增", "扭亏", "大幅增长", "净利润增长", "盈利"),
         SentimentEventType.EARNINGS_POSITIVE,
         1,

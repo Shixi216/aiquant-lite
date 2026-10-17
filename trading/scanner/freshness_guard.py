@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from database.db import open_database
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json
@@ -61,7 +61,6 @@ class ScannerFreshnessGuard:
         max_age_hours: float = 12.0,
     ) -> FreshnessCheckResult:
         """扫描前强制检查。过期时自动批量刷新；刷新失败返回数据陈旧。"""
-        import duckdb
         from config.settings import settings
 
         db_path = Path(settings.opc_database_path)
@@ -200,30 +199,60 @@ class ScannerFreshnessGuard:
                 # Tushare 主源失败 → 备用：腾讯源
                 return self._fallback_tencent(result, db_path)
 
+            # 交易日必须由 daily payload 确认；采集时间不是行情交易日。
+            if not snap.trade_date_consistent:
+                result.fresh = False
+                result.refresh_failed = True
+                result.refresh_error = snap.error or "daily交易日期无法确认"
+                result.reason = "数据陈旧（行情交易日期无法确认）"
+                return result
+
+            # 派生横截面字段（两融净买入 / 龙虎榜净额 / 机构净额）
+            margin_map, dragon_map = provider.compute_cross_section_fields(snap)
+
             # 写入快照（Tushare 数据）
-            self._write_tushare_snapshot(db_path, snap)
+            snapshot_id = self._write_tushare_snapshot(db_path, snap, margin_map, dragon_map)
             result.auto_refreshed = True
 
-            # 刷新后重新读取快照
-            import duckdb
+            # 只读取本次写入的快照，并以 payload 的实际交易日作最终判定。
             con = open_database(str(db_path), read_only=True)
             rows = con.execute(
                 "SELECT snapshot_id, snapshot_time FROM market_snapshot_runs "
-                "ORDER BY snapshot_time DESC LIMIT 1"
+                "WHERE snapshot_id=?",
+                [snapshot_id],
             ).fetchall()
+            payload_dates = [
+                str(row[0]).replace("-", "")
+                for row in con.execute(
+                    """
+                    SELECT DISTINCT JSON_EXTRACT_STRING(payload_json,'$.trade_date')
+                    FROM market_snapshot_items WHERE snapshot_id=?
+                    """,
+                    [snapshot_id],
+                ).fetchall()
+                if row[0]
+            ]
             con.close()
             if rows:
                 result.snapshot_id = rows[0][0]
                 result.snapshot_time = rows[0][1]
-                snap_date = str(rows[0][1])[:10].replace("-", "")
-                if snap_date >= result.latest_trade_date:
+                expected_date = str(snap.trade_date).replace("-", "")
+                observed_dates = sorted(set(payload_dates))
+                if observed_dates != [expected_date]:
+                    result.fresh = False
+                    result.refresh_failed = True
+                    result.refresh_error = (
+                        f"payload交易日期不一致：期望 {expected_date}，实际 {observed_dates}"
+                    )
+                    result.reason = "数据陈旧（持久化行情交易日期无法确认）"
+                elif expected_date >= result.latest_trade_date:
                     result.fresh = True
                     result.reason = (
-                        f"批量刷新成功（快照 {snap_date}，Tushare主源，"
+                        f"批量刷新成功（行情 {expected_date}，Tushare主源，"
                         f"覆盖{snap.coverage_ratio:.0%}，moneyflow{'缺失' if snap.moneyflow_missing else '完整'}）"
                     )
                 else:
-                    result.reason = f"刷新后仍过期（快照 {snap_date}，需 {result.latest_trade_date}）"
+                    result.reason = f"刷新后仍过期（行情 {expected_date}，需 {result.latest_trade_date}）"
                     result.fresh = False
             else:
                 result.reason = "刷新后仍无快照"
@@ -241,7 +270,6 @@ class ScannerFreshnessGuard:
         """备用源：腾讯全市场快照（Tushare 失败时）"""
         try:
             from data_hub.providers.tencent_snapshot import TencentSnapshotProvider
-            import duckdb
 
             provider = TencentSnapshotProvider()
             con = open_database(str(db_path), read_only=True)
@@ -265,15 +293,16 @@ class ScannerFreshnessGuard:
             result.reason = "数据陈旧（主源+备用均失败）"
             return result
 
-    def _write_tushare_snapshot(self, db_path: Path, snap) -> None:
-        """把 Tushare 四接口数据写入快照表"""
+    def _write_tushare_snapshot(self, db_path: Path, snap, margin_map: dict, dragon_map: dict) -> str:
+        """把 Tushare 四接口数据写入快照表（含两融/龙虎榜派生字段）"""
         import uuid
-        import duckdb
         import json
 
         snapshot_id = f"mkt_{uuid.uuid4().hex[:20]}"
         now = datetime.now(tz=TZ)
         trade_date = snap.trade_date  # 实际交易日期
+        # 防御性 clamp：覆盖率上限 100%（Tushare 可能多于 universe 新股数）
+        coverage = min(max(snap.coverage_ratio, 0.0), 1.0)
 
         con = open_database(str(db_path))
         try:
@@ -291,8 +320,8 @@ class ScannerFreshnessGuard:
                 [
                     snapshot_id, now,
                     len(snap.daily), len(snap.daily), len(snap.daily), 0,
-                    snap.coverage_ratio,
-                    "COMPLETE" if snap.coverage_ratio >= 0.99 else "PARTIAL",
+                    coverage,
+                    "COMPLETE" if coverage >= 0.99 else "PARTIAL",
                     now, now, now,
                     f"tushare_{trade_date}_{int(now.timestamp())}",
                     snap.request_count, 0.0, 0, 0,
@@ -319,7 +348,7 @@ class ScannerFreshnessGuard:
                 code = r["ts_code"]
                 b = basic_map.get(code)
                 m = mf_map.get(code)
-                l = limit_map.get(code)
+                limit_row = limit_map.get(code)
                 payload = {
                     "trade_date": trade_date,
                     "snapshot_time": now.isoformat(),
@@ -334,8 +363,11 @@ class ScannerFreshnessGuard:
                     "pb": b.get("pb") if b is not None else None,
                     "total_mv": b.get("total_mv") if b is not None else None,
                     "moneyflow_net": (m.get("net_mf_amount") if m is not None else None),
-                    "limit_up": (l.get("up_limit") if l is not None else None),
-                    "limit_down": (l.get("down_limit") if l is not None else None),
+                    "limit_up": (limit_row.get("up_limit") if limit_row is not None else None),
+                    "limit_down": (limit_row.get("down_limit") if limit_row is not None else None),
+                    "margin_net_buy": margin_map.get(code),
+                    "dragon_tiger_net_amount": dragon_map.get(code, {}).get("net_amount"),
+                    "dragon_tiger_institution_net_amount": dragon_map.get(code, {}).get("institution_net_amount"),
                 }
                 rows.append((
                     snapshot_id, code,
@@ -366,11 +398,11 @@ class ScannerFreshnessGuard:
             )
         finally:
             con.close()
+        return snapshot_id
 
     def _write_snapshot(self, db_path: Path, frame, provider_name: str) -> None:
         """把腾讯快照数据写入 market_snapshot_runs / market_snapshot_items（匹配真实表结构）"""
         import uuid
-        import duckdb
 
         snapshot_id = f"mkt_{uuid.uuid4().hex[:20]}"
         now = datetime.now(tz=TZ)

@@ -1,0 +1,42 @@
+<script setup lang="ts">
+import type { Block, MarketContextData } from "../../types/v2";
+import { formatAmount, formatDateTime, formatPct, formatScore, NO_DATA } from "../../domain/labels";
+
+defineProps<{ context: Block<MarketContextData> }>();
+const regime: Record<string, string> = { RISK_ON: "偏强", BALANCED: "均衡", RISK_OFF: "偏弱", UNKNOWN: "数据不足" };
+</script>
+
+<template>
+  <section class="panel">
+    <div class="section-head"><div><h3>宏观与市场环境</h3><p>基于全市场涨跌分布、情绪与资金流算法结果</p></div><span v-if="context.available" class="badge">截至 {{ formatDateTime(context.data?.data_cutoff) }}</span></div>
+    <div v-if="context.available && context.data" class="macro-grid">
+      <div class="metric"><span>市场状态</span><strong>{{ regime[context.data.macro.market_regime] ?? context.data.macro.market_regime }}</strong></div>
+      <div class="metric"><span>上涨占比</span><strong>{{ context.data.macro.advance_ratio == null ? NO_DATA : formatPct(context.data.macro.advance_ratio * 100) }}</strong></div>
+      <div class="metric"><span>中位涨跌</span><strong>{{ formatPct(context.data.macro.median_change_pct) }}</strong></div>
+      <div class="metric"><span>全市场成交额</span><strong>{{ formatAmount(context.data.macro.total_amount) }}</strong></div>
+      <div class="metric"><span>市场情绪</span><strong>{{ context.data.macro.sentiment ? formatScore(Number(context.data.macro.sentiment.score)) : NO_DATA }}</strong><small v-if="context.data.macro.sentiment">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.sentiment.data_cutoff ?? '')) }} · 置信度 {{ formatScore(Number(context.data.macro.sentiment.confidence)) }}</small></div>
+      <div class="metric"><span>市场资金流</span><strong>{{ context.data.macro.capital_flow ? formatScore(Number(context.data.macro.capital_flow.score)) : NO_DATA }}</strong><small v-if="context.data.macro.capital_flow">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.capital_flow.data_cutoff ?? '')) }} · 置信度 {{ formatScore(Number(context.data.macro.capital_flow.confidence)) }}</small></div>
+    </div>
+    <p v-else class="dim">该数据库暂没有可用的市场环境聚合。</p>
+  </section>
+  <section class="panel">
+    <div class="section-head"><div><h3>全部板块现状</h3><p>按数据库行业映射聚合当期全市场快照，按板块中位涨跌排序</p></div></div>
+    <div v-if="context.available && context.data?.sectors.length" class="table-scroll" tabindex="0">
+      <table class="data">
+        <thead><tr><th>板块</th><th>成分数</th><th>上涨/下跌</th><th>上涨占比</th><th>中位涨跌</th><th>平均四维分</th><th>成交额</th></tr></thead>
+        <tbody><tr v-for="sector in context.data.sectors" :key="sector.sector">
+          <td><strong>{{ sector.sector }}</strong><small>{{ sector.classification_system }}</small></td>
+          <td>{{ sector.member_count }}</td><td>{{ sector.advances }} / {{ sector.declines }}</td>
+          <td>{{ formatPct(sector.advance_ratio * 100) }}</td>
+          <td :class="sector.median_change_pct && sector.median_change_pct > 0 ? 'up' : sector.median_change_pct && sector.median_change_pct < 0 ? 'down' : ''">{{ formatPct(sector.median_change_pct) }}</td>
+          <td>{{ formatScore(sector.average_composite_score) }}</td><td>{{ formatAmount(sector.total_amount) }}</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <p v-else class="dim">行业映射或板块行情暂无覆盖。</p>
+  </section>
+</template>
+
+<style scoped>
+.section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.section-head h3{margin-bottom:4px}.section-head p,.dim{margin:0;color:var(--text-dim);font-size:12px}.macro-grid{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px}.metric{padding:13px;background:var(--bg-hover);border-radius:8px}.metric span,.metric small,td small{display:block;color:var(--text-dim);font-size:11px}.metric strong{display:block;margin-top:8px;font-size:17px}td small{margin-top:3px}@media(max-width:1100px){.macro-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:640px){.macro-grid{grid-template-columns:repeat(2,1fr)}}
+</style>

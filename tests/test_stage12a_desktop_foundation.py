@@ -130,6 +130,7 @@ def test_missing_database_is_safe(tmp_path: Path) -> None:
     assert result == {"ok": False, "error": "DATABASE_NOT_FOUND"}
 
 
+@pytest.mark.local_state
 def test_current_database_read_only_and_migrations_valid() -> None:
     paths = AppPaths.resolve(development=True, application_root=PROJECT_ROOT)
     assert paths.validate_database()["ok"] is True
@@ -404,6 +405,7 @@ def test_service_state_contains_no_child_credentials(tmp_path: Path) -> None:
     assert value not in supervisor._state_file.read_text(encoding="utf-8")
 
 
+@pytest.mark.local_state
 def test_database_business_counts_are_unchanged() -> None:
     """业务数据完整性保护（不依赖会随正常刷新变化的全库固定总数）
 
@@ -452,7 +454,7 @@ def test_database_business_counts_are_unchanged() -> None:
 def test_no_live_execution_check_passes() -> None:
     result = subprocess.run(
         [
-            str(PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"),
+            sys.executable,
             str(PROJECT_ROOT / "scripts" / "check_no_live_execution.py"),
         ],
         cwd=PROJECT_ROOT,

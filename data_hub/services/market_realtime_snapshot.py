@@ -21,7 +21,7 @@ import threading
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
@@ -244,7 +244,6 @@ class MarketRealtimeSnapshotService:
 
     def _symbols(self) -> list[str]:
         """从股票池读代码（转腾讯格式）"""
-        import duckdb
         con = open_database(str(self.db_path), read_only=True)
         rows = con.execute(
             "SELECT symbol FROM stock_universe WHERE listing_status='ACTIVE'"

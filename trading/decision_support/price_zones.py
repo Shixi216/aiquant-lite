@@ -10,7 +10,7 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from trading.decision_support.action import Action
@@ -37,8 +37,8 @@ class PriceZoneCalculator:
             return 0.0
         trs = []
         for i in range(1, min(period + 1, len(bars))):
-            h, l, pc = bars[-i].high, bars[-i].low, bars[-i - 1].close
-            tr = max(h - l, abs(h - pc), abs(l - pc))
+            h, low_price, pc = bars[-i].high, bars[-i].low, bars[-i - 1].close
+            tr = max(h - low_price, abs(h - pc), abs(low_price - pc))
             trs.append(tr)
         return sum(trs) / len(trs) if trs else 0.0
 

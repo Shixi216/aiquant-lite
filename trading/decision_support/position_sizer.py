@@ -21,11 +21,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from trading.decision_support.action import Action
 from trading.decision_support.data_status import DataStatus
-from trading.decision_support.thresholds import ActionThresholds
+from trading.decision_support.thresholds import ActionThresholdsV2
 
 
 @dataclass
@@ -62,8 +61,8 @@ class SizerOutput:
 class PositionSizer:
     """确定性仓位计算器"""
 
-    def __init__(self, thresholds: ActionThresholds | None = None):
-        self.t = thresholds or ActionThresholds()
+    def __init__(self, thresholds: ActionThresholdsV2 | None = None):
+        self.t = thresholds or ActionThresholdsV2.from_table()
 
     def size(self, inp: SizerInput) -> SizerOutput:
         out = SizerOutput(
@@ -137,11 +136,13 @@ class PositionSizer:
         return out
 
     def _base_target(self, inp: SizerInput) -> float:
-        """基础目标仓位（按动作 + 评分 + 置信度）"""
+        """基础目标仓位（按动作 + 评分强度；数据状态门槛已在 size() 前置）"""
+        if inp.data_status == DataStatus.STALE:
+            return 0.0
         if inp.action in (Action.STRONG_BUY,):
-            return 0.18 if inp.confidence >= 0.70 else 0.12
+            return 0.18 if inp.formal_score >= self.t.strong_buy_min else 0.12
         if inp.action == Action.BUY:
-            return 0.12 if inp.confidence >= 0.60 else 0.08
+            return 0.12 if inp.formal_score >= self.t.buy_min else 0.08
         if inp.action == Action.SMALL_BUY:
             return 0.03
         if inp.action == Action.ADD:

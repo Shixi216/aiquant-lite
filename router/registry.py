@@ -23,8 +23,8 @@ ROLE_SPECS: dict[str, RoleSpec] = {
     "research_synthesizer": RoleSpec(
         role="research_synthesizer",
         display_name="个股研究综合 Agent",
-        provider="longcat",
-        preferred_model="LongCat-2.0",
+        provider="qwen",
+        preferred_model="qwen3.8-max-0902",
         task_type="research_synthesis",
         description="基于本地点时五维证据生成RESEARCH结构化摘要。",
     ),
@@ -32,7 +32,7 @@ ROLE_SPECS: dict[str, RoleSpec] = {
         role="announcement_verifier",
         display_name="公告核验 Agent",
         provider="qwen",
-        preferred_model="Qwen3.7-Plus",
+        preferred_model="qwen3.8-max-0902",  # 2026-10-01 用户：qwen3.8-max → qwen3.8-max-0902（原额度耗尽）
         task_type="text_verification",
         description="核对公告原文、日期、主体和关键事实。",
     ),
@@ -56,7 +56,7 @@ ROLE_SPECS: dict[str, RoleSpec] = {
         role="risk_controller",
         display_name="风险控制 Agent",
         provider="deepseek",
-        preferred_model="DeepSeek V4 Pro",
+        preferred_model="deepseek-v4-pro",  # 2026-10-01 用户：风控改官方 deepseek-v4-pro
         task_type="risk_analysis",
         description="识别风险暴露、约束条件和否决项。",
     ),
@@ -71,8 +71,8 @@ ROLE_SPECS: dict[str, RoleSpec] = {
     "news_processor": RoleSpec(
         role="news_processor",
         display_name="新闻处理 Agent",
-        provider="longcat",
-        preferred_model="LongCat-2.0",
+        provider="qwen",
+        preferred_model="qwen3.8-max-0902",
         task_type="bulk_text",
         description="批量整理新闻、去重、聚类和生成摘要。",
     ),
@@ -81,7 +81,7 @@ ROLE_SPECS: dict[str, RoleSpec] = {
 
 def _role_enabled(spec: RoleSpec) -> bool:
     if spec.role in {"news_processor", "research_synthesizer"}:
-        return router_settings.longcat_ready
+        return router_settings.qwen_ready
 
     if spec.role == "risk_controller":
         return router_settings.deepseek_ready

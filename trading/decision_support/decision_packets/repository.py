@@ -196,7 +196,12 @@ class DecisionRepository:
     @staticmethod
     def _packet_payload(packet: DecisionPacket) -> dict[str, Any]:
         dumped = packet.model_dump(mode="json")
-        return {field: dumped[field] for field in PAYLOAD_FIELDS}
+        # TIMESTAMPTZ retains the instant but not its original UTC offset.
+        # Preserve the original representation used by the immutable packet hash.
+        return {
+            field: dumped[field]
+            for field in PAYLOAD_FIELDS | {"generated_at", "data_cutoff_time"}
+        }
 
     @staticmethod
     def _verified_source_ids(packet: DecisionPacket) -> set[str]:
@@ -434,6 +439,13 @@ class DecisionRepository:
 
     def _row_to_packet(self, row: tuple[Any, ...]) -> DecisionPacket:
         payload = _json_load(row[10])
+        for field, column in (("generated_at", 4), ("data_cutoff_time", 5)):
+            if field in payload:
+                original = datetime.fromisoformat(payload[field])
+                if original.tzinfo is None:
+                    original = original.astimezone()
+                if original != row[column]:
+                    raise DecisionIntegrityError("packet timestamp metadata mismatch")
         values = {
             "decision_id": row[0],
             "decision_version": int(row[1]),

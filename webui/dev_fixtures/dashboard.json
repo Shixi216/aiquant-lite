@@ -1,0 +1,144 @@
+{
+  "time_semantics": {
+    "market_trade_date": {
+      "value": "2026-09-04",
+      "source": "router.market_breadth.market_trade_date",
+      "label_zh": "market_trade_date"
+    },
+    "market_snapshot_cutoff": {
+      "value": "2026-09-04T23:44:00+08:00",
+      "source": "router.market_breadth.snapshot_time",
+      "label_zh": "market_snapshot_cutoff"
+    },
+    "score_data_cutoff": {
+      "value": "2026-08-30T15:00:00+08:00",
+      "source": "router.cross_section.data_cutoff",
+      "label_zh": "score_data_cutoff"
+    },
+    "score_generated_at": {
+      "value": "2026-08-30T18:02:11+08:00",
+      "source": "router.cross_section.generated_at",
+      "label_zh": "score_generated_at"
+    },
+    "coverage_report_date": {
+      "value": "2026-07-30T15:00:00+08:00",
+      "source": "router.data_coverage.data_cutoff",
+      "label_zh": "coverage_report_date"
+    }
+  },
+  "market_breadth": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.market_breadth",
+    "formal_status": "formal",
+    "data": {
+      "snapshot_id": "snap-20260904",
+      "snapshot_time": "2026-09-04T23:44:00+08:00",
+      "data_cutoff": "2026-09-04T15:00:00+08:00",
+      "expected_universe_size": 5549,
+      "received_symbol_count": 5549,
+      "valid_symbol_count": 5549,
+      "coverage_ratio": 1.0,
+      "completeness_status": "COMPLETE",
+      "stale": false,
+      "data_age_seconds": 120.5,
+      "advances": 2311,
+      "declines": 2762,
+      "flats": 476,
+      "limit_ups": null,
+      "limit_downs": null,
+      "limit_counts_derivation": "unavailable: snapshot carries no price-limit context (no ST flag / board limit), not guessed from fixed 10%",
+      "total_amount": 1897234567890.0,
+      "median_change_pct": -0.42,
+      "change_buckets": {
+        "gt7": 132, "p5_7": 211, "p2_5": 503, "p0_2": 1465, "flat": 476,
+        "n0_2": 1602, "n2_5": 733, "n5_7": 302, "lt7": 125
+      },
+      "market_trade_date": "2026-09-04",
+      "market_trade_date_status": "FRESH",
+      "market_trade_date_derivation": "trading_calendar.latest_completed_trade_date(data_available_date=snapshot_data_trade_date or bars_max_trade_date)",
+      "snapshot_data_trade_date": "2026-09-04",
+      "bars_max_trade_date": "2026-09-04",
+      "partial_universe": false
+    }
+  },
+  "score_preview": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.cross_section",
+    "data": {
+      "data_cutoff": "2026-08-30T15:00:00+08:00",
+      "generated_at": "2026-08-30T18:02:11+08:00",
+      "total": 5321,
+      "thresholds": {
+        "data_cutoff": "2026-08-30T15:00:00+08:00",
+        "p50": 0.512, "p75": 0.663, "p90": 0.799, "p95": 0.884,
+        "strong_buy_q": 0.799, "buy_q": 0.663, "n_total": 5321,
+        "generated_at": "2026-08-30T18:02:11+08:00"
+      }
+    }
+  },
+  "coverage": {
+    "available": true,
+    "reason_code": null,
+    "stale": true,
+    "source": "router.data_coverage",
+    "data": {
+      "data_cutoff": "2026-07-30T15:00:00+08:00",
+      "stale": true
+    }
+  },
+  "components": [
+    {"name": "router", "status": "ok", "healthy": true},
+    {"name": "data_hub", "status": "closed", "healthy": true},
+    {"name": "jinniu", "status": "closed", "healthy": true},
+    {"name": "tushare", "status": "closed", "healthy": true},
+    {"name": "baostock", "status": "open", "healthy": false},
+    {"name": "coverage", "status": "ok", "healthy": true}
+  ],
+  "market_context": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.equity_context",
+    "data": {
+      "snapshot_id": "snap-20260904",
+      "data_cutoff": "2026-09-04T23:44:00+08:00",
+      "coverage_ratio": 1.0,
+      "completeness_status": "COMPLETE",
+      "valid_symbol_count": 5549,
+      "macro": {"market_regime": "BALANCED", "advance_ratio": 0.4165, "median_change_pct": -0.42, "total_amount": 1897234567890.0},
+      "sectors": [
+        {"sector": "白酒", "classification_system": "申万", "member_count": 20, "advances": 13, "declines": 7, "advance_ratio": 0.65, "median_change_pct": 1.18, "total_amount": 42680000000.0, "average_composite_score": 0.32},
+        {"sector": "银行", "classification_system": "申万", "member_count": 42, "advances": 18, "declines": 23, "advance_ratio": 0.4286, "median_change_pct": -0.21, "total_amount": 78120000000.0, "average_composite_score": 0.08}
+      ],
+      "calculation": "sector_snapshot_aggregate_v1",
+      "source": "router_main_database"
+    }
+  },
+  "dragon_tiger": {
+    "available": true,
+    "reason_code": null,
+    "stale": false,
+    "source": "router.sentiment_v3_dragon_tiger",
+    "data": {
+      "trade_date": "2026-09-04",
+      "available_time": "2026-09-04T18:00:00+08:00",
+      "source": "Tushare top_list/top_inst EOD event",
+      "quality_flags": ["EOD_ONLY", "AVAILABLE_TIME_INFERRED"],
+      "publication_type": "POST_CLOSE_EOD",
+      "is_realtime": false,
+      "total": 1,
+      "items": [{"symbol":"600519.SH","name":"贵州茅台","reasons":["日涨幅偏离值达7%"],"buy_amount":985000000.0,"sell_amount":612000000.0,"net_amount":373000000.0,"institution_net_amount":86000000.0,"seat_count":10,"institution_seat_count":2}]
+    }
+  },
+  "provenance": {
+    "data_source": "router_canonical",
+    "data_time": null,
+    "calculation_source": "router_canonical",
+    "formal_status": "formal"
+  },
+  "fixture_mode": true
+}

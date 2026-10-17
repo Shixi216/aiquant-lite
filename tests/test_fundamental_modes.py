@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import duckdb
 import pytest
@@ -64,7 +65,7 @@ from trading.schemas import (
 )
 
 
-TZ = datetime.now().astimezone().tzinfo
+TZ = ZoneInfo("Asia/Shanghai")
 NOW = datetime(2025, 5, 2, 12, 0, tzinfo=TZ)
 CUTOFF = datetime(2025, 5, 1, 23, 0, tzinfo=TZ)
 

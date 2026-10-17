@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
-from datetime import date, datetime, time
+from datetime import date, datetime
 from pathlib import Path
 from statistics import fmean, median
 from typing import Any

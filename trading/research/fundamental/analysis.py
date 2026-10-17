@@ -35,6 +35,28 @@ def fundamental_signal(snapshot: FundamentalSnapshot | None) -> Signal:
     if snapshot.pe_ttm is not None and snapshot.pe_ttm <= 0:
         risks.append("PE is non-positive; earnings may be negative")
     score = fmean(components) if components else 0.0
+    # 扣非净利校验：归母净利可能被投资收益等非经常性项目撑起，
+    # 单期 ROE/现金流为正会高估主业质量（盈新发展 000620 教训）。
+    deducted = snapshot.net_profit_deducted
+    invest_ratio = snapshot.invest_income_ratio
+    if deducted is not None:
+        evidence.append(
+            f"net_profit_deducted={deducted / 1e8:+.2f}亿"
+        )
+    if snapshot.invest_income is not None:
+        evidence.append(
+            f"invest_income={snapshot.invest_income / 1e8:+.2f}亿"
+        )
+    if deducted is not None and deducted < 0:
+        score_cap = -0.6
+        risks.append("扣非净利为负，主业实际亏损")
+        if invest_ratio is not None and invest_ratio > 0.5:
+            score_cap = -0.75
+            risks.append(
+                "非经常性收益撑利润：投资收益占归母净利"
+                f"{invest_ratio:.0%}，扣非亏损"
+            )
+        score = min(score, score_cap)
     confidence = min(0.9, 0.2 + len(components) * 0.15)
     return Signal(
         role="fundamental_agent",

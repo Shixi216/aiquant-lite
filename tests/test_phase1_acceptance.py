@@ -4,17 +4,14 @@
 """
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
-
-import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from trading.decision_support.action import Action, action_zh, is_no_position_action, is_position_action
 from trading.decision_support.action_resolver import DecisionActionResolver, ResolverInput, VetoResult
-from trading.decision_support.data_status import DataStatus, data_status_zh, status_priority
+from trading.decision_support.data_status import DataStatus
 from trading.decision_support.permission_service import PermissionLevel, PermissionService
 from trading.decision_support.position_sizer import PositionSizer, SizerInput
 from trading.decision_support.task_context import TaskContext
@@ -42,54 +39,56 @@ class TestActions:
 
     def test_strong_buy(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.70, confidence=0.80, data_status=DataStatus.FRESH))
+            point_in_time_ok=True,             formal_score=0.70, confidence=0.80, data_status=DataStatus.FRESH))
         assert out.action == Action.STRONG_BUY
 
     def test_buy(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.50, confidence=0.65, data_status=DataStatus.FRESH))
+            point_in_time_ok=True,             formal_score=0.30, confidence=0.65, data_status=DataStatus.FRESH))
         assert out.action == Action.BUY
 
     def test_small_buy(self):
+        """v2：SMALL_BUY 仅来自情绪风险提醒降级"""
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.50, confidence=0.50, data_status=DataStatus.FRESH))
+            point_in_time_ok=True,             formal_score=0.70, confidence=0.50, data_status=DataStatus.FRESH,
+            sentiment_risk_reminder=True))
         assert out.action == Action.SMALL_BUY
 
     def test_wait(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.10, confidence=0.60, data_status=DataStatus.FRESH))
+            point_in_time_ok=True,             formal_score=0.10, confidence=0.60, data_status=DataStatus.FRESH))
         assert out.action == Action.WAIT
 
     def test_avoid(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=-0.30, confidence=0.60, data_status=DataStatus.FRESH))
+            point_in_time_ok=True,             formal_score=-0.30, confidence=0.60, data_status=DataStatus.FRESH))
         assert out.action == Action.AVOID
 
     def test_hold(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.30, confidence=0.60, data_status=DataStatus.FRESH, has_position=True))
+            point_in_time_ok=True,             formal_score=0.30, confidence=0.60, data_status=DataStatus.FRESH, has_position=True))
         assert out.action == Action.HOLD
 
     def test_add(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.70, confidence=0.75, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=0.70, confidence=0.75, data_status=DataStatus.FRESH,
             has_position=True, technical_score=0.5, capital_score=0.4))
         assert out.action == Action.ADD
 
     def test_reduce(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=-0.35, confidence=0.60, data_status=DataStatus.FRESH, has_position=True))
+            point_in_time_ok=True,             formal_score=-0.35, confidence=0.60, data_status=DataStatus.FRESH, has_position=True))
         assert out.action == Action.REDUCE
 
     def test_stop_loss(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=-0.60, confidence=0.60, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=-0.60, confidence=0.60, data_status=DataStatus.FRESH,
             has_position=True, unrealized_return=-0.20))
         assert out.action == Action.STOP_LOSS
 
     def test_exit(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=-0.60, confidence=0.60, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=-0.60, confidence=0.60, data_status=DataStatus.FRESH,
             has_position=True, unrealized_return=-0.05))
         assert out.action == Action.EXIT
 
@@ -101,7 +100,7 @@ class TestPriority:
     def test_veto_overrides_strong_buy(self):
         """VETO 覆盖强买信号"""
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.80, confidence=0.90, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=0.80, confidence=0.90, data_status=DataStatus.FRESH,
             veto=VetoResult(veto_triggered=True, veto_type="DELISTING_RISK")))
         assert out.veto_override
         assert out.action == Action.AVOID
@@ -109,7 +108,7 @@ class TestPriority:
 
     def test_veto_exit_with_position(self):
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.80, confidence=0.90, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=0.80, confidence=0.90, data_status=DataStatus.FRESH,
             has_position=True,
             veto=VetoResult(veto_triggered=True, veto_type="FRAUD")))
         assert out.action == Action.EXIT
@@ -117,14 +116,14 @@ class TestPriority:
     def test_stale_no_buy(self):
         """STALE 禁止建仓"""
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.80, confidence=0.90, data_status=DataStatus.STALE))
+            point_in_time_ok=True,             formal_score=0.80, confidence=0.90, data_status=DataStatus.STALE))
         assert out.action == Action.WAIT
         assert not out.allow_new_position
 
     def test_failed_stops_decision(self):
         """FAILED 停止决策"""
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.80, confidence=0.90, data_status=DataStatus.FAILED))
+            point_in_time_ok=True,             formal_score=0.80, confidence=0.90, data_status=DataStatus.FAILED))
         assert out.action == Action.WAIT
 
     def test_degraded_reduces_position(self):
@@ -136,11 +135,11 @@ class TestPriority:
         # DEGRADED 后目标仓位 < 正常 BUY 目标（12%）
         assert out.target_position_ratio < 0.12
 
-    def test_low_confidence_no_strong_buy(self):
-        """低置信度禁止强烈建仓"""
+    def test_score_strength_drives_action(self):
+        """rank 分位数 v2：动作由评分分档决定，confidence 不参与映射"""
         out = DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.70, confidence=0.40, data_status=DataStatus.FRESH))
-        assert out.action != Action.STRONG_BUY
+            point_in_time_ok=True,             formal_score=0.70, confidence=0.40, data_status=DataStatus.FRESH))
+        assert out.action == Action.STRONG_BUY
 
     def test_formal_60_40_not_replaced(self):
         """正式60/40不被影子五维替换（结构测试）"""
@@ -153,19 +152,19 @@ class TestPriority:
 # T3 持仓差异测试
 # =====================================================================
 class TestPositionDifference:
-    def _resolve(self, has_position, ratio, cost, price):
+    def _resolve(self, has_position, ratio, cost, price, score=0.55):
         return DecisionActionResolver().resolve(ResolverInput(
-            formal_score=0.55, confidence=0.65, data_status=DataStatus.FRESH,
+            point_in_time_ok=True,             formal_score=score, confidence=0.65, data_status=DataStatus.FRESH,
             has_position=has_position, current_position_ratio=ratio,
             average_cost=cost, current_price=price,
             unrealized_return=(price - cost) / cost if cost else 0,
             technical_score=0.3, capital_score=0.2))
 
     def test_no_position_vs_heavy(self):
-        """无持仓 → 建仓；重仓 → 持有/减仓"""
+        """无持仓 → 建仓类；评分一般 + 重仓 → 持有不新增"""
         no_pos = self._resolve(False, 0, 0, 10)
-        heavy = self._resolve(True, 0.35, 9, 8.5)  # 亏损重仓
-        assert no_pos.action in (Action.BUY, Action.SMALL_BUY)
+        heavy = self._resolve(True, 0.35, 9, 8.5, score=0.10)  # 亏损重仓
+        assert no_pos.action in (Action.STRONG_BUY, Action.BUY, Action.SMALL_BUY)
         assert heavy.action in (Action.REDUCE, Action.HOLD)
 
     def test_high_cost_loss_vs_low_cost_profit(self):

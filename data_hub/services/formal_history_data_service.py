@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from contextlib import nullcontext
 from datetime import date, datetime, time
 from typing import Any, Callable
 from zoneinfo import ZoneInfo
