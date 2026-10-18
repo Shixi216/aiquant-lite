@@ -246,8 +246,14 @@ class RiskProvider(FakeProvider):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("budget_tier", "expected_tokens"),
+    [(BudgetTier.STANDARD, 2048), (BudgetTier.PREMIUM, 8192)],
+)
 async def test_high_risk_runs_automated_risk_controller_in_same_task(
     monkeypatch: pytest.MonkeyPatch,
+    budget_tier: BudgetTier,
+    expected_tokens: int,
 ):
     primary_provider = FakeProvider()
     review_provider = RiskProvider()
@@ -276,17 +282,20 @@ async def test_high_risk_runs_automated_risk_controller_in_same_task(
             symbol="300502",
             prompt="test high-risk conclusion",
             risk_level=RiskLevel.HIGH,
-            budget_tier=BudgetTier.STANDARD,
+            budget_tier=budget_tier,
         )
     )
 
     assert len(primary_provider.calls) == 1
     assert len(review_provider.calls) == 1
+    assert review_provider.calls[0]["max_tokens"] == expected_tokens
     assert response.risk_review is not None
     assert response.risk_review.status == "completed"
     assert response.risk_review.output is not None
     assert response.risk_review.output.decision == "revise"
     assert response.risk_review.output.required_actions == ["human review"]
+    assert response.routing.human_review_required is True
+    assert len(response.call_ids) <= response.routing.max_physical_calls
     review_audit = next(
         item for item in service.audit_store.results if item["agent_role"] == "risk_controller"
     )

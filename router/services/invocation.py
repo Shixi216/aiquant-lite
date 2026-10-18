@@ -209,6 +209,7 @@ class RouterInvocationService:
         primary_role: str,
         primary_response: RouterInvokeResponse,
         max_physical_calls: int,
+        max_output_tokens_per_call: int,
         call_ids: list[str],
     ) -> RiskReviewResult | None:
         if request.risk_level.value not in {"high", "critical"}:
@@ -249,7 +250,7 @@ class RouterInvocationService:
                 original_output=primary_response.content,
             ),
             temperature=0,
-            max_tokens=min(1024, remaining_calls * 512),
+            max_tokens=max_output_tokens_per_call,
             risk_level=request.risk_level,
             budget_tier=request.budget_tier,
         )
@@ -485,6 +486,7 @@ class RouterInvocationService:
                 primary_role=role.role,
                 primary_response=result.response,
                 max_physical_calls=routing.max_physical_calls,
+                max_output_tokens_per_call=routing.max_output_tokens_per_call,
                 call_ids=call_ids,
             )
 

@@ -15,7 +15,7 @@ RESEARCH_SYSTEM_PROMPT = """
 1. 这是RESEARCH，不是正式DECISION，不得输出BUY、SELL或HOLD；
 2. 不得补造缺失的基本面、情绪、政策或资金数据；
 3. 必须明确列出缺失数据和风险；
-4. 不得改变正式技术面60%与基本面40%的权重；
+4. 评分来源和权重只能引用输入，不得改算、补造或套用其他评分路径；
 5. 不得改变任何硬风险VETO；
 6. 只输出一个JSON对象，不得输出Markdown或额外解释。
 
@@ -68,8 +68,14 @@ class ResearchSynthesizerHandler:
         task_id: str,
         invoke_model: ModelInvoker,
     ) -> RoleHandlerResult:
+        prompt = request.prompt
+        if request.symbol:
+            prompt = (
+                f"输出 JSON 的 symbol 必须逐字等于：{request.symbol}\n\n"
+                + prompt
+            )
         response, call_id = await invoke_model(
-            prompt=request.prompt,
+            prompt=prompt,
             system_prompt=request.system_prompt or RESEARCH_SYSTEM_PROMPT,
             temperature=min(request.temperature, 0.2),
             max_tokens=request.max_tokens,

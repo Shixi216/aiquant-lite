@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-18T18:56:16.466633+00:00",
+  "source_base": "a5444362f453adab3d894224922a1532a7ff0730",
+  "scope": "One local installation; final selected live cases after prerequisite setup and fixes; not an availability benchmark.",
+  "final_checks": [
+    {
+      "case": "hermes_planning",
+      "status": "passed",
+      "request_model": "deepseek-v4-flash",
+      "response_model": "deepseek-flash",
+      "steps": 4,
+      "tools_enabled": 0,
+      "memory_loaded": false,
+      "mcp_executed": false
+    },
+    {
+      "case": "news_processing",
+      "status": "passed",
+      "request_model": "qwen3.8-max-0902",
+      "response_model": "qwen3.8-max-0902",
+      "validated": true,
+      "events": 1,
+      "input_scope": "Official historical announcement title and metadata only; no body supplied"
+    },
+    {
+      "case": "announcement_verification",
+      "status": "passed",
+      "request_model": "qwen3.8-max-0902",
+      "response_model": "qwen3.8-max-0902",
+      "validated": true,
+      "claims": 2,
+      "verdicts": [
+        "SUPPORTED",
+        "SUPPORTED"
+      ],
+      "announcement_id": "1224628637",
+      "document_date": "2025-08-30",
+      "source_url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=600519&announcementId=1224628637&orgId=gssh0600519&announcementTime=2025-08-30",
+      "pdf_sha256": "52b1ea5972877eef98fc5673e5329a50cbcff65a9003e7babf1b2ae67a90f00c",
+      "text_sha256": "ef0b833537880376aaf3b71e11fe47375048fc863bd26505db68553b4b19c265"
+    },
+    {
+      "case": "research_synthesis",
+      "status": "passed",
+      "request_model": "qwen3.8-max-0902",
+      "response_model": "qwen3.8-max-0902",
+      "validated": true,
+      "factors": 5,
+      "missing_items": 6,
+      "quote_basis": "2026-10-16",
+      "financial_period": "2026-06-30",
+      "sentiment_recomputed": false,
+      "legacy_weight_injected": false,
+      "latency_ms": 22906,
+      "usage": {
+        "input_tokens": 1311,
+        "output_tokens": 1354
+      }
+    },
+    {
+      "case": "automatic_risk_review",
+      "status": "passed",
+      "request_model": "deepseek-v4-pro",
+      "response_model": "deepseek-v4-pro",
+      "review_status": "completed",
+      "decision": "revise",
+      "findings": 5,
+      "required_actions": 4,
+      "human_review_required": true,
+      "same_task_as_research": true,
+      "shared_physical_calls": 2,
+      "max_physical_calls": 8,
+      "max_output_tokens_per_call": 8192,
+      "latency_ms": 35918,
+      "usage": {
+        "input_tokens": 2344,
+        "output_tokens": 4811
+      }
+    },
+    {
+      "case": "mimo_text_adapter",
+      "status": "failed",
+      "configured_model": "mimo-v2.5",
+      "response_model": null,
+      "http_status": 402,
+      "image_tested": false,
+      "router_role_tested": false
+    }
+  ],
+  "final_counts": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6
+  },
+  "not_run": [
+    {
+      "provider": "longcat",
+      "reason": "not configured and no current role binding"
+    },
+    {
+      "provider": "hy3",
+      "reason": "disabled; no provider or handler"
+    }
+  ],
+  "unverified": [
+    "Full Hermes-to-MCP automatic execution",
+    "MiMo image transport and visual recognition",
+    "Long-term reliability",
+    "Investment performance"
+  ],
+  "fixes": [
+    "Risk review uses the selected per-call token budget instead of a fixed 1024-token ceiling",
+    "Research sends the exact request symbol and no longer injects legacy 60/40 weights"
+  ],
+  "verification_topology": {
+    "news_and_announcement": "Existing local Router and Data Hub proxy",
+    "research_and_risk_after_fix": "Patched public source, isolated Router and temporary database",
+    "hermes": "Native Hermes agent; no tools, memory or private context",
+    "resident_router_patch_loaded": false
+  },
+  "offline_checks": {
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "scope": [
+      "test_routing_policy.py",
+      "test_research_synthesizer_contract.py",
+      "test_specialist_providers.py"
+    ],
+    "ruff": "passed"
+  },
+  "code_sha256": {
+    "router/services/invocation.py": "60a3413a3ee7f7b17da4e1c65efdadefc3c8e35634b97a0eb234bc404579f098",
+    "router/services/research_synthesizer_handler.py": "637dd07349115e77261bd5edcf1583214403e6daec9c713f14225ab6b3b7e00a"
+  },
+  "raw_prompts_and_private_logs_published": false
+}

@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 快速部署](#快速开始) · [🤖 AI 分工](#ai-如何分工一套有职责有复核有审计的研究体系) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
+**[🚀 快速部署](#快速开始) · [🤖 AI 分工](#ai-如何分工具体模型具体任务真实调用) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
 
 </div>
 
@@ -30,41 +30,36 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 | **🧪 策略有比较，复杂度有代价**<br>静态、动态、模型与消融路线接受成本、年度稳定性和 Walk-Forward 检验，失败方案一并留存。 | **⏱️ 时间进入研究契约**<br>PIT 截止、来源可得时间与历史成员质量分别约束输入；缺失与过期显式呈现。 |
 | **🧾 判断可以回到证据**<br>版本化 DecisionPacket 固定区间、关联来源并校验完整性，支持人工检查和复盘。 | **🔐 本地数据，清晰所有权**<br>Router 是主 DuckDB 的在线唯一 Owner；研究侧车按各自只读契约提供结果。 |
 
-## AI 如何分工：一套有职责、有复核、有审计的研究体系
+## AI 如何分工：具体模型，具体任务，真实调用
 
-**Hermes 组织任务，专业 Agent 整理证据，量化内核计算分数，风险规则约束动作，研究者做最终判断。** 项目把 AI 工作拆成信息处理、研究综合、风险复核、视觉读取与对抗审查五类职责，每类都有明确的输入、输出和实现边界。
+**DeepSeek Flash 组织任务，Qwen 整理与核验证据，DeepSeek Pro 复核结论。** 数据取得、量化评分、风险 VETO 和决策证据由对应工程模块完成。下面展示 **2026-10-19 本机实际配置与实跑结果**；模型可按部署环境替换。
 
-![AI 分类、角色分工与研究边界](docs/assets/ai-role-map.zh-CN.svg)
+![当前模型分工与实跑结果](docs/assets/ai-role-map.zh-CN.svg)
 
-### 7 个专业角色，各自回答不同问题
-
-| 类别 / 角色 | 负责回答什么 | 输入 → 输出 | 模型归属与当前实现 |
+| 工作环节 | 本次实际请求模型 | 具体做什么 | 实跑结果 |
 |---|---|---|---|
-| **信息处理 · 新闻处理**<br>`news_processor` | 发生了什么？报道是否重复？哪些只是推测？ | 新闻与公告材料 → 事件要素、来源等级、情绪方向、去重聚类、未核验说法 | **Qwen**；通用 Handler 与新闻流水线已实现。早期由 LongCat 承担 |
-| **信息处理 · 公告核验**<br>`announcement_verifier` | 主体、日期、数字和结论能否回到官方原文？ | 公告正文与待核验事实 → 结构化核验结果、证据关联 | **Qwen**；独立公告核验流水线已实现，走专用入口 |
-| **研究综合 · 个股研究**<br>`research_synthesizer` | 五维证据共同说明什么？还缺什么？ | 技术、基本面、情绪、政策 / 新闻、资金摘要 → `RESEARCH`、因子观察、缺失项、风险与置信度 | **Qwen**；通用 Handler 已实现，输出属于研究摘要 |
-| **风险复核 · 风险控制**<br>`risk_controller` | 证据是否充分？推断是否越界？结论应修改还是拒绝？ | 原始请求与待审输出 → `approve / revise / reject`、风险等级、发现与修正要求 | **DeepSeek**；通用 Handler 与高风险追加复核已实现 |
-| **视觉读取 · 普通视觉**<br>`vision_reader` | 图表、截图与报表页面中有哪些可提取信息？ | 设计目标：图像材料 → 可复核的内容提取 | **MiMo**；Provider 与局部路由分支存在，通用图片输入及 Handler 尚未接通 |
-| **视觉读取 · 复杂视觉**<br>`complex_vision` | 跨页表格与复杂图形如何保持结构和上下文？ | 设计目标：复杂视觉材料 → 结构化研究材料 | **MiMo**；角色已注册，完整专用流程待实现 |
-| **对抗审查 · 反方研究**<br>`adversarial_reviewer` | 如果结论错了，最可能错在哪里？ | 设计目标：研究结论与证据 → 反例、漏洞、证据缺口 | **Hy3**；保留角色设计，当前禁用，未接入 Provider / Handler |
+| **Hermes 交互与任务组织** | **`deepseek-v4-flash`**<br>服务返回标识 `deepseek-flash` | 理解研究问题，安排新闻、公告、综合研究与风险复核职责 | 原生 Hermes 规划运行通过，生成 4 步分工；本次关闭工具与记忆，未执行 MCP 全链 |
+| **新闻处理**<br>`news_processor` | **`qwen3.8-max-0902`** | 提取事件、主体与来源，区分事实 / 媒体表述 / 推测，整理重复材料 | 真实历史公告标题与元数据 → 1 条结构化事件，Schema 校验通过；未提供正文时保留缺口 |
+| **公告核验**<br>`announcement_verifier` | **`qwen3.8-max-0902`** | 对照官方 PDF，核对主体、事实、页码证据与时间性质 | 2 条陈述均为 `SUPPORTED`；区分 `CURRENT_STATUS` 与 `FORWARD_LOOKING`，留存文档哈希 |
+| **个股研究综合**<br>`research_synthesizer` | **`qwen3.8-max-0902`** | 汇总技术、基本面、情绪、政策 / 新闻、资金证据，列出缺失与风险 | 本地报告 → 5 维观察、6 个缺失项；保留行情基准与财报期，研究输出校验通过 |
+| **风险控制与追加复核**<br>`risk_controller` | **`deepseek-v4-pro`** | 审查 Qwen 输出中的证据缺口、推断越界和状态矛盾，给出修改要求 | 同一任务内完成复核：`revise`、5 条发现、4 项修正要求；人工复核要求保留 |
 
-模型名称由本地 Provider 配置决定。注册表的 `preferred_model` 是角色偏好，不能直接当作实际请求模型；例如 Qwen 的代码默认配置为 `qwen3.7-plus`，角色偏好为 `qwen3.8-max-0902`。**已实现仍需配置凭证与端点；注册、配置就绪和在线调用成功是三种不同状态。** 详见 [模型绑定与实现状态](docs/ai-roles-and-routing.zh-CN.md)。
+### 这次实跑，模型协作解决了什么
 
-### 一次研究，如何经过协作与复核
+Qwen 的摘要把 **DIF 大于 DEA 的静态关系写成了“上穿”事件**，还把具有部分量价数据的资金维度标为完全缺失。DeepSeek Pro 在复核中指出这两处问题，要求改为静态指标描述，并将资金状态改为 `PARTIAL`。
 
-以“研究一家公司近期公告与风险”为例：Hermes / MCP 或研究入口先取得可用材料；新闻 Agent 整理事件，公告流水线核对原文；研究综合 Agent 在提供的五维摘要上整理观察和缺口。通用 Router 的 `high / critical` 请求会在预算允许且 DeepSeek 可用时追加风险复核，保留人工复核要求。
+这体现了项目的价值：**研究摘要有独立复核，模型的说法有证据与状态约束，修正要求进入同一任务的审计链。** 本次返回的是待修正研究结果；复核意见不会自动改写原文，也不代表人工审批完成。
 
-这些是**按入口与条件组合的工作环节**，不是每次请求都自动串联七个角色。情绪、政策提取还具有独立的重大事件 / 低置信度升级条件；对应的调用与输出需按各自契约解释。
+### 哪些能力本次没有跑通
 
-| 协作机制 | 项目里的具体做法 |
-|---|---|
-| **任务与模型分离** | Hermes / MCP 连接工具；Router 按逻辑角色选择 Provider；换模型时仍保留角色职责与输出契约 |
-| **事实与推断分离** | 新闻输出区分 `FACT / MEDIA_STATEMENT / SPECULATION`；缺失内容保留空值，媒体措辞不自动成为事实 |
-| **研究与决策分离** | 五维 AI 摘要整理证据；正式分数、数据时点检查、仓位约束和硬风险 VETO 由确定性模块处理 |
-| **风险与成本共同约束** | 四档风险、三档预算先于通用模型调用生效；重试、结构修复和追加风险复核共享物理调用额度 |
-| **结果与调用可追溯** | 保留 `task_id / call_ids`、实际返回模型、已知用量、耗时和失败状态；结构化输出先校验再进入对应流程 |
+- **MiMo `mimo-v2.5`**：文本适配器请求返回 **HTTP 402**；本次没有通过连通性检查，也没有执行图片识别。普通 / 复杂视觉角色尚缺通用图片输入与 Handler。
+- **LongCat / Hy3**：LongCat 当前未配置、未绑定现行角色；Hy3 对抗审查仍禁用。两者不列入已验证模型组合。
 
-**项目的研究深度，来自“数据 → 专业分工 → 结构校验 → 风险复核 → 证据留存”的工程闭环。** [查看完整 AI 分工、预算矩阵、入口示例与早期版本演进](docs/ai-roles-and-routing.zh-CN.md)。
+**最终验收 6 项：5 项通过、1 项未通过。** 新闻 / 公告在现有服务上运行；修复后的研究与风险链在公开源码的新构建、隔离 Router 和临时数据库上运行。公告使用 2025 年历史材料；个股报告的行情基准为 2026-10-16、财报期为 2026-06-30，情绪来自缓存。这些样本不代表实时行情、长期可用率或投资绩效。
+
+本次还修复了风险复核的固定 1024 Token 截断问题，以及研究摘要的证券代码传递和旧版权重提示问题；**17 项相关测试与 Ruff 通过**。本机原常驻 Router 尚未加载新补丁。
+
+[查看具体模型、接口与预算规则](docs/ai-roles-and-routing.zh-CN.md) · [查看实跑审核与修复记录](docs/live-model-validation-2026-10-19.md) · [机器可读结果](docs/model-validation-2026-10-19.json)
 
 ## 眼见为实：投研工作台
 
