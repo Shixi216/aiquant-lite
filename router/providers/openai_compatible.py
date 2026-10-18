@@ -10,6 +10,17 @@ from pydantic import SecretStr
 from router.schemas import RouterInvokeResponse
 
 
+class ProviderOutputError(RuntimeError):
+    """An unusable completion with known, billable response metadata."""
+
+    def __init__(self, provider_label: str, response: RouterInvokeResponse) -> None:
+        self.response = response
+        reason = "truncated output" if response.finish_reason == "length" else "empty content"
+        super().__init__(
+            f"{provider_label} API returned {reason}; finish_reason={response.finish_reason}"
+        )
+
+
 async def invoke_openai_compatible_chat(
     *,
     provider_name: str,
@@ -80,16 +91,13 @@ async def invoke_openai_compatible_chat(
         normalized_content = json.dumps(content, ensure_ascii=False)
     else:
         normalized_content = ""
-    if not normalized_content:
-        raise RuntimeError(f"{provider_label} API returned empty content")
-
     usage_raw = payload.get("usage") or {}
     usage = {
         str(key): int(value)
         for key, value in usage_raw.items()
         if isinstance(value, (int, float)) and not isinstance(value, bool)
     }
-    return RouterInvokeResponse(
+    result = RouterInvokeResponse(
         role=role,
         provider=provider_name,
         model=str(payload.get("model") or model),
@@ -98,3 +106,7 @@ async def invoke_openai_compatible_chat(
         finish_reason=first_choice.get("finish_reason"),
         usage=usage,
     )
+    if not normalized_content or result.finish_reason == "length":
+        # Reasoning text is never a substitute for the requested final answer.
+        raise ProviderOutputError(provider_label, result)
+    return result

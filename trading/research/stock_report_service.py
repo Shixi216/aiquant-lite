@@ -4,7 +4,7 @@ import json
 import os
 import time
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, time as datetime_time
 
 from database.db import get_connection
 from scripts.analyze_stock import (
@@ -69,6 +69,11 @@ class StockReportService:
         performance: StockReportPerformance,
         report_cutoff: datetime,
     ):
+        if report_cutoff.utcoffset() is None:
+            raise ValueError("report_cutoff must include timezone")
+        market_cutoff = report_cutoff.astimezone(TZ)
+        market_date = market_cutoff.date()
+        market_closed = market_cutoff.time() >= datetime_time(16)
         connect_started = time.perf_counter()
         connection = get_connection(read_only=True)
         performance.record(
@@ -94,17 +99,17 @@ class StockReportService:
                 SELECT MAX(calendar_date) FILTER (
                     WHERE is_trading_day = TRUE
                       AND (
-                        calendar_date < CAST(? AS DATE)
+                        calendar_date < ?
                         OR (
-                            calendar_date = CAST(? AS DATE)
-                            AND EXTRACT(hour FROM ?) >= 16
+                            calendar_date = ?
+                            AND ?
                         )
                       )
                 ), MAX(calendar_date)
                 FROM trading_calendar_days
                 WHERE data_cutoff <= ?
                 """,
-                [report_cutoff, report_cutoff, report_cutoff, report_cutoff],
+                [market_date, market_date, market_closed, report_cutoff],
             ).fetchone()
             snapshot_row = connection.execute(
                 """
@@ -130,7 +135,7 @@ class StockReportService:
         calendar_covers_cutoff = (
             latest_trade_row is not None
             and latest_trade_row[1] is not None
-            and latest_trade_row[1] >= report_cutoff.date()
+            and latest_trade_row[1] >= market_date
         )
         latest_trade_date = (
             latest_trade_row[0] if calendar_covers_cutoff else None
@@ -626,6 +631,9 @@ class StockReportService:
                     )
                 report = "\n".join(lines)
             return report
+        except Exception as exc:
+            performance.record_failure(exc)
+            raise
         finally:
             performance.finish()
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -36,10 +38,13 @@ def _write_record(payload: dict[str, object]) -> None:
     # diagnostics mixed with real runtime observations.
     if "PYTEST_CURRENT_TEST" in os.environ:
         return
-    target = _performance_log_path()
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with target.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+    try:
+        target = _performance_log_path()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+    except OSError:
+        logging.getLogger(__name__).warning("Stock-report performance log unavailable")
 
 
 @dataclass
@@ -51,6 +56,11 @@ class StockReportPerformance:
     database_owner_pid: int
     _started: float = field(default_factory=time.perf_counter)
     _stages: dict[str, float] = field(default_factory=dict)
+    _error_type: str | None = field(default=None, init=False)
+
+    def record_failure(self, exc: Exception) -> None:
+        # Store the class only; provider errors may contain credentials or prompts.
+        self._error_type = type(exc).__name__
 
     def record(self, stage: str, elapsed_ms: float) -> None:
         self._stages[stage] = self._stages.get(stage, 0.0) + max(0.0, elapsed_ms)
@@ -72,8 +82,12 @@ class StockReportPerformance:
 
     def finish(self) -> dict[str, object]:
         total_ms = max(0.0, (time.perf_counter() - self._started) * 1_000.0)
+        timestamp = datetime.now(timezone.utc).isoformat()
         payload: dict[str, object] = {
             "event": "STOCK_REPORT_PERFORMANCE",
+            "timestamp": timestamp,
+            "success": self._error_type is None,
+            "error_type": self._error_type,
             "request_id": self.request_id,
             "symbol": self.symbol,
             "mode": self.mode,
@@ -92,6 +106,7 @@ class StockReportPerformance:
                 _write_record(
                     {
                         "event": "SLOW_STAGE",
+                        "timestamp": timestamp,
                         "request_id": self.request_id,
                         "symbol": self.symbol,
                         "stage": field_name,
@@ -105,6 +120,7 @@ class StockReportPerformance:
             _write_record(
                 {
                     "event": "SLOW_STOCK_REPORT",
+                    "timestamp": timestamp,
                     "request_id": self.request_id,
                     "symbol": self.symbol,
                     "total_ms": round(total_ms, 3),

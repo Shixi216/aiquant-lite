@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import os
 from typing import Any
@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 
 from config.version import PROJECT_VERSION
 from database.db import get_connection, initialize_database
+from database.connection_manager import DatabaseBusyError
 from database.owner_routes import router as database_owner_router
 from config.openapi import install_documented_openapi
 from router.routes.announcement_pipeline import (
@@ -25,6 +26,7 @@ from router.routes.news_pipeline import (
 )
 from router.registry import get_role, list_roles
 from router.schemas.audit import (
+    ModelCallAuditListResponse,
     TaskAuditDetail,
     TaskAuditListResponse,
 )
@@ -97,6 +99,15 @@ app = FastAPI(
     description="Hermes OPC specialist Agent routing service",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(DatabaseBusyError)
+async def database_busy_error(request: Request, exc: DatabaseBusyError):
+    return JSONResponse(
+        status_code=503,
+        headers={"Retry-After": "3"},
+        content={"detail": "数据库暂时繁忙，请稍后重试。", "error_code": "DATABASE_BUSY"},
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -348,6 +359,30 @@ def get_audit_task(
         )
 
     return task
+
+
+@app.get(
+    "/v1/audit/model-calls", response_model=ModelCallAuditListResponse,
+    summary="查询近期物理模型调用，包含未关联任务的研究调用",
+)
+def list_model_call_audit(
+    limit: int = Query(default=100, ge=1, le=1000),
+    since: datetime | None = Query(default=None),
+    until: datetime | None = Query(default=None),
+) -> ModelCallAuditListResponse:
+    end = until if until is not None else datetime.now().astimezone()
+    start = since if since is not None else end - timedelta(days=7)
+    if start.utcoffset() is None or end.utcoffset() is None:
+        raise HTTPException(status_code=422, detail="since and until must include timezone")
+    if start > end:
+        raise HTTPException(status_code=422, detail="since must not be later than until")
+    try:
+        return AuditQueryStore().list_model_calls(since=start, until=end, limit=limit)
+    except DatabaseBusyError:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="模型调用审计暂时不可用") from exc
+
 
 app.include_router(database_owner_router, include_in_schema=False)
 app.include_router(announcement_pipeline_router)

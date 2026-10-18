@@ -92,3 +92,29 @@ def test_main_database_guard_blocks_non_owner_online_process(
             read_only=True,
         )
 
+
+def test_exhausted_lock_retries_raise_typed_busy_error(tmp_path, monkeypatch):
+    attempts = 0
+
+    def locked(*args, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        raise duckdb.IOException("Could not set lock on file")
+
+    monkeypatch.setattr(connection_manager.duckdb, "connect", locked)
+    monkeypatch.setattr(connection_manager.time, "sleep", lambda _: None)
+    with pytest.raises(connection_manager.DatabaseBusyError) as error:
+        connection_manager.connect_database(tmp_path / "busy.duckdb", configured_path=tmp_path / "busy.duckdb")
+    assert attempts == 4
+    assert isinstance(error.value.__cause__, duckdb.IOException)
+
+
+def test_gate_timeout_is_also_a_typed_busy_error(tmp_path, monkeypatch):
+    class BusyGate:
+        def acquire(self, *, timeout):
+            return False
+
+    monkeypatch.setattr(connection_manager, "_connect_gate", lambda _: BusyGate())
+    with pytest.raises(connection_manager.DatabaseBusyError, match="门锁"):
+        connection_manager.connect_database(tmp_path / "gate.duckdb", configured_path=tmp_path / "gate.duckdb")
+

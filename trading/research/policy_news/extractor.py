@@ -10,8 +10,10 @@ from pydantic import ValidationError
 
 from config.settings import settings
 from router.config import router_settings
+from router.providers.openai_compatible import ProviderOutputError
 from router.services.audit import AuditStore
 from router.services.provider_registry import get_model_provider
+from router.services.provider_retry import provider_error_type
 from trading.research.policy_news.models import (
     EventBundle,
     PolicyExtractionResult,
@@ -619,6 +621,8 @@ class PolicyNewsExtractor:
         validation: SchemaValidationStatus,
         error: Exception | None = None,
     ) -> str:
+        if response is None and isinstance(error, ProviderOutputError):
+            response = error.response
         return self.audit_store.record_model_call(
             task_id=None,
             agent_role=role,
@@ -640,7 +644,7 @@ class PolicyNewsExtractor:
                     SchemaValidationStatus.REPAIRED,
                 }
             ),
-            error_type=type(error).__name__ if error is not None else None,
+            error_type=provider_error_type(error) if error is not None else None,
             error_message=str(error) if error is not None else None,
             prompt_version=POLICY_NEWS_PROMPT_VERSION,
             input_hash=input_hash,
@@ -680,7 +684,7 @@ class PolicyNewsExtractor:
                     prompt=current_prompt,
                     system_prompt=_SYSTEM_PROMPT,
                     temperature=0.0,
-                    max_tokens=1200,
+                    max_tokens=8192 if provider_name == "deepseek" else 1200,
                 )
                 extraction = ModelPolicyExtraction.model_validate(
                     _json_payload(response.content)

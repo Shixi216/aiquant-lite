@@ -161,6 +161,8 @@ def test_performance_log_emits_slow_markers_without_secrets(
         "SLOW_STAGE",
         "SLOW_STOCK_REPORT",
     ]
+    assert all(datetime.fromisoformat(row["timestamp"]).utcoffset() is not None for row in records)
+    assert records[0]["success"] is True and records[0]["error_type"] is None
     assert "token" not in target.read_text().casefold()
     assert "api_key" not in target.read_text().casefold()
 

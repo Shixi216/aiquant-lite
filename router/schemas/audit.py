@@ -79,3 +79,17 @@ class TaskAuditListResponse(BaseModel):
     count: int
     tasks: list[TaskAuditSummary]
     invalid_record_count: int = Field(default=0, ge=0)
+
+
+class ModelCallAuditListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    since: datetime
+    until: datetime
+    count: int = Field(ge=0)
+    total_count: int = Field(ge=0)
+    success_count: int = Field(ge=0)
+    failed_count: int = Field(ge=0)
+    unlinked_call_count: int = Field(ge=0)
+    invalid_record_count: int = Field(default=0, ge=0)
+    calls: list[ModelCallAudit] = Field(default_factory=list)

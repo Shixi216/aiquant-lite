@@ -56,6 +56,7 @@ The Vue workspace brings these views together. The Python backend combines struc
 - **Explicit time semantics** for trade dates, quote snapshots, score cutoffs and report generation, with Point-in-Time input contracts.
 - **Traceable decisions** with frozen zones, versions, linked evidence and hash verification.
 - **Visible degradation** when data is missing, stale or unavailable. Missing values remain missing.
+- **Auditable model usage** with time-window counts across task workflows and standalone research calls, known token usage and sanitized errors. See the [call audit API](docs/api-reference.md#recent-model-calls).
 - **Composable access** through WebUI, CLI, FastAPI, Finance Data MCP, Hermes and desktop source modules.
 
 ## Reference architectures
