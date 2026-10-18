@@ -138,7 +138,7 @@ powershell -ExecutionPolicy Bypass -File scripts\start_hermes_opc.ps1
 powershell -ExecutionPolicy Bypass -File scripts\status_hermes_opc.ps1
 ```
 
-打开 **http://127.0.0.1:8767**。Router 默认端口为 `8765`，Data Hub 为 `8766`。首次使用可运行 `uv run python -m scripts.preflight_check` 查看配置与服务状态。
+打开 [本地投研工作台](http://127.0.0.1:8767)。Router 默认端口为 `8765`，Data Hub 为 `8766`。首次使用可运行 `uv run python -m scripts.preflight_check` 查看配置与服务状态。
 
 也可在不同终端分别启动：
 
