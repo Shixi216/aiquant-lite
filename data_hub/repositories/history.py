@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import json
 import math
-from datetime import date, datetime
+from datetime import date, datetime, time
 from pathlib import Path
 from time import perf_counter
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -205,6 +206,11 @@ class HistoryRepository:
         self,
         data_cutoff: datetime,
     ) -> date | None:
+        if data_cutoff.utcoffset() is None:
+            raise ValueError("data_cutoff must include timezone")
+        market_cutoff = data_cutoff.astimezone(ZoneInfo("Asia/Shanghai"))
+        market_date = market_cutoff.date()
+        market_closed = market_cutoff.time() >= time(16)
         with get_connection() as connection:
             row = connection.execute(
                 """
@@ -213,14 +219,14 @@ class HistoryRepository:
                 WHERE is_trading_day = TRUE
                   AND data_cutoff <= ?
                   AND (
-                    calendar_date < CAST(? AS DATE)
+                    calendar_date < ?
                     OR (
-                        calendar_date = CAST(? AS DATE)
-                        AND EXTRACT(hour FROM ?) >= 16
+                        calendar_date = ?
+                        AND ?
                     )
                   )
                 """,
-                [data_cutoff, data_cutoff, data_cutoff, data_cutoff],
+                [data_cutoff, market_date, market_date, market_closed],
             ).fetchone()
         return None if row is None else row[0]
 

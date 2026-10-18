@@ -55,6 +55,8 @@ def run_module(path: Path, output: Path) -> dict:
     matches = re.findall(r"(\d+) deselected", text)
     result["deselected"] = int(matches[-1]) if matches else 0
     print(json.dumps(result, ensure_ascii=False), flush=True)
+    if completed.returncode not in (0, 5) or result["failures"] or result["errors"]:
+        print(f"\n--- {result['module']}: failure details ---\n{text[-12000:]}", flush=True)
     return result
 
 

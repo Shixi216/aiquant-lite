@@ -130,7 +130,9 @@ class MarketFactService:
         parameters: list[Any] = [canonical_symbol, normalized_type]
 
         if normalized_date:
-            clauses.append("CAST(event_time AS DATE) = CAST(? AS DATE)")
+            clauses.append(
+                "CAST(event_time AT TIME ZONE 'Asia/Shanghai' AS DATE) = CAST(? AS DATE)"
+            )
             parameters.append(normalized_date)
 
         parameters.append(limit)

@@ -10,11 +10,13 @@ import duckdb
 import pytest
 from pydantic import ValidationError
 
+# Initialize validation modules before Qt installs its module-inspection hook.
+from config.settings import settings
+
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
-from config.settings import settings
 from desktop.workspace.models import TaskStatus, TimelineKind
 from desktop.workspace.pages import ConversationPage, SkillCenterPage
 from desktop.workspace.query_plan import IncrementalQueryPlanModifier
