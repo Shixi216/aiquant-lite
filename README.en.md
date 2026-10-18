@@ -12,7 +12,7 @@ From market context to company research. From factor ideas to inspectable eviden
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 Quick start](#quick-start) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
+**[🚀 Quick start](#quick-start) · [🤖 AI roles](#how-ai-work-is-divided) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
 
 </div>
 
@@ -29,6 +29,36 @@ For **A-share researchers, quantitative developers and small research teams**, A
 | **🔎 Source-attributed facts**<br>Quotes, financials, filings, news and risk information retain source, coverage and time semantics. | **🧠 Configurable models and access**<br>Router organizes research roles; Web, CLI, Hermes, MCP and desktop source reuse research infrastructure. |
 | **🧪 Experiments with trade-offs**<br>Static, dynamic, model and ablation routes retain cost sensitivity, yearly stability and rejection reasons. | **⏱️ Point-in-Time contracts**<br>Availability, cutoffs and historical membership quality constrain inputs; missing and stale data remain visible. |
 | **🧾 Inspectable decisions**<br>Versioned DecisionPackets preserve zones, evidence and integrity checks for human review. | **🔐 Local-first data ownership**<br>Router is the sole online owner of the primary DuckDB; sidecars expose research under separate read-only contracts. |
+
+## How AI work is divided
+
+**Hermes organizes tasks; specialist roles structure evidence; the quantitative core computes scores; deterministic risk rules constrain actions; the researcher makes the final judgment.** Five responsibility groups cover information processing, research synthesis, risk review, visual reading and adversarial review.
+
+![AI responsibilities and implementation boundaries — Chinese diagram](docs/assets/ai-role-map.zh-CN.svg)
+
+| Group / role | Input → responsibility → output | Provider and implementation |
+|---|---|---|
+| Information · `news_processor` | News / filings → extract events, classify sources and cluster duplicates → structured events, sentiment and unverified claims | **Qwen**; generic handler and news pipeline implemented; originally assigned to LongCat |
+| Information · `announcement_verifier` | Official text / claims → check entities, dates and figures → structured verification with evidence links | **Qwen**; dedicated announcement pipeline implemented |
+| Research · `research_synthesizer` | Five-dimension summaries → synthesize available evidence → `RESEARCH`, observations, missing data and risks | **Qwen**; generic handler implemented |
+| Risk · `risk_controller` | Request / prior output → review evidence and reasoning → `approve / revise / reject`, findings and required actions | **DeepSeek**; generic handler and conditional high-risk review implemented |
+| Vision · `vision_reader` | Intended: charts / report images → inspect visual evidence → reviewable extraction | **MiMo**; adapter and local routing branches exist; generic image payload and handler are missing |
+| Vision · `complex_vision` | Intended: complex charts / multi-page tables → retain structure and context | **MiMo**; registered role, complete dedicated workflow pending |
+| Adversarial · `adversarial_reviewer` | Intended: conclusion / evidence → find counterexamples and gaps | **Hy3**; disabled, without provider or handler integration |
+
+Provider settings determine the actual request model. Registry preferences are separate metadata: Qwen currently defaults to `qwen3.7-plus` in settings while roles prefer `qwen3.8-max-0902`. Implemented paths require local credentials and endpoints; registration and configuration do not establish live connectivity.
+
+For a company-news investigation, available tools obtain evidence, news processing organizes events, the dedicated announcement pipeline checks original text, and research synthesis structures supplied observations. These stages are composed by the selected workflow; requests do not automatically run all seven roles. Generic `high / critical` requests add a DeepSeek review when configured and within budget, while retaining the human-review requirement. Sentiment and policy extraction have separate escalation conditions.
+
+| Mechanism | Concrete behavior |
+|---|---|
+| Role / provider separation | Hermes and MCP connect tools; Router binds logical responsibilities to configurable providers |
+| Facts / inference separation | News output distinguishes `FACT / MEDIA_STATEMENT / SPECULATION` and retains missing values |
+| Research / decision separation | AI organizes evidence; deterministic modules own score calculations, PIT checks, position constraints and hard VETO |
+| Risk / budget controls | Four risk levels and three budgets constrain generic calls; retries, repair and added risk reviews share physical-call limits |
+| Traceability | Task / call IDs, reported model, known usage, latency and failure state support review; structured output is validated |
+
+See the [detailed AI roles and routing guide (Chinese)](docs/ai-roles-and-routing.zh-CN.md) for implementation states, exact budget limits, entry points and historical changes.
 
 ## See the workspace
 

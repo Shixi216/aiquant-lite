@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 快速部署](#快速开始) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
+**[🚀 快速部署](#快速开始) · [🤖 AI 分工](#ai-如何分工一套有职责有复核有审计的研究体系) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
 
 </div>
 
@@ -29,6 +29,42 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 | **🔎 多源事实，一处研究**<br>行情、财务、公告、新闻与风险信息保留来源、覆盖与时点，支持继续追问结论依据。 | **🧠 模型可配置，入口可组合**<br>Router 组织研究角色，Web、CLI、Hermes、MCP 与桌面源码复用研究基础设施。 |
 | **🧪 策略有比较，复杂度有代价**<br>静态、动态、模型与消融路线接受成本、年度稳定性和 Walk-Forward 检验，失败方案一并留存。 | **⏱️ 时间进入研究契约**<br>PIT 截止、来源可得时间与历史成员质量分别约束输入；缺失与过期显式呈现。 |
 | **🧾 判断可以回到证据**<br>版本化 DecisionPacket 固定区间、关联来源并校验完整性，支持人工检查和复盘。 | **🔐 本地数据，清晰所有权**<br>Router 是主 DuckDB 的在线唯一 Owner；研究侧车按各自只读契约提供结果。 |
+
+## AI 如何分工：一套有职责、有复核、有审计的研究体系
+
+**Hermes 组织任务，专业 Agent 整理证据，量化内核计算分数，风险规则约束动作，研究者做最终判断。** 项目把 AI 工作拆成信息处理、研究综合、风险复核、视觉读取与对抗审查五类职责，每类都有明确的输入、输出和实现边界。
+
+![AI 分类、角色分工与研究边界](docs/assets/ai-role-map.zh-CN.svg)
+
+### 7 个专业角色，各自回答不同问题
+
+| 类别 / 角色 | 负责回答什么 | 输入 → 输出 | 模型归属与当前实现 |
+|---|---|---|---|
+| **信息处理 · 新闻处理**<br>`news_processor` | 发生了什么？报道是否重复？哪些只是推测？ | 新闻与公告材料 → 事件要素、来源等级、情绪方向、去重聚类、未核验说法 | **Qwen**；通用 Handler 与新闻流水线已实现。早期由 LongCat 承担 |
+| **信息处理 · 公告核验**<br>`announcement_verifier` | 主体、日期、数字和结论能否回到官方原文？ | 公告正文与待核验事实 → 结构化核验结果、证据关联 | **Qwen**；独立公告核验流水线已实现，走专用入口 |
+| **研究综合 · 个股研究**<br>`research_synthesizer` | 五维证据共同说明什么？还缺什么？ | 技术、基本面、情绪、政策 / 新闻、资金摘要 → `RESEARCH`、因子观察、缺失项、风险与置信度 | **Qwen**；通用 Handler 已实现，输出属于研究摘要 |
+| **风险复核 · 风险控制**<br>`risk_controller` | 证据是否充分？推断是否越界？结论应修改还是拒绝？ | 原始请求与待审输出 → `approve / revise / reject`、风险等级、发现与修正要求 | **DeepSeek**；通用 Handler 与高风险追加复核已实现 |
+| **视觉读取 · 普通视觉**<br>`vision_reader` | 图表、截图与报表页面中有哪些可提取信息？ | 设计目标：图像材料 → 可复核的内容提取 | **MiMo**；Provider 与局部路由分支存在，通用图片输入及 Handler 尚未接通 |
+| **视觉读取 · 复杂视觉**<br>`complex_vision` | 跨页表格与复杂图形如何保持结构和上下文？ | 设计目标：复杂视觉材料 → 结构化研究材料 | **MiMo**；角色已注册，完整专用流程待实现 |
+| **对抗审查 · 反方研究**<br>`adversarial_reviewer` | 如果结论错了，最可能错在哪里？ | 设计目标：研究结论与证据 → 反例、漏洞、证据缺口 | **Hy3**；保留角色设计，当前禁用，未接入 Provider / Handler |
+
+模型名称由本地 Provider 配置决定。注册表的 `preferred_model` 是角色偏好，不能直接当作实际请求模型；例如 Qwen 的代码默认配置为 `qwen3.7-plus`，角色偏好为 `qwen3.8-max-0902`。**已实现仍需配置凭证与端点；注册、配置就绪和在线调用成功是三种不同状态。** 详见 [模型绑定与实现状态](docs/ai-roles-and-routing.zh-CN.md)。
+
+### 一次研究，如何经过协作与复核
+
+以“研究一家公司近期公告与风险”为例：Hermes / MCP 或研究入口先取得可用材料；新闻 Agent 整理事件，公告流水线核对原文；研究综合 Agent 在提供的五维摘要上整理观察和缺口。通用 Router 的 `high / critical` 请求会在预算允许且 DeepSeek 可用时追加风险复核，保留人工复核要求。
+
+这些是**按入口与条件组合的工作环节**，不是每次请求都自动串联七个角色。情绪、政策提取还具有独立的重大事件 / 低置信度升级条件；对应的调用与输出需按各自契约解释。
+
+| 协作机制 | 项目里的具体做法 |
+|---|---|
+| **任务与模型分离** | Hermes / MCP 连接工具；Router 按逻辑角色选择 Provider；换模型时仍保留角色职责与输出契约 |
+| **事实与推断分离** | 新闻输出区分 `FACT / MEDIA_STATEMENT / SPECULATION`；缺失内容保留空值，媒体措辞不自动成为事实 |
+| **研究与决策分离** | 五维 AI 摘要整理证据；正式分数、数据时点检查、仓位约束和硬风险 VETO 由确定性模块处理 |
+| **风险与成本共同约束** | 四档风险、三档预算先于通用模型调用生效；重试、结构修复和追加风险复核共享物理调用额度 |
+| **结果与调用可追溯** | 保留 `task_id / call_ids`、实际返回模型、已知用量、耗时和失败状态；结构化输出先校验再进入对应流程 |
+
+**项目的研究深度，来自“数据 → 专业分工 → 结构校验 → 风险复核 → 证据留存”的工程闭环。** [查看完整 AI 分工、预算矩阵、入口示例与早期版本演进](docs/ai-roles-and-routing.zh-CN.md)。
 
 ## 眼见为实：投研工作台
 
