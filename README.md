@@ -1,121 +1,112 @@
 <div align="center">
 
-![AIQUANT-LITE — A-share research, engineered for clarity](docs/assets/hero.svg)
+![AIQUANT-LITE — Research deeper. Decide with evidence.](docs/assets/hero.svg)
 
 # AIQUANT-LITE · 怡怡投研
 
-### 面向 A 股的 AI 原生投研工作台
+### 为认真研究市场的人，打造自己的 AI 投研中枢。
 
-**百万级数据沉淀 · 版本化策略研究 · 可追溯的 AI 决策证据。**
+**百万级数据沉淀 × 量化实验体系 × 多模型研究 × 可追溯决策**
 
-把多源事实、量化实验、多模型研究与风险约束汇入一套本地优先的投研系统，让每次判断都能回到数据、时点和证据。
+从市场全景到个股深研，从因子试验到证据复盘。把专业投研的深度，带进你的本地工作台。
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
-[![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json)
-[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py)
-[![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py)
-[![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
-[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml)
+[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-简体中文 · [English](README.en.md)
-
-[研究积累](#研究积累用证据展示实力) · [产品能力](#产品能力) · [开源对标](#开源对标) · [系统架构](#系统架构) · [快速开始](#快速开始) · [质量验证](#质量验证)
+**[🚀 快速部署](#快速开始) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [English](README.en.md)**
 
 </div>
 
 ---
 
-## 一套工作台，贯穿投研全流程
+## 让研究的每一步，都有据可查
 
-AIQUANT-LITE 面向个人研究者、量化开发者和小型研究团队，围绕 A 股研究的实际链路构建：**观察市场 → 筛选机会 → 研究个股 → 检查风险 → 留存决策 → 模拟复盘**。
+AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，把数据平台、量化研究台和 Agent 工作流汇入一套本地优先的投研系统。数据、实验、风险和判断在同一条研究链路中衔接，让一次研究留下下一次能够复用的资产。
 
-前端提供多视图投研工作台；后端用结构化数据、确定性计算和可选的模型角色组织研究。每个结论都尽量保留来源、时点、覆盖率和状态，让使用者能够继续追问“依据是什么”。
+![AIQUANT-LITE 六大能力](docs/assets/capability-map.svg)
 
-### 产品预览
+| 研究深度 | 工程底座 |
+|---|---|
+| **🔎 多源事实，一处研究**<br>行情、财务、公告、新闻与风险信息保留来源、覆盖与时点，支持继续追问结论依据。 | **🧠 模型可配置，入口可组合**<br>Router 组织研究角色，Web、CLI、Hermes、MCP 与桌面源码复用研究基础设施。 |
+| **🧪 策略有比较，复杂度有代价**<br>静态、动态、模型与消融路线接受成本、年度稳定性和 Walk-Forward 检验，失败方案一并留存。 | **⏱️ 时间进入研究契约**<br>PIT 截止、来源可得时间与历史成员质量分别约束输入；缺失与过期显式呈现。 |
+| **🧾 判断可以回到证据**<br>版本化 DecisionPacket 固定区间、关联来源并校验完整性，支持人工检查和复盘。 | **🔐 本地数据，清晰所有权**<br>Router 是主 DuckDB 的在线唯一 Owner；研究侧车按各自只读契约提供结果。 |
 
-![市场总览演示](docs/assets/dashboard-demo.png)
+## 眼见为实：投研工作台
+
+**市场驾驶舱 → 机会排序 → 个股研究 → 风险检查 → 决策留存 → 模拟复盘**，让研究视图跟随工作流程展开。
+
+![市场驾驶舱：覆盖、时点与市场结构](docs/assets/dashboard-demo.png)
+
+<table width="100%">
+<tr>
+<td width="50%" align="center"><strong>个股深研 · 事实与因子同屏</strong><br><img src="docs/assets/stock-overview-demo.png" alt="个股研究总览开发样本" width="100%"></td>
+<td width="50%" align="center"><strong>行情观察 · 价格与研究联动</strong><br><img src="docs/assets/stock-demo.png" alt="个股 K 线研究开发样本" width="100%"></td>
+</tr>
+</table>
 
 <details>
-<summary><strong>查看个股研究与 K 线视图</strong></summary>
+<summary><strong>展开查看个股研究大图</strong></summary>
 
-![个股研究总览演示](docs/assets/stock-overview-demo.png)
+![个股研究全尺寸开发样本](docs/assets/stock-overview-demo.png)
 
-![个股研究演示](docs/assets/stock-demo.png)
+![个股 K 线全尺寸开发样本](docs/assets/stock-demo.png)
 
 </details>
 
-> 截图来自实际界面的开发契约样本，数值仅用于展示布局与交互，不代表实时行情、投资建议或收益表现。演示模式在生产环境中禁用。
+> 界面来自实际 Web 工作台的开发契约样本；数值用于展示交互，演示模式在生产环境中禁用。产品图展示界面，流程图展示概念架构，均不作为实时行情或收益证明。
 
+### 六个工作区，贯穿研究全程
 
-## 研究积累：用证据展示实力
-
-![AIQUANT-LITE 研究资产盘点](docs/assets/research-evidence.svg)
-
-**事实 → 特征 → 实验 → 决策 → 复盘 → 知识**，构成项目持续积累的研究链路：
-
-- **百万级事实与特征**：本地已落库 2,782,220 行标准化历史日线、2,625,560 个 Replay 特征包；保留数据来源、业务日期和缺失语义。
-- **成体系的策略验证**：Strategy Lab 留存 202 个候选定义、4 档成本、144 行 Walk-Forward 指标，比较静态、动态、模型与消融路线，同时保留拒绝理由。
-- **从研究走到可核对的判断**：PIT 约束输入，DecisionPacket 固定版本与证据；调用审计覆盖独立研究请求，异常和降级状态可查询。
-- **经验沉淀为知识**：从 Hermes 项目会话、长期记忆和排障材料提炼 [8 个研究主题](docs/knowledge/README.md)，覆盖时点纪律、失败案例、工作流和知识治理。
-
-> 数据数字为 **2026-10-19 单个本地安装的只读盘点**，不同表存在关联，不能相加；原始数据不随仓库分发。候选数与指标行数不代表有效策略数。详见 [数据资产与边界](docs/knowledge/data-assets.md)、[实验协议对照](docs/knowledge/experiment-comparison.md) 和 [机器可读证据摘要](docs/knowledge/evidence-snapshot-2026-10-19.json)。
-
-## 产品能力
-
-| 工作区 | 研究体验 | 对应实现 |
+| 工作区 | 你可以做什么 | 实现入口 |
 |---|---|---|
-| **市场驾驶舱** | 市场涨跌分布、覆盖率、行情时点、数据组件与风险状态集中呈现 | [Dashboard](frontend/src/views/DashboardView.vue) |
-| **机会排序** | 全市场确定性扫描、候选筛选、四维横截面评分与分位数展示 | [Scanner](trading/scanner) · [Cross Section](trading/research/orchestration/cross_section.py) |
-| **个股研究** | 证券身份、行情快照、财务记录、因子拆解、冻结决策区间与 K 线联动 | [Stock Intelligence](frontend/src/views/StockIntelView.vue) |
-| **量化实验室** | 市场情绪、两融、龙虎榜、日线计算与研究面板 | [Quant Lab](frontend/src/views/QuantLabView.vue) |
-| **策略与资金研究** | 情绪实验、资金行为产物、Walk-Forward、成本敏感性与策略比较 | [Strategy Lab](trading/research/strategy_lab) · [Research](webui/routes/research.py) |
-| **决策与复盘** | 风险 VETO、动作与仓位约束、版本化决策包、本地模拟和手工事实账本 | [Decision Support](trading/decision_support) · [Manual Tracking](manual_tracking) |
+| **市场驾驶舱** | 看涨跌分布、数据覆盖、行情时点和来源状态 | [Dashboard](frontend/src/views/DashboardView.vue) |
+| **机会排序** | 全市场确定性扫描、条件筛选、四维横截面 rank | [Scanner](trading/scanner) · [Cross Section](trading/research/orchestration/cross_section.py) |
+| **个股研究** | 联看证券身份、财务、因子、决策区间和 K 线 | [Stock Intelligence](frontend/src/views/StockIntelView.vue) |
+| **量化实验室** | 查看情绪、两融、龙虎榜与日线研究面板 | [Quant Lab](frontend/src/views/QuantLabView.vue) |
+| **策略与资金研究** | 比较策略家族、成本敏感性和滚动验证结果 | [Strategy Lab](trading/research/strategy_lab) · [Research](webui/routes/research.py) |
+| **决策与复盘** | 检查风险 VETO、仓位约束、版本化决策与本地模拟 | [Decision Support](trading/decision_support) · [Manual Tracking](manual_tracking) |
 
-### 工程能力
+## 研究实力，落在可核对的积累上
 
-- **数据有出处**：整合 Tushare、AKShare / Eastmoney、BaoStock、CNInfo 等适配器；保留来源、校验状态与缺失信息。金牛历史数据适配作为可选实验能力，需单独配置。
-- **AI 有分工**：研究综合、公告核验、风险复核等角色通过 Router 分配给可配置模型；模型可用性取决于凭证、服务和角色配置。
-- **时间有语义**：区分交易日、行情快照时间、评分截止时间与报告生成时间，按 Point-in-Time 契约约束研究输入。
-- **决策可追溯**：DecisionPacket 冻结区间、记录版本、关联证据并校验哈希；展示层读取已有决策。
-- **异常可见**：数据缺失、过期、来源不可达或分数降级都有明确状态；缺失值保留为空。
-- **调用可核对**：按时间窗查询物理模型调用，覆盖独立研究链路，汇总成功、失败与未关联任务的记录；保留已知用量，错误信息脱敏展示。见 [调用审计 API](docs/api-reference.md#recent-model-calls)。
-- **入口可组合**：Web 工作台、CLI、FastAPI、Finance Data MCP、Hermes 集成与桌面源码共用研究基础设施。
+![本地研究数据与实验规模](docs/assets/research-evidence.svg)
 
-## 开源对标
+**2,782,220 行历史日线、2,625,560 个 Replay 特征包、2,238,764 条 Strategy Lab 对齐输入**，构成本地数据与实验积累。Strategy Lab 保留 **202 个候选定义、0 / 20 / 40 / 60bp 四档成本、144 行 Walk-Forward 指标**，让方案优劣接受统一协议检查。
 
-以成熟开源基础设施为架构参照，聚焦 **A 股、本地研究和决策证据链**。下表比较产品方向，不宣称功能、市场覆盖、性能或收益等价。
+项目同时沉淀 [8 个研究知识主题](docs/knowledge/README.md)：数据边界、PIT、实验协议、失败案例、故障治理、Hermes 工作流、Forward 观察和记忆治理。把“为什么有效、为什么不采用、下一步缺什么”一并留存。
 
-| 参照项目 | 官方定位与优势方向 | AIQUANT-LITE 的聚焦点 |
+> 统计来自 **2026-10-19 单个本地安装的只读盘点**。各表相互关联，不能相加；候选和指标行数不代表有效策略数。原始数据不随仓库分发。查看 [数据边界](docs/knowledge/data-assets.md)、[实验协议](docs/knowledge/experiment-comparison.md) 与 [机器可读证据摘要](docs/knowledge/evidence-snapshot-2026-10-19.json)。
+
+## 从市场事实，到可复用的研究资产
+
+![研究、决策与知识沉淀流程](docs/assets/research-workflow.svg)
+
+1. **采集事实**：通过已配置数据源读取市场信息，标记来源、覆盖、业务日期和新鲜度。
+2. **筛选与研究**：确定性计算组织候选；按配置调用模型角色，区分事实与推断。
+3. **验证方案**：固定样本、标签和成本，对照简单基准、年度稳定性与滚动验证。
+4. **留存证据**：相关决策流程记录版本、风险与证据，支持完整性核对。
+5. **人工复盘**：检查模拟和观察结果，把经核查的方法与失败教训整理为知识。
+
+不同 API 的边界分别定义；Hermes 的筛选结果需明确选择才进入决策评估，该集成工具不创建订单或 DecisionPacket。详见 [Hermes 契约](docs/hermes-integration.md) 与 [研究工作流](docs/knowledge/hermes-research-workflows.md)。
+
+## 向成熟开源基础设施看齐
+
+参考成熟项目的架构思想，聚焦 **A 股语境、日常研究体验和决策证据链**。
+
+| 设计参照 | 值得学习的方向 | AIQUANT-LITE 的聚焦点 |
 |---|---|---|
-| **[Microsoft Qlib](https://github.com/microsoft/qlib)** | 面向 AI 的量化投资研究平台，支持多种机器学习研究范式 | 把因子、策略实验与可读决策结果连接到日常 A 股研究工作流 |
-| **[OpenBB](https://github.com/openbq-org/OpenBB)** | 为分析师、量化研究者与 AI Agent 提供数据集成基础设施 | 组织 A 股数据来源、覆盖状态与多视图投研界面 |
-| **[QuantConnect LEAN](https://github.com/QuantConnect/Lean)** | 模块化算法交易引擎，覆盖策略研究、回测与执行基础设施 | 在研究与模拟范围内沉淀策略证据、风险约束和复盘记录 |
+| **[Microsoft Qlib](https://github.com/microsoft/qlib)** | AI 量化研究、数据到模型的完整研究流程 | 把因子、实验和可读判断接进日常 A 股工作台 |
+| **[OpenBB](https://github.com/openbq-org/OpenBB)** | 多源数据集成与面向分析师、量化和 Agent 的接口 | 组织 A 股来源状态，连接界面、API、Hermes 与 MCP |
+| **[QuantConnect LEAN](https://github.com/QuantConnect/Lean)** | 模块化策略研究、回测与执行引擎 | 在研究与模拟范围内连接策略证据、风险约束和复盘 |
 
-这些项目是对标参照，并非本项目的依赖或合作方。AIQUANT-LITE 当前定位为研究与人工决策支持；公开实现不接入券商、不自动提交实盘订单。
+这些项目是设计参照；功能、数据覆盖、性能与投资收益没有被认定为等价。项目当前用于研究和人工决策支持，公开实现不接入券商、不自动提交实盘订单。
 
-## 系统架构
+## 一套研究内核，多种工作入口
 
-```mermaid
-flowchart LR
-    subgraph Workspace["研究工作台"]
-        WEB["Vue 3 · ECharts"]
-        CLI["CLI · Hermes · MCP"]
-    end
-    WEB --> UI["WebUI · 只读 API"]
-    UI --> R["Router · 研究与决策编排"]
-    CLI --> R
-    R --> DATA["Data Hub · 多源事实"]
-    R --> FACTOR["扫描 · 因子 · 策略实验"]
-    R --> RISK["PIT · 数据状态 · Risk VETO"]
-    RISK --> PACKET["版本化 DecisionPacket"]
-    R --> DB[("主 DuckDB · 单 Owner")]
-    UI --> SIDECAR[("只读研究侧车与产物")]
-    PACKET --> REVIEW["人工判断 · 模拟 · 复盘"]
-```
+![研究工作台与服务架构](docs/assets/architecture-overview.svg)
 
-**Router 是主 DuckDB 的在线唯一 Owner。** WebUI 的事实与评分请求通过 Router；图表和实验视图可读取明确许可的只读侧车库与研究文件。离线维护主库前需停止持有主库的在线服务。
+前端采用 **Vue 3 + TypeScript + ECharts**，后端以 **FastAPI + DuckDB** 组织事实、研究与证据。WebUI 的主库事实与评分请求通过 Router；图表和研究产物可按契约读取只读侧车。数据源适配包括 Tushare、AKShare / Eastmoney、BaoStock、CNInfo；金牛历史数据为需独立配置的可选实验能力。
 
-### 评分与风险边界
+<details>
+<summary><strong>展开工程细节：评分、风险与模型审计</strong></summary>
 
 当前代码包含多条有明确来源的评分路径，不能混称为同一种分数：
 
@@ -126,6 +117,10 @@ flowchart LR
 | 编排实验接口 | 支持两因子、50 / 35 / 15 三因子及自定义权重研究；与上述横截面分数分开解释 |
 
 动作还受数据状态、持仓上下文、分位数阈值与风险 VETO 约束。更多说明见 [架构文档](docs/architecture.md) 和 [当前限制](docs/limitations.md)。
+
+模型角色及其服务凭证按本地配置选择；外部连通性需独立核查。物理调用审计覆盖任务与独立研究请求，记录已知用量、失败原因与未关联数量，错误脱敏显示。见 [调用审计 API](docs/api-reference.md#recent-model-calls)。离线维护主库前需停止持有主库的在线服务。
+
+</details>
 
 ## 快速开始
 
@@ -176,6 +171,20 @@ uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8877
 
 访问 `http://127.0.0.1:8877`；市场总览、机会排序与示例个股页面显示契约样本，其余视图会按缺失数据降级。结束演示后在新终端启动正常服务，或清除以上环境变量。
 
+## 质量验证
+
+软件质量有公开记录：[源码 `53022f7` 的 Windows CI](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) 留存 **后端 1794 passed、0 failed、4 skipped、8 deselected；前端 5 passed，生产构建通过**。当前分支检查见顶部 CI 标识。
+
+```powershell
+uv run ruff check .
+uv run python -m scripts.run_offline_tests --workers 2
+uv run python -m scripts.check_no_live_execution
+npm --prefix frontend test
+npm --prefix frontend run build
+```
+
+验证使用隔离环境和临时数据库。模块独立进程是已验证模式；审核 Windows / Python 3.11.1 环境的长时间混合进程原生崩溃尚未解决。跳过项、外部服务及本地数据的未验证范围见 [源码审核](docs/release-audit-2026-10-18.md) 和 [研究资料审核](docs/release-audit-2026-10-19.md)。软件测试不代替数据质量与长期策略绩效检验。
+
 ## 代码地图
 
 ```text
@@ -195,20 +204,6 @@ tests/                     单元、接口、隔离与回归测试
 docs/knowledge/            数据资产、研究协议、失败案例与知识治理
 ```
 
-## 质量验证
-
-本次 Windows / Python 3.11.1 环境中，长时间混合进程测试出现原生崩溃；当前验证入口采用逐模块独立进程。已验证范围与该限制均记录在下方审核报告中。
-
-```powershell
-uv run ruff check .
-uv run python -m scripts.run_offline_tests --workers 2
-uv run python -m scripts.check_no_live_execution
-npm --prefix frontend test
-npm --prefix frontend run build
-```
-
-验证应在独立环境和临时数据库中进行。已发布源码 `53022f7` 的 [Windows CI](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) 记录 **后端 1794 passed、4 skipped、8 deselected；前端 5 passed，构建通过**。源码审核见 [Release Audit](docs/release-audit-2026-10-18.md)，本次研究资料发布见 [Evidence Audit](docs/release-audit-2026-10-19.md)；测试结论只覆盖记录中的环境与范围。外部服务连通性、真实数据质量和长期策略表现需要另行验证。
-
 ## 文档与路线
 
 | 了解系统 | 使用与运维 | 深入研究 |
@@ -219,6 +214,12 @@ npm --prefix frontend run build
 | [安全边界](docs/security.md) | [Hermes 集成](docs/hermes-integration.md) | [PIT 基本面](docs/fundamental-point-in-time.zh-CN.md) |
 
 下一阶段聚焦：**数据质量度量、评分来源一致性、策略证据积累、研究可复现性与工作台交互完善**。规划内容不作为已经交付的能力。
+
+## 参与建设
+
+如果你关注 A 股数据质量、量化验证、Agent 工具或研究工作台，欢迎从一个明确问题开始：复现缺陷、补充数据语义、改进验证或完善交互。先阅读 [贡献指南](CONTRIBUTING.md)，通过 [Issues](https://github.com/Shixi216/aiquant-lite/issues) 提交可复核的问题与建议。
+
+喜欢这个方向，欢迎 Star，让更多认真做研究的人看到这个项目。
 
 ## 安全与许可
 

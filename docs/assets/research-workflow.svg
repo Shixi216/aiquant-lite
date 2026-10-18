@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="565" viewBox="0 0 1600 565" role="img" aria-labelledby="title desc">
+<title id="title">AIQUANT-LITE research workflow</title>
+<desc id="desc">A conceptual research loop: collect facts, screen factors, evaluate candidates, record decision evidence, review and curate knowledge. Routes have separate contracts; user confirmation controls decision transitions and observations do not create trades.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#101b30"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#68e4cd"/><stop offset="1" stop-color="#7eacff"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#377e81" stop-opacity=".18"/><stop offset="1" stop-color="#377e81" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#adc9df" stroke-opacity=".04"/></pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#75b9bf"/></marker>
+</defs>
+<rect width="1600" height="565" rx="24" fill="url(#bg)"/>
+<rect width="1600" height="565" rx="24" fill="url(#grid)"/>
+<g font-family="Segoe UI,Inter,Arial,sans-serif">
+<text x="48" y="62" fill="#e4eef7" font-size="27" font-weight="650" letter-spacing="1.5">THE RESEARCH LOOP</text>
+<text x="48" y="104" fill="#9db4c8" font-size="22" font-weight="400" >Every stage carries its inputs, time semantics and evidence forward.</text>
+<rect x="48" y="160" width="280" height="190" rx="16" fill="#112838" stroke="#365167"/>
+<text x="69" y="201" fill="#79ddcb" font-size="20" font-weight="650" >01</text>
+<text x="69" y="245" fill="#e2edf6" font-size="28" font-weight="650" >COLLECT</text>
+<text x="69" y="285" fill="#afc5d7" font-size="19" font-weight="400" >Source-attributed facts</text>
+<text x="69" y="317" fill="#afc5d7" font-size="19" font-weight="400" >Coverage + freshness</text>
+<path d="M330 256H349" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="354" y="160" width="280" height="190" rx="16" fill="#112838" stroke="#365167"/>
+<text x="375" y="201" fill="#79ddcb" font-size="20" font-weight="650" >02</text>
+<text x="375" y="245" fill="#e2edf6" font-size="28" font-weight="650" >SCREEN</text>
+<text x="375" y="285" fill="#afc5d7" font-size="19" font-weight="400" >Deterministic factors</text>
+<text x="375" y="317" fill="#afc5d7" font-size="19" font-weight="400" >Availability + cutoff</text>
+<path d="M636 256H655" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="660" y="160" width="280" height="190" rx="16" fill="#112838" stroke="#365167"/>
+<text x="681" y="201" fill="#79ddcb" font-size="20" font-weight="650" >03</text>
+<text x="681" y="245" fill="#e2edf6" font-size="28" font-weight="650" >EVALUATE</text>
+<text x="681" y="285" fill="#afc5d7" font-size="19" font-weight="400" >Candidates + protocols</text>
+<text x="681" y="317" fill="#afc5d7" font-size="19" font-weight="400" >Costs + Walk-Forward</text>
+<path d="M942 256H961" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="966" y="160" width="280" height="190" rx="16" fill="#112838" stroke="#365167"/>
+<text x="987" y="201" fill="#79ddcb" font-size="20" font-weight="650" >04</text>
+<text x="987" y="245" fill="#e2edf6" font-size="28" font-weight="650" >RECORD</text>
+<text x="987" y="285" fill="#afc5d7" font-size="19" font-weight="400" >Decision evidence</text>
+<text x="987" y="317" fill="#afc5d7" font-size="19" font-weight="400" >Versions + risk checks</text>
+<path d="M1248 256H1267" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1272" y="160" width="280" height="190" rx="16" fill="#112838" stroke="#365167"/>
+<text x="1293" y="201" fill="#79ddcb" font-size="20" font-weight="650" >05</text>
+<text x="1293" y="245" fill="#e2edf6" font-size="28" font-weight="650" >REVIEW</text>
+<text x="1293" y="285" fill="#afc5d7" font-size="19" font-weight="400" >Human-led inspection</text>
+<text x="1293" y="317" fill="#afc5d7" font-size="19" font-weight="400" >Simulation + findings</text>
+<path d="M1412 352V410H188V365" fill="none" stroke="#528e92" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="494" y="383" width="611" height="56" rx="12" fill="#11352f" stroke="#35665a"/>
+<text x="800" y="418" fill="#a2e3d1" font-size="20" font-weight="600" text-anchor="middle">CURATE → VERIFY → VERSION → REUSE</text>
+<text x="48" y="490" fill="#a3bacd" font-size="20" font-weight="400" >Research candidates require explicit selection. Observations do not create trades.</text>
+<text x="48" y="526" fill="#8ba7be" font-size="18" font-weight="400" >Workflow capabilities are composed across separate APIs; not every path creates a DecisionPacket.</text>
+</g>
+<path d="M24 563H1576" stroke="url(#accent)" stroke-width="3"/>
+</svg>

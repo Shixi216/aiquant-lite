@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="835" viewBox="0 0 1600 835" role="img" aria-labelledby="title desc">
+<title id="title">AIQUANT-LITE architecture overview</title>
+<desc id="desc">Conceptual architecture showing Web, Hermes, MCP, CLI and desktop source surfaces, a Router research core, configurable external model providers, a Router-owned main DuckDB and read-only research sidecars. WebUI chart and artifact routes may read approved sidecars directly.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#101b30"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#68e4cd"/><stop offset="1" stop-color="#7eacff"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#377e81" stop-opacity=".18"/><stop offset="1" stop-color="#377e81" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#adc9df" stroke-opacity=".04"/></pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#75b9bf"/></marker>
+</defs>
+<rect width="1600" height="835" rx="24" fill="url(#bg)"/>
+<rect width="1600" height="835" rx="24" fill="url(#grid)"/>
+<g font-family="Segoe UI,Inter,Arial,sans-serif">
+<text x="48" y="62" fill="#e3eef7" font-size="26" font-weight="650" letter-spacing="1">ONE RESEARCH CORE. MULTIPLE WAYS TO WORK.</text>
+<text x="48" y="104" fill="#9db4c8" font-size="22" font-weight="400" >Local-first services, explicit data ownership and configurable model access.</text>
+<text x="48" y="154" fill="#7dddc9" font-size="17" font-weight="600" letter-spacing="2">WORKSPACE</text>
+<rect x="48" y="174" width="479" height="72" rx="16" fill="#102331" stroke="#294254"/>
+<text x="287.5" y="218" fill="#dfeaf5" font-size="23" font-weight="600" text-anchor="middle">WEB / VUE + ECHARTS</text>
+<rect x="555" y="174" width="479" height="72" rx="16" fill="#102331" stroke="#294254"/>
+<text x="794.5" y="218" fill="#dfeaf5" font-size="23" font-weight="600" text-anchor="middle">HERMES / MCP / CLI</text>
+<rect x="1062" y="174" width="490" height="72" rx="16" fill="#102331" stroke="#294254"/>
+<text x="1307.0" y="218" fill="#dfeaf5" font-size="23" font-weight="600" text-anchor="middle">DESKTOP SOURCE</text>
+<path d="M287 247V278H800M794 247V290M1307 247V278H800" fill="none" stroke="#5b899c" stroke-width="2" />
+<path d="M800 278V300" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="48" y="309" width="1504" height="275" rx="20" fill="#102936" stroke="#3a665f"/>
+<text x="78" y="350" fill="#91e4d1" font-size="23" font-weight="650" letter-spacing="1">ROUTER / RESEARCH CORE</text>
+<rect x="78" y="382" width="340" height="110" rx="12" fill="#143342" stroke="#365c6b"/>
+<text x="96" y="422" fill="#d9e9f3" font-size="21" font-weight="600" >DATA + FACTORS</text>
+<text x="96" y="460" fill="#a4bfd0" font-size="19" font-weight="400" >Sources, screening, research</text>
+<rect x="448" y="382" width="340" height="110" rx="12" fill="#143342" stroke="#365c6b"/>
+<text x="466" y="422" fill="#d9e9f3" font-size="21" font-weight="600" >RISK + EVIDENCE</text>
+<text x="466" y="460" fill="#a4bfd0" font-size="19" font-weight="400" >PIT, VETO, decision packets</text>
+<rect x="818" y="382" width="340" height="110" rx="12" fill="#143342" stroke="#365c6b"/>
+<text x="836" y="422" fill="#d9e9f3" font-size="21" font-weight="600" >AI ROUTING</text>
+<text x="836" y="460" fill="#a4bfd0" font-size="19" font-weight="400" >Models, roles, call audits</text>
+<rect x="1190" y="382" width="330" height="110" rx="12" fill="#142c42" stroke="#506a90"/>
+<text x="1208" y="422" fill="#bdd2fa" font-size="21" font-weight="600" >PROVIDER CLIENTS</text>
+<text x="1208" y="460" fill="#a4bfd0" font-size="18" font-weight="400" >External models, local config</text>
+<path d="M1160 438H1181" fill="none" stroke="#759abf" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="78" y="546" fill="#a6c2d0" font-size="20" font-weight="400" >Main facts and scoring pass through Router. Read-only research sidecars have separate contracts.</text>
+<path d="M426 586V622" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M1173 586V622" fill="none" stroke="#75b9bf" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="48" y="619" fill="#8db7e7" font-size="17" font-weight="600" letter-spacing="2">PERSISTENCE</text>
+<rect x="48" y="641" width="728" height="110" rx="16" fill="#102c33" stroke="#3b6c63"/>
+<text x="74" y="684" fill="#9ae3cf" font-size="24" font-weight="600" >PRIMARY DUCKDB / SINGLE ONLINE OWNER</text>
+<text x="74" y="722" fill="#a4bdcd" font-size="20" font-weight="400" >Router owns the live database. Local credentials and data.</text>
+<rect x="804" y="641" width="748" height="110" rx="16" fill="#102331" stroke="#294254"/>
+<text x="830" y="684" fill="#bbd1f4" font-size="23" font-weight="600" >READ-ONLY SIDECARS + RESEARCH ARTIFACTS</text>
+<text x="830" y="722" fill="#a4bdcd" font-size="20" font-weight="400" >Replay, experiment results and curated evidence summaries.</text>
+<text x="48" y="799" fill="#8ca9bf" font-size="17" font-weight="500" >CONCEPTUAL MAP · THIRD-PARTY DATA / MODEL ACCESS DEPENDS ON LOCAL CONFIGURATION</text>
+</g>
+<path d="M24 833H1576" stroke="url(#accent)" stroke-width="3"/>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="630" viewBox="0 0 1600 630" role="img" aria-labelledby="title desc">
+<title id="title">AIQUANT-LITE capability map</title>
+<desc id="desc">Six capabilities: source-attributed data, quantitative research, configurable AI, point-in-time contracts, traceable decisions and curated knowledge. This is a conceptual capability map, not a live-status display.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#101b30"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#68e4cd"/><stop offset="1" stop-color="#7eacff"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#377e81" stop-opacity=".18"/><stop offset="1" stop-color="#377e81" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#adc9df" stroke-opacity=".04"/></pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#75b9bf"/></marker>
+</defs>
+<rect width="1600" height="630" rx="24" fill="url(#bg)"/>
+<rect width="1600" height="630" rx="24" fill="url(#grid)"/>
+<g font-family="Segoe UI,Inter,Arial,sans-serif">
+<text x="48" y="62" fill="#e3edf7" font-size="25" font-weight="650" letter-spacing="1">SIX BUILDING BLOCKS. ONE RESEARCH WORKSPACE.</text>
+<text x="48" y="103" fill="#9db4c8" font-size="22" font-weight="400" >From source-attributed data to inspectable decisions and reusable knowledge.</text>
+<rect x="48" y="145" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="70" y="181" fill="#76dfcb" font-size="21" font-weight="650" >01</text>
+<text x="70" y="223" fill="#e4eef7" font-size="23" font-weight="650" >SOURCE-ATTRIBUTED DATA</text>
+<text x="70" y="265" fill="#a4bbcf" font-size="20" font-weight="400" >Multi-source adapters</text>
+<text x="70" y="296" fill="#a4bbcf" font-size="20" font-weight="400" >Coverage, freshness and missing data</text>
+<g fill="none" stroke="#76dfcb" stroke-width="2">
+<ellipse cx="475" cy="173" rx="17" ry="6"/>
+<path d="M458 173V197Q475 209 492 197V173M458 185Q475 197 492 185"/>
+</g>
+<rect x="558" y="145" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="580" y="181" fill="#a0c0ff" font-size="21" font-weight="650" >02</text>
+<text x="580" y="223" fill="#e4eef7" font-size="23" font-weight="650" >QUANTITATIVE RESEARCH</text>
+<text x="580" y="265" fill="#a4bbcf" font-size="20" font-weight="400" >Factors, ablations and candidate families</text>
+<text x="580" y="296" fill="#a4bbcf" font-size="20" font-weight="400" >Walk-Forward and cost sensitivity</text>
+<path d="M965 199H1004M971 194V181M984 194V170M997 194V176" fill="none" stroke="#a0c0ff" stroke-width="3" />
+<rect x="1068" y="145" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="1090" y="181" fill="#76dfcb" font-size="21" font-weight="650" >03</text>
+<text x="1090" y="223" fill="#e4eef7" font-size="23" font-weight="650" >CONFIGURABLE AI</text>
+<text x="1090" y="265" fill="#a4bbcf" font-size="20" font-weight="400" >Model routing and specialist roles</text>
+<text x="1090" y="296" fill="#a4bbcf" font-size="20" font-weight="400" >Hermes, MCP and API access</text>
+<path d="M1481 172L1509 172L1495 198Z" fill="none" stroke="#76dfcb" stroke-width="2" />
+<circle cx="1481" cy="172" r="5" fill="#102331" stroke="#76dfcb" stroke-width="2"/>
+<circle cx="1509" cy="172" r="5" fill="#102331" stroke="#76dfcb" stroke-width="2"/>
+<circle cx="1495" cy="198" r="5" fill="#102331" stroke="#76dfcb" stroke-width="2"/>
+<rect x="48" y="357" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="70" y="393" fill="#a0c0ff" font-size="21" font-weight="650" >04</text>
+<text x="70" y="435" fill="#e4eef7" font-size="23" font-weight="650" >POINT-IN-TIME CONTRACTS</text>
+<text x="70" y="477" fill="#a4bbcf" font-size="20" font-weight="400" >Explicit availability and decision cutoffs</text>
+<text x="70" y="508" fill="#a4bbcf" font-size="20" font-weight="400" >Historical membership quality flags</text>
+<circle cx="473" cy="395" r="18" fill="none" stroke="#a0c0ff" stroke-width="2"/>
+<path d="M473 383V396H484" fill="none" stroke="#a0c0ff" stroke-width="2" />
+<rect x="558" y="357" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="580" y="393" fill="#76dfcb" font-size="21" font-weight="650" >05</text>
+<text x="580" y="435" fill="#e4eef7" font-size="23" font-weight="650" >TRACEABLE DECISIONS</text>
+<text x="580" y="477" fill="#a4bbcf" font-size="20" font-weight="400" >Versioned packets and linked evidence</text>
+<text x="580" y="508" fill="#a4bbcf" font-size="20" font-weight="400" >Risk constraints and audit records</text>
+<path d="M983 377L1002 384V397Q998 411 983 416Q968 411 964 397V384ZM973 394L981 402L994 388" fill="none" stroke="#76dfcb" stroke-width="2" />
+<rect x="1068" y="357" width="484" height="184" rx="16" fill="#102331" stroke="#294254"/>
+<text x="1090" y="393" fill="#a0c0ff" font-size="21" font-weight="650" >06</text>
+<text x="1090" y="435" fill="#e4eef7" font-size="23" font-weight="650" >REUSABLE KNOWLEDGE</text>
+<text x="1090" y="477" fill="#a4bbcf" font-size="20" font-weight="400" >Curated workflows and negative findings</text>
+<text x="1090" y="508" fill="#a4bbcf" font-size="20" font-weight="400" >Dated evidence and unresolved issues</text>
+<rect x="1477" y="378" width="31" height="34" rx="3" fill="none" stroke="#a0c0ff"/>
+<path d="M1484 387H1501M1484 395H1501M1484 403H1494" fill="none" stroke="#a0c0ff" stroke-width="2" />
+<text x="48" y="594" fill="#90aabe" font-size="18" font-weight="500" letter-spacing="1.4">DATA + RESEARCH + AI + TIME + EVIDENCE + KNOWLEDGE</text>
+</g>
+<path d="M24 628H1576" stroke="url(#accent)" stroke-width="3"/>
+</svg>

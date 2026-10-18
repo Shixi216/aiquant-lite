@@ -1,107 +1,112 @@
 <div align="center">
 
-![AIQUANT-LITE — A-share research, engineered for clarity](docs/assets/hero.svg)
+![AIQUANT-LITE — Research deeper. Decide with evidence.](docs/assets/hero.svg)
 
 # AIQUANT-LITE
 
-### An AI-native research workspace for China's A-share market
+### Build your own AI research command center for China's A-share market.
 
-**Million-row data assets. Versioned strategy research. Traceable AI decision evidence.**
+**Million-row data assets × Quantitative experiments × Configurable AI × Traceable decisions**
 
-Market intelligence, quantitative factors, AI-assisted research, risk constraints and decision review in one local-first workspace.
+From market context to company research. From factor ideas to inspectable evidence. A local-first workspace for serious research.
 
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
-[![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json)
-[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py)
-[![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py)
-[![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
-[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml)
+[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-[简体中文](README.md) · English
+**[🚀 Quick start](#quick-start) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [简体中文](README.md)**
 
 </div>
 
-## Research, connected
+---
 
-Built for individual researchers, quantitative developers and small research teams, AIQUANT-LITE connects **market observation → screening → company research → risk review → decision records → simulation and review**.
+## Research that leaves an evidence trail
 
-The Vue workspace brings these views together. The Python backend combines structured facts, deterministic calculations and optional specialized model roles, retaining source attribution, timestamps, coverage and availability so that results remain open to inspection.
+For **A-share researchers, quantitative developers and small research teams**, AIQUANT-LITE connects a data platform, quantitative workbench and Agent workflows. Source attribution, experiments, risks and decisions become parts of a research process you can inspect and improve.
 
-![Market dashboard — development sample](docs/assets/dashboard-demo.png)
+![Six capabilities in one workspace](docs/assets/capability-map.svg)
+
+| Research depth | Engineering foundations |
+|---|---|
+| **🔎 Source-attributed facts**<br>Quotes, financials, filings, news and risk information retain source, coverage and time semantics. | **🧠 Configurable models and access**<br>Router organizes research roles; Web, CLI, Hermes, MCP and desktop source reuse research infrastructure. |
+| **🧪 Experiments with trade-offs**<br>Static, dynamic, model and ablation routes retain cost sensitivity, yearly stability and rejection reasons. | **⏱️ Point-in-Time contracts**<br>Availability, cutoffs and historical membership quality constrain inputs; missing and stale data remain visible. |
+| **🧾 Inspectable decisions**<br>Versioned DecisionPackets preserve zones, evidence and integrity checks for human review. | **🔐 Local-first data ownership**<br>Router is the sole online owner of the primary DuckDB; sidecars expose research under separate read-only contracts. |
+
+## See the workspace
+
+**Market context → screening → company research → risk review → decision records → simulation and review.**
+
+![Market dashboard — development contract sample](docs/assets/dashboard-demo.png)
+
+<table width="100%">
+<tr>
+<td width="50%" align="center"><strong>Stock intelligence · facts and factors</strong><br><img src="docs/assets/stock-overview-demo.png" alt="Stock intelligence development sample" width="100%"></td>
+<td width="50%" align="center"><strong>Price research · connected chart views</strong><br><img src="docs/assets/stock-demo.png" alt="Stock chart development sample" width="100%"></td>
+</tr>
+</table>
 
 <details>
-<summary><strong>Stock intelligence and chart preview</strong></summary>
+<summary><strong>Expand the stock research previews</strong></summary>
 
-![Stock overview — development sample](docs/assets/stock-overview-demo.png)
+![Stock overview — full development sample](docs/assets/stock-overview-demo.png)
 
-![Stock research — development sample](docs/assets/stock-demo.png)
+![Stock chart — full development sample](docs/assets/stock-demo.png)
 
 </details>
 
-> Screenshots show the actual UI with development contract samples. Values illustrate layout and interactions; they are not live quotes, advice or performance results. Fixture mode is disabled in production.
+> Screenshots show the actual UI with development contract samples; fixture mode is disabled in production. Product images illustrate interactions and diagrams illustrate conceptual architecture. Neither represents live quotes or investment performance.
 
+### Six connected workspaces
 
-## Research assets, with evidence
+| Workspace | What you can investigate | Implementation |
+|---|---|---|
+| **Market dashboard** | Breadth, coverage, quote timestamps and provider state | [Dashboard](frontend/src/views/DashboardView.vue) |
+| **Opportunity ranking** | Deterministic market scans, filters and four-dimensional cross-sectional ranks | [Scanner](trading/scanner) · [Cross Section](trading/research/orchestration/cross_section.py) |
+| **Stock intelligence** | Security identity, financials, factors, decision zones and candlestick charts | [Stock Intelligence](frontend/src/views/StockIntelView.vue) |
+| **Quant lab** | Sentiment, margin financing, Dragon-Tiger activity and daily-bar panels | [Quant Lab](frontend/src/views/QuantLabView.vue) |
+| **Strategy and capital research** | Candidate families, cost sensitivity and Walk-Forward evidence | [Strategy Lab](trading/research/strategy_lab) · [Research](webui/routes/research.py) |
+| **Decisions and review** | Risk VETO, sizing, versioned decisions and local simulation | [Decision Support](trading/decision_support) · [Manual Tracking](manual_tracking) |
 
-![AIQUANT-LITE research evidence inventory](docs/assets/research-evidence.svg)
+## Research depth, in inspectable assets
 
-- **Facts and features at scale:** one local installation holds 2,782,220 standardized historical bar rows and 2,625,560 Replay feature packets, with explicit source, date and missing-data semantics.
-- **Structured strategy evaluation:** 202 candidate definitions, four cost scenarios and 144 Walk-Forward metric rows; static, dynamic, model and ablation routes retain rejection reasons.
-- **Inspectable decisions and operations:** PIT input contracts, versioned DecisionPackets, linked evidence, standalone model-call audits and visible degradation.
-- **Curated research knowledge:** [eight topics](docs/knowledge/README.md) distilled from project-related Hermes conversations, memory and operations reviews, covering protocols, negative findings and reusable workflows.
+![Local data and experiment inventory](docs/assets/research-evidence.svg)
 
-> Counts come from a **read-only inventory of one local installation on 2026-10-19**. Related tables are non-additive; underlying datasets are not distributed. Candidate and metric counts are not counts of profitable strategies. See [data scope](docs/knowledge/data-assets.md), [protocol comparison](docs/knowledge/experiment-comparison.md) and the [machine-readable evidence summary](docs/knowledge/evidence-snapshot-2026-10-19.json). The detailed knowledge articles are currently in Chinese.
+The local inventory contains **2,782,220 historical bar rows, 2,625,560 Replay feature packets and 2,238,764 aligned Strategy Lab input rows**. Strategy Lab retains **202 candidate definitions, four cost scenarios at 0 / 20 / 40 / 60bp and 144 Walk-Forward metric rows**.
 
-## Workspace capabilities
+[Eight curated knowledge topics](docs/knowledge/README.md) cover data scope, PIT, experiment protocols, negative findings, operations, Hermes workflows, Forward observations and memory governance. Rejection reasons and unresolved questions remain part of the research record. Detailed knowledge articles are currently in Chinese.
 
-| View | Research workflow |
-|---|---|
-| **Market dashboard** | Breadth, price-change distribution, coverage, timestamps and provider state |
-| **Opportunity ranking** | Deterministic market screening, candidate filters and four-dimensional cross-sectional ranks |
-| **Stock intelligence** | Security identity, quote snapshots, financial records, factor details, frozen decision zones and candlestick charts |
-| **Quant lab** | Market sentiment, margin financing, Dragon-Tiger trading activity and daily-bar research panels |
-| **Strategy and capital research** | Research artifacts, sentiment experiments, Walk-Forward evaluation, cost sensitivity and strategy comparison |
-| **Decisions and review** | Risk VETO, action and sizing constraints, versioned packets, local simulation and user-entered trade facts |
+> Counts come from a **read-only inventory of one local installation on 2026-10-19**. Related tables are non-additive; candidate and metric counts are not counts of profitable strategies. Underlying data is not distributed. See [data scope](docs/knowledge/data-assets.md), [protocol comparison](docs/knowledge/experiment-comparison.md) and [machine-readable evidence](docs/knowledge/evidence-snapshot-2026-10-19.json).
 
-- **Source-attributed data** through Tushare, AKShare / Eastmoney, BaoStock and CNInfo adapters; optional Jinniu history integration remains experimental and requires separate configuration.
-- **Configurable AI roles** for synthesis, filing verification and risk review; provider access depends on credentials and service availability.
-- **Explicit time semantics** for trade dates, quote snapshots, score cutoffs and report generation, with Point-in-Time input contracts.
-- **Traceable decisions** with frozen zones, versions, linked evidence and hash verification.
-- **Visible degradation** when data is missing, stale or unavailable. Missing values remain missing.
-- **Auditable model usage** with time-window counts across task workflows and standalone research calls, known token usage and sanitized errors. See the [call audit API](docs/api-reference.md#recent-model-calls).
-- **Composable access** through WebUI, CLI, FastAPI, Finance Data MCP, Hermes and desktop source modules.
+## From market facts to reusable research
+
+![Research, evidence and knowledge workflow](docs/assets/research-workflow.svg)
+
+1. **Collect facts:** retain configured sources, coverage, business dates and freshness.
+2. **Screen and research:** deterministic calculations organize candidates; configured model roles separate facts from inference.
+3. **Evaluate ideas:** fix samples, labels and costs; check simple baselines, yearly stability and Walk-Forward results.
+4. **Record evidence:** relevant decision workflows retain versions, risks and integrity checks.
+5. **Review and curate:** inspect observations and simulations, then document verified methods and negative findings.
+
+APIs have separate boundaries. Hermes screening requires explicit selection before decision evaluation; that integration tool creates neither orders nor DecisionPackets. See the [Hermes contract](docs/hermes-integration.md) and [workflow guide](docs/knowledge/hermes-research-workflows.md).
 
 ## Reference architectures
 
-The following projects provide architectural reference points. This is a comparison of direction, not a claim of feature, coverage, speed or investment-performance parity.
+We learn from mature open-source infrastructure while focusing on **A-share context, everyday research and decision evidence**.
 
-| Project | Official focus | AIQUANT-LITE's focus |
+| Reference | Design direction | AIQUANT-LITE's focus |
 |---|---|---|
-| **[Microsoft Qlib](https://github.com/microsoft/qlib)** | AI-oriented quantitative investment research with multiple ML paradigms | Connect factors and experiments to inspectable A-share research decisions |
-| **[OpenBB](https://github.com/openbq-org/OpenBB)** | Data integration infrastructure for analysts, quants and AI agents | Organize A-share sources, availability and research views in a local workspace |
-| **[QuantConnect LEAN](https://github.com/QuantConnect/Lean)** | Modular algorithmic trading, backtesting and execution infrastructure | Retain strategy evidence, risk constraints and review records within research and simulation |
+| **[Microsoft Qlib](https://github.com/microsoft/qlib)** | AI-oriented quantitative research and data-to-model workflows | Connect factors, experiments and readable decisions to a daily A-share workspace |
+| **[OpenBB](https://github.com/openbq-org/OpenBB)** | Multi-source data integration for analysts, quants and AI agents | Organize A-share source state across UI, API, Hermes and MCP |
+| **[QuantConnect LEAN](https://github.com/QuantConnect/Lean)** | Modular strategy research, backtesting and execution infrastructure | Connect strategy evidence, risk constraints and review within research and simulation |
 
-These are references, not dependencies or partners. AIQUANT-LITE supports research and human decisions; the public implementation has no broker connection or automated live-order path.
+These are design references. Feature, coverage, performance and investment-return equivalence has not been established. The public implementation supports research and human decisions, with no broker connection or automated live-order path.
 
-## Architecture
+## One research core, multiple interfaces
 
-```mermaid
-flowchart LR
-    WEB["Vue 3 · ECharts"] --> UI["WebUI · read-only APIs"]
-    UI --> R["Router · research orchestration"]
-    CLI["CLI · Hermes · MCP"] --> R
-    R --> DATA["Data Hub · source-attributed facts"]
-    R --> FACTOR["Screening · factors · experiments"]
-    R --> RISK["PIT · data status · Risk VETO"]
-    RISK --> PACKET["Versioned DecisionPacket"]
-    R --> DB[("Primary DuckDB · single owner")]
-    UI --> SIDE[("Read-only sidecars and artifacts")]
-    PACKET --> REVIEW["Human review · simulation"]
-```
+![Workspace and services architecture](docs/assets/architecture-overview.svg)
 
-Router is the sole online owner of the primary DuckDB. WebUI fact and scoring requests go through Router; approved read-only sidecars and research files serve chart and experiment views. Stop online database owners before direct offline maintenance.
+**Vue 3 + TypeScript + ECharts** powers the workspace; **FastAPI + DuckDB** organizes facts, research and evidence. WebUI main-database facts and scoring pass through Router. Approved sidecars serve chart and research artifacts. Source adapters include Tushare, AKShare / Eastmoney, BaoStock and CNInfo; optional Jinniu history remains experimental and separately configured.
 
-### Scoring contracts
+<details>
+<summary><strong>Engineering details: scores, risk and model audits</strong></summary>
 
 | Path | Meaning |
 |---|---|
@@ -110,6 +115,10 @@ Router is the sole online owner of the primary DuckDB. WebUI fact and scoring re
 | Orchestration experiments | Separate two-factor, 50 / 35 / 15 three-factor and custom-weight research paths |
 
 Actions also depend on data state, position context, percentile thresholds and Risk VETO. See [architecture](docs/architecture.md) and [limitations](docs/limitations.md).
+
+Model roles and provider access depend on local configuration and credentials. The physical call audit includes task and standalone research calls, known usage, failure causes and unlinked counts, with sanitized error display. See the [call audit API](docs/api-reference.md#recent-model-calls). Stop online owners before direct offline maintenance of the primary database.
+
+</details>
 
 ## Quick start
 
@@ -156,6 +165,20 @@ uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8877
 
 Visit `http://127.0.0.1:8877`. Dashboard, opportunities and the sample stock view use fixtures; other views degrade with missing data. Use a fresh terminal or clear those variables before normal operation.
 
+## Validation
+
+The [hosted Windows CI at source commit `53022f7`](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) records **1,794 backend passes, zero failures, four skips and eight deselections; five frontend passes and a successful production build**. The top CI badge shows the current branch status.
+
+```powershell
+uv run ruff check .
+uv run python -m scripts.run_offline_tests --workers 2
+uv run python -m scripts.check_no_live_execution
+npm --prefix frontend test
+npm --prefix frontend run build
+```
+
+Use isolated environments and temporary databases. Module isolation is the validated test mode; the native crash in long combined processes on the reviewed Windows / Python 3.11.1 environment remains unresolved. See the [source audit](docs/release-audit-2026-10-18.md) and [research publication audit](docs/release-audit-2026-10-19.md) for skipped checks and unverified local-data / network scope. Software validation does not establish data quality or long-term investment performance.
+
 ## Repository map
 
 ```text
@@ -175,25 +198,17 @@ tests/                     Unit, API, isolation and regression checks
 docs/knowledge/            Data inventory, protocols, negative findings and knowledge governance
 ```
 
-## Validation
-
-Long combined test processes hit native crashes in the reviewed Windows / Python 3.11.1 environment. The supplied runner isolates test modules; the audit records both the completed checks and this unresolved limitation.
-
-```powershell
-uv run ruff check .
-uv run python -m scripts.run_offline_tests --workers 2
-uv run python -m scripts.check_no_live_execution
-npm --prefix frontend test
-npm --prefix frontend run build
-```
-
-Run validation in an isolated environment with temporary databases. The [hosted Windows CI at `53022f7`](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) recorded **1,794 backend passes, four skips and eight deselections; five frontend passes and a successful build**. See the [source release audit](docs/release-audit-2026-10-18.md) and [research publication audit](docs/release-audit-2026-10-19.md) for scope and limits. Offline checks do not establish external-provider connectivity, live data quality or long-term strategy performance.
-
 ## Documentation and direction
 
 [Research evidence](docs/knowledge/README.md) · [Architecture](docs/architecture.md) · [API](docs/api-reference.md) · [Data pipeline](docs/data-pipeline.md) · [Operations](docs/operations.md) · [Hermes](docs/hermes-integration.md) · [Experiments](docs/experiments.md) · [PIT fundamentals](docs/fundamental-point-in-time.zh-CN.md)
 
 Next priorities: data-quality measurement, consistent score provenance, longer strategy evidence, reproducible research and workspace interaction improvements. Roadmap items are not delivered features.
+
+## Build with us
+
+Interested in A-share data quality, quantitative validation, Agent tools or research interfaces? Start with a reproducible issue, clearer data semantics, better evaluation or improved interaction. Read [CONTRIBUTING.md](CONTRIBUTING.md) and open an [issue](https://github.com/Shixi216/aiquant-lite/issues) with evidence and a focused proposal.
+
+If this research direction resonates, a Star helps more researchers discover the project.
 
 ## Security and license
 

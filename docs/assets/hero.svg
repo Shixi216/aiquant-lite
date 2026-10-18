@@ -1,50 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
-<title id="title">AIQUANT-LITE — A-share research, engineered for clarity</title>
-<desc id="desc">A local-first research workspace connecting data, quantitative discipline and traceable evidence.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="590" viewBox="0 0 1600 590" role="img" aria-labelledby="title desc">
+<title id="title">AIQUANT-LITE — Research deeper. Decide with evidence.</title>
+<desc id="desc">An AI-native A-share research workspace linking market facts, quantitative experiments, evidence and human review. Conceptual system illustration.</desc>
 <defs>
-  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#0d1729"/></linearGradient>
-  <linearGradient id="accent"><stop stop-color="#6ae3d5"/><stop offset="1" stop-color="#72a8ff"/></linearGradient>
-  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#95bed2" stroke-opacity=".045"/></pattern>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#101b30"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#68e4cd"/><stop offset="1" stop-color="#7eacff"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#377e81" stop-opacity=".18"/><stop offset="1" stop-color="#377e81" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#adc9df" stroke-opacity=".04"/></pattern>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#75b9bf"/></marker>
 </defs>
-<rect width="1600" height="520" rx="24" fill="url(#bg)"/>
-<rect width="1600" height="520" rx="24" fill="url(#grid)"/>
-<path d="M0 518H1600" stroke="url(#accent)" stroke-width="4"/>
+<rect width="1600" height="590" rx="24" fill="url(#bg)"/>
+<rect width="1600" height="590" rx="24" fill="url(#grid)"/>
 <g font-family="Segoe UI,Inter,Arial,sans-serif">
-  <rect x="72" y="62" width="190" height="29" rx="14" fill="#163c43"/>
-  <circle cx="90" cy="76" r="4" fill="#68e0c9"/>
-  <text x="105" y="81" fill="#9cebdc" font-size="12" letter-spacing="2.1">A-SHARE RESEARCH</text>
-  <text x="68" y="194" fill="#f2f7fc" font-size="84" font-weight="700" letter-spacing="-3">AIQUANT-LITE<tspan fill="#70dfd2">.</tspan></text>
-  <text x="74" y="252" fill="#bfd0dd" font-size="29">Research, built on evidence.</text>
-  <text x="74" y="300" fill="#8299ae" font-size="19">AI intelligence. Quantitative discipline. Traceable decisions.</text>
-  <g font-size="12" letter-spacing="1.5" fill="#d6e5ee">
-    <rect x="74" y="375" width="160" height="40" rx="9" fill="#122534" stroke="#274152"/>
-    <text x="95" y="400">LOCAL FIRST</text>
-    <rect x="248" y="375" width="160" height="40" rx="9" fill="#122534" stroke="#274152"/>
-    <text x="270" y="400">PIT AWARE</text>
-    <rect x="422" y="375" width="186" height="40" rx="9" fill="#122534" stroke="#274152"/>
-    <text x="444" y="400">EVIDENCE LINKED</text>
-  </g>
-  <g transform="translate(1000 88)">
-    <rect width="508" height="344" rx="18" fill="#0d1f2c" stroke="#294153"/>
-    <text x="30" y="39" fill="#b8ccda" font-size="12" letter-spacing="2">THE RESEARCH LOOP</text>
-    <circle cx="468" cy="34" r="5" fill="#67dbc7"/>
-    <path d="M30 62H478" stroke="#294153"/>
-    <g fill="none" stroke="#335166" stroke-width="1.4"><path d="M120 143H252H390"/><path d="M120 143V242H390V143"/></g>
-    <g>
-      <rect x="38" y="109" width="144" height="68" rx="11" fill="#142d3c" stroke="#34766e"/>
-      <text x="60" y="136" fill="#6ee2cf" font-size="11" letter-spacing="1.5">01 / DATA</text>
-      <text x="60" y="158" fill="#d6e6ef" font-size="15">Market facts</text>
-      <rect x="202" y="109" width="118" height="68" rx="11" fill="#14293e" stroke="#41648d"/>
-      <text x="219" y="136" fill="#8ab9ff" font-size="11" letter-spacing="1">02 / FACTORS</text>
-      <text x="219" y="158" fill="#d6e6ef" font-size="15">Research</text>
-      <rect x="340" y="109" width="130" height="68" rx="11" fill="#19273f" stroke="#566789"/>
-      <text x="357" y="136" fill="#b2c5ee" font-size="11" letter-spacing=".7">03 / EVIDENCE</text>
-      <text x="357" y="158" fill="#d6e6ef" font-size="15">Decisions</text>
-      <rect x="167" y="220" width="188" height="44" rx="10" fill="#113634" stroke="#386f63"/>
-      <text x="191" y="247" fill="#9ee2d1" font-size="14">Review &amp; refine</text>
-    </g>
-    <text x="30" y="313" fill="#7996ab" font-size="12">SOURCE ATTRIBUTION</text>
-    <text x="260" y="313" fill="#7996ab" font-size="12">RISK CONSTRAINTS</text>
-  </g>
+<ellipse cx="1210" cy="310" rx="480" ry="300" fill="url(#glow)"/>
+<rect x="64" y="54" width="250" height="36" rx="18" fill="#133936" stroke="#275e56"/>
+<circle cx="84" cy="72" r="4" fill="#74e7ce"/>
+<text x="100" y="78" fill="#9de9d8" font-size="13" font-weight="600" letter-spacing="1.5">A-SHARE RESEARCH ENGINE</text>
+<text x="58" y="194" fill="#f1f6fc" font-size="94" font-weight="750" letter-spacing="-3">AIQUANT-LITE</text>
+<circle cx="694" cy="183" r="8" fill="#6be2cc"/>
+<text x="66" y="268" fill="#dce8f3" font-size="40" font-weight="600" >Research deeper.</text>
+<text x="66" y="319" fill="#79e1cf" font-size="40" font-weight="600" >Decide with evidence.</text>
+<text x="68" y="376" fill="#9db2c6" font-size="24" font-weight="400" >Market facts. Quant discipline. AI intelligence.</text>
+<rect x="66" y="438" width="184" height="46" rx="10" fill="#102735" stroke="#2d4659"/>
+<text x="87" y="467" fill="#d1e4ee" font-size="16" font-weight="500" letter-spacing="1.2">LOCAL FIRST</text>
+<rect x="266" y="438" width="172" height="46" rx="10" fill="#102735" stroke="#2d4659"/>
+<text x="287" y="467" fill="#d1e4ee" font-size="16" font-weight="500" letter-spacing="1.2">PIT AWARE</text>
+<rect x="454" y="438" width="224" height="46" rx="10" fill="#102735" stroke="#2d4659"/>
+<text x="475" y="467" fill="#d1e4ee" font-size="16" font-weight="500" letter-spacing="1.2">EVIDENCE LINKED</text>
+<text x="68" y="544" fill="#829fb6" font-size="15" font-weight="500" letter-spacing="1.2">YOUR DATA. YOUR MODELS. YOUR RESEARCH WORKSPACE.</text>
+<rect x="896" y="70" width="640" height="460" rx="22" fill="#0d202d" stroke="#345066"/>
+<text x="926" y="110" fill="#c1d6e5" font-size="17" font-weight="600" letter-spacing="2">THE EVIDENCE ENGINE</text>
+<circle cx="1504" cy="104" r="5" fill="#74dec8"/>
+<path d="M926 133H1506" fill="none" stroke="#294454" stroke-width="2" />
+<rect x="928" y="160" width="260" height="105" rx="14" fill="#122b3b" stroke="#345367"/>
+<text x="946" y="197" fill="#77dfcf" font-size="17" font-weight="600" >01 / MARKET FACTS</text>
+<text x="946" y="232" fill="#a8bdce" font-size="17" font-weight="400" >Source · time · coverage</text>
+<rect x="1244" y="160" width="260" height="105" rx="14" fill="#122b3b" stroke="#345367"/>
+<text x="1262" y="197" fill="#9bbdff" font-size="17" font-weight="600" >02 / RESEARCH</text>
+<text x="1262" y="232" fill="#a8bdce" font-size="17" font-weight="400" >Factors · models · costs</text>
+<rect x="1244" y="300" width="260" height="105" rx="14" fill="#122b3b" stroke="#345367"/>
+<text x="1262" y="337" fill="#b0c6fb" font-size="17" font-weight="600" >03 / EVIDENCE</text>
+<text x="1262" y="372" fill="#a8bdce" font-size="17" font-weight="400" >Version · risk · integrity</text>
+<rect x="928" y="300" width="260" height="105" rx="14" fill="#122b3b" stroke="#345367"/>
+<text x="946" y="337" fill="#77dfcf" font-size="17" font-weight="600" >04 / HUMAN REVIEW</text>
+<text x="946" y="372" fill="#a8bdce" font-size="17" font-weight="400" >Inspect · compare · learn</text>
+<path d="M1190 212H1232" fill="none" stroke="#70afb5" stroke-width="2.2" marker-end="url(#arrow)"/>
+<path d="M1374 267V290" fill="none" stroke="#70afb5" stroke-width="2.2" marker-end="url(#arrow)"/>
+<path d="M1242 352H1200" fill="none" stroke="#70afb5" stroke-width="2.2" marker-end="url(#arrow)"/>
+<path d="M1058 300V278" fill="none" stroke="#70afb5" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="928" y="441" width="576" height="54" rx="12" fill="#10332f" stroke="#2f645a"/>
+<text x="1216" y="474" fill="#a4e7d5" font-size="17" font-weight="600" text-anchor="middle">FACTS → EXPERIMENTS → TRACEABLE DECISIONS</text>
 </g>
+<path d="M24 588H1576" stroke="url(#accent)" stroke-width="3"/>
 </svg>
