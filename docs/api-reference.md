@@ -58,3 +58,8 @@ Empty or length-truncated completions remain failures. Their known model, token 
 latency are retained by these extractors, and the error records the finish reason. Reasoning
 text is never used as a final answer. Network failures retain their underlying error class;
 unknown usage remains null. The existing retry and deterministic fallback limits still apply.
+
+Model clients honor configured HTTPX proxy settings, including `HTTP_PROXY`, `HTTPS_PROXY`,
+`ALL_PROXY` and `NO_PROXY`. They also use system proxy discovery where HTTPX supports it.
+This avoids forcing a direct connection on networks that require the user's existing proxy.
+See [HTTPX proxy configuration](https://www.python-httpx.org/environment_variables/).

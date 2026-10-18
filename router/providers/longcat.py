@@ -67,7 +67,7 @@ class LongCatProvider:
                     timeout=90,
                     connect=20,
                 ),
-                trust_env=False,
+                trust_env=True,
             ) as client:
                 response = await client.post(
                     url,

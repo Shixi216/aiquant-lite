@@ -59,7 +59,7 @@ async def invoke_openai_compatible_chat(
     try:
         async with httpx.AsyncClient(
             timeout=httpx.Timeout(timeout=180, connect=20),
-            trust_env=False,
+            trust_env=True,
         ) as client:
             response = await client.post(url, headers=headers, json=request_payload)
         response.raise_for_status()
