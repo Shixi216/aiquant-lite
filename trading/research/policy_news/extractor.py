@@ -335,7 +335,6 @@ def _provider_ready(provider: str) -> bool:
         "longcat": router_settings.longcat_ready,
         "qwen": router_settings.qwen_ready,
         "deepseek": router_settings.deepseek_ready,
-        "mimo": router_settings.mimo_ready,
     }.get(provider, False)
 
 
@@ -542,8 +541,6 @@ def _primary_route(
     bundle: EventBundle,
     completeness: TextCompleteness,
 ) -> tuple[str, str]:
-    if completeness == TextCompleteness.IMAGE_ONLY:
-        return "mimo", "vision_reader"
     if bundle.cluster_event_type == "announcement":
         return "qwen", "announcement_verifier"
     # 2026-10-01 用户：longcat 不可用，新闻统一走 qwen
@@ -775,16 +772,15 @@ class PolicyNewsExtractor:
                 extraction=fallback,
                 validation_status=SchemaValidationStatus.NOT_CALLED,
             )
-        provider_name, role = _primary_route(bundle, completeness)
-        if completeness == TextCompleteness.IMAGE_ONLY and not (
-            _provider_ready("mimo") and _provider_ready("qwen")
-        ):
+        # No supported image transport exists. Do not send image-only
+        # metadata to a text model or a retired provider.
+        if completeness == TextCompleteness.IMAGE_ONLY:
             return PolicyExtractionResult(
                 extraction=fallback,
                 validation_status=SchemaValidationStatus.NOT_CALLED,
-                risk_flags=[PolicyRiskFlag.MODEL_CALL_FAILED],
-                provider="mimo",
+                risk_flags=[PolicyRiskFlag.TEXT_INCOMPLETE],
             )
+        provider_name, role = _primary_route(bundle, completeness)
         extraction, call_ids, status = await self._invoke_validated(
             provider_name=provider_name,
             role=role,
@@ -818,24 +814,6 @@ class PolicyNewsExtractor:
                         settings.policy_news_title_only_confidence_cap,
                     ),
                 }
-            )
-        if completeness == TextCompleteness.IMAGE_ONLY:
-            review, review_calls, review_status = await self._invoke_validated(
-                provider_name="qwen",
-                role="announcement_verifier",
-                prompt=_prompt(bundle, completeness),
-            )
-            call_ids.extend(review_calls)
-            if review is None:
-                return PolicyExtractionResult(
-                    extraction=fallback,
-                    model_call_ids=call_ids,
-                    validation_status=review_status,
-                    risk_flags=[PolicyRiskFlag.MODEL_OUTPUT_INVALID],
-                    provider="mimo",
-                )
-            extraction = review.model_copy(
-                update={"fact_type": PolicyFactType.MODEL_INFERENCE}
             )
         if self._needs_escalation(extraction) and _provider_ready("deepseek"):
             review, review_calls, review_status = await self._invoke_validated(

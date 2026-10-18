@@ -147,13 +147,8 @@ class RouterSettings(BaseSettings):
 
     @property
     def mimo_ready(self) -> bool:
-        if self.mimo_api_key is None or self.mimo_base_url is None:
-            return False
-        return bool(
-            self.mimo_api_key.get_secret_value().strip()
-            and self.mimo_base_url.strip()
-            and self.mimo_model.strip()
-        )
+        """Retired provider; legacy configuration must never reactivate it."""
+        return False
 
 
 router_settings = RouterSettings()

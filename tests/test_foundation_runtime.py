@@ -209,7 +209,6 @@ def test_presence_check_uses_only_requested_public_names() -> None:
         "LONGCAT_API_KEY",
         "DEEPSEEK_API_KEY",
         "DASHSCOPE_API_KEY",
-        "XIAOMI_API_KEY",
     }
 
 

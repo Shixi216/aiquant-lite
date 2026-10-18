@@ -13,7 +13,7 @@ from pydantic import SecretStr
 
 from config.settings import settings
 from router.config import router_settings
-from router.providers import DeepSeekProvider, LongCatProvider, MiMoProvider, QwenProvider
+from router.providers import DeepSeekProvider, LongCatProvider, QwenProvider
 
 
 @dataclass(frozen=True)
@@ -37,12 +37,6 @@ def provider_probes() -> tuple[ProviderProbe, ...]:
             router_settings.qwen_base_url,
             router_settings.qwen_api_key,
             router_settings.qwen_model,
-        ),
-        ProviderProbe(
-            "mimo",
-            router_settings.mimo_base_url,
-            router_settings.mimo_api_key,
-            router_settings.mimo_model,
         ),
         ProviderProbe(
             "longcat",
@@ -81,7 +75,7 @@ async def discover_models(probe: ProviderProbe) -> dict[str, Any]:
         relevant = [
             model_id
             for model_id in model_ids
-            if any(token in model_id.lower() for token in ("deepseek", "mimo", "qwen", "longcat"))
+            if any(token in model_id.lower() for token in ("deepseek", "qwen", "longcat"))
         ]
         return {
             "provider": probe.name,
@@ -104,7 +98,6 @@ async def invoke_models() -> list[dict[str, Any]]:
     providers = (
         ("deepseek", DeepSeekProvider(), "risk_controller"),
         ("qwen", QwenProvider(), "announcement_verifier"),
-        ("mimo", MiMoProvider(), "vision_reader"),
         ("longcat", LongCatProvider(), "news_processor"),
     )
     results: list[dict[str, Any]] = []

@@ -46,7 +46,7 @@ For **A-share researchers, quantitative developers and small research teams**, A
 
 The review caught a concrete reasoning error: Qwen described a static DIF / DEA relationship as a crossover event. It also marked a partially available capital-flow dimension as wholly missing. DeepSeek Pro requested a static description and a `PARTIAL` state. The original research remains pending revision; review findings do not automatically rewrite it or complete human approval.
 
-**Final selected checks: five passed, one failed.** MiMo `mimo-v2.5` returned **HTTP 402** on a text-adapter check; no image recognition was tested. Visual roles lack generic image input and handlers. LongCat is unconfigured and unbound; Hy3 remains disabled. Neither is presented as a verified active model.
+**All five checks for the current model combination passed.** LongCat is unconfigured and unbound; Hy3 remains disabled. Neither is presented as a verified active model. Image recognition is not part of the current workflow.
 
 News and filing checks used existing services. The patched research / risk chain ran from the public-source build in an isolated Router with a temporary database. The filing is a 2025 historical example; report quotes are dated 2026-10-16, financials 2026-06-30, and sentiment was cached. These checks do not establish live-market freshness, long-term availability or investment performance.
 

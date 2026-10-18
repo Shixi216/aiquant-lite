@@ -4,9 +4,6 @@ from router.providers.longcat import (
 from router.providers.deepseek import (
     DeepSeekProvider as DeepSeekProvider,
 )
-from router.providers.mimo import (
-    MiMoProvider as MiMoProvider,
-)
 from router.providers.qwen import (
     QwenProvider as QwenProvider,
 )
@@ -14,6 +11,5 @@ from router.providers.qwen import (
 __all__ = [
     "LongCatProvider",
     "DeepSeekProvider",
-    "MiMoProvider",
     "QwenProvider",
 ]

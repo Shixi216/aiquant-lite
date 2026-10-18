@@ -6,11 +6,10 @@ import httpx
 BASE_URL = "http://127.0.0.1:8765"
 
 EXPECTED_ROLES = {
+    "research_synthesizer",
     "announcement_verifier",
     "adversarial_reviewer",
-    "vision_reader",
     "risk_controller",
-    "complex_vision",
     "news_processor",
 }
 

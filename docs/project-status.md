@@ -1,5 +1,7 @@
 # Project status and runtime
 
+> Status correction (2026-10-19): this is an early snapshot. MiMo is retired and has no role. See the [current model and routing guide](ai-roles-and-routing.zh-CN.md) for the active setup.
+
 > Historical snapshot: 2026-07-29, release 0.10.0. For current functionality and validation, see the [project page](../README.en.md) and [2026-10-18 publication review](release-audit-2026-10-18.md).
 
 `aiquant-lite` is a runnable local A-share research MVP with an auditable backtesting and

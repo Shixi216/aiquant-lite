@@ -5,7 +5,6 @@ from collections.abc import Callable
 from router.providers import (
     DeepSeekProvider,
     LongCatProvider,
-    MiMoProvider,
     QwenProvider,
 )
 from router.services.model_provider import (
@@ -26,7 +25,6 @@ _PROVIDER_FACTORIES: dict[
     "longcat": LongCatProvider,
     "qwen": QwenProvider,
     "deepseek": DeepSeekProvider,
-    "mimo": MiMoProvider,
 }
 
 

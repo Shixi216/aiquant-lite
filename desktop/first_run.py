@@ -97,7 +97,7 @@ class FirstRunWizard(QWizard):
         page.setTitle("Provider 凭据")
         layout = QFormLayout(page)
         self.credential_edits: dict[str, QLineEdit] = {}
-        for provider in ("tushare", "deepseek", "qwen", "longcat", "mimo", "wecom"):
+        for provider in ("tushare", "deepseek", "qwen", "longcat", "wecom"):
             edit = QLineEdit()
             edit.setEchoMode(QLineEdit.Password)
             edit.setPlaceholderText("留空表示暂不配置")
@@ -170,7 +170,7 @@ class FirstRunWizard(QWizard):
         self.provider_test_result.setText(f"tushare: {result.status}")
 
     def _test_first_model(self) -> None:
-        for provider in ("deepseek", "qwen", "longcat", "mimo"):
+        for provider in ("deepseek", "qwen", "longcat"):
             value = self.credential_edits[provider].text()
             if value:
                 result = self.setup_service.test_model(provider, value)

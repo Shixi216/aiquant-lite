@@ -91,7 +91,7 @@ def collect_presence_checks(
         PresenceCheck(
             variable="LONGCAT_API_KEY",
             present=_has_value(model_settings.longcat_api_key),
-            required_for=("news_processor",),
+            required_for=(),
         ),
         PresenceCheck(
             variable="DEEPSEEK_API_KEY",
@@ -101,12 +101,7 @@ def collect_presence_checks(
         PresenceCheck(
             variable="DASHSCOPE_API_KEY",
             present=_has_value(model_settings.qwen_api_key),
-            required_for=("announcement_verifier",),
-        ),
-        PresenceCheck(
-            variable="XIAOMI_API_KEY",
-            present=_has_value(model_settings.mimo_api_key),
-            required_for=("vision_reader", "complex_vision"),
+            required_for=("announcement_verifier", "news_processor", "research_synthesizer"),
         ),
     )
 
@@ -117,12 +112,13 @@ def collect_role_availability(
     return (
         RoleAvailability(
             role="news_processor",
-            available=model_settings.longcat_ready,
-            reason=(
-                "LongCat configuration is ready"
-                if model_settings.longcat_ready
-                else "LONGCAT_API_KEY is missing or LongCat configuration is incomplete"
-            ),
+            available=model_settings.qwen_ready,
+            reason="Qwen configuration is ready" if model_settings.qwen_ready else "Qwen is not configured",
+        ),
+        RoleAvailability(
+            role="research_synthesizer",
+            available=model_settings.qwen_ready,
+            reason="Qwen configuration is ready" if model_settings.qwen_ready else "Qwen is not configured",
         ),
         RoleAvailability(
             role="risk_controller",
@@ -140,24 +136,6 @@ def collect_role_availability(
                 "Qwen configuration is ready"
                 if model_settings.qwen_ready
                 else "DASHSCOPE_API_KEY is missing or Qwen configuration is incomplete"
-            ),
-        ),
-        RoleAvailability(
-            role="vision_reader",
-            available=model_settings.mimo_ready,
-            reason=(
-                "MiMo configuration is ready"
-                if model_settings.mimo_ready
-                else "XIAOMI_API_KEY is missing or MiMo configuration is incomplete"
-            ),
-        ),
-        RoleAvailability(
-            role="complex_vision",
-            available=model_settings.mimo_ready,
-            reason=(
-                "MiMo configuration is ready"
-                if model_settings.mimo_ready
-                else "XIAOMI_API_KEY is missing or MiMo configuration is incomplete"
             ),
         ),
     )

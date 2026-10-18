@@ -134,5 +134,27 @@
     "router/services/invocation.py": "60a3413a3ee7f7b17da4e1c65efdadefc3c8e35634b97a0eb234bc404579f098",
     "router/services/research_synthesizer_handler.py": "637dd07349115e77261bd5edcf1583214403e6daec9c713f14225ab6b3b7e00a"
   },
-  "raw_prompts_and_private_logs_published": false
+  "raw_prompts_and_private_logs_published": false,
+  "current_usage": {
+    "retired_providers": [
+      "mimo"
+    ],
+    "retired_probe_cases": [
+      "mimo_text_adapter"
+    ],
+    "current_model_checks": {
+      "passed": 5,
+      "failed": 0,
+      "total": 5
+    },
+    "note": "Original final_checks preserve the earlier run; the retired probe is not a current role or task.",
+    "retirement_regression": {
+      "passed": 87,
+      "failed": 0,
+      "skipped": 0,
+      "legacy_credentials_cannot_enable": true,
+      "image_only_model_calls": 0,
+      "resident_service_update_loaded": false
+    }
+  }
 }

@@ -136,7 +136,6 @@ PROVIDER_ENVIRONMENT_KEYS = {
     "deepseek": "DEEPSEEK_API_KEY",
     "qwen": "DASHSCOPE_API_KEY",
     "longcat": "LONGCAT_API_KEY",
-    "mimo": "XIAOMI_API_KEY",
     "wecom": "WECOM_SECRET",
 }
 

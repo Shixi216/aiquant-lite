@@ -61,18 +61,18 @@
 
 ## 其他模型与注册角色：按现状标注
 
+MiMo 已退役，不承担任何角色。角色注册、Provider 调度、图片分支、桌面候选和常规连通性检查均不再使用它；兼容配置不能重新启用它。旧探测结果仅留在注明状态更正的历史审核中。
+
 | 模型 / 角色 | 本机现状 | 本次结果 |
 |---|---|---|
-| **MiMo `mimo-v2.5`** | 配置字段齐备，文本适配器存在 | 实际请求返回 HTTP 402；未收到有效模型结果，未验证图片识别 |
-| `vision_reader / complex_vision` | 角色注册、MiMo Provider 与局部政策路由分支存在；共享一个配置模型 | 通用请求缺少图片载荷和 Handler；不能把配置就绪写成视觉功能已完成，也没有验证独立 Pro 视觉模型 |
 | **LongCat `LongCat-2.0`** | 适配器存在，但本机未配置，现行新闻角色未绑定它 | 未调用，不作为当前新闻主模型 |
 | **Hy3 `adversarial_reviewer`** | 角色禁用；无 Provider / Handler | 未调用，不作为已交付审查能力 |
 
-源码：[Provider 注册](../router/services/provider_registry.py)、[Handler 注册](../router/services/role_handler_registry.py)、[MiMo 适配器](../router/providers/mimo.py)、[请求 Schema](../router/schemas/invocation.py)。
+源码：[Provider 注册](../router/services/provider_registry.py)、[Handler 注册](../router/services/role_handler_registry.py)、[请求 Schema](../router/schemas/invocation.py)。
 
 ## 专业提取与确定性内核
 
-情绪 / 政策提取当前按公告 / 新闻类别走 Qwen；符合重大事件、低置信度或高强度等条件且 DeepSeek 可用时，可走独立升级复核。这些分支本次没有重新全量运行，不能把已有缓存报告当作新调用证据。图像类别虽有 MiMo 条件分支，也不证明图像已传输和识别。
+情绪 / 政策提取当前按公告 / 新闻类别走 Qwen；符合重大事件、低置信度或高强度等条件且 DeepSeek 可用时，可走独立升级复核。这些分支本次没有重新全量运行，不能把已有缓存报告当作新调用证据。图片材料当前直接返回正文不足与规则回退，不调用任何模型。
 
 Data Hub 管理结构化事实；扫描、评分、数据时点、持仓约束和硬风险 VETO 由确定性模块负责。五维是研究证据分类，四维横截面评分与旧版 60/40 回退分别解释；模型不能自行切换评分路径。
 
@@ -88,3 +88,7 @@ Invoke-RestMethod http://127.0.0.1:8765/v1/routing/policy
 ```
 
 本次验证新补丁使用隔离 Router / 临时库；本机原常驻 Router 没有重启加载补丁。完整结果和前置条件见 [实跑审核](live-model-validation-2026-10-19.md)。
+
+## 退役变更验证
+
+MiMo 退役变更的相关回归检查最终为 **87 通过、0 失败、0 跳过**，覆盖角色 API、旧凭证不重新启用、兼容调用拒绝、图片输入不发起模型请求、Provider 代理、启动自检和政策提取。Ruff、文档链接与敏感信息检查通过。本次没有再次请求退役接口；本机常驻服务未加载仓库更新。

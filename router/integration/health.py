@@ -291,7 +291,6 @@ class SystemHealthService:
             "longcat": router_settings.longcat_ready,
             "deepseek": router_settings.deepseek_ready,
             "qwen": router_settings.qwen_ready,
-            "mimo": router_settings.mimo_ready,
             "wecom": wecom_ready,
         }
         return SystemHealth(

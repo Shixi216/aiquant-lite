@@ -1,4 +1,4 @@
-"""三模型（qwen/longcat/mimo）公告事件提取对比测试"""
+"""双模型（qwen/longcat）公告事件提取对比测试"""
 import asyncio
 import time
 from datetime import datetime, timezone, timedelta
@@ -63,7 +63,7 @@ async def main():
          '控股股东拟在未来6个月内通过集中竞价减持不超过总股本1%的股份。',
          datetime(2026, 7, 15, 18, 0, tzinfo=TZ)),
     ]
-    models = ['qwen', 'longcat', 'mimo']
+    models = ['qwen', 'longcat']
 
     for name, title, content, t in tests:
         bundle = make_bundle(name, title, content, t, '公司公告', f'http://x/{name}')

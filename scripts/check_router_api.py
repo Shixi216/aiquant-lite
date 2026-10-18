@@ -8,11 +8,10 @@ from router.api import app
 
 
 EXPECTED_ROLES = {
+    "research_synthesizer",
     "announcement_verifier",
     "adversarial_reviewer",
-    "vision_reader",
     "risk_controller",
-    "complex_vision",
     "news_processor",
 }
 

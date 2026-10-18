@@ -21,7 +21,6 @@ SETTINGS_FIELD_BY_PROVIDER = {
     "deepseek": "deepseek_api_key",
     "qwen": "dashscope_api_key",
     "longcat": "longcat_api_key",
-    "mimo": "xiaomi_api_key",
 }
 
 
@@ -83,7 +82,6 @@ def activate_configured_credentials(
                 "deepseek_api_key": "deepseek_api_key",
                 "dashscope_api_key": "qwen_api_key",
                 "longcat_api_key": "longcat_api_key",
-                "xiaomi_api_key": "mimo_api_key",
             }.get(settings_field)
             if router_field:
                 setattr(router_settings, router_field, SecretStr(value))

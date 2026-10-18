@@ -44,14 +44,6 @@ ROLE_SPECS: dict[str, RoleSpec] = {
         task_type="adversarial_review",
         description="寻找研究结论中的反例、漏洞和证据缺口。",
     ),
-    "vision_reader": RoleSpec(
-        role="vision_reader",
-        display_name="视觉读取 Agent",
-        provider="mimo",
-        preferred_model="MiMo V2.5",
-        task_type="vision",
-        description="读取普通图表、截图和财务报告页面。",
-    ),
     "risk_controller": RoleSpec(
         role="risk_controller",
         display_name="风险控制 Agent",
@@ -59,14 +51,6 @@ ROLE_SPECS: dict[str, RoleSpec] = {
         preferred_model="deepseek-v4-pro",  # 2026-10-01 用户：风控改官方 deepseek-v4-pro
         task_type="risk_analysis",
         description="识别风险暴露、约束条件和否决项。",
-    ),
-    "complex_vision": RoleSpec(
-        role="complex_vision",
-        display_name="复杂视觉 Agent",
-        provider="mimo",
-        preferred_model="MiMo V2.5 Pro",
-        task_type="complex_vision",
-        description="处理复杂图表、跨页表格和高难度视觉材料。",
     ),
     "news_processor": RoleSpec(
         role="news_processor",
@@ -88,9 +72,6 @@ def _role_enabled(spec: RoleSpec) -> bool:
 
     if spec.role == "announcement_verifier":
         return router_settings.qwen_ready
-
-    if spec.role in {"vision_reader", "complex_vision"}:
-        return router_settings.mimo_ready
 
     return False
 

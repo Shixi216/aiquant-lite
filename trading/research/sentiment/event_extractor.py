@@ -71,7 +71,6 @@ def _provider_ready(provider: str) -> bool:
         "longcat": router_settings.longcat_ready,
         "qwen": router_settings.qwen_ready,
         "deepseek": router_settings.deepseek_ready,
-        "mimo": router_settings.mimo_ready,
     }.get(provider, False)
 
 

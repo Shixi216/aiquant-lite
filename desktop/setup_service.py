@@ -26,7 +26,6 @@ _MODEL_CREDENTIAL_FIELDS = {
     "deepseek": ("DEEPSEEK_API_KEY", "deepseek_api_key"),
     "qwen": ("DASHSCOPE_API_KEY", "qwen_api_key"),
     "longcat": ("LONGCAT_API_KEY", "longcat_api_key"),
-    "mimo": ("XIAOMI_API_KEY", "mimo_api_key"),
 }
 
 

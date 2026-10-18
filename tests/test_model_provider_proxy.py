@@ -11,7 +11,6 @@ from pydantic import SecretStr
 from router.config import router_settings
 from router.providers.deepseek import DeepSeekProvider
 from router.providers.longcat import LongCatProvider
-from router.providers.mimo import MiMoProvider
 from router.providers.qwen import QwenProvider
 
 
@@ -49,7 +48,7 @@ def completion_server(label):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("provider_class", [QwenProvider, DeepSeekProvider, MiMoProvider, LongCatProvider])
+@pytest.mark.parametrize("provider_class", [QwenProvider, DeepSeekProvider, LongCatProvider])
 @pytest.mark.parametrize("bypass_proxy", [False, True])
 async def test_model_clients_use_configured_proxy_and_honor_no_proxy(monkeypatch, provider_class, bypass_proxy):
     provider = provider_class()

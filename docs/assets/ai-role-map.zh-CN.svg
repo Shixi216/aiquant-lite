@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1030" viewBox="0 0 1600 1030" role="img" aria-labelledby="title desc">
 <title id="title">当前实际模型分工与运行结果</title>
-<desc id="desc">DeepSeek Flash 负责 Hermes 任务规划；Qwen3.8 max 0902 负责新闻、公告、五维研究；DeepSeek v4 pro 完成风险复核并要求修改。MiMo 返回402，视觉未验证；LongCat未配置、Hy3禁用。2026年10月19日，最终六项验收五通过一未通过。</desc>
+<desc id="desc">DeepSeek Flash 负责 Hermes 任务规划；Qwen3.8 max 0902 负责新闻、公告、五维研究；DeepSeek v4 pro 完成风险复核并要求修改。当前不提供图片识别；LongCat未配置、Hy3禁用。2026年10月19日，现用五项模型验收通过。</desc>
 <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081321"/><stop offset="1" stop-color="#102737"/></linearGradient></defs><rect width="1600" height="1030" rx="28" fill="url(#bg)"/>
 <text x="60" y="64" fill="#64d9cb" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600">AIQUANT-LITE  /  VERIFIED MODEL WORKFLOW</text>
 <text x="60" y="124" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="42" font-weight="700">让专业模型分工，也让研究经得起复核</text>
-<text x="60" y="170" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400">2026-10-19 本机实跑 · 最终 6 项验收：5 通过 / 1 未通过 · 具体范围见审核记录</text>
+<text x="60" y="170" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400">2026-10-19 本机实跑 · 现用模型 5 项验收通过 · 具体范围见审核记录</text>
 <rect x="60" y="208" width="1480" height="115" rx="18" fill="#123345" stroke="#397b88"/>
 <text x="90" y="250" fill="#73dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">Hermes · deepseek-v4-flash</text>
 <text x="90" y="291" fill="#b1cad8" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">返回标识 deepseek-flash</text>
@@ -36,10 +36,10 @@
 <text x="1095" y="580" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">revise · 5 条发现 · 4 项修正要求</text>
 <text x="1095" y="611" fill="#9fb8c9" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">执行完成 · 人工复核仍必须</text>
 <rect x="60" y="660" width="725" height="171" rx="18" fill="#162636" stroke="#405061"/>
-<text x="85" y="700" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">MiMo · mimo-v2.5</text>
-<text x="85" y="739" fill="#e8b393" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">文本适配器请求返回 HTTP 402</text>
-<text x="85" y="770" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">未取得有效模型结果；未验证图片识别</text>
-<text x="85" y="801" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">普通 / 复杂视觉的通用输入与 Handler 待完善</text>
+<text x="85" y="700" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">当前模型组合</text>
+<text x="85" y="739" fill="#e8b393" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">Flash 规划 / Qwen 研究 / Pro 复核</text>
+<text x="85" y="770" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">5 项现用模型检查均已实际运行通过</text>
+<text x="85" y="801" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">当前不提供图片识别流程</text>
 <rect x="815" y="660" width="725" height="171" rx="18" fill="#162636" stroke="#405061"/>
 <text x="840" y="700" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">未列入已验证组合</text>
 <text x="840" y="739" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">LongCat：未配置、无现行角色绑定</text>

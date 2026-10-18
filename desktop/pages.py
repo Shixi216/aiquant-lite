@@ -240,7 +240,7 @@ class LogsPage(QWidget):
 
 
 class SettingsPage(QWidget):
-    PROVIDERS = ("tushare", "deepseek", "qwen", "longcat", "mimo", "wecom")
+    PROVIDERS = ("tushare", "deepseek", "qwen", "longcat", "wecom")
 
     def __init__(
         self,
