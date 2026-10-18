@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "inventory_date": "2026-10-19",
+  "report_timezone": "Asia/Tokyo",
+  "scope": "One local installation; aggregate metadata only; underlying datasets are not distributed.",
+  "reviewed_public_code_commit": "53022f7262ecc08b6759b41fab3a723c178cd92b",
+  "evidence_levels": {
+    "inventory_verified": "Read-only persisted row counts or owner API metadata; not a rerun of research.",
+    "historical_report": "A retained local report; performance and chronology have not been reproduced in this review.",
+    "public_code": "Implementation is available at the reviewed commit; installation-specific results require local data."
+  },
+  "main_database": {
+    "method": "Existing Router database-owner consistency API; no external connection to the online main DuckDB.",
+    "captured_start": "2026-10-18T17:00:05.941826+00:00",
+    "captured_end": "2026-10-18T17:00:15.867972+00:00",
+    "consistency_scope": "Owner-provided table counts; no claim of one frozen cross-table transaction or cross-table deduplication.",
+    "evidence_level": "inventory_verified",
+    "tables": {
+      "data_records": {
+        "rows": 2793854
+      },
+      "canonical_historical_bars": {
+        "rows": 2782220
+      },
+      "canonical_financial_records": {
+        "rows": 33708
+      },
+      "historical_risk_events": {
+        "rows": 135347
+      }
+    }
+  },
+  "replay": {
+    "database_relative_path": "database/sentiment_v3_replay.duckdb",
+    "evidence_level": "inventory_verified",
+    "tables": {
+      "replay_feature_packets": {
+        "rows": 2625560,
+        "date_column": "trade_date",
+        "date_bounds": [
+          "2024-08-01",
+          "2026-08-13"
+        ]
+      }
+    },
+    "warning": "Feature packets, labels and snapshots share observations and must not be added together. Calendar bounds are not data bounds."
+  },
+  "strategy_lab": {
+    "database_relative_path": "Strategy_Lab_Results.duckdb",
+    "evidence_level": "inventory_verified",
+    "tables": {
+      "aligned_historical_packets": {
+        "rows": 2238764,
+        "date_column": "trade_date",
+        "date_bounds": [
+          "2024-08-01",
+          "2026-07-29"
+        ]
+      },
+      "candidate_definitions": {
+        "rows": 202
+      },
+      "candidate_metrics": {
+        "rows": 808
+      },
+      "walk_forward_fold_metrics": {
+        "rows": 144,
+        "date_column": "validation_start",
+        "date_bounds": [
+          "2025-03-25 00:00:00",
+          "2026-07-07 00:00:00"
+        ]
+      }
+    },
+    "cost_scenarios_bp": [
+      0,
+      20,
+      40,
+      60
+    ],
+    "warning": "202 candidate definitions; 808 candidate-cost metric rows; 144 fold metric rows. These are not 202 profitable strategies or 144 independent trials."
+  },
+  "latest_market_snapshot_at_inventory": {
+    "snapshot_time": "2026-10-16T18:02:17.876106+09:00",
+    "expected_universe_size": 5565,
+    "received_symbol_count": 5565,
+    "valid_symbol_count": 5565,
+    "missing_symbol_count": 0,
+    "coverage_ratio": 1.0,
+    "completeness_status": "COMPLETE",
+    "stale": true,
+    "warning": "Metadata only; the business trade_date of every payload item was not revalidated. Completeness does not establish freshness."
+  },
+  "forward_observation": {
+    "evidence_level": "inventory_verified",
+    "complete_dates": 21,
+    "trade_date_start": "2026-08-31",
+    "trade_date_end": "2026-09-30",
+    "theme_snapshots": 234,
+    "member_snapshots": 6252,
+    "name_version_rows": 0,
+    "checkpoint_20_reached": true,
+    "checkpoint_30_reached": false,
+    "checkpoint_60_reached": false,
+    "collector_present_at_inventory": false,
+    "full_pit_chain_revalidated": false,
+    "frozen_database_hash_checks": {
+      "files": 8,
+      "unchanged": 8
+    }
+  },
+  "market_emotion_observation": {
+    "evidence_level": "inventory_verified",
+    "snapshot_rows": 11,
+    "distinct_business_dates": 1,
+    "trade_date": "2026-10-16",
+    "finality": {
+      "INTRADAY": 8,
+      "PRELIMINARY": 1,
+      "FINAL": 2
+    },
+    "status": {
+      "CORE_COMPLETE": 9,
+      "PARTIAL": 2
+    },
+    "warning": "One-date inventory; finality flags do not establish multi-day validation or profitability."
+  },
+  "knowledge_curation": {
+    "project_related_sessions": 161,
+    "session_selection": "Project working directory or repository root, or strong project markers in user/assistant text; keyword selection may overlap topics.",
+    "published_topics": 8,
+    "raw_conversations_distributed": false,
+    "warning": "Session matches are source material, not 161 validated findings. No tool dumps, personal memory files or third-party skill trees are distributed."
+  },
+  "software_validation_reference": {
+    "commit": "53022f7262ecc08b6759b41fab3a723c178cd92b",
+    "actions_url": "https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548",
+    "backend_passed": 1794,
+    "backend_failed": 0,
+    "backend_skipped": 4,
+    "backend_deselected": 8,
+    "frontend_passed": 5,
+    "frontend_build": "passed",
+    "warning": "Software validation at the referenced commit; not a strategy-performance result or acceptance of unrelated local changes."
+  },
+  "private_evidence_digests": [
+    {
+      "name": "router-data-inventory.json",
+      "sha256": "dbe52b187ca64948901e97cc50df0a2e9c01dae83f130667af05691575a73a9c",
+      "availability": "Retained locally; contains private paths or state and is not distributed."
+    },
+    {
+      "name": "database-inventory.json",
+      "sha256": "71a6c222ceab326006c2819ec35559ccb089ebd2488f855ce5b5c48fd6311537",
+      "availability": "Retained locally; contains private paths or state and is not distributed."
+    },
+    {
+      "name": "forward-ledger-detail.json",
+      "sha256": "b7f3ef35d232886e82e8d33a1e5657c3f3778a71347ddc10e0fdcf47324494fa",
+      "availability": "Retained locally; contains private paths or state and is not distributed."
+    },
+    {
+      "name": "emotion-inventory.json",
+      "sha256": "260fef5642e49e14296f3e9a907c4b3ad3f1cf459d2002249be9c75287ba4a35",
+      "availability": "Retained locally; contains private paths or state and is not distributed."
+    }
+  ],
+  "historical_report_digests": [
+    {
+      "title": "Strategy_Lab_Final_Report.md",
+      "sha256": "ed823ba36aaa584b5a0bfde4b74cb6ead357b12ecb62e0aef4b0d6b59542848c",
+      "evidence_level": "historical_report",
+      "distributed": false
+    },
+    {
+      "title": "MultiFactor_V1_Report.md",
+      "sha256": "fa74b259ca61824970b7b2ae516ddb127a302ee66132bb2dbbc971d324c8b26a",
+      "evidence_level": "historical_report",
+      "distributed": false
+    }
+  ],
+  "limitations": [
+    "No cross-database deduplicated sample total.",
+    "No new collection, backtest, performance reproduction or full PIT audit in this inventory.",
+    "Private source hashes provide identity checks, not independent public verification of inaccessible data.",
+    "Local research archives may contain modules and datasets outside the published source snapshot."
+  ]
+}

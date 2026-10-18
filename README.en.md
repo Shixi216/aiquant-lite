@@ -6,7 +6,7 @@
 
 ### An AI-native research workspace for China's A-share market
 
-**Turn market data into research. Turn research into traceable decisions.**
+**Million-row data assets. Versioned strategy research. Traceable AI decision evidence.**
 
 Market intelligence, quantitative factors, AI-assisted research, risk constraints and decision review in one local-first workspace.
 
@@ -39,6 +39,18 @@ The Vue workspace brings these views together. The Python backend combines struc
 </details>
 
 > Screenshots show the actual UI with development contract samples. Values illustrate layout and interactions; they are not live quotes, advice or performance results. Fixture mode is disabled in production.
+
+
+## Research assets, with evidence
+
+![AIQUANT-LITE research evidence inventory](docs/assets/research-evidence.svg)
+
+- **Facts and features at scale:** one local installation holds 2,782,220 standardized historical bar rows and 2,625,560 Replay feature packets, with explicit source, date and missing-data semantics.
+- **Structured strategy evaluation:** 202 candidate definitions, four cost scenarios and 144 Walk-Forward metric rows; static, dynamic, model and ablation routes retain rejection reasons.
+- **Inspectable decisions and operations:** PIT input contracts, versioned DecisionPackets, linked evidence, standalone model-call audits and visible degradation.
+- **Curated research knowledge:** [eight topics](docs/knowledge/README.md) distilled from project-related Hermes conversations, memory and operations reviews, covering protocols, negative findings and reusable workflows.
+
+> Counts come from a **read-only inventory of one local installation on 2026-10-19**. Related tables are non-additive; underlying datasets are not distributed. Candidate and metric counts are not counts of profitable strategies. See [data scope](docs/knowledge/data-assets.md), [protocol comparison](docs/knowledge/experiment-comparison.md) and the [machine-readable evidence summary](docs/knowledge/evidence-snapshot-2026-10-19.json). The detailed knowledge articles are currently in Chinese.
 
 ## Workspace capabilities
 
@@ -160,6 +172,7 @@ desktop/                   PySide6 desktop source
 database/migrations/       Schema migrations
 scripts/                   Operations, research and validation commands
 tests/                     Unit, API, isolation and regression checks
+docs/knowledge/            Data inventory, protocols, negative findings and knowledge governance
 ```
 
 ## Validation
@@ -174,11 +187,11 @@ npm --prefix frontend test
 npm --prefix frontend run build
 ```
 
-Run validation in an isolated environment with temporary databases. See the [release audit](docs/release-audit-2026-10-18.md) for this publication's exact scope and results. Offline checks do not establish external-provider connectivity, live data quality or long-term strategy performance.
+Run validation in an isolated environment with temporary databases. The [hosted Windows CI at `53022f7`](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) recorded **1,794 backend passes, four skips and eight deselections; five frontend passes and a successful build**. See the [source release audit](docs/release-audit-2026-10-18.md) and [research publication audit](docs/release-audit-2026-10-19.md) for scope and limits. Offline checks do not establish external-provider connectivity, live data quality or long-term strategy performance.
 
 ## Documentation and direction
 
-[Architecture](docs/architecture.md) · [API](docs/api-reference.md) · [Data pipeline](docs/data-pipeline.md) · [Operations](docs/operations.md) · [Hermes](docs/hermes-integration.md) · [Experiments](docs/experiments.md) · [PIT fundamentals](docs/fundamental-point-in-time.zh-CN.md)
+[Research evidence](docs/knowledge/README.md) · [Architecture](docs/architecture.md) · [API](docs/api-reference.md) · [Data pipeline](docs/data-pipeline.md) · [Operations](docs/operations.md) · [Hermes](docs/hermes-integration.md) · [Experiments](docs/experiments.md) · [PIT fundamentals](docs/fundamental-point-in-time.zh-CN.md)
 
 Next priorities: data-quality measurement, consistent score provenance, longer strategy evidence, reproducible research and workspace interaction improvements. Roadmap items are not delivered features.
 

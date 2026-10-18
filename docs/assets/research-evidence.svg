@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="350" viewBox="0 0 1600 350" role="img" aria-labelledby="title desc">
+<title id="title">AIQUANT-LITE research evidence — local inventory, 2026-10-19</title>
+<desc id="desc">2,782,220 historical bar rows; 2,625,560 replay feature packet rows; 202 candidate definitions; 144 Walk-Forward metric rows. Non-additive counts from one local installation. Underlying data is not distributed.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#07151f"/><stop offset="1" stop-color="#0d1729"/></linearGradient>
+  <linearGradient id="accent"><stop stop-color="#6ae3d5"/><stop offset="1" stop-color="#72a8ff"/></linearGradient>
+</defs>
+<rect width="1600" height="350" rx="22" fill="url(#bg)"/>
+<rect x="40" y="45" width="4" height="20" rx="2" fill="#6ae3d5"/>
+<g font-family="Segoe UI,Inter,Arial,sans-serif">
+  <text x="58" y="61" fill="#e4eff7" font-size="17" font-weight="600" letter-spacing="2">RESEARCH EVIDENCE</text>
+  <text x="1560" y="61" fill="#91a9bd" font-size="14" text-anchor="end">LOCAL INVENTORY / 2026-10-19</text>
+  <g fill="#102333" stroke="#294153">
+    <rect x="40" y="95" width="365" height="170" rx="14"/>
+    <rect x="425" y="95" width="365" height="170" rx="14"/>
+    <rect x="810" y="95" width="365" height="170" rx="14"/>
+    <rect x="1195" y="95" width="365" height="170" rx="14"/>
+  </g>
+  <g font-size="48" font-weight="700" fill="#75e1d2">
+    <text x="64" y="162">2.78M</text><text x="449" y="162">2.63M</text>
+  </g>
+  <g font-size="48" font-weight="700" fill="#a1c3ff">
+    <text x="834" y="162">202</text><text x="1219" y="162">144</text>
+  </g>
+  <g fill="#e1ecf4" font-size="19" font-weight="600">
+    <text x="64" y="199">Historical bar rows</text><text x="449" y="199">Replay feature packets</text>
+    <text x="834" y="199">Candidate definitions</text><text x="1219" y="199">Walk-Forward metric rows</text>
+  </g>
+  <g fill="#91a9bd" font-size="14">
+    <text x="64" y="232">2,782,220 persisted rows</text><text x="449" y="232">2024-08-01 to 2026-08-13</text>
+    <text x="834" y="232">4 cost scenarios: 0 / 20 / 40 / 60bp</text><text x="1219" y="232">Research evaluation records</text>
+  </g>
+  <text x="40" y="310" fill="#a3b7c8" font-size="14">NON-ADDITIVE COUNTS · ONE LOCAL INSTALLATION · UNDERLYING DATA NOT DISTRIBUTED · NO PERFORMANCE CLAIM</text>
+</g>
+<path d="M24 348H1576" stroke="url(#accent)" stroke-width="3"/>
+</svg>

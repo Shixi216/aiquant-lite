@@ -6,9 +6,9 @@
 
 ### 面向 A 股的 AI 原生投研工作台
 
-**让市场数据形成研究，让研究沉淀为可追溯的判断。**
+**百万级数据沉淀 · 版本化策略研究 · 可追溯的 AI 决策证据。**
 
-把多源数据、量化因子、AI 研究、风险约束与决策复盘，汇入一套本地优先的投研系统。
+把多源事实、量化实验、多模型研究与风险约束汇入一套本地优先的投研系统，让每次判断都能回到数据、时点和证据。
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json)
@@ -19,7 +19,7 @@
 
 简体中文 · [English](README.en.md)
 
-[产品能力](#产品能力) · [开源对标](#开源对标) · [系统架构](#系统架构) · [快速开始](#快速开始) · [质量验证](#质量验证)
+[研究积累](#研究积累用证据展示实力) · [产品能力](#产品能力) · [开源对标](#开源对标) · [系统架构](#系统架构) · [快速开始](#快速开始) · [质量验证](#质量验证)
 
 </div>
 
@@ -45,6 +45,20 @@ AIQUANT-LITE 面向个人研究者、量化开发者和小型研究团队，围�
 </details>
 
 > 截图来自实际界面的开发契约样本，数值仅用于展示布局与交互，不代表实时行情、投资建议或收益表现。演示模式在生产环境中禁用。
+
+
+## 研究积累：用证据展示实力
+
+![AIQUANT-LITE 研究资产盘点](docs/assets/research-evidence.svg)
+
+**事实 → 特征 → 实验 → 决策 → 复盘 → 知识**，构成项目持续积累的研究链路：
+
+- **百万级事实与特征**：本地已落库 2,782,220 行标准化历史日线、2,625,560 个 Replay 特征包；保留数据来源、业务日期和缺失语义。
+- **成体系的策略验证**：Strategy Lab 留存 202 个候选定义、4 档成本、144 行 Walk-Forward 指标，比较静态、动态、模型与消融路线，同时保留拒绝理由。
+- **从研究走到可核对的判断**：PIT 约束输入，DecisionPacket 固定版本与证据；调用审计覆盖独立研究请求，异常和降级状态可查询。
+- **经验沉淀为知识**：从 Hermes 项目会话、长期记忆和排障材料提炼 [8 个研究主题](docs/knowledge/README.md)，覆盖时点纪律、失败案例、工作流和知识治理。
+
+> 数据数字为 **2026-10-19 单个本地安装的只读盘点**，不同表存在关联，不能相加；原始数据不随仓库分发。候选数与指标行数不代表有效策略数。详见 [数据资产与边界](docs/knowledge/data-assets.md)、[实验协议对照](docs/knowledge/experiment-comparison.md) 和 [机器可读证据摘要](docs/knowledge/evidence-snapshot-2026-10-19.json)。
 
 ## 产品能力
 
@@ -128,7 +142,7 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ```
 
-按需填写本地 `.env` 的数据与模型凭证。开源代码不附带授权数据、个人数据库或实验结果；完整研究链需要自行配置数据源并建立本地数据。
+按需填写本地 `.env` 的数据与模型凭证。开源代码附带经过整理的研究摘要，不附带授权数据、个人数据库或完整实验结果集；完整研究链需要自行配置数据源并建立本地数据。
 
 ### 2. 启动工作台
 
@@ -178,6 +192,7 @@ desktop/                   PySide6 桌面源码
 database/migrations/       数据库结构演进
 scripts/                   运维、研究与验证入口
 tests/                     单元、接口、隔离与回归测试
+docs/knowledge/            数据资产、研究协议、失败案例与知识治理
 ```
 
 ## 质量验证
@@ -192,7 +207,7 @@ npm --prefix frontend test
 npm --prefix frontend run build
 ```
 
-验证应在独立环境和临时数据库中进行。当前发布审核记录见 [Release Audit](docs/release-audit-2026-10-18.md)；测试结论只覆盖记录中的环境与范围。外部服务连通性、真实数据质量和长期策略表现需要另行验证。
+验证应在独立环境和临时数据库中进行。已发布源码 `53022f7` 的 [Windows CI](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) 记录 **后端 1794 passed、4 skipped、8 deselected；前端 5 passed，构建通过**。源码审核见 [Release Audit](docs/release-audit-2026-10-18.md)，本次研究资料发布见 [Evidence Audit](docs/release-audit-2026-10-19.md)；测试结论只覆盖记录中的环境与范围。外部服务连通性、真实数据质量和长期策略表现需要另行验证。
 
 ## 文档与路线
 
@@ -200,6 +215,7 @@ npm --prefix frontend run build
 |---|---|---|
 | [系统架构](docs/architecture.md) | [API](docs/api-reference.md) | [因子编排](docs/five-factor-orchestration.md) |
 | [数据管线](docs/data-pipeline.md) | [运维手册](docs/operations.md) | [策略实验](docs/experiments.md) |
+| [研究证据库](docs/knowledge/README.md) | [知识治理](docs/knowledge/memory-and-dialogue-governance.md) | [实验协议与失败案例](docs/knowledge/experiment-comparison.md) |
 | [安全边界](docs/security.md) | [Hermes 集成](docs/hermes-integration.md) | [PIT 基本面](docs/fundamental-point-in-time.zh-CN.md) |
 
 下一阶段聚焦：**数据质量度量、评分来源一致性、策略证据积累、研究可复现性与工作台交互完善**。规划内容不作为已经交付的能力。
