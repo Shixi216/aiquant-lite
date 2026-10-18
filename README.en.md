@@ -12,7 +12,7 @@ From market context to company research. From factor ideas to inspectable eviden
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 Quick start](#quick-start) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [简体中文](README.md)**
+**[🚀 Quick start](#quick-start) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
 
 </div>
 
@@ -34,25 +34,34 @@ For **A-share researchers, quantitative developers and small research teams**, A
 
 **Market context → screening → company research → risk review → decision records → simulation and review.**
 
-![Market dashboard — development contract sample](docs/assets/dashboard-demo.png)
+![Market dashboard — actual read-only view](docs/assets/dashboard-live-20261019.jpg)
 
 <table width="100%">
 <tr>
-<td width="50%" align="center"><strong>Stock intelligence · facts and factors</strong><br><img src="docs/assets/stock-overview-demo.png" alt="Stock intelligence development sample" width="100%"></td>
-<td width="50%" align="center"><strong>Price research · connected chart views</strong><br><img src="docs/assets/stock-demo.png" alt="Stock chart development sample" width="100%"></td>
+<td width="50%" align="center"><strong>Stock intelligence · facts and factors</strong><br><img src="docs/assets/stock-overview-live-20261019.jpg" alt="Actual stock intelligence view" width="100%"></td>
+<td width="50%" align="center"><strong>Price research · connected chart views</strong><br><img src="docs/assets/stock-chart-live-20261019.jpg" alt="Actual stock chart view" width="100%"></td>
 </tr>
 </table>
 
 <details>
 <summary><strong>Expand the stock research previews</strong></summary>
 
-![Stock overview — full development sample](docs/assets/stock-overview-demo.png)
+![Stock overview — actual read-only view](docs/assets/stock-overview-live-20261019.jpg)
 
-![Stock chart — full development sample](docs/assets/stock-demo.png)
+![Stock chart — actual read-only view](docs/assets/stock-chart-live-20261019.jpg)
 
 </details>
 
-> Screenshots show the actual UI with development contract samples; fixture mode is disabled in production. Product images illustrate interactions and diagrams illustrate conceptual architecture. Neither represents live quotes or investment performance.
+> Captured on 2026-10-19 from the production-built Chinese WebUI using existing local data, with fixtures disabled. Business dates, missing data and stale-data notices remain visible. Screenshots are not a live feed or strategy-performance result; diagrams show conceptual architecture.
+
+<details>
+<summary><strong>Quantitative panels and strategy research</strong></summary>
+
+![Actual quantitative panel](docs/assets/quant-live-20261019.jpg)
+
+![Actual strategy research panel](docs/assets/research-live-20261019.jpg)
+
+</details>
 
 ### Six connected workspaces
 
@@ -179,6 +188,8 @@ npm --prefix frontend run build
 
 Use isolated environments and temporary databases. Module isolation is the validated test mode; the native crash in long combined processes on the reviewed Windows / Python 3.11.1 environment remains unresolved. See the [source audit](docs/release-audit-2026-10-18.md) and [research publication audit](docs/release-audit-2026-10-19.md) for skipped checks and unverified local-data / network scope. Software validation does not establish data quality or long-term investment performance.
 
+The Chinese WebUI update passed **14 frontend regressions, 58 scoped backend checks and a production build**. See the [WebUI review](docs/webui-review-2026-10-19.md) for browser checks, screenshot provenance and unresolved data-quality scope.
+
 ## Repository map
 
 ```text
@@ -203,6 +214,22 @@ docs/knowledge/            Data inventory, protocols, negative findings and know
 [Research evidence](docs/knowledge/README.md) · [Architecture](docs/architecture.md) · [API](docs/api-reference.md) · [Data pipeline](docs/data-pipeline.md) · [Operations](docs/operations.md) · [Hermes](docs/hermes-integration.md) · [Experiments](docs/experiments.md) · [PIT fundamentals](docs/fundamental-point-in-time.zh-CN.md)
 
 Next priorities: data-quality measurement, consistent score provenance, longer strategy evidence, reproducible research and workspace interaction improvements. Roadmap items are not delivered features.
+
+## The story behind the project
+
+My first real encounter with stocks came through the 12th East Money Cup competition. It opened a door from financial concepts in the classroom to the changing reality of financial markets.
+
+The experience that followed included setbacks and expensive lessons. I became more interested in understanding what supported a decision, which information was actually available at the time, and how to evaluate an idea after the outcome was known.
+
+With a financial technology background, I find quantitative trading fascinating: it turns financial questions into testable hypotheses and translates intuition into data, rules and experiments. Each result can become a starting point for the next investigation.
+
+That is how AIQUANT-LITE began. I wanted a research workspace of my own: one that organizes market and financial information, tests ideas quantitatively, uses AI to help structure evidence, and retains decisions, risks and reviews. The attention to time boundaries, sources, costs and negative findings reflects what those market lessons taught me.
+
+Markets remain complex and uncertain. This project is both a tool and a record of my learning at the intersection of finance and technology. I hope it helps me research more carefully, reason with better evidence and remain honest about what I do not yet know. If that direction resonates, you are welcome to help build it.
+
+— The author of AIQUANT-LITE
+
+[完整中文自述](docs/project-story.zh-CN.md)
 
 ## Build with us
 

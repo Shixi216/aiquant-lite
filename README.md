@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 快速部署](#快速开始) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [English](README.en.md)**
+**[🚀 快速部署](#快速开始) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
 
 </div>
 
@@ -34,25 +34,34 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 
 **市场驾驶舱 → 机会排序 → 个股研究 → 风险检查 → 决策留存 → 模拟复盘**，让研究视图跟随工作流程展开。
 
-![市场驾驶舱：覆盖、时点与市场结构](docs/assets/dashboard-demo.png)
+![市场驾驶舱：覆盖、时点与市场结构](docs/assets/dashboard-live-20261019.jpg)
 
 <table width="100%">
 <tr>
-<td width="50%" align="center"><strong>个股深研 · 事实与因子同屏</strong><br><img src="docs/assets/stock-overview-demo.png" alt="个股研究总览开发样本" width="100%"></td>
-<td width="50%" align="center"><strong>行情观察 · 价格与研究联动</strong><br><img src="docs/assets/stock-demo.png" alt="个股 K 线研究开发样本" width="100%"></td>
+<td width="50%" align="center"><strong>个股深研 · 事实与因子同屏</strong><br><img src="docs/assets/stock-overview-live-20261019.jpg" alt="个股研究总览真实界面" width="100%"></td>
+<td width="50%" align="center"><strong>行情观察 · 价格与研究联动</strong><br><img src="docs/assets/stock-chart-live-20261019.jpg" alt="个股 K 线研究真实界面" width="100%"></td>
 </tr>
 </table>
 
 <details>
 <summary><strong>展开查看个股研究大图</strong></summary>
 
-![个股研究全尺寸开发样本](docs/assets/stock-overview-demo.png)
+![个股研究全尺寸真实界面](docs/assets/stock-overview-live-20261019.jpg)
 
-![个股 K 线全尺寸开发样本](docs/assets/stock-demo.png)
+![个股 K 线全尺寸真实界面](docs/assets/stock-chart-live-20261019.jpg)
 
 </details>
 
-> 界面来自实际 Web 工作台的开发契约样本；数值用于展示交互，演示模式在生产环境中禁用。产品图展示界面，流程图展示概念架构，均不作为实时行情或收益证明。
+> 截图于 2026-10-19，来自生产构建的中文 WebUI 与本地已落库数据，未启用演示样本。行情日期、缺失项和过期提示按实际状态保留；截图不代表实时行情或策略收益。流程图展示概念架构。
+
+<details>
+<summary><strong>查看量化实验与策略研究界面</strong></summary>
+
+![量化实验室真实界面](docs/assets/quant-live-20261019.jpg)
+
+![策略研究真实界面](docs/assets/research-live-20261019.jpg)
+
+</details>
 
 ### 六个工作区，贯穿研究全程
 
@@ -185,6 +194,8 @@ npm --prefix frontend run build
 
 验证使用隔离环境和临时数据库。模块独立进程是已验证模式；审核 Windows / Python 3.11.1 环境的长时间混合进程原生崩溃尚未解决。跳过项、外部服务及本地数据的未验证范围见 [源码审核](docs/release-audit-2026-10-18.md) 和 [研究资料审核](docs/release-audit-2026-10-19.md)。软件测试不代替数据质量与长期策略绩效检验。
 
+本次中文 WebUI 修复通过 **14 项前端回归、58 项相关后端测试与生产构建**，真实页面检查、截图来源及未解决的数据边界见 [WebUI 审核记录](docs/webui-review-2026-10-19.md)。
+
 ## 代码地图
 
 ```text
@@ -214,6 +225,26 @@ docs/knowledge/            数据资产、研究协议、失败案例与知识�
 | [安全边界](docs/security.md) | [Hermes 集成](docs/hermes-integration.md) | [PIT 基本面](docs/fundamental-point-in-time.zh-CN.md) |
 
 下一阶段聚焦：**数据质量度量、评分来源一致性、策略证据积累、研究可复现性与工作台交互完善**。规划内容不作为已经交付的能力。
+
+## 项目自述：从一次比赛开始
+
+我与股票的第一次真正接触，始于第十二届“东方财富杯”比赛。那次比赛为我打开了一扇门，让我从课堂上的金融概念，走进了充满变化的金融市场。
+
+走进市场以后，我也遭遇过挫折，交过不少学费。经历这些之后，我越来越想弄清楚：一次判断究竟依据什么，哪些信息当时已经可得，结果出来以后，又该如何检验自己的想法。
+
+我本身是金融科技专业，量化交易一直是一个让我着迷的主题。它把金融问题变成可以研究的假设，把模糊的直觉拆成数据、规则和实验，也让每一次得失都有机会成为下一次研究的起点。
+
+AIQUANT-LITE 就是在这样的经历与兴趣中做出来的。我想为自己搭建一套投研工作台：把分散的行情、财务和市场信息组织起来，用量化方法检验想法，让 AI 协助梳理证据，再把判断、风险和复盘留下来。
+
+因此，我很在意这个项目里的时间边界、数据来源、交易成本和失败记录。一个看起来漂亮的结果，还需要回答它是怎样得到的、适用于什么条件、还有哪些问题没有解决。这些要求，也是在回应我曾经交过的学费。
+
+市场的复杂与不确定性始终存在。我希望这个项目能让我研究得更扎实，判断得更有依据，也更诚实地面对自己的局限。代码、数据和模型，是我持续学习金融市场的工具。
+
+这个项目既是一套投研工具，也是我作为金融科技专业的学习者，探索量化交易的一份实践记录。如果你也对金融市场、数据和技术之间的联系着迷，欢迎一起完善它，把问题问清楚，把证据留下来。
+
+—— AIQUANT-LITE 作者
+
+[独立阅读这篇自述](docs/project-story.zh-CN.md)
 
 ## 参与建设
 

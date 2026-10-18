@@ -111,7 +111,7 @@ function switchTab(tab: string) {
       </p>
       <div class="head-chips">
         <span v-if="dataCutoff" class="badge action">扫描数据截止 {{ dataCutoff }}</span>
-        <span v-if="latest?.available" class="badge ok">当日快照 {{ latest?.data_cutoff }}</span>
+        <span v-if="latest?.available" class="badge">最新落库快照 {{ latest?.data_cutoff }}</span>
         <button class="mini" @click="loadAll">{{ loading ? "刷新中…" : "刷新" }}</button>
       </div>
     </div>
@@ -121,8 +121,8 @@ function switchTab(tab: string) {
     <!-- 情绪总览 -->
     <section v-if="overview?.available && overview.data" class="panel">
       <h3>
-        市场情绪总览
-        <span class="h3-extra">全市场 {{ overview.data.universe_size }} 只 · 非正式口径</span>
+        历史情绪观察
+        <span class="h3-extra">{{ overview.data.sentiment.trade_date }} · 全市场 {{ overview.data.universe_size }} 只 · 非正式口径</span>
       </h3>
       <div class="sentiment-grid">
         <SentimentGauge
@@ -187,7 +187,7 @@ function switchTab(tab: string) {
     <!-- 当日快照 -->
     <section v-if="latest?.available && latest.data" class="panel">
       <h3>
-        当日全市场快照
+        最新全市场快照
         <span class="h3-extra">{{ latest.data.trade_date }} · Tushare 补充</span>
       </h3>
       <LatestSessionPanel :session="latest.data" />

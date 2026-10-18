@@ -13,13 +13,14 @@ import ProvenanceLine from "../components/global/ProvenanceLine.vue";
 import AdjustmentBadge from "../components/global/AdjustmentBadge.vue";
 import BlockState from "../components/global/BlockState.vue";
 import StockDatabaseContext from "../components/stock/StockDatabaseContext.vue";
-import { getBlockReasonLabel } from "../domain/labels";
+import { getBlockReasonLabel, hasInconsistentTurnover } from "../domain/labels";
 
 const route = useRoute();
 const symbol = computed(() => String(route.params.symbol ?? "600519.SH"));
 
 const intel = ref<StockIntelResponse | null>(null);
 const chart = ref<ChartResponse | null>(null);
+const inconsistentTurnover = computed(() => chart.value?.bars.some(hasInconsistentTurnover) ?? false);
 const days = ref(60);
 const error = ref<string | null>(null);
 const chartError = ref<string | null>(null);
@@ -130,6 +131,7 @@ const showDegradedChartHint = computed(() => {
           />
         </div>
         <p v-if="chart?.data_time" class="dim">行情截至 {{ chart.data_time }} · 历史日线</p>
+        <p v-if="inconsistentTurnover" class="warn" role="status">部分历史成交量与成交额相互矛盾，相关量额待核验，暂不展示。</p>
         <p v-if="chartLoading" class="loading" role="status">正在加载{{ days }}日行情…</p>
         <p v-if="chartError" class="error-banner" role="alert">K线加载失败：{{ chartError }}</p>
         <p v-if="chart && chart.bars.length < days" class="dim">已显示可用的 {{ chart.bars.length }} 个交易日</p>

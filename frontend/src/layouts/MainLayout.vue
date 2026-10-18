@@ -14,7 +14,16 @@ const searchFocused = ref(false);
 const menuOpen = ref(false);
 const pageTitle = computed(() => String(route.meta.title ?? "投研工作台"));
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
+let blurTimer: ReturnType<typeof setTimeout> | undefined;
 let searchRequest = 0;
+
+function focusSearch() {
+  if (blurTimer) clearTimeout(blurTimer);
+  searchFocused.value = true;
+}
+function blurSearch() {
+  blurTimer = setTimeout(() => { searchFocused.value = false; }, 150);
+}
 
 function stockPath(item: StockSearchItem) {
   searchResults.value = [];
@@ -25,6 +34,7 @@ function stockPath(item: StockSearchItem) {
 }
 
 async function loadSearchResults(value: string) {
+  if (value !== query.value.trim()) return;
   const request = ++searchRequest;
   searchLoading.value = true;
   try {
@@ -53,6 +63,7 @@ async function searchStock() {
     return;
   }
   await loadSearchResults(query.value.trim());
+  if (query.value.trim().toUpperCase() !== value) return;
   const exact = searchResults.value.find((item) => item.name === query.value.trim());
   if (exact) return stockPath(exact);
   if (searchResults.value.length === 1) return stockPath(searchResults.value[0]!);
@@ -60,6 +71,9 @@ async function searchStock() {
   searchError.value = searchResults.value.length ? "请选择具体股票" : "未找到匹配股票";
 }
 watch(query, (value) => {
+  ++searchRequest;
+  searchLoading.value = false;
+  searchResults.value = [];
   searchError.value = "";
   if (searchTimer) clearTimeout(searchTimer);
   const keyword = value.trim();
@@ -70,11 +84,19 @@ watch(query, (value) => {
   searchTimer = setTimeout(() => loadSearchResults(keyword), 250);
 });
 watch(() => route.fullPath, () => {
+  ++searchRequest;
+  if (searchTimer) clearTimeout(searchTimer);
+  searchLoading.value = false;
+  searchFocused.value = false;
   menuOpen.value = false;
   searchResults.value = [];
   document.title = `${pageTitle.value} · 怡怡投研`;
 }, { immediate: true });
-onBeforeUnmount(() => { if (searchTimer) clearTimeout(searchTimer); });
+onBeforeUnmount(() => {
+  ++searchRequest;
+  if (searchTimer) clearTimeout(searchTimer);
+  if (blurTimer) clearTimeout(blurTimer);
+});
 const navGroups = [
   {
     label: "决策驾驶舱",
@@ -132,11 +154,11 @@ const navGroups = [
       </div>
       <form class="stock-search" role="search" @submit.prevent="searchStock">
         <label class="sr-only" for="stock-query">股票代码或中文名称</label>
-        <input id="stock-query" v-model="query" type="text" placeholder="股票代码或中文名称" autocomplete="off" :aria-invalid="!!searchError" aria-describedby="stock-search-error" aria-controls="stock-search-results" :aria-expanded="searchFocused && searchResults.length > 0" @focus="searchFocused = true" @blur="setTimeout(() => searchFocused = false, 150)" />
+        <input id="stock-query" v-model="query" type="text" placeholder="股票代码或中文名称" autocomplete="off" :aria-invalid="!!searchError" aria-describedby="stock-search-error" aria-controls="stock-search-results" :aria-expanded="searchFocused && searchResults.length > 0" @focus="focusSearch" @blur="blurSearch" />
         <button class="mini" type="submit">研究个股 <span aria-hidden="true">↗</span></button>
         <div v-if="searchFocused && (searchResults.length || searchLoading)" id="stock-search-results" class="search-results" role="listbox" aria-label="股票搜索结果">
           <span v-if="searchLoading && !searchResults.length" class="search-loading">正在搜索…</span>
-          <button v-for="item in searchResults" :key="item.symbol" type="button" role="option" @mousedown.prevent="stockPath(item)">
+          <button v-for="item in searchResults" :key="item.symbol" type="button" role="option" @mousedown.prevent @click="stockPath(item)">
             <span><strong>{{ item.name }}</strong><small>{{ item.symbol }}</small></span>
             <em>{{ item.listing_status === 'DELISTED' ? '已退市' : item.company_name || '' }}</em>
           </button>

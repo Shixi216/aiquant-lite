@@ -46,8 +46,7 @@ usePolling(onPoll, 60_000, 300_000);
 </script>
 
 <template>
-  <h1 class="page-title">实验与系统状态</h1>
-  <p class="page-sub">Strategy Lab 走查 · 情绪因子评估 · 实验运行查询 · 系统健康（交易时段 60s 轮询）</p>
+  <p class="page-sub">策略实验 · 情绪因子评估 · 运行查询 · 系统健康。结果来自已有研究产物，仅供研究。</p>
 
   <div class="toolbar">
     <button
@@ -61,8 +60,8 @@ usePolling(onPoll, 60_000, 300_000);
     </button>
   </div>
 
-  <StrategyLabPanel v-show="activeTab === 'strategy-lab'" />
-  <SentimentPanel v-show="activeTab === 'sentiment'" />
+  <StrategyLabPanel v-if="activeTab === 'strategy-lab'" />
+  <SentimentPanel v-if="activeTab === 'sentiment'" />
 
   <div v-show="activeTab === 'experiments'">
     <div class="panel">
@@ -71,7 +70,7 @@ usePolling(onPoll, 60_000, 300_000);
         <input
           v-model="experimentRunId"
           type="text"
-          placeholder="run_id"
+          placeholder="输入实验运行编号"
           style="width: 320px"
           @keyup.enter="loadExperiment"
         />
@@ -79,11 +78,11 @@ usePolling(onPoll, 60_000, 300_000);
       </div>
       <div v-if="experimentError" class="error-box" style="padding: 14px">{{ experimentError }}</div>
       <pre v-else-if="experiment" class="json-view">{{ JSON.stringify(experiment, null, 2) }}</pre>
-      <div v-else class="empty">输入 run_id 后查询（POST /v1/experiments 创建的实验或 run）。</div>
+      <div v-else class="empty">输入已有实验的运行编号后查询；此页面只读取结果。</div>
     </div>
   </div>
 
-  <div v-show="activeTab === 'health'">
+  <div v-if="activeTab === 'health'">
     <HealthPanel ref="healthPanel" />
   </div>
 </template>

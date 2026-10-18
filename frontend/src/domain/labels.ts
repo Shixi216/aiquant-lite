@@ -15,6 +15,17 @@ const COMPONENT_NAMES: Record<string, string> = {
   tushare: "Tushare",
   baostock: "BaoStock",
   coverage: "数据覆盖",
+  database: "主数据库",
+  migrations: "数据库结构版本",
+  finance_mcp: "金融工具服务",
+  scanner: "选股扫描",
+  formal_evaluation: "正式评估",
+  fundamental_coverage: "基本面覆盖",
+  sentiment_coverage: "情绪数据覆盖",
+  policy_news_coverage: "政策新闻覆盖",
+  capital_flow_coverage: "资金流覆盖",
+  wecom: "企业微信通道",
+  live_trading: "实盘执行接口",
 };
 export function getComponentLabel(name: string): string {
   return COMPONENT_NAMES[name] ?? name;
@@ -82,6 +93,12 @@ export const HEALTH_STATUS_LABELS: Record<string, string> = {
   unreachable: "不可达",
   not_deployed: "接口未部署",
   unknown: "未知状态",
+  NOT_READY: "尚未就绪",
+  not_ready: "尚未就绪",
+  UNAVAILABLE: "暂不可用",
+  unavailable: "暂不可用",
+  FAILED: "失败",
+  ERROR: "异常",
 };
 
 export const EXECUTION_STATUS_KNOWN: Record<string, string> = {
@@ -135,6 +152,9 @@ export const DATA_SOURCE_LABELS: Record<string, string> = {
   provider_tail_fill: "增量行情",
   local_backup_snapshot: "临时备份行情",
   router_canonical: "正式数据",
+  "router.equity_context_overview": "正式市场环境数据",
+  "router.cross_section": "正式横截面评分",
+  "router.market_breadth": "正式市场宽度数据",
   unavailable: "暂不可用",
 };
 
@@ -197,6 +217,7 @@ export const STRATEGY_ROLE_LABELS: Record<string, string> = {
 };
 
 export const VERIFICATION_STATUS_LABELS: Record<string, string> = {
+  SINGLE_SOURCE: "单一来源",
   VERIFIED: "已核验",
   UNVERIFIED: "未核验",
   CANONICAL: "正式收录",
@@ -204,6 +225,9 @@ export const VERIFICATION_STATUS_LABELS: Record<string, string> = {
 };
 
 export const DATA_TYPE_LABELS: Record<string, string> = {
+  "financial_statement:income": "利润表",
+  "financial_statement:balancesheet": "资产负债表",
+  "financial_statement:cashflow": "现金流量表",
   FINANCIAL_INDICATOR: "主要财务指标",
   INCOME: "利润表",
   BALANCESHEET: "资产负债表",
@@ -361,7 +385,7 @@ function finite(value: unknown): value is number {
 
 // Production rank and composite values are centered in [-1, 1].
 // Only rank fields are percentiles; composite is a weighted score.
-export function formatScore(value: number | null | undefined): string {
+export function formatScore(value: unknown): string {
   if (!finite(value)) return NO_DATA;
   return ((value + 1) * 50).toFixed(1);
 }
@@ -400,16 +424,66 @@ export function formatAmount(value: number | null | undefined): string {
 
 export function formatDateTime(value: string | null | undefined): string {
   if (!value) return NO_DATA;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  // Never let a browser invent the timezone of a naive timestamp.
+  if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) {
+    return /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(value)
+      ? `${value.replace("T", " ").slice(0, 16)}（时区未确认）` : value;
+  }
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(parsed).map((part) => [part.type, part.value]));
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return NO_DATA;
-  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
   return formatDateTime(value).slice(0, 10);
+}
+
+/** Confidence is a probability in [0, 1], not a centered [-1, 1] score. */
+export function formatConfidence(value: unknown): string {
+  if (!finite(value) || value < 0 || value > 1) return NO_DATA;
+  return `${(value * 100).toFixed(1)}%`;
+}
+
+/** Fiscal period comes from report metadata, never an announcement/event timestamp. */
+export function getFinancialReportPeriod(metrics: unknown): string {
+  if (!metrics || typeof metrics !== "object" || Array.isArray(metrics)) return NO_DATA;
+  const record = metrics as Record<string, unknown>;
+  const periods: string[] = [];
+  for (const key of ["report_period", "end_date"]) {
+    const raw = record[key];
+    if (typeof raw !== "string") continue;
+    const value = /^\d{8}$/.test(raw) ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6)}` : raw;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
+    const parsed = new Date(`${value}T00:00:00Z`);
+    if (Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value) periods.push(value);
+  }
+  return new Set(periods).size > 1 ? "报告期字段冲突" : periods[0] ?? NO_DATA;
+}
+
+export function hasInconsistentTurnover(bar: { volume?: unknown; amount?: unknown }): boolean {
+  return (finite(bar.volume) && bar.volume < 0) || (finite(bar.amount) && bar.amount < 0)
+    || (bar.volume === 0 && finite(bar.amount) && bar.amount > 0);
+}
+
+export function getWalkForwardLabel(row: { train_window_days: number; fold: number }): string {
+  return `${row.train_window_days}日 · 第${row.fold + 1}折`;
+}
+
+export function getCandidateLabel(id: string): string {
+  const families: Record<string, string> = {
+    legacy: "传统基准", static: "静态组合", dynamic: "动态组合", dynamic_risk: "动态风控",
+    risk_overlay: "风险叠加", regime: "市场状态", interaction: "交互组合",
+    ablation: "消融实验", ml_ridge: "岭回归模型",
+  };
+  const match = /^(.*)_([a-f0-9]+)$/.exec(id);
+  return match ? `${families[match[1]!] ?? "研究候选"} · ${match[2]!.slice(0, 6)}` : id;
 }
 
 /* ---------------- 量化面板 ---------------- */

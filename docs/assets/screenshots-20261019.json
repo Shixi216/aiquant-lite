@@ -1,0 +1,64 @@
+{
+  "capture_date": "2026-10-19",
+  "date_timezone": "Asia/Tokyo",
+  "ui_time_timezone": "Asia/Shanghai",
+  "production_build": true,
+  "fixtures_enabled": false,
+  "test_viewport": [
+    1440,
+    1000
+  ],
+  "capture_method": "Unedited browser screenshot JPEG",
+  "files": [
+    {
+      "file": "dashboard-live-20261019.jpg",
+      "sha256": "b0322f615dae4984a5cad47a3c6f590259104b18b8838a0c72538fb0e854c080",
+      "bytes": 76965,
+      "image_size": [
+        1425,
+        990
+      ]
+    },
+    {
+      "file": "quant-live-20261019.jpg",
+      "sha256": "6823386736881d28d827cd853bca4207675585e8dbafecda43b601f78c31b444",
+      "bytes": 114333,
+      "image_size": [
+        1425,
+        990
+      ]
+    },
+    {
+      "file": "research-live-20261019.jpg",
+      "sha256": "b202bfdae9389e4f77867f65f41555515ec940fd6ae2228a8e4b5f6f79f196e9",
+      "bytes": 77707,
+      "image_size": [
+        1425,
+        990
+      ]
+    },
+    {
+      "file": "stock-chart-live-20261019.jpg",
+      "sha256": "ef12db031666344a301522341a9486704ea149a9566bbf9f75a746738fc764f0",
+      "bytes": 100556,
+      "image_size": [
+        1425,
+        990
+      ]
+    },
+    {
+      "file": "stock-overview-live-20261019.jpg",
+      "sha256": "4883bbb457af8e3db6890698c904cec32fde6675548d699e7ab72a5e947d5a2a",
+      "bytes": 68013,
+      "image_size": [
+        1425,
+        990
+      ]
+    }
+  ],
+  "notes": [
+    "Existing local data; not a live feed.",
+    "Missing, stale and inconsistent-data notices are retained.",
+    "Screenshots contain no personal accounts, credentials or raw conversations."
+  ]
+}

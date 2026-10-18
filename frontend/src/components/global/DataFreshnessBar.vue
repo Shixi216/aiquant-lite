@@ -21,7 +21,8 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <div class="freshness-bar">
+  <div class="freshness-bar" aria-label="数据时点，统一显示北京时间">
+    <small class="timezone-note">数据时点 · 北京时间</small>
     <div v-for="row in rows" :key="row.key" class="freshness-row">
       <span class="label">{{ row.label }}</span>
       <span class="value" :class="{ missing: row.display === '暂无数据' }">{{ row.display }}</span>
@@ -56,6 +57,7 @@ const rows = computed(() =>
 .value.missing {
   color: var(--text-dim);
 }
+.timezone-note { color: var(--text-dim); margin-bottom: 4px; }
 .source {
   color: var(--text-dim);
   margin-left: auto;

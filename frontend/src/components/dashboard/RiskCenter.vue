@@ -28,7 +28,7 @@ const risks = computed(() => {
     list.push({ code: "partial_universe", text: getRiskLabel("partial_universe") });
   }
   if (props.breadth.stale) {
-    list.push({ code: "stale_data", text: "快照陈旧（盘后属正常）" });
+    list.push({ code: "stale_data", text: "行情快照已过期，请核对业务交易日与来源状态" });
   }
   const unhealthy = props.components.filter((chip) => !chip.healthy);
   for (const chip of unhealthy) {

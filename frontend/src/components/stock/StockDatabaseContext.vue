@@ -7,6 +7,8 @@ import {
   formatDateTime,
   formatPct,
   formatScore,
+  formatConfidence,
+  getFinancialReportPeriod,
   getDataTypeLabel,
   getVerificationStatusLabel,
   NO_DATA,
@@ -68,8 +70,8 @@ function scalarMetrics(value: unknown): Array<[string, string]> {
         <h3>策略因子明细</h3>
         <div v-if="data.factors.length" class="factor-list">
           <div v-for="factor in data.factors" :key="String(factor.type)">
-            <span>{{ factorNames[String(factor.type)] ?? factor.type }}</span><strong>{{ formatScore(Number(factor.score)) }}</strong>
-            <small>置信度 {{ formatPct(Number(factor.confidence) * 100) }} · {{ factor.formal_status === 'shadow' ? '影子研究' : '正式结果' }} · 截至 {{ formatDateTime(String(factor.data_cutoff ?? '')) }}</small>
+            <span>{{ factorNames[String(factor.type)] ?? factor.type }}</span><strong>{{ formatScore(factor.score) }}</strong>
+            <small>置信度 {{ formatConfidence(factor.confidence) }} · {{ factor.formal_status === 'shadow' ? '影子研究' : '正式结果' }} · 截至 {{ formatDateTime(String(factor.data_cutoff ?? '')) }}</small>
           </div>
         </div><p v-else class="dim">暂无已持久化的策略因子明细；四维横截面仍可单独查看。</p>
       </section>
@@ -81,7 +83,7 @@ function scalarMetrics(value: unknown): Array<[string, string]> {
         <article v-for="record in data.financials" :key="`${record.data_type}-${record.data_cutoff}`">
           <header><strong>{{ getDataTypeLabel(record.data_type) }}</strong><span>{{ getVerificationStatusLabel(record.verification_status) }} · {{ record.source }}</span></header>
           <dl><template v-for="metric in scalarMetrics(record.metrics)" :key="metric[0]"><dt>{{ metric[0] }}</dt><dd>{{ metric[1] }}</dd></template></dl>
-          <small>报告期 {{ formatDate(String(record.event_time ?? '')) }} · 数据截至 {{ formatDateTime(String(record.data_cutoff ?? '')) }}</small>
+          <small>报告期 {{ getFinancialReportPeriod(record.metrics) }} · 来源事件日 {{ formatDate(String(record.event_time ?? '')) }} · 数据截至 {{ formatDateTime(String(record.data_cutoff ?? '')) }}</small>
         </article>
       </div><p v-else class="dim">数据库暂无该股票的规范化财务记录。</p>
     </section>

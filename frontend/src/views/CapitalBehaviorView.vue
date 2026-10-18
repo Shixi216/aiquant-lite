@@ -85,7 +85,7 @@ function weightBarStyle(weight: number): Record<string, string> {
 <template>
   <h1 class="page-title">资金行为研究</h1>
   <p class="page-sub">
-    可观测市场行为假设（非内部意图断言）· 12 状态加权证据 softmax · research_only
+    可观测市场行为假设（非内部意图断言）· 12 类市场状态 · 加权证据 · 仅供研究
   </p>
 
   <div v-if="error" class="error-box">{{ error }}</div>

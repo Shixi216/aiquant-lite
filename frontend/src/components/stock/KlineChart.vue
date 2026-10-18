@@ -4,7 +4,7 @@ import type { Ref } from "vue";
 import type { ChartBar, DecisionPacketData } from "../../types/v2";
 import { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
-import { DOWN_COLOR, UP_COLOR, formatAmount, formatVolume, formatPct } from "../../domain/labels";
+import { DOWN_COLOR, UP_COLOR, formatAmount, formatVolume, formatPct, hasInconsistentTurnover } from "../../domain/labels";
 
 const props = defineProps<{
   bars: ChartBar[];
@@ -64,7 +64,7 @@ const option = computed<EChartsCoreOption | null>(() => {
   const dates = bars.map((bar) => bar.trade_date);
   const candles = bars.map((bar) => [bar.open, bar.close, bar.low, bar.high]);
   const volumes = bars.map((bar) => ({
-    value: bar.volume,
+    value: hasInconsistentTurnover(bar) ? null : bar.volume,
     itemStyle: {
       color: (bar.close ?? 0) >= (bar.open ?? 0) ? UP_COLOR : DOWN_COLOR,
     },
@@ -139,8 +139,8 @@ const option = computed<EChartsCoreOption | null>(() => {
           `最低：${price(bar.low)}`,
           `收盘：${price(bar.close)}`,
           `涨跌：${formatPct(change)}`,
-          `成交量：${formatVolume(bar?.volume ?? null)}`,
-          `成交额：${formatAmount(bar?.amount ?? null)}`,
+          `成交量：${formatVolume(hasInconsistentTurnover(bar) ? null : bar.volume)}`,
+          `成交额：${formatAmount(hasInconsistentTurnover(bar) ? null : bar.amount)}`,
         ];
         return rows.join("<br/>");
       },

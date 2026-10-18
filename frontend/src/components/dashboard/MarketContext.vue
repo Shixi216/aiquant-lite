@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Block, MarketContextData } from "../../types/v2";
-import { formatAmount, formatDateTime, formatPct, formatScore, NO_DATA } from "../../domain/labels";
+import { formatAmount, formatDateTime, formatPct, formatScore, formatConfidence, NO_DATA } from "../../domain/labels";
 
 defineProps<{ context: Block<MarketContextData> }>();
 const regime: Record<string, string> = { RISK_ON: "偏强", BALANCED: "均衡", RISK_OFF: "偏弱", UNKNOWN: "数据不足" };
@@ -14,8 +14,8 @@ const regime: Record<string, string> = { RISK_ON: "偏强", BALANCED: "均衡", 
       <div class="metric"><span>上涨占比</span><strong>{{ context.data.macro.advance_ratio == null ? NO_DATA : formatPct(context.data.macro.advance_ratio * 100) }}</strong></div>
       <div class="metric"><span>中位涨跌</span><strong>{{ formatPct(context.data.macro.median_change_pct) }}</strong></div>
       <div class="metric"><span>全市场成交额</span><strong>{{ formatAmount(context.data.macro.total_amount) }}</strong></div>
-      <div class="metric"><span>市场情绪</span><strong>{{ context.data.macro.sentiment ? formatScore(Number(context.data.macro.sentiment.score)) : NO_DATA }}</strong><small v-if="context.data.macro.sentiment">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.sentiment.data_cutoff ?? '')) }} · 置信度 {{ formatScore(Number(context.data.macro.sentiment.confidence)) }}</small></div>
-      <div class="metric"><span>市场资金流</span><strong>{{ context.data.macro.capital_flow ? formatScore(Number(context.data.macro.capital_flow.score)) : NO_DATA }}</strong><small v-if="context.data.macro.capital_flow">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.capital_flow.data_cutoff ?? '')) }} · 置信度 {{ formatScore(Number(context.data.macro.capital_flow.confidence)) }}</small></div>
+      <div class="metric"><span>市场情绪</span><strong>{{ context.data.macro.sentiment ? formatScore(context.data.macro.sentiment.score) : NO_DATA }}</strong><small v-if="context.data.macro.sentiment">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.sentiment.data_cutoff ?? '')) }} · 置信度 {{ formatConfidence(context.data.macro.sentiment.confidence) }}</small></div>
+      <div class="metric"><span>市场资金流</span><strong>{{ context.data.macro.capital_flow ? formatScore(context.data.macro.capital_flow.score) : NO_DATA }}</strong><small v-if="context.data.macro.capital_flow">影子研究 · 截至 {{ formatDateTime(String(context.data.macro.capital_flow.data_cutoff ?? '')) }} · 置信度 {{ formatConfidence(context.data.macro.capital_flow.confidence) }}</small></div>
     </div>
     <p v-else class="dim">该数据库暂没有可用的市场环境聚合。</p>
   </section>
