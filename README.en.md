@@ -12,7 +12,7 @@ From market context to company research. From factor ideas to inspectable eviden
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
 
-**[🚀 Quick start](#quick-start) · [🤖 AI roles](#how-ai-work-is-divided-actual-models-and-live-results) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
+**[🚀 Quick start](#quick-start) · [🤖 AI roles](#ai-and-quantitative-rules-working-on-the-same-research-question) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
 
 </div>
 
@@ -30,29 +30,53 @@ For **A-share researchers, quantitative developers and small research teams**, A
 | **🧪 Experiments with trade-offs**<br>Static, dynamic, model and ablation routes retain cost sensitivity, yearly stability and rejection reasons. | **⏱️ Point-in-Time contracts**<br>Availability, cutoffs and historical membership quality constrain inputs; missing and stale data remain visible. |
 | **🧾 Inspectable decisions**<br>Versioned DecisionPackets preserve zones, evidence and integrity checks for human review. | **🔐 Local-first data ownership**<br>Router is the sole online owner of the primary DuckDB; sidecars expose research under separate read-only contracts. |
 
-## How AI work is divided: actual models and live results
+## AI and quantitative rules, working on the same research question
 
-**DeepSeek Flash organizes tasks, Qwen structures and verifies evidence, and DeepSeek Pro reviews the conclusions.** Dedicated modules handle data, quantitative scores, hard risk VETO and decision evidence. These are the **actual local settings and live checks on 2026-10-19**, rather than repository defaults or a list of planned roles.
+Bring a stock or a question. AIQUANT-LITE connects market data, financials, filings and capital-flow evidence. **Quantitative rules organize the comparison; AI structures the evidence, identifies contradictions and helps explain the reasoning.** You receive research guidance and options you can inspect for yourself.
 
-![Current model responsibilities and live validation — Chinese diagram](docs/assets/ai-role-map.zh-CN.svg)
+![How AI, strategy and the user work together — Chinese diagram](docs/assets/ai-role-map.zh-CN.svg)
 
-| Stage | Actual request model | Responsibility | Live result |
-|---|---|---|---|
-| Hermes task planning | **`deepseek-v4-flash`**; response identifier `deepseek-flash` | Arrange news, filing, synthesis and review responsibilities | Native Hermes produced four planning steps; tools and memory were disabled, so this is not MCP execution |
-| News · `news_processor` | **`qwen3.8-max-0902`** | Extract events, retain source classes and cluster duplicate material | One structured event from a real historical filing title and metadata; schema passed, missing body retained |
-| Filings · `announcement_verifier` | **`qwen3.8-max-0902`** | Check official PDF text, claim evidence and temporal meaning | Two `SUPPORTED` claims, with current-status / forward-looking classification and document hashes |
-| Synthesis · `research_synthesizer` | **`qwen3.8-max-0902`** | Organize five evidence dimensions, missing inputs and risks | Five observations and six missing items from a local report; dates retained and schema passed |
-| Risk · `risk_controller` | **`deepseek-v4-pro`** | Independently inspect the prior output and identify required changes | Same-task review completed: `revise`, five findings and four required actions; human review remains required |
+| Responsibility | Model | What it does for you |
+|---|---|---|
+| Understand and organize | **DeepSeek `deepseek-v4-flash`** | Understand the question in Hermes, organize tools and research tasks, and bring results back into the conversation |
+| Read and structure evidence | **Qwen `qwen3.8-max-0902`** | Extract news events, verify original filings and synthesize five evidence dimensions while retaining gaps |
+| Review important conclusions | **DeepSeek `deepseek-v4-pro`** | Review evidence, reasoning and risk when requested by the workflow; identify changes and checks for human review |
 
-The review caught a concrete reasoning error: Qwen described a static DIF / DEA relationship as a crossover event. It also marked a partially available capital-flow dimension as wholly missing. DeepSeek Pro requested a static description and a `PARTIAL` state. The original research remains pending revision; review findings do not automatically rewrite it or complete human approval.
+In a recorded review, Qwen described a static indicator relationship as a crossover event. Pro requested a description supported by the actual evidence. Review produces findings; it does not automatically rewrite the original or approve a trade.
 
-**All five checks for the current model combination passed.** LongCat is unconfigured and unbound; Hy3 remains disabled. Neither is presented as a verified active model. Image recognition is not part of the current workflow.
+### The strategy: quality, relative strength and timing
 
-News and filing checks used existing services. The patched research / risk chain ran from the public-source build in an isolated Router with a temporary database. The filing is a 2025 historical example; report quotes are dated 2026-10-16, financials 2026-06-30, and sentiment was cached. These checks do not establish live-market freshness, long-term availability or investment performance.
+Historical project discussions repeatedly returned to three principles: sector enthusiasm cannot replace company quality, a high score cannot override risk, and a research view is separate from the timing of an action.
 
-The update fixes the risk review's fixed 1,024-token ceiling, exact-symbol propagation and legacy-weight injection in research prompts. **17 scoped checks and Ruff passed.** The original resident Router has not loaded these patches.
+| Stage | Quantitative work | AI contribution |
+|---|---|---|
+| Relative comparison | Cross-sectional ranks: technical 30%, fundamental 30%, structured sentiment 25%, margin financing 15% | Explain context and contradictions; code calculates the formal score |
+| Quality and risk | Loaded financial losses / earnings deterioration, large Dragon-Tiger net selling, data state and material-risk evidence | Structure original evidence, distinguish reports from speculation and flag follow-up checks |
+| Position and timing | Score tiers, position context, support / resistance and volatility inform zones, batches and stop references | Explain the options and their conditions |
+| Experiments and review | Costs, yearly stability, out-of-sample checks and Walk-Forward comparisons | Explain findings and negative results; experiments do not silently replace the formal strategy |
 
-[Model and routing guide (Chinese)](docs/ai-roles-and-routing.zh-CN.md) · [Live validation and fixes (Chinese)](docs/live-model-validation-2026-10-19.md) · [Machine-readable evidence](docs/model-validation-2026-10-19.json)
+Code calculates the score and preserves data gaps. AI news analysis adds context and risk evidence to help you interpret the quantitative result. See the [research playbook (Chinese)](docs/research-playbook.zh-CN.md).
+
+### Risk has its own say
+
+Strong price action and an attractive theme can coexist with serious problems. The stock-report path checks available financial losses, earnings declines below −30% and substantial Dragon-Tiger net selling. Trusted-source rules also identify order restrictions and investigations as adverse events, making reasons for caution visible alongside the score.
+
+A synthetic test combined a **+0.95** score with a hard VETO. The result was **AVOID** without a position and an **EXIT recommendation** with one; neither allowed a new position. A high score does not erase risk. Material events also require source checks: rumor wording alone cannot stand in for official evidence. Screening can miss problems or need false-positive review. These labels provide guidance; the user decides and executes any trade.
+
+### Reuse in seconds; deepen when needed
+
+| Local example | Measured time | Scope |
+|---|---:|---|
+| Existing-data report | **1.35–2.60 s**; **1.43 s** median across 3 samples | Local reads, five-dimension calculations and rule-based guidance; no model calls observed in these samples |
+| Online fetch + Qwen event analysis | **28.65 s**, one sample | Data-fetch path, event extraction, calculations and report; excludes additional Pro review |
+
+> Local samples from 2026-10-19, with a 2026-10-16 quote basis. The paths differ in inputs and depth; models, networks and caches affect latency. These timings do not guarantee a live feed. See the [measurement evidence](docs/product-evidence-2026-10-19.md).
+
+### Guidance for you; execution by you
+
+**The user chooses and executes any trade in their own trading application.** Buy, exit and execution-state labels express recommendations or conditions. They do not submit live orders.
+
+Users choose different timing, sizing, prices and costs. Their gains and losses cannot be treated as one attributable “project return.” Strategy experiment metrics test research hypotheses under stated protocols; they are not promised investor outcomes.
 
 ## See the workspace
 
@@ -121,6 +145,17 @@ The local inventory contains **2,782,220 historical bar rows, 2,625,560 Replay f
 APIs have separate boundaries. Hermes screening requires explicit selection before decision evaluation; that integration tool creates neither orders nor DecisionPackets. See the [Hermes contract](docs/hermes-integration.md) and [workflow guide](docs/knowledge/hermes-research-workflows.md).
 
 ## Reference architectures
+
+### Focus alongside TradingAgents
+
+| Focus | TradingAgents | AIQUANT-LITE |
+|---|---|---|
+| Research structure | Analyst reports, research debate, Trader and risk-team decision graph | Local quantitative structure plus evidence-focused AI and optional review |
+| A-share input | Yahoo-supported `.SS / .SZ` symbols | A-share sources including Tushare and CNInfo |
+| Work cadence | Parallel analysts and configurable depth / debate rounds | Reuse local factors and choose refresh / AI analysis; local timings above |
+| Product focus | Multi-role decision-research framework | Research guidance, strategy explanation and risk support; the user executes trades |
+
+Based on the [official README](https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/README.md), [graph](https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/tradingagents/graph/setup.py) and [vendor configuration](https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/tradingagents/default_config.py). No equal-hardware, equal-input, equal-model comparison was run; no speedup ratio or return superiority is claimed. [Comparison scope](docs/product-evidence-2026-10-19.md#对比-tradingagents).
 
 We learn from mature open-source infrastructure while focusing on **A-share context, everyday research and decision evidence**.
 

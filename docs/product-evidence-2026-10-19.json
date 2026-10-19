@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-19T02:54:07.239749+00:00",
+  "source_base": "5b20ddef5ab16765765ac961f8e3ce3232db3a79",
+  "benchmark_scope": "One existing local Windows installation, localhost HTTP wall time; not a TradingAgents comparison or a clean-install benchmark.",
+  "cached_report": {
+    "symbol": "600036",
+    "sample_count": 3,
+    "seconds": [
+      2.604,
+      1.429,
+      1.348
+    ],
+    "median_seconds": 1.429,
+    "minimum_seconds": 1.348,
+    "maximum_seconds": 2.604,
+    "request_flags": {
+      "no_fetch": true,
+      "no_ai": true,
+      "stale_ok": false
+    },
+    "observed_model_calls_in_windows": 0,
+    "quote_basis": "2026-10-16",
+    "financial_period": "2026-06-30",
+    "order_created": false
+  },
+  "online_ai_report": {
+    "symbol": "600036",
+    "sample_count": 1,
+    "seconds": 28.653,
+    "report_internal_seconds": 28.639,
+    "request_flags": {
+      "no_fetch": false,
+      "no_ai": false,
+      "stale_ok": false
+    },
+    "includes": [
+      "online data-fetch path",
+      "Qwen event extraction",
+      "five-dimension calculations",
+      "deterministic decision-support report"
+    ],
+    "excludes": [
+      "Hermes conversation round trip",
+      "dedicated PDF verification",
+      "Qwen research synthesis plus DeepSeek Pro review",
+      "broker operations"
+    ],
+    "quote_basis": "2026-10-16",
+    "financial_period": "2026-06-30",
+    "observed_qwen_calls_in_window": 6,
+    "audit_association": "standalone physical calls observed in the bounded request window; not a shared task-id proof",
+    "order_created": false
+  },
+  "separate_deep_review_example": {
+    "seconds": 59.818,
+    "scope": "Earlier independent Qwen synthesis plus DeepSeek Pro review on supplied report input; not added to the above run as one benchmark."
+  },
+  "historical_conversation_background": {
+    "date": "2026-10-18",
+    "reported_examples_seconds": [
+      38.8,
+      42.6
+    ],
+    "source_kind": "project-related Hermes assistant summaries; supporting tool record includes 21.457 seconds of sentiment AI",
+    "not_pooled_with_current_samples": true,
+    "raw_dialogues_published": false
+  },
+  "risk_demonstrations": [
+    {
+      "case": "high_score_with_hard_veto",
+      "synthetic_input": true,
+      "score": 0.95,
+      "has_position": false,
+      "action": "AVOID",
+      "allow_new_position": false,
+      "allow_add_position": false,
+      "veto_override": true
+    },
+    {
+      "case": "high_score_with_hard_veto",
+      "synthetic_input": true,
+      "score": 0.95,
+      "has_position": true,
+      "action": "EXIT",
+      "allow_new_position": false,
+      "allow_add_position": false,
+      "veto_override": true
+    },
+    {
+      "case": "order_restriction_source_gate",
+      "synthetic_input": true,
+      "source_level": "official",
+      "matched": true,
+      "event_type": "ORDER_RESTRICTION",
+      "intensity": 1.0
+    },
+    {
+      "case": "order_restriction_source_gate",
+      "synthetic_input": true,
+      "source_level": "social",
+      "matched": false,
+      "event_type": null,
+      "intensity": null
+    },
+    {
+      "case": "stale_high_score",
+      "synthetic_input": true,
+      "score": 0.95,
+      "action": "WAIT",
+      "allow_new_position": false
+    }
+  ],
+  "real_cached_risk_example": {
+    "anonymized": true,
+    "scope": "Existing local report, not a current issuer assessment",
+    "quote_basis": "2026-09-30",
+    "financial_period": "2026-06-30",
+    "observed": [
+      "fundamental-loss warning",
+      "WAIT recommendation",
+      "invalidated execution status"
+    ],
+    "order_created": false
+  },
+  "mechanism_regressions": {
+    "passed": 47,
+    "failed": 0,
+    "skipped": 0
+  },
+  "tradingagents_reference": {
+    "repository": "TauricResearch/TradingAgents",
+    "commit": "e8f5503e9b86d5c2710b0c76b1f686703968c9df",
+    "commit_date": "2026-10-16",
+    "readme": "https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/README.md",
+    "graph": "https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/tradingagents/graph/setup.py",
+    "config": "https://github.com/TauricResearch/TradingAgents/blob/e8f5503e9b86d5c2710b0c76b1f686703968c9df/tradingagents/default_config.py",
+    "head_to_head_runtime_tested": false,
+    "speedup_ratio_claimed": false
+  },
+  "strategy_contract": {
+    "formal_source": "cross_section_4d",
+    "weights": {
+      "technical": 0.3,
+      "fundamental": 0.3,
+      "structured_sentiment": 0.25,
+      "margin_financing": 0.15
+    },
+    "missing_inputs": "normalize available factor weights; mark limitations",
+    "legacy_fallback": "60/40 when cross section is unavailable; distinct degraded path",
+    "news_llm_sentiment_is_not_formal_rank": true,
+    "hard_veto_overrides_positive_score": true,
+    "final_live_execution": "performed by the user outside this project",
+    "attributable_project_return_rate": null
+  },
+  "privacy": {
+    "raw_prompts_published": false,
+    "raw_dialogues_published": false,
+    "private_reports_published": false,
+    "credentials_published": false
+  }
+}

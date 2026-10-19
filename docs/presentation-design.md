@@ -31,3 +31,9 @@ This update changes project documentation and vector assets. The original worksp
 Both README files were rendered through GitHub's Markdown API and previewed locally at desktop (1160 × 1000) and mobile (390 × 844) viewport sizes. All 20 local image instances loaded, with no page-width overflow in either language. Badge placeholders were used only in the local preview; repository badges retain their real URLs.
 
 The publication check passed for seven changed files, 114 local documentation links, eight anchors and four parsed / rendered SVG assets. It found no conflict markers, sensitive patterns or exact matches against 24 local sensitive configuration values. The original-workspace preservation categories matched the baseline, including eight frozen database hashes. These are bounded presentation and preservation checks; they do not replace software or research validation.
+
+## User-facing AI and strategy story
+
+The AI section now leads with user benefits and the three active model responsibilities, rather than registration states and test reports. The native SVG connects those roles to quantitative scoring, independent risk constraints and user-controlled execution. Unused models are omitted from the product introduction.
+
+The strategy playbook separates formal ranks, news evidence, hard VETO, timing / sizing guidance and research experiments. Local timing examples and the TradingAgents comparison have a separate evidence page; no head-to-head speedup or attributable investor return is asserted. Historical conversations inform principles only; raw chats and private reports are not published.

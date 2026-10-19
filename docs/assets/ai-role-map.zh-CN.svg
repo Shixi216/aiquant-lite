@@ -1,53 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1030" viewBox="0 0 1600 1030" role="img" aria-labelledby="title desc">
-<title id="title">当前实际模型分工与运行结果</title>
-<desc id="desc">DeepSeek Flash 负责 Hermes 任务规划；Qwen3.8 max 0902 负责新闻、公告、五维研究；DeepSeek v4 pro 完成风险复核并要求修改。当前不提供图片识别；LongCat未配置、Hy3禁用。2026年10月19日，现用五项模型验收通过。</desc>
-<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081321"/><stop offset="1" stop-color="#102737"/></linearGradient></defs><rect width="1600" height="1030" rx="28" fill="url(#bg)"/>
-<text x="60" y="64" fill="#64d9cb" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600">AIQUANT-LITE  /  VERIFIED MODEL WORKFLOW</text>
-<text x="60" y="124" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="42" font-weight="700">让专业模型分工，也让研究经得起复核</text>
-<text x="60" y="170" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400">2026-10-19 本机实跑 · 现用模型 5 项验收通过 · 具体范围见审核记录</text>
-<rect x="60" y="208" width="1480" height="115" rx="18" fill="#123345" stroke="#397b88"/>
-<text x="90" y="250" fill="#73dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">Hermes · deepseek-v4-flash</text>
-<text x="90" y="291" fill="#b1cad8" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">返回标识 deepseek-flash</text>
-<text x="620" y="250" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">理解研究任务 → 安排四个专业岗位</text>
-<text x="620" y="291" fill="#b1cad8" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">规划运行通过；工具与记忆关闭，未执行 MCP 全链</text>
-<path d="M800 324V348M290 348H1310M290 348V370M800 348V370M1310 348V370" stroke="#4b8796" stroke-width="3" fill="none"/>
-<rect x="60" y="370" width="470" height="265" rx="18" fill="#112b3b" stroke="#294556"/>
-<text x="85" y="413" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">信息处理与公告核验</text>
-<text x="85" y="446" fill="#68ddd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600">qwen3.8-max-0902</text>
-<text x="85" y="487" fill="#68ddd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">新闻处理</text>
-<text x="85" y="517" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">1 条真实标题事件 · 来源与缺口</text>
-<text x="85" y="550" fill="#68ddd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">官方 PDF 核验</text>
-<text x="85" y="580" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">2 条 SUPPORTED · 页码与时间性质</text>
-<text x="85" y="611" fill="#9fb8c9" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">新闻与专用公告核验均通过</text>
-<rect x="565" y="370" width="470" height="265" rx="18" fill="#112b3b" stroke="#294556"/>
-<text x="590" y="413" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">五维研究综合</text>
-<text x="590" y="446" fill="#88bbff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600">qwen3.8-max-0902</text>
-<text x="590" y="487" fill="#88bbff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">技术 / 基本面 / 情绪</text>
-<text x="590" y="517" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">政策与新闻 / 资金证据</text>
-<text x="590" y="550" fill="#88bbff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">结构化研究摘要</text>
-<text x="590" y="580" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">5 维观察 · 6 个缺失项 · 保留日期</text>
-<text x="590" y="611" fill="#9fb8c9" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">新构建实跑通过 · RESEARCH</text>
-<rect x="1070" y="370" width="470" height="265" rx="18" fill="#112b3b" stroke="#294556"/>
-<text x="1095" y="413" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">独立风险复核</text>
-<text x="1095" y="446" fill="#f4c67a" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="600">deepseek-v4-pro</text>
-<text x="1095" y="487" fill="#f4c67a" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">检查 Qwen 的推断</text>
-<text x="1095" y="517" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">指出静态关系被误写为上穿事件</text>
-<text x="1095" y="550" fill="#f4c67a" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="600">同一任务追加审查</text>
-<text x="1095" y="580" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">revise · 5 条发现 · 4 项修正要求</text>
-<text x="1095" y="611" fill="#9fb8c9" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">执行完成 · 人工复核仍必须</text>
-<rect x="60" y="660" width="725" height="171" rx="18" fill="#162636" stroke="#405061"/>
-<text x="85" y="700" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">当前模型组合</text>
-<text x="85" y="739" fill="#e8b393" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">Flash 规划 / Qwen 研究 / Pro 复核</text>
-<text x="85" y="770" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">5 项现用模型检查均已实际运行通过</text>
-<text x="85" y="801" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">当前不提供图片识别流程</text>
-<rect x="815" y="660" width="725" height="171" rx="18" fill="#162636" stroke="#405061"/>
-<text x="840" y="700" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">未列入已验证组合</text>
-<text x="840" y="739" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">LongCat：未配置、无现行角色绑定</text>
-<text x="840" y="770" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">Hy3 对抗审查：禁用、未接入 Provider / Handler</text>
-<text x="840" y="801" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">按实际结果展示，不把角色注册当作运行成功</text>
-<rect x="60" y="856" width="1480" height="114" rx="18" fill="#103432" stroke="#327467"/>
-<text x="88" y="897" fill="#8ce6c6" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">确定性底座</text>
-<text x="340" y="897" fill="#e4f4ec" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">数据与 PIT / 扫描评分 / 硬风险 VETO / 调用与证据审计</text>
-<text x="88" y="939" fill="#b5d4cd" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">风险复核提出修改意见；不自动重写原文，不替代人工判断。新补丁使用隔离服务与临时库验证。</text>
-<text x="60" y="1006" fill="#8ba8bb" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400">样本为历史公告与本地缓存报告；不代表实时行情、长期可用率或投资绩效。模型可按部署配置替换。</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">AI 与量化策略，帮助你形成有依据的判断</title>
+<desc id="desc">Flash 组织问题，Qwen 读懂证据，Pro 按需复核。量化规则计算四维分数、检查硬风险并提供区间参考。研究建议交给使用者，最终操作由使用者决定和执行。</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081321"/><stop offset="1" stop-color="#102737"/></linearGradient></defs><rect width="1600" height="1000" rx="28" fill="url(#bg)"/>
+<text x="60" y="60" fill="#64d9cb" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="600">AIQUANT-LITE  /  RESEARCH WITH EVIDENCE</text>
+<text x="60" y="120" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="43" font-weight="700">你提出问题，AI 与策略一起梳理答案</text>
+<text x="60" y="164" fill="#adc1d0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="400">事实、分数、风险和行动条件，放在同一份研究建议里。</text>
+<rect x="60" y="205" width="470" height="185" rx="18" fill="#112b3b" stroke="#294556"/>
+<text x="85" y="248" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">理解你的问题</text>
+<text x="85" y="283" fill="#68ddd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600">deepseek-v4-flash</text>
+<text x="85" y="326" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">Hermes 组织任务与工具</text>
+<text x="85" y="358" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">把研究结果带回对话</text>
+<rect x="565" y="205" width="470" height="185" rx="18" fill="#112b3b" stroke="#294556"/>
+<text x="590" y="248" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">读懂材料与证据</text>
+<text x="590" y="283" fill="#88bbff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600">qwen3.8-max-0902</text>
+<text x="590" y="326" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">新闻事件 / 公告原文 / 五维观察</text>
+<text x="590" y="358" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">区分事实、推断与缺口</text>
+<rect x="1070" y="205" width="470" height="185" rx="18" fill="#112b3b" stroke="#294556"/>
+<text x="1095" y="248" fill="#f3f8fc" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700">重要结论再审一遍</text>
+<text x="1095" y="283" fill="#f4c67a" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="600">deepseek-v4-pro</text>
+<text x="1095" y="326" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">按需检查逻辑与风险</text>
+<text x="1095" y="358" fill="#c5d6e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">指出修改项，保留人工核查</text>
+<rect x="60" y="420" width="1480" height="220" rx="18" fill="#10313b" stroke="#367084"/>
+<text x="90" y="465" fill="#e6f2f7" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="700">量化主线：相对强弱 + 质量约束 + 位置与节奏</text>
+<text x="90" y="512" fill="#b8d2e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">技术</text>
+<text x="280" y="512" fill="#78dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="700">30%</text>
+<text x="435" y="512" fill="#b8d2e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">基本面</text>
+<text x="625" y="512" fill="#78dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="700">30%</text>
+<text x="780" y="512" fill="#b8d2e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">结构化情绪</text>
+<text x="970" y="512" fill="#78dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="700">25%</text>
+<text x="1125" y="512" fill="#b8d2e1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">两融资金</text>
+<text x="1315" y="512" fill="#78dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="30" font-weight="700">15%</text>
+<text x="90" y="564" fill="#d5e3ed" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="400">数据日期与缺口 → 四维比较 → 硬风险检查 → 区间 / 分批 / 止损参考</text>
+<text x="90" y="608" fill="#a9c6d6" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">正式分数由程序计算；AI 补充解释与核查；硬否决保持独立。</text>
+<path d="M800 641V676" stroke="#64bba4" stroke-width="3"/>
+<rect x="60" y="677" width="1480" height="148" rx="18" fill="#123c34" stroke="#3a9378"/>
+<text x="90" y="725" fill="#e6fff2" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="35" font-weight="700">把研究做扎实，把决定留给你</text>
+<text x="90" y="769" fill="#c2e8d7" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="400">你查看理由、风险和条件，自主选择是否参与，并在自己的交易端执行。</text>
+<text x="90" y="805" fill="#a8d5c2" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">建议标签与执行状态不会自动生成实盘委托。</text>
+<rect x="60" y="855" width="720" height="92" rx="18" fill="#162636" stroke="#294556"/>
+<rect x="810" y="855" width="730" height="92" rx="18" fill="#162636" stroke="#294556"/>
+<text x="85" y="893" fill="#73dfd0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">秒级复用已有研究</text>
+<text x="85" y="928" fill="#b4c9d8" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">本地数据与因子复用，模型按需调用</text>
+<text x="835" y="893" fill="#88bbff" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">策略可检验，个人收益不归因于工具</text>
+<text x="835" y="928" fill="#b4c9d8" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">实验指标单独看，实际盈亏取决于使用者执行</text>
+<text x="60" y="981" fill="#8ba8bb" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="19" font-weight="400">模型与入口按部署配置；研究建议帮助判断，不承诺收益。</text>
 </svg>
