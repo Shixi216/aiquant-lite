@@ -10,7 +10,7 @@
 
 From market context to company research. From factor ideas to inspectable evidence. A local-first workspace for serious research.
 
-[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-MIT-6E7681)](LICENSE)
+[![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-Apache--2.0-6E7681)](LICENSE)
 
 **[🚀 Quick start](#quick-start) · [🤖 AI roles](#ai-and-quantitative-rules-working-on-the-same-research-question) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
 
@@ -300,4 +300,4 @@ If this research direction resonates, a Star helps more researchers discover the
 
 Keep credentials in local `.env`; exclude databases, logs, caches, runtime state and private research outputs from the public repository. Services bind to loopback by default. Remote use requires authentication and network controls. See [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
-For research, education, backtesting, simulation and human decision support. Not investment advice; no return guarantees. Third-party data and model use remains subject to the respective service terms. Source code is licensed under [MIT](LICENSE).
+For research, education, backtesting, simulation and human decision support. Not investment advice; no return guarantees. Third-party data and model use remains subject to the respective service terms. Source code is licensed under [Apache-2.0 License](LICENSE).

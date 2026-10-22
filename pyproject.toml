@@ -3,6 +3,8 @@ name = "hermes-opc"
 version = "0.10.0"
 description = "A-share research multi-agent workspace powered by Hermes"
 requires-python = ">=3.11,<3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 dependencies = [
     "akshare>=1.18.64",
     "baostock>=0.9.3",
