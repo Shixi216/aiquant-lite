@@ -233,11 +233,14 @@ def run_strategy_backtest(
     end_date: date,
     cost_bps: float = 5.0,
     initial_capital: float = 1_000_000.0,
+    eligibility_fn=None,
 ) -> StrategyBacktestOutput:
     """统一策略回测：调仓日以截至前一交易日的数据决策（防未来函数）。
 
     份额模型：units_i 为资产 i 的份额（以首日价格归一），现金为 C。
     成本：Σ|Δ市值|/总资产 × cost_bps/1e4。
+    eligibility_fn(decision_date, symbols) -> set[str]：调仓时点 PIT 资格重评，
+    不合格资产强制清仓至现金（按换手计成本），策略只在合格资产中选择。
     """
     frame = close.loc[pd.Timestamp(start_date): pd.Timestamp(end_date)]
     if len(frame) < 2:
@@ -262,8 +265,13 @@ def run_strategy_backtest(
         decision_idx = i - 1
         if rebalance_flags[i]:
             history = frame.iloc[:i]
+            decision_history = history
+            if eligibility_fn is not None:
+                decision_date = frame.index[decision_idx].date() if i else frame.index[0].date()
+                eligible_set = eligibility_fn(decision_date, list(history.columns))
+                decision_history = history[[c for c in history.columns if c in eligible_set]]
             try:
-                target = strategy.target_weights(history)
+                target = strategy.target_weights(decision_history)
             except Exception as exc:
                 raise ValueError(f"strategy failed on {frame.index[i].date()}") from exc
             new_w = np.array([float(target.get(s, 0.0)) for s in symbols])

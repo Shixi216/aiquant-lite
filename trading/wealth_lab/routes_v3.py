@@ -47,17 +47,25 @@ def v3_universe_assets(universe_id: str):
 
 
 @router.get("/quality")
-def v3_quality(category: str | None = None):
+def v3_quality(category: str | None = None, page: int = 1, limit: int | None = None):
     rows = assets_report()
     if category:
         rows = [r for r in rows if r["category"] == category]
+    total = len(rows)
+    page = max(1, page)
+    limit = max(1, min(limit or total, total)) if total else 0
+    start_index = (page - 1) * limit if limit else 0
+    page_rows = rows[start_index: start_index + limit] if limit else []
     counts: dict[str, int] = {}
     for row in rows:
         counts[row["quality_status"]] = counts.get(row["quality_status"], 0) + 1
     return envelope({
-        "data_mode": "REAL", "total": len(rows), "quality_counts": counts,
-        "assets": rows,
-        "notes": ["缺失率以池内真实交易日历（SSE）为分母", "复权缺失不填充；金额已统一为元"],
+        "data_mode": "REAL", "total": total, "quality_counts": counts,
+        "page": page, "limit": limit or total,
+        "next_page": page + 1 if start_index + limit < total else None,
+        "assets": page_rows,
+        "notes": ["缺失率以池内真实交易日历（SSE）为分母", "复权缺失不填充；金额已统一为元",
+                  "v3.1 新增 product_form/underlying/market_scope/currency_risk 维度"],
     })
 
 
@@ -105,9 +113,21 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
                         sanitized_error="数据不可用：回测起点无 PIT 合格资产")
 
     import uuid
+    pit_snapshots: list[dict] = []
+
+    def eligibility_fn(decision_date, symbols):
+        verdict = backtest_eligible(list(symbols), decision_date)
+        eligible = {s for s, v in verdict.items() if v["eligible"]}
+        pit_snapshots.append({
+            "decision_date": decision_date.isoformat(),
+            "eligible_count": len(eligible),
+            "excluded": {s: v["reasons"][:1] for s, v in verdict.items() if not v["eligible"]},
+        })
+        return eligible
+
     try:
         output = run_strategy_backtest(close, strategy, start_date=start, end_date=end,
-                                       cost_bps=body.cost_bps)
+                                       cost_bps=body.cost_bps, eligibility_fn=eligibility_fn)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     backtest_id = "wlbt_" + uuid.uuid4().hex[:12]
@@ -123,6 +143,14 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
         "pit_gate": {"asof": start.isoformat(), "eligible": eligible_symbols,
                      "excluded": excluded,
                      "note": "PIT 判定基于上市/退市/历史长度/流动性；幸存者偏差未消除"},
+        "pit_rebalance_snapshots": {
+            "note": "每个调仓决策时点重新评估资格；不合格资产清仓至现金",
+            "rebalances": len(pit_snapshots),
+            "first": pit_snapshots[0] if pit_snapshots else None,
+            "last": pit_snapshots[-1] if pit_snapshots else None,
+            "eligible_count_min": min((s["eligible_count"] for s in pit_snapshots), default=0),
+            "eligible_count_max": max((s["eligible_count"] for s in pit_snapshots), default=0),
+        },
         "series": {"dates": [d.isoformat() for d in output.dates],
                    "nav": [round(float(v), 6) for v in output.nav],
                    "drawdown": [round(float(v), 6) for v in output.drawdown],

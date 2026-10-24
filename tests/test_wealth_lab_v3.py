@@ -84,3 +84,56 @@ def test_quality_status_and_sources(v3_database):
 
 def test_survivorship_note_constant():
     assert "幸存者偏差" in SURVIVORSHIP_NOTE or "存续" in SURVIVORSHIP_NOTE
+
+
+def test_engine_per_rebalance_eligibility(tmp_path, monkeypatch):
+    """v3.1 P0-2：引擎在调仓时点逐次重评资格，不合格资产清仓至现金。"""
+    import trading.wealth_lab.universe as universe_mod
+    import trading.wealth_lab.repository as repo_mod
+    from trading.wealth_lab.backtest import run_strategy_backtest
+    from trading.wealth_lab.strategies import get_strategy
+
+    path = tmp_path / "wl_pit.duckdb"
+    monkeypatch.setattr(universe_mod, "WEALTH_LAB_DB_PATH", path)
+    monkeypatch.setattr(repo_mod, "WEALTH_LAB_DB_PATH", path)
+    import duckdb as _duckdb
+    con = _duckdb.connect(str(path))
+    con.execute(repo_mod._SCHEMA)
+    idx = pd.bdate_range("2021-01-04", periods=400)
+    rows = []
+    for symbol in ("GOOD.SH", "LATE.SH"):
+        for i, ts in enumerate(idx):
+            rows.append([symbol, ts.date(), 1, 1, 1, 10.0, 5e6, 5e6, 1.0, 10.0, "OFFICIAL", "t", None])
+    con.executemany("INSERT INTO etf_daily VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    con.close()
+    upsert_assets([
+        {"symbol": "GOOD.SH", "name": "G", "category": "CN_EQUITY_BROAD_ETF",
+         "list_date": date(2020, 1, 1), "valid_days": 400, "adj_missing": 0,
+         "avg_amount_20d_cny": 5e7, "source_breakdown": {"OFFICIAL": 400},
+         "quality_status": "QUALIFIED"},
+        {"symbol": "LATE.SH", "name": "L", "category": "CN_EQUITY_BROAD_ETF",
+         "list_date": date(2020, 1, 1), "valid_days": 400, "adj_missing": 0,
+         "avg_amount_20d_cny": 5e7, "source_breakdown": {"OFFICIAL": 400},
+         "quality_status": "QUALIFIED"},
+    ])
+
+    close = pd.DataFrame(
+        {"GOOD.SH": [10.0] * len(idx), "LATE.SH": [10.0] * len(idx)}, index=idx)
+    calls = []
+
+    def eligibility_fn(decision_date, symbols):
+        calls.append(decision_date)
+        # 2022 年起 LATE 失去资格（模拟流动性/退市变化）
+        return {"GOOD.SH"} if decision_date >= date(2022, 1, 1) else set(symbols)
+
+    strategy = get_strategy("S1_equal_weight")
+    out = run_strategy_backtest(close, strategy, start_date=idx[0].date(),
+                                end_date=idx[-1].date(), cost_bps=0.0,
+                                eligibility_fn=eligibility_fn)
+    assert len(calls) >= 10  # 每个调仓日都被调用
+    # 决策时点（decision_data_through）在 2022 起的调仓只含 GOOD
+    # 注：2022-01-03 调仓的决策时点是 2021-12-31，LATE 当时仍合格——按决策日判定
+    later = [h for h in out.weight_history if h["decision_data_through"] >= "2022-01-01"]
+    assert later and all(set(h["weights"]) == {"GOOD.SH"} for h in later)
+    early = [h for h in out.weight_history if h["decision_data_through"] < "2022-01-01"]
+    assert early and all(set(h["weights"]) == {"GOOD.SH", "LATE.SH"} for h in early)

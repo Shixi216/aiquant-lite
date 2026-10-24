@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS wealth_assets (
     source_breakdown VARCHAR,
     quality_status VARCHAR,
     notes VARCHAR,
+    product_form VARCHAR,
+    underlying VARCHAR,
+    market_scope VARCHAR,
+    currency_risk VARCHAR,
     updated_at TIMESTAMPTZ
 );
 CREATE TABLE IF NOT EXISTS wealth_universes (
@@ -61,6 +65,13 @@ SURVIVORSHIP_NOTE = (
 def _connect():
     con = duckdb.connect(str(WEALTH_LAB_DB_PATH))
     con.execute(UNIVERSE_SCHEMA)
+    # v3.1 维度列（旧表幂等补列）
+    for column, default in (("product_form", "'ETF'"), ("underlying", "''"),
+                            ("market_scope", "'DOMESTIC'"), ("currency_risk", "'NONE'")):
+        try:
+            con.execute(f"ALTER TABLE wealth_assets ADD COLUMN {column} VARCHAR DEFAULT {default}")
+        except duckdb.Error:
+            pass  # 列已存在
     return con
 
 
@@ -68,7 +79,12 @@ def upsert_assets(rows: list[dict]) -> None:
     with _LOCK, _connect() as con:
         for row in rows:
             con.execute(
-                """INSERT INTO wealth_assets VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """INSERT INTO wealth_assets
+                   (symbol, name, category, exchange, list_date, delist_date,
+                    data_first, data_last, valid_days, expected_days, missing_ratio,
+                    adj_missing, avg_amount_20d_cny, source_breakdown, quality_status,
+                    notes, product_form, underlying, market_scope, currency_risk, updated_at)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                    ON CONFLICT (symbol) DO UPDATE SET
                      name=excluded.name, category=excluded.category, exchange=excluded.exchange,
                      list_date=excluded.list_date, delist_date=excluded.delist_date,
@@ -78,6 +94,8 @@ def upsert_assets(rows: list[dict]) -> None:
                      avg_amount_20d_cny=excluded.avg_amount_20d_cny,
                      source_breakdown=excluded.source_breakdown,
                      quality_status=excluded.quality_status, notes=excluded.notes,
+                     product_form=excluded.product_form, underlying=excluded.underlying,
+                     market_scope=excluded.market_scope, currency_risk=excluded.currency_risk,
                      updated_at=excluded.updated_at""",
                 [
                     row["symbol"], row["name"], row["category"], row.get("exchange"),
@@ -87,6 +105,8 @@ def upsert_assets(rows: list[dict]) -> None:
                     row.get("missing_ratio", 1.0), row.get("adj_missing", 0),
                     row.get("avg_amount_20d_cny"), json.dumps(row.get("source_breakdown", {})),
                     row.get("quality_status", "REJECTED"), row.get("notes", ""),
+                    row.get("product_form", "ETF"), row.get("underlying", ""),
+                    row.get("market_scope", "DOMESTIC"), row.get("currency_risk", "NONE"),
                     datetime.now(_TZ),
                 ],
             )
