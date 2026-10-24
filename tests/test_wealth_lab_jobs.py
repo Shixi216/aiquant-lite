@@ -66,8 +66,11 @@ def test_job_persistence_fields(mgr):
 
 
 def test_operations_whitelist_contents():
-    assert set(OPERATIONS) == {
+    # v3.2 核心 8 项必须在白名单内；其他并行模块（如 Wealth Sentiment）经同一
+    # 受控机制扩展的项允许共存 —— 提交时仍全部经白名单校验（见首个测试）。
+    core = {
         "update_fund_basic", "update_market_data", "update_adj_factors",
         "run_quality_check", "rebuild_pit", "run_backtest",
         "run_ai_research", "generate_report",
     }
+    assert core <= set(OPERATIONS)

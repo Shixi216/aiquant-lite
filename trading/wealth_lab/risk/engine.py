@@ -228,7 +228,9 @@ def _claim_supported(claim: str, numbers: dict[str, float]) -> bool:
 
     # 2) 指标名 + 无百分号数字（含中文全角数字场景不处理，仅常规半角）
     for keyword, (key, is_ratio) in _METRIC_KEYWORDS.items():
-        pattern = re.compile(re.escape(keyword) + r"[^0-9\-]{0,6}(-?\d+(?:\.\d+)?)(?![\d%.])")
+        # 词边界：避免策略 ID（如 S4_inverse_volatility）内嵌关键词被误当指标名
+        pattern = re.compile(r"(?<![a-zA-Z_])" + re.escape(keyword)
+                             + r"[^0-9\-]{0,6}(-?\d+(?:\.\d+)?)(?![\d%.])")
         for match in pattern.finditer(claim.lower()):
             claimed = float(match.group(1))
             expected = numbers.get(key)
