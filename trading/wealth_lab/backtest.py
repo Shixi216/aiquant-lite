@@ -210,3 +210,128 @@ def generate_demo_close(symbols: list[str], days: int = 1600, seed: int = 202610
         steps = rng.normal(drift / 252, vol / np.sqrt(252), size=days)
         columns[symbol] = 1_000 * np.cumprod(1 + steps)
     return pd.DataFrame(columns, index=idx)
+
+
+# ===================== v2 策略回测（份额模型，支持现金与动态权重） =====================
+
+@dataclass
+class StrategyBacktestOutput:
+    dates: list[date]
+    nav: np.ndarray
+    drawdown: np.ndarray
+    daily_returns: np.ndarray
+    cash_weight: np.ndarray
+    weight_history: list[dict]
+    rebalances: list[RebalanceEvent]
+
+
+def run_strategy_backtest(
+    close: pd.DataFrame,
+    strategy,
+    *,
+    start_date: date,
+    end_date: date,
+    cost_bps: float = 5.0,
+    initial_capital: float = 1_000_000.0,
+) -> StrategyBacktestOutput:
+    """统一策略回测：调仓日以截至前一交易日的数据决策（防未来函数）。
+
+    份额模型：units_i 为资产 i 的份额（以首日价格归一），现金为 C。
+    成本：Σ|Δ市值|/总资产 × cost_bps/1e4。
+    """
+    frame = close.loc[pd.Timestamp(start_date): pd.Timestamp(end_date)]
+    if len(frame) < 2:
+        raise ValueError(f"insufficient trading days: {len(frame)}")
+    symbols = list(frame.columns)
+    prices = frame.to_numpy(dtype=float)
+    n_days, n_assets = prices.shape
+    cost_unit = cost_bps / 1e4
+
+    units = np.zeros(n_assets)
+    cash = initial_capital
+    target_w = np.zeros(n_assets)
+    nav = np.zeros(n_days)
+    daily = np.zeros(n_days)
+    cash_weights = np.zeros(n_days)
+    weight_history: list[dict] = []
+    rebalances: list[RebalanceEvent] = []
+    rebalance_flags = _rebalance_mask(frame.index, strategy.meta.rebalance)
+
+    prev_total = initial_capital
+    for i in range(n_days):
+        if i == 0:
+            decision_idx = 0
+        else:
+            decision_idx = i - 1
+        if rebalance_flags[i]:
+            history = frame.iloc[: decision_idx + 1]
+            if len(history) >= 1:
+                try:
+                    target = strategy.target_weights(history)
+                except Exception:
+                    target = {}
+                new_w = np.array([float(target.get(s, 0.0)) for s in symbols])
+                total_now = units @ prices[i] + cash
+                delta_value = np.abs(new_w * total_now - units * prices[i])
+                cost_ratio = float(delta_value.sum()) / max(total_now, 1e-12) * cost_unit
+                cost_value = float(delta_value.sum()) * cost_unit
+                if i > 0:
+                    trades = [
+                        {"symbol": symbols[j],
+                         "weight_before": float(units[j] * prices[i][j] / max(prev_total, 1e-12)),
+                         "weight_after": float(new_w[j]),
+                         "turnover": float(abs(new_w[j] - units[j] * prices[i][j] / max(prev_total, 1e-12)))}
+                        for j in range(n_assets)
+                        if abs(new_w[j] - units[j] * prices[i][j] / max(prev_total, 1e-12)) > 1e-9
+                    ]
+                    if trades:
+                        rebalances.append(RebalanceEvent(
+                            date=frame.index[i].date(), trades=trades, cost=round(cost_value, 2)))
+                weight_history.append({
+                    "date": frame.index[i].date().isoformat(),
+                    "decision_data_through": frame.index[decision_idx].date().isoformat(),
+                    "weights": {s: round(float(new_w[j]), 6) for j, s in enumerate(symbols) if new_w[j] > 0},
+                })
+                units = new_w * total_now * (1.0 - cost_ratio) / np.maximum(prices[i], 1e-12)
+                cash = total_now * (1.0 - float(new_w.sum())) * (1.0 - cost_ratio)
+                target_w = new_w
+        # 当日漂移
+        if i > 0:
+            gross = units @ prices[i] + cash
+        else:
+            gross = units @ prices[i] + cash
+        nav[i] = gross
+        daily[i] = gross / prev_total - 1.0 if prev_total > 0 else 0.0
+        cash_weights[i] = cash / gross if gross > 0 else 0.0
+        prev_total = gross
+
+    nav = nav / nav[0]
+    running_max = np.maximum.accumulate(nav)
+    drawdown = nav / running_max - 1.0
+    return StrategyBacktestOutput(
+        dates=[idx.date() for idx in frame.index], nav=nav, drawdown=drawdown,
+        daily_returns=daily, cash_weight=cash_weights,
+        weight_history=weight_history, rebalances=rebalances,
+    )
+
+
+def compute_v2_metrics(output: StrategyBacktestOutput) -> dict:
+    base = compute_metrics(BacktestResult(
+        dates=output.dates, nav=output.nav, drawdown=output.drawdown,
+        daily_returns=output.daily_returns,
+    ))
+    daily = output.daily_returns
+    downside = daily[daily < 0]
+    downside_vol = float(np.std(downside, ddof=1) * np.sqrt(TRADING_DAYS_PER_YEAR)) if len(downside) > 2 else 0.0
+    sortino = (
+        (base["annual_return"] - RF_ANNUAL) / downside_vol if downside_vol > 0 else 0.0
+    )
+    turnovers = [
+        t["turnover"] for rb in output.rebalances for t in rb.trades
+    ] if output.rebalances else []
+    avg_turnover = float(np.mean([sum(t["turnover"] for t in rb.trades) for rb in output.rebalances])) if output.rebalances else 0.0
+    return {
+        **base,
+        "sortino_ratio": round(float(sortino), 4),
+        "avg_turnover_per_rebalance": round(avg_turnover, 4),
+    }
