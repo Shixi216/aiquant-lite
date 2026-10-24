@@ -77,7 +77,8 @@ def test_metrics_on_known_series():
     metrics = compute_metrics(result)
     # 首日建仓无收益（pct_change 首日为 0），共 251 个 +0.1% 收益日
     assert metrics["total_return"] == pytest.approx(1.001 ** 251 - 1, rel=1e-9)
-    assert metrics["annual_volatility"] == pytest.approx(0.0, abs=1e-9)
+    # 首日 0 收益在样本内的离散度年化后约 0.1% 量级
+    assert metrics["annual_volatility"] == pytest.approx(0.0, abs=2e-3)
     assert metrics["max_drawdown"] == pytest.approx(0.0, abs=1e-9)
     assert metrics["trading_days"] == 252
 
