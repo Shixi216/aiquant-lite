@@ -383,6 +383,7 @@ class TushareProvider:
         for _, row in frame.sort_values("trade_date").iterrows():
             trade_date = str(row["trade_date"])
 
+            vol_lots = _to_float(row.get("vol"))
             payload: dict[str, object] = {
                 "ts_code": str(row["ts_code"]),
                 "trade_date": trade_date,
@@ -393,7 +394,12 @@ class TushareProvider:
                 "pre_close": _to_float(row.get("pre_close")),
                 "change": _to_float(row.get("change")),
                 "pct_chg": _to_float(row.get("pct_chg")),
-                "vol": _to_float(row.get("vol")),
+                "vol": vol_lots,
+                # volume 统一“股”口径（BaoStock volume=SHARES、Jinniu volume_shares）；
+                # Tushare vol 单位是手，Bar.volume 必填 ge=0，缺失时以 0.0 兜底
+                "volume": (
+                    vol_lots * 100.0 if vol_lots is not None else 0.0
+                ),
                 "amount": _to_float(row.get("amount")),
                 "adjustment_type": adjustment_type,
                 "provider_adjustment": "daily",
