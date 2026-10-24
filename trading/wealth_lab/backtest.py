@@ -259,42 +259,38 @@ def run_strategy_backtest(
 
     prev_total = initial_capital
     for i in range(n_days):
-        if i == 0:
-            decision_idx = 0
-        else:
-            decision_idx = i - 1
+        decision_idx = i - 1
         if rebalance_flags[i]:
-            history = frame.iloc[: decision_idx + 1]
-            if len(history) >= 1:
-                try:
-                    target = strategy.target_weights(history)
-                except Exception:
-                    target = {}
-                new_w = np.array([float(target.get(s, 0.0)) for s in symbols])
-                total_now = units @ prices[i] + cash
-                delta_value = np.abs(new_w * total_now - units * prices[i])
-                cost_ratio = float(delta_value.sum()) / max(total_now, 1e-12) * cost_unit
-                cost_value = float(delta_value.sum()) * cost_unit
-                if i > 0:
-                    trades = [
-                        {"symbol": symbols[j],
-                         "weight_before": float(units[j] * prices[i][j] / max(prev_total, 1e-12)),
-                         "weight_after": float(new_w[j]),
-                         "turnover": float(abs(new_w[j] - units[j] * prices[i][j] / max(prev_total, 1e-12)))}
-                        for j in range(n_assets)
-                        if abs(new_w[j] - units[j] * prices[i][j] / max(prev_total, 1e-12)) > 1e-9
-                    ]
-                    if trades:
-                        rebalances.append(RebalanceEvent(
-                            date=frame.index[i].date(), trades=trades, cost=round(cost_value, 2)))
-                weight_history.append({
-                    "date": frame.index[i].date().isoformat(),
-                    "decision_data_through": frame.index[decision_idx].date().isoformat(),
-                    "weights": {s: round(float(new_w[j]), 6) for j, s in enumerate(symbols) if new_w[j] > 0},
-                })
-                units = new_w * total_now * (1.0 - cost_ratio) / np.maximum(prices[i], 1e-12)
-                cash = total_now * (1.0 - float(new_w.sum())) * (1.0 - cost_ratio)
-                target_w = new_w
+            history = frame.iloc[:i]
+            try:
+                target = strategy.target_weights(history)
+            except Exception as exc:
+                raise ValueError(f"strategy failed on {frame.index[i].date()}") from exc
+            new_w = np.array([float(target.get(s, 0.0)) for s in symbols])
+            if not np.isfinite(new_w).all() or (new_w < 0).any() or new_w.sum() > 1 + 1e-9:
+                raise ValueError("invalid strategy weights")
+            total_now = units @ prices[i] + cash
+            delta_value = np.abs(new_w * total_now - units * prices[i])
+            cost_ratio = float(delta_value.sum()) / max(total_now, 1e-12) * cost_unit
+            cost_value = float(delta_value.sum()) * cost_unit
+            trades = [
+                {"symbol": symbols[j],
+                 "weight_before": float(units[j] * prices[i][j] / max(total_now, 1e-12)),
+                 "weight_after": float(new_w[j]),
+                 "turnover": float(abs(new_w[j] - units[j] * prices[i][j] / max(total_now, 1e-12)))}
+                for j in range(n_assets)
+                if abs(new_w[j] - units[j] * prices[i][j] / max(total_now, 1e-12)) > 1e-9
+            ]
+            rebalances.append(RebalanceEvent(
+                date=frame.index[i].date(), trades=trades, cost=round(cost_value, 2)))
+            weight_history.append({
+                "date": frame.index[i].date().isoformat(),
+                "decision_data_through": (frame.index[decision_idx] if i else frame.index[0] - pd.Timedelta(days=1)).date().isoformat(),
+                "weights": {s: round(float(new_w[j]), 6) for j, s in enumerate(symbols) if new_w[j] > 0},
+            })
+            units = new_w * total_now * (1.0 - cost_ratio) / np.maximum(prices[i], 1e-12)
+            cash = total_now * (1.0 - float(new_w.sum())) * (1.0 - cost_ratio)
+            target_w = new_w
         # 当日漂移
         if i > 0:
             gross = units @ prices[i] + cash
@@ -305,8 +301,8 @@ def run_strategy_backtest(
         cash_weights[i] = cash / gross if gross > 0 else 0.0
         prev_total = gross
 
-    nav = nav / nav[0]
-    running_max = np.maximum.accumulate(nav)
+    nav = nav / initial_capital
+    running_max = np.maximum.accumulate(np.r_[1.0, nav])[1:]
     drawdown = nav / running_max - 1.0
     return StrategyBacktestOutput(
         dates=[idx.date() for idx in frame.index], nav=nav, drawdown=drawdown,

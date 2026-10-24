@@ -95,7 +95,8 @@ def test_native_optimizers():
     assert min_vol_w["511010.SH"] == max(min_vol_w.values())
 
 
-def test_decision_packet_versioning_and_hash():
+def test_decision_packet_versioning_and_hash(tmp_path, monkeypatch):
+    monkeypatch.setattr('trading.wealth_lab.decision_packets.WEALTH_LAB_DB_PATH', tmp_path / 'wealth.duckdb')
     store = WealthDecisionPacketStore()
     common = {"strategy_id": "S0_fixed_weight", "weights": {"510300.SH": 0.4, "511010.SH": 0.6}}
     p1 = store.create(common, metrics={"total_return": 0.1}, risk_check={"verdict": "PASS"},

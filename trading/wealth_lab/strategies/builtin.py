@@ -114,21 +114,33 @@ class InverseVolatilityStrategy(Strategy):
     def apply_params(self, params: dict) -> None:
         self._window = int(params["window_days"])
         self._max_weight = float(params["max_weight"])
+        if not 0 < self._max_weight <= 1:
+            raise ValueError("max_weight must be in (0, 1]")
+
+    def _capped_weights(self, inv: pd.Series) -> dict[str, float]:
+        # 固定触顶资产后只在剩余资产间按比例分配；容量不足则留现金。
+        weights = pd.Series(0.0, index=inv.index)
+        free = inv[inv > 0].index
+        while len(free):
+            proposal = (1.0 - weights.sum()) * inv[free] / inv[free].sum()
+            hit = proposal[proposal > self._max_weight].index
+            if not len(hit):
+                weights.loc[free] = proposal
+                break
+            weights.loc[hit] = self._max_weight
+            free = free.difference(hit, sort=False)
+        return self.validate_output(dict(weights), list(inv.index))
 
     def target_weights(self, history: pd.DataFrame) -> dict[str, float]:
         if len(history) < self._window + 1:
             cols = list(history.columns)
-            return self.validate_output({s: 1.0 / len(cols) for s in cols}, cols)
+            return self._capped_weights(pd.Series(1.0, index=cols))
         vol = history.iloc[-(self._window + 1):].pct_change().dropna().std()
         inv = (1.0 / vol.replace(0, np.nan)).fillna(0.0)
         if inv.sum() <= 0:
             cols = list(history.columns)
-            return self.validate_output({s: 1.0 / len(cols) for s in cols}, cols)
-        raw = inv / inv.sum()
-        capped = raw.clip(upper=self._max_weight)
-        if capped.sum() > 0:
-            capped = capped / capped.sum()
-        return self.validate_output(dict(capped), list(history.columns))
+            return self._capped_weights(pd.Series(1.0, index=cols))
+        return self._capped_weights(inv)
 
 
 @register_strategy

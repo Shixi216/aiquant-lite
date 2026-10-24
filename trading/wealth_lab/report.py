@@ -41,7 +41,7 @@ def build_report(output: "StrategyBacktestOutput", backtest_id: str) -> dict:
     daily = pd.Series(output.daily_returns, index=dates)
     rolling_vol = (daily.rolling(63).std() * np.sqrt(TRADING_DAYS_PER_YEAR)).iloc[-1]
     rolling_sharpe = (
-        ((1 + daily).rolling(252).mean() * TRADING_DAYS_PER_YEAR - RF_ANNUAL)
+        (daily.rolling(252).mean() * TRADING_DAYS_PER_YEAR - RF_ANNUAL)
         / (daily.rolling(252).std() * np.sqrt(TRADING_DAYS_PER_YEAR))
     ).iloc[-1]
     worst_idx = np.argsort(output.daily_returns)[:5]

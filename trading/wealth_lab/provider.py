@@ -193,10 +193,11 @@ class DualSourceProvider:
         if adj_factors is not None and not adj_factors.empty and "adj_factor" in adj_factors.columns:
             factors = adj_factors[["trade_date", "adj_factor"]].copy()
             merged = frame.merge(factors, on="trade_date", how="left")
-            merged["adj_factor"] = pd.to_numeric(merged["adj_factor"]).ffill().fillna(1.0)
+            merged["adj_factor"] = pd.to_numeric(merged["adj_factor"], errors="coerce")
         else:
-            merged = frame.copy()
-            merged["adj_factor"] = 1.0
+            raise SourceUnavailableError("fund_adj 缺少复权因子，不能标记为后复权收益")
+        if merged["adj_factor"].isna().any() or (merged["adj_factor"] <= 0).any():
+            raise SourceUnavailableError("fund_adj 存在缺失或无效因子，禁止以未来因子或 1 填充")
         merged["hfq_close"] = pd.to_numeric(merged["close"]) * merged["adj_factor"]
         merged["data_source"] = daily.source
         return merged.sort_values("trade_date").reset_index(drop=True), dict(self.source_status)

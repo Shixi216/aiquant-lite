@@ -38,6 +38,10 @@ CREATE TABLE IF NOT EXISTS backtest_runs (
     params_json VARCHAR NOT NULL,
     result_json VARCHAR NOT NULL
 );
+CREATE TABLE IF NOT EXISTS wealth_research_contexts (
+    research_id VARCHAR PRIMARY KEY,
+    context_json VARCHAR NOT NULL
+);
 """
 
 
@@ -219,6 +223,17 @@ class WealthLabRepository:
                 values = [float(r[0]) * 1000.0 for r in rows if r[0] is not None]
                 result[symbol] = round(sum(values) / len(values), 2) if values else None
         return result
+
+    def save_research_context(self, research_id: str, context: dict) -> None:
+        with _LOCK, _connect(self._path) as con:
+            con.execute("INSERT OR REPLACE INTO wealth_research_contexts VALUES (?,?)",
+                        [research_id, json.dumps(context, ensure_ascii=False)])
+
+    def load_research_context(self, research_id: str) -> dict | None:
+        with _LOCK, _connect(self._path) as con:
+            row = con.execute("SELECT context_json FROM wealth_research_contexts WHERE research_id=?",
+                              [research_id]).fetchone()
+        return json.loads(row[0]) if row else None
 
 
 PROXY_FALLBACK_LABEL = "PROXY"

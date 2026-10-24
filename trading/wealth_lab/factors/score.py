@@ -63,7 +63,8 @@ def score_factors(
         - frame["volatility_63d"].fillna(frame["volatility_63d"].max()).rank()
         - frame["max_drawdown_252d"].abs().rank()
     )
-    frame["composite_rank"] = (rank / rank.max()).round(4)
+    # 冻结契约要求 0-1 分位：对原始加权秩得分再次做横截面百分位排名。
+    frame["composite_rank"] = rank.rank(method="average", pct=True).round(4)
     frame = frame.sort_values("composite_rank", ascending=False)
     return {
         "data_mode": "REAL",
