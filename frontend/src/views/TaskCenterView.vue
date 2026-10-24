@@ -5,10 +5,15 @@ import { fetchWealthMeta } from "../api/wealthLab";
 import { fetchV3Quality } from "../api/wealthLabV3";
 import {
   buildPayload,
+  cancelJob,
   executeOp,
+  fetchJobLogs,
+  fetchJobs,
   fetchTaskCenterStatus,
+  JOB_OPERATION_LABELS,
   TASK_OPS,
   validateOp,
+  type JobPublic,
   type TaskOpDef,
   type TaskRunRecord,
 } from "../api/taskCenter";
@@ -57,6 +62,20 @@ async function loadStatus() {
 onMounted(loadStatus);
 usePolling(loadStatus, 5 * 60_000, 10 * 60_000);
 
+const RUN_STATUS_CLS: Record<string, string> = {
+  QUEUED: "",
+  RUNNING: "action",
+  SUCCEEDED: "ok",
+  FAILED: "veto",
+  CANCELLED: "warn",
+};
+const RUN_STATUS_LABELS: Record<string, string> = {
+  QUEUED: "排队中",
+  RUNNING: "运行中",
+  SUCCEEDED: "SUCCEEDED",
+  FAILED: "FAILED",
+  CANCELLED: "已取消",
+};
 const recentFailedCount = computed(() => runRecords.value.filter((r) => r.status === "FAILED").length);
 
 function fmtTime(iso: string | null | undefined): string {
@@ -115,8 +134,16 @@ function confirmRun() {
 async function doRun(op: TaskOpDef) {
   runningOpId.value = op.id;
   try {
-    const record = await executeOp(op, paramsOf(op));
-    recordRun(record);
+    const record = await executeOp(op, paramsOf(op), (live) => {
+      // job 模式：轮询期间实时刷新任务记录（真实进度，不模拟）
+      const index = runRecords.value.findIndex((r) => r.runKey === live.runKey);
+      if (index >= 0) runRecords.value.splice(index, 1, { ...live });
+      else runRecords.value = [live, ...runRecords.value].slice(0, 50);
+    });
+    const index = runRecords.value.findIndex((r) => r.runKey === record.runKey);
+    if (index >= 0) runRecords.value.splice(index, 1, { ...record });
+    else recordRun(record);
+    persistRecords();
     await loadStatus();
   } catch (err) {
     cardError.value = { ...cardError.value, [op.id]: errorMessage(err) };
@@ -145,6 +172,10 @@ function loadRecords(): TaskRunRecord[] {
 
 function recordRun(record: TaskRunRecord) {
   runRecords.value = [record, ...runRecords.value].slice(0, 50);
+  persistRecords();
+}
+
+function persistRecords() {
   try {
     localStorage.setItem(RECORDS_KEY, JSON.stringify(runRecords.value));
   } catch {
@@ -168,6 +199,85 @@ function toggleRun(runKey: string) {
 const dataOps = computed(() => TASK_OPS.filter((op) => op.group === "data"));
 const researchOps = computed(() => TASK_OPS.filter((op) => op.group === "research"));
 
+/* ---------------- 后端任务队列（v3.2 jobs：真实列表/进度/取消/日志） ---------------- */
+
+const backendJobs = ref<JobPublic[] | null>(null);
+const backendJobsError = ref<string | null>(null);
+const backendJobsLoading = ref(false);
+let jobsSeq = 0;
+
+async function loadBackendJobs() {
+  const seq = ++jobsSeq;
+  backendJobsLoading.value = true;
+  try {
+    const jobs = await fetchJobs();
+    if (seq !== jobsSeq) return;
+    backendJobs.value = jobs;
+    backendJobsError.value = null;
+  } catch (err) {
+    if (seq === jobsSeq) backendJobsError.value = errorMessage(err);
+  } finally {
+    if (seq === jobsSeq) backendJobsLoading.value = false;
+  }
+}
+
+onMounted(loadBackendJobs);
+usePolling(loadBackendJobs, 8_000, 15_000);
+
+const activeJobCount = computed(
+  () => (backendJobs.value ?? []).filter((j) => j.status === "QUEUED" || j.status === "RUNNING").length,
+);
+
+const expandedJobId = ref<string | null>(null);
+const jobLogs = ref<Record<string, string[]>>({});
+
+async function toggleJobLogs(jobId: string) {
+  if (expandedJobId.value === jobId) {
+    expandedJobId.value = null;
+    return;
+  }
+  expandedJobId.value = jobId;
+  try {
+    const result = await fetchJobLogs(jobId);
+    jobLogs.value = { ...jobLogs.value, [jobId]: result.logs };
+  } catch (err) {
+    jobLogs.value = { ...jobLogs.value, [jobId]: [errorMessage(err)] };
+  }
+}
+
+const cancellingJobId = ref<string | null>(null);
+
+async function doCancelJob(job: JobPublic) {
+  cancellingJobId.value = job.job_id;
+  try {
+    await cancelJob(job.job_id, "前端任务中心发起取消");
+    await loadBackendJobs();
+  } catch (err) {
+    backendJobsError.value = errorMessage(err);
+  } finally {
+    cancellingJobId.value = null;
+  }
+}
+
+const JOB_STATUS_CLS: Record<string, string> = {
+  QUEUED: "badge",
+  RUNNING: "badge action",
+  SUCCEEDED: "badge ok",
+  FAILED: "badge veto",
+  CANCELLED: "badge warn",
+};
+const JOB_STATUS_LABELS: Record<string, string> = {
+  QUEUED: "排队中",
+  RUNNING: "运行中",
+  SUCCEEDED: "成功",
+  FAILED: "失败",
+  CANCELLED: "已取消",
+};
+
+function jobLabel(operation: string): string {
+  return JOB_OPERATION_LABELS[operation] ?? operation;
+}
+
 const providerChips = computed(() => {
   const items = status.value?.providers;
   if (!items || !items.length) return [];
@@ -182,8 +292,8 @@ const providerChips = computed(() => {
 <template>
   <div class="task-center">
     <p class="page-sub">
-      所有操作按钮均调用真实后端接口（Router 8767 / 财富后端 8765）。后端同步接口请求返回即终态；
-      异步 job 轮询待后端契约交付后接入。后端未提供的能力显示「暂不可用」，不伪造成功。
+      所有操作按钮均调用真实后端接口：数据/研究任务走后端任务队列（提交 → job_id → 真实进度轮询），
+      Router 门面操作按其当前只读部署如实返回。后端未提供的能力显示「暂不可用」，不伪造成功。
     </p>
 
     <!-- A. 数据状态面板 -->
@@ -223,8 +333,8 @@ const providerChips = computed(() => {
         </div>
         <div class="stat-card">
           <span class="stat-label">待处理任务</span>
-          <span class="stat-value">0</span>
-          <span class="stat-foot">同步接口无排队 · 近期失败 {{ recentFailedCount }}</span>
+          <span class="stat-value">{{ backendJobs === null ? "—" : activeJobCount }}</span>
+          <span class="stat-foot">后端串行队列{{ backendJobsLoading ? " · 刷新中" : "" }} · 近期失败 {{ recentFailedCount }}</span>
         </div>
       </div>
       <div v-if="providerChips.length" class="provider-row">
@@ -246,11 +356,12 @@ const providerChips = computed(() => {
           <header class="op-head">
             <strong>{{ op.label }}</strong>
             <span v-if="op.unavailable" class="badge warn">暂不可用</span>
+            <span v-else-if="op.kind === 'job'" class="badge">任务队列 · {{ op.operation }}</span>
             <span v-else class="badge">{{ op.base === "wealth" ? "8765 可写" : "8767 只读门面" }} · {{ op.method }} {{ op.path }}</span>
           </header>
           <p class="op-desc">{{ op.description }}</p>
           <p v-if="op.unavailable && op.unavailableReason" class="op-unavailable-reason">{{ op.unavailableReason }}</p>
-          <template v-if="!op.unavailable && op.params.length">
+          <template v-if="!op.unavailable">
             <div class="op-form">
               <label v-for="spec in op.params" :key="spec.key" class="op-field" :title="spec.hint">
                 <span>{{ spec.label }}</span>
@@ -283,11 +394,73 @@ const providerChips = computed(() => {
       </div>
     </section>
 
-    <!-- D. 任务管理 -->
+    <!-- D1. 后端任务队列（v3.2 jobs，真实轮询） -->
     <section class="panel">
       <h3>
-        任务记录
-        <span class="h3-extra">同步接口：请求返回即终态 · 保留最近 50 条（本地）</span>
+        后端任务队列（jobs）
+        <span class="h3-extra">
+          白名单 8 操作 · DuckDB 单写者串行执行 · 排队 {{ activeJobCount }}
+          {{ backendJobsLoading ? " · 刷新中…" : "" }}
+        </span>
+        <button class="mini" type="button" @click="loadBackendJobs">刷新</button>
+      </h3>
+      <div v-if="backendJobsError" class="status-errors" role="alert">{{ backendJobsError }}</div>
+      <div v-if="backendJobs !== null && !backendJobs.length && !backendJobsError" class="empty">
+        队列为空。上方任务按钮提交后将在此显示 job_id、真实进度与结果。
+      </div>
+      <div v-else-if="backendJobs !== null" class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>job_id</th><th>操作</th><th>状态</th><th class="num">进度</th><th class="num">已写入</th>
+              <th>创建 / 完成时间</th><th>结果 / 错误</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="job in backendJobs" :key="job.job_id">
+              <tr>
+                <td><code class="job-id">{{ job.job_id }}</code></td>
+                <td>{{ jobLabel(job.operation) }}</td>
+                <td><span :class="JOB_STATUS_CLS[job.status] ?? 'badge'">{{ JOB_STATUS_LABELS[job.status] ?? job.status }}</span></td>
+                <td class="num">
+                  <span class="progress-cell"><span class="progress-bar"><span :style="{ width: `${job.progress}%` }"></span></span>{{ job.progress }}%</span>
+                </td>
+                <td class="num">{{ job.records_written || "—" }}</td>
+                <td class="num">{{ fmtTime(job.created_at) }}<br /><small class="run-path">{{ job.finished_at ? fmtTime(job.finished_at) : "进行中" }}</small></td>
+                <td class="job-result-cell">
+                  <template v-if="job.error"><span class="error-text">{{ job.error }}</span></template>
+                  <template v-else-if="job.result && Object.keys(job.result).length">{{ JSON.stringify(job.result) }}</template>
+                  <template v-else>—</template>
+                </td>
+                <td class="job-actions">
+                  <button class="mini" type="button" @click="toggleJobLogs(job.job_id)">{{ expandedJobId === job.job_id ? "收起日志" : "日志" }}</button>
+                  <button
+                    v-if="job.status === 'QUEUED' || job.status === 'RUNNING'"
+                    class="mini danger"
+                    type="button"
+                    :disabled="cancellingJobId !== null"
+                    @click="doCancelJob(job)"
+                  >{{ cancellingJobId === job.job_id ? "取消中…" : "取消" }}</button>
+                </td>
+              </tr>
+              <tr v-if="expandedJobId === job.job_id">
+                <td colspan="8" class="logs-cell">
+                  <h4>执行日志（后端真实记录，最近 100 条）</h4>
+                  <pre>{{ (jobLogs[job.job_id] ?? ["加载中…"]).join("\n") }}</pre>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <div v-else class="loading">正在读取后端任务队列…</div>
+    </section>
+
+    <!-- D2. 本地留痕（含同步接口与已完结 job） -->
+    <section class="panel">
+      <h3>
+        任务记录（本地留痕）
+        <span class="h3-extra">job 任务轮询期间实时更新 · 保留最近 50 条（本地）</span>
       </h3>
       <div v-if="!runRecords.length" class="empty">暂无任务记录。上方每个「运行」按钮的真实调用（含失败）都会留痕于此。</div>
       <template v-else>
@@ -312,7 +485,7 @@ const providerChips = computed(() => {
               <template v-for="record in runRecords" :key="record.runKey">
                 <tr>
                   <td>{{ record.opLabel }}<small class="run-path">{{ record.path }}</small></td>
-                  <td><span class="badge" :class="record.status === 'SUCCEEDED' ? 'ok' : 'veto'">{{ record.status }}</span></td>
+                  <td><span class="badge" :class="RUN_STATUS_CLS[record.status] ?? (record.status === 'SUCCEEDED' ? 'ok' : 'veto')">{{ RUN_STATUS_LABELS[record.status] ?? record.status }}</span></td>
                   <td class="num">{{ fmtTime(record.startedAt) }}</td>
                   <td class="num">{{ (record.durationMs / 1000).toFixed(1) }}s</td>
                   <td class="num">{{ record.backendRefId ?? record.jobId ?? "—" }}</td>
@@ -362,6 +535,15 @@ const providerChips = computed(() => {
 <style scoped>
 .provider-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .status-errors { margin-top: 10px; color: var(--veto); font-size: 12px; }
+.job-id { font-size: 11.5px; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+.progress-cell { display: inline-flex; align-items: center; gap: 7px; }
+.progress-bar { display: inline-block; width: 76px; height: 6px; border-radius: 4px; background: var(--bg-hover); overflow: hidden; }
+.progress-bar > span { display: block; height: 100%; border-radius: 4px; background: var(--accent-grad); transition: width 0.5s ease; }
+.job-result-cell { max-width: 300px; white-space: normal; word-break: break-all; font-size: 11.5px; color: var(--text-dim); }
+.job-actions { display: flex; gap: 6px; }
+.logs-cell { background: var(--bg-hover); white-space: normal; }
+.logs-cell h4 { margin: 0 0 6px; font-size: 12px; color: var(--text-dim); }
+.logs-cell pre { margin: 0; font-size: 11px; max-height: 220px; overflow: auto; background: var(--control-bg); border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px; white-space: pre-wrap; word-break: break-all; }
 .op-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 .op-card { border: 1px solid var(--border); border-radius: var(--radius-inner); padding: 12px 14px; background: var(--bg-panel-2); display: flex; flex-direction: column; gap: 8px; }
 .op-card.unavailable { opacity: 0.75; }

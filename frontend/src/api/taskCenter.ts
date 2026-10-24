@@ -105,6 +105,98 @@ interface UniverseListRaw {
   items: unknown[];
 }
 
+/* ================= 后端任务队列（v3.2 jobs 契约，/wealth-lab-api） =================
+ * 契约：trading/wealth_lab/routes_jobs.py（POST /v1/wealth-lab/v3/jobs 等）。
+ * 受控提交（白名单 8 操作）→ job_id → 轮询真实状态/进度 → 终态留痕。
+ * 付费 AI 操作必须 params.confirm=true；大规模数据任务由后端串行队列保证 DuckDB 单写者。
+ */
+
+export type JobStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+
+export interface JobPublic {
+  job_id: string;
+  operation: string;
+  request_id: string | null;
+  status: JobStatus;
+  progress: number;
+  source: string | null;
+  asset_scope: string[];
+  records_written: number;
+  error: string | null;
+  result: Record<string, unknown> | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+}
+
+function unwrapJobEnvelope<T>(payload: { data?: T } | T): T {
+  // wealth 信封：{status, data:{...}}；jobs 路由统一 envelope_v3
+  const outer = payload as { data?: T };
+  if (outer && typeof outer === "object" && "data" in outer && outer.data && typeof outer.data === "object") {
+    return outer.data;
+  }
+  return payload as T;
+}
+
+export async function submitJob(
+  operation: string,
+  params: Record<string, unknown>,
+): Promise<{ job: JobPublic; duplicated: boolean; message: string }> {
+  const payload = await wealthApi.post("/v1/wealth-lab/v3/jobs", { operation, params }).then((r) => r.data);
+  const data = unwrapJobEnvelope<Record<string, unknown>>(payload);
+  const { duplicated, message, ...job } = data;
+  return { job: job as unknown as JobPublic, duplicated: Boolean(duplicated), message: String(message ?? "") };
+}
+
+export async function fetchJobs(status?: string): Promise<JobPublic[]> {
+  const payload = await wealthApi
+    .get("/v1/wealth-lab/v3/jobs", { params: status ? { status } : {} })
+    .then((r) => r.data);
+  const data = unwrapJobEnvelope<{ jobs?: JobPublic[] }>(payload);
+  return data.jobs ?? [];
+}
+
+export async function fetchJob(jobId: string): Promise<JobPublic | null> {
+  try {
+    const payload = await wealthApi.get(`/v1/wealth-lab/v3/jobs/${encodeURIComponent(jobId)}`).then((r) => r.data);
+    return unwrapJobEnvelope<JobPublic>(payload);
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function fetchJobLogs(jobId: string): Promise<{ status: string; logs: string[] }> {
+  const payload = await wealthApi.get(`/v1/wealth-lab/v3/jobs/${encodeURIComponent(jobId)}/logs`).then((r) => r.data);
+  const data = unwrapJobEnvelope<{ status: string; logs: string[] }>(payload);
+  return { status: data.status, logs: data.logs ?? [] };
+}
+
+export async function cancelJob(jobId: string, reason?: string): Promise<JobPublic | null> {
+  try {
+    const payload = await wealthApi
+      .post(`/v1/wealth-lab/v3/jobs/${encodeURIComponent(jobId)}/cancel`, { reason: reason ?? null })
+      .then((r) => r.data);
+    return unwrapJobEnvelope<JobPublic>(payload);
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+export const JOB_OPERATION_LABELS: Record<string, string> = {
+  update_fund_basic: "更新基金名录",
+  update_market_data: "增量更新 ETF 行情",
+  update_adj_factors: "更新复权因子",
+  run_quality_check: "运行质量检查",
+  rebuild_pit: "重新评估历史可投资池",
+  run_backtest: "策略回测（后台）",
+  run_ai_research: "AI 研究（付费）",
+  generate_report: "生成研究报告",
+};
+
+const TERMINAL_STATUSES: JobStatus[] = ["SUCCEEDED", "FAILED", "CANCELLED"];
+
 /* ---------------- 操作注册表（POST，受控写操作） ---------------- */
 
 export type OpGroupId = "data" | "research";
@@ -126,9 +218,13 @@ export interface TaskOpDef {
   description: string;
   /** 确认对话框文案；为空则不二次确认 */
   confirm?: string;
-  /** 请求路径与方法 */
-  method: "POST";
-  path: string;
+  /** 执行模式：sync = 同步接口（请求返回即终态）；job = 后端任务队列（job_id + 轮询） */
+  kind: "sync" | "job";
+  /** kind=job 时的后端白名单操作名 */
+  operation?: string;
+  /** 请求路径与方法（kind=sync 用） */
+  method?: "POST";
+  path?: string;
   /** 出口：api = Router 门面（/api，当前部署为 GET-only 只读代理）；wealth = 财富后端（/wealth-lab-api，POST 可用） */
   base?: "api" | "wealth";
   /** 参数 schema；UI 据此渲染表单 */
@@ -162,6 +258,7 @@ function splitSymbols(raw: string | undefined): string[] {
 export const TASK_OPS: TaskOpDef[] = [
   {
     id: "universe-sync",
+    kind: "sync",
     group: "data",
     label: "同步 A 股研究名录",
     description: "POST /v1/universe/sync：按预算增量同步带版本与审计的 A 股 universe（默认 dry_run 预检）。",
@@ -175,6 +272,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "snapshot-sync",
+    kind: "sync",
     group: "data",
     label: "抓取全市场快照",
     description: "POST /v1/market-snapshots/sync：抓取一批全市场快照（默认 SCREENING 模式、dry_run 预检）。",
@@ -188,6 +286,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "data-expansion-daily-bars",
+    kind: "sync",
     group: "data",
     label: "增量补充日线行情",
     description: "POST /v1/data-expansion/run（expansion_type=DAILY_BARS）：按预算补充指定资产日线（dry_run 优先）。",
@@ -205,6 +304,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "candidates-enrich",
+    kind: "sync",
     group: "data",
     label: "候选资产 enrichment",
     description: "POST /v1/candidates/enrich：对 ≤20 只候选资产做研究模式富化（含历史长度与模型预算控制）。",
@@ -220,6 +320,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "news-pipeline",
+    kind: "sync",
     group: "research",
     label: "新闻与公告分析流水线",
     description: "POST /v1/pipelines/news-analysis：对指定资产在给定日期区间运行新闻+公告分析。",
@@ -234,6 +335,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "announcement-verification",
+    kind: "sync",
     group: "research",
     label: "官方公告核验流水线",
     description: "POST /v1/pipelines/announcement-verification：对指定资产的官方公告做精确核验。",
@@ -246,6 +348,7 @@ export const TASK_OPS: TaskOpDef[] = [
   },
   {
     id: "wealth-v2-backtest",
+    kind: "sync",
     group: "research",
     label: "运行财富策略回测",
     description: "POST /v1/wealth-lab/v2/strategies/{id}/backtest（8765 可写链路）：后台触发一次真实策略回测并留痕 backtest_id；结果亦可在「策略工厂」页查看。",
@@ -259,94 +362,97 @@ export const TASK_OPS: TaskOpDef[] = [
       { key: "costBps", label: "单边成本(bps)", kind: "number", default: 5 },
     ],
   },
-  /* ---- 以下能力后端契约未交付：按规范显示「暂不可用」，不得伪造 ---- */
+  /* ---- 以下走后端任务队列（v3.2 jobs 白名单）：提交 → job_id → 真实轮询 ---- */
   {
-    id: "fund-directory-update",
+    id: "job-update-fund-basic",
     group: "data",
     label: "更新基金名录",
-    description: "后端尚未提供基金/ETF 名录更新的控制接口契约（待后端交付后接入）。",
-    unavailable: true,
-    unavailableReason: "后端契约未交付：缺少基金名录更新端点（wealth 后端 8765 侧）",
-    method: "POST",
-    path: "",
+    description: "jobs/update_fund_basic：拉取官方 fund_basic（E+O）核对研究池元数据（上市/退市/名称），差异写入 notes。",
+    kind: "job",
+    operation: "update_fund_basic",
     params: [],
   },
   {
-    id: "adj-factor-update",
+    id: "job-update-market-data",
+    group: "data",
+    label: "增量更新 ETF 行情",
+    description: "jobs/update_market_data：按池内资产从各自 data_last 次日起增量抓取入审计库；可指定资产与区间。",
+    confirm: "将向研究池资产行情库增量写入数据（后端串行队列执行）。请确认参数。",
+    kind: "job",
+    operation: "update_market_data",
+    params: [
+      { key: "symbols", label: "资产列表", kind: "symbols", default: "", hint: "留空=整个研究池；或逗号分隔（须在池内）" },
+      { key: "startDate", label: "开始日期", kind: "text", default: "", hint: "YYYYMMDD；留空=各资产 data_last 次日" },
+      { key: "endDate", label: "结束日期", kind: "text", default: "", hint: "YYYYMMDD；留空=今天" },
+    ],
+  },
+  {
+    id: "job-update-adj-factors",
     group: "data",
     label: "更新复权因子",
-    description: "后端尚未提供复权因子更新的控制接口契约。",
-    unavailable: true,
-    unavailableReason: "后端契约未交付：缺少复权因子更新端点",
-    method: "POST",
-    path: "",
+    description: "jobs/update_adj_factors：随行情重拉 fund_adj 并强制校验缺失（缺失即失败，不填充）。",
+    confirm: "复权因子校验失败即任务失败（不填充）。确认执行？",
+    kind: "job",
+    operation: "update_adj_factors",
     params: [],
   },
   {
-    id: "quality-check",
+    id: "job-run-quality-check",
     group: "data",
-    label: "运行数据质量检查",
-    description: "质量数据当前由 wealth 后端在审计端点内按需计算（GET /v3/quality），无独立触发式检查任务。",
-    unavailable: true,
-    unavailableReason: "后端无独立质量检查任务端点；质量审计请见「多资产研究池」页",
-    method: "POST",
-    path: "",
+    label: "运行质量检查",
+    description: "jobs/run_quality_check：以池内真实交易日历重算缺失率并更新质量状态（QUALIFIED/DEGRADED/REJECTED）。",
+    confirm: "将重算并写回各资产质量状态。确认执行？",
+    kind: "job",
+    operation: "run_quality_check",
     params: [],
   },
   {
-    id: "pit-rebuild",
+    id: "job-rebuild-pit",
     group: "data",
     label: "重新评估历史可投资池",
-    description: "PIT 判定为查询时实时计算（GET /v3/eligible），无缓存池重建任务。",
-    unavailable: true,
-    unavailableReason: "后端无 PIT 池重建任务端点；即时判定请见「多资产研究池」页",
-    method: "POST",
-    path: "",
+    description: "jobs/rebuild_pit：对每个资产池最近 12 个月初时点重评 PIT 资格，产出快照。",
+    confirm: "将对全部资产池 × 12 个时点重评 PIT（计算量较大）。确认执行？",
+    kind: "job",
+    operation: "rebuild_pit",
     params: [],
   },
   {
-    id: "multi-strategy-compare",
+    id: "job-run-backtest",
     group: "research",
-    label: "多策略比较",
-    description: "请使用「策略对比与优化」页发起，该页已对接真实对比接口；此处暂无批量任务端点。",
-    unavailable: true,
-    unavailableReason: "批量比较任务端点未交付；请使用策略对比页的实时接口",
-    method: "POST",
-    path: "",
-    params: [],
+    label: "启动策略回测（后台）",
+    description: "jobs/run_backtest：以任务形式运行 v3 资产池回测，完成后 result 附 backtest_id/time_semantics/metrics。",
+    kind: "job",
+    operation: "run_backtest",
+    params: [
+      { key: "strategyId", label: "策略 ID", kind: "select", options: ["S0_fixed_weight", "S1_equal_weight", "S2_cross_momentum", "S3_dual_momentum", "S4_inverse_volatility"], default: "S0_fixed_weight", required: true },
+      { key: "universeId", label: "资产池 ID", kind: "text", default: "multi-asset-v2", required: true },
+      { key: "startDate", label: "开始日期", kind: "date", default: "2021-02-04" },
+      { key: "endDate", label: "结束日期", kind: "date", default: "2026-10-23" },
+      { key: "costBps", label: "单边成本(bps)", kind: "number", default: 5 },
+    ],
   },
   {
-    id: "ai-research",
+    id: "job-run-ai-research",
     group: "research",
-    label: "触发 AI 研究",
-    description: "AI 研究会话在「AI 研究与风控」页交互式发起；无独立后台任务端点。",
-    unavailable: true,
-    unavailableReason: "AI 研究后台任务端点未交付；请使用 AI 研究页",
-    method: "POST",
-    path: "",
-    params: [],
+    label: "触发 AI 研究（付费）",
+    description: "jobs/run_ai_research：对指定回测结果运行 AI 研究+风险复核（真实模型调用，须显式确认）。",
+    confirm: "该操作触发真实付费模型调用（confirm=true）。请确认回测 ID 无误。",
+    kind: "job",
+    operation: "run_ai_research",
+    params: [
+      { key: "backtestId", label: "回测 ID", kind: "text", default: "", required: true, hint: "如 wlbt_xxxx（可从策略工厂或任务记录获取）" },
+    ],
   },
   {
-    id: "risk-check",
-    group: "research",
-    label: "运行风险检查",
-    description: "风险检查随回测与决策包链路执行（wealth 后端），无独立任务端点。",
-    unavailable: true,
-    unavailableReason: "独立风险检查任务端点未交付；风险结果见回测与决策包",
-    method: "POST",
-    path: "",
-    params: [],
-  },
-  {
-    id: "report-generate",
+    id: "job-generate-report",
     group: "research",
     label: "生成研究报告",
-    description: "股票研究报告由 stock_report 链路生成，财富侧报告随决策包产出；无独立任务端点。",
-    unavailable: true,
-    unavailableReason: "报告生成任务端点未交付",
-    method: "POST",
-    path: "",
-    params: [],
+    description: "jobs/generate_report：从存档回测重放生成月度收益/指标报告。",
+    kind: "job",
+    operation: "generate_report",
+    params: [
+      { key: "backtestId", label: "回测 ID", kind: "text", default: "", required: true },
+    ],
   },
 ];
 
@@ -437,7 +543,49 @@ export function validateOp(op: TaskOpDef, params: Record<string, string>): strin
   if (op.id === "wealth-v2-backtest" && params.startDate && params.endDate && params.startDate >= params.endDate) {
     return "开始日期必须早于结束日期";
   }
+  if (op.id === "job-run-backtest" && params.startDate && params.endDate && params.startDate >= params.endDate) {
+    return "开始日期必须早于结束日期";
+  }
+  if (op.kind === "job" && (op.id === "job-run-ai-research" || op.id === "job-generate-report")) {
+    if (!(params.backtestId ?? "").trim()) return "请填写回测 ID（如 wlbt_xxxx）";
+  }
+  if (op.id === "job-update-market-data") {
+    for (const key of ["startDate", "endDate"]) {
+      const raw = (params[key] ?? "").trim();
+      if (raw && !/^\d{8}$/.test(raw)) return "日期格式须为 YYYYMMDD（或留空使用默认口径）";
+    }
+  }
   return null;
+}
+
+/** job 操作参数构造（严格按 job_handlers.py 各 handler 的 params 读取口径）。 */
+export function buildJobParams(op: TaskOpDef, params: Record<string, string>): Record<string, unknown> {
+  switch (op.operation) {
+    case "update_market_data": {
+      const payload: Record<string, unknown> = {};
+      const symbols = splitSymbols(params.symbols);
+      if (symbols.length) payload.symbols = symbols;
+      if (params.startDate?.trim()) payload.start_date = params.startDate.trim();
+      if (params.endDate?.trim()) payload.end_date = params.endDate.trim();
+      return payload;
+    }
+    case "run_backtest": {
+      const payload: Record<string, unknown> = {
+        strategy_id: params.strategyId?.trim(),
+        universe_id: params.universeId?.trim(),
+        cost_bps: Number(params.costBps ?? 5),
+      };
+      if (params.startDate) payload.start_date = params.startDate;
+      if (params.endDate) payload.end_date = params.endDate;
+      return payload;
+    }
+    case "run_ai_research":
+      return { backtest_id: params.backtestId?.trim(), confirm: true };
+    case "generate_report":
+      return { backtest_id: params.backtestId?.trim() };
+    default:
+      return {};
+  }
 }
 
 /* ---------------- 任务记录（真实调用留痕） ---------------- */
@@ -448,14 +596,20 @@ export interface TaskRunRecord {
   opLabel: string;
   path: string;
   request: Record<string, unknown> | null;
-  status: "SUCCEEDED" | "FAILED";
+  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
   startedAt: string;
   finishedAt: string;
   durationMs: number;
-  /** 后端返回的业务 ID（run_id / snapshot_id 等），存在才填 */
+  /** 后端返回的业务 ID（run_id / snapshot_id / backtest_id 等），存在才填 */
   backendRefId: string | null;
-  /** 后端异步任务 ID（契约交付后接入轮询；当前同步接口无此字段） */
+  /** 后端异步任务 ID（jobs 契约） */
   jobId: string | null;
+  /** 任务进度 0-100（job 模式轮询更新） */
+  progress: number | null;
+  /** 已写入记录数（job 模式实时更新） */
+  recordsWritten: number | null;
+  /** 任务结果引用（job 终态 result_ref） */
+  resultRef: Record<string, unknown> | null;
   resultSummary: string;
   resultPayload: unknown;
   error: string | null;
@@ -501,6 +655,7 @@ function operationError(err: unknown): string {
 export async function executeOp(
   op: TaskOpDef,
   params: Record<string, string>,
+  onTick?: (record: TaskRunRecord) => void,
 ): Promise<TaskRunRecord> {
   const startedAt = new Date();
   const request = buildPayload(op, params);
@@ -508,7 +663,7 @@ export async function executeOp(
     runKey: `${op.id}-${startedAt.getTime()}`,
     opId: op.id,
     opLabel: op.label,
-    path: op.path,
+    path: op.path ?? "",
     request,
     status: "FAILED",
     startedAt: startedAt.toISOString(),
@@ -516,10 +671,16 @@ export async function executeOp(
     durationMs: 0,
     backendRefId: null,
     jobId: null,
+    progress: null,
+    recordsWritten: null,
+    resultRef: null,
     resultSummary: "",
     resultPayload: null,
     error: null,
   };
+  if (op.kind === "job") {
+    return executeJobOp(op, base, buildJobParams(op, params), onTick);
+  }
   if (!request) {
     return {
       ...base,
@@ -527,7 +688,7 @@ export async function executeOp(
       error: "无法构造请求体（参数缺失）",
     };
   }
-  const url = op.path.replace("{strategyId}", encodeURIComponent(params.strategyId ?? ""));
+  const url = (op.path ?? "").replace("{strategyId}", encodeURIComponent(params.strategyId ?? ""));
   const http = op.base === "wealth" ? wealthApi : api;
   base.path = url;
   try {
@@ -552,4 +713,83 @@ export async function executeOp(
       error: operationError(err),
     };
   }
+}
+
+/** job 模式：提交 → 每 2s 轮询真实状态/进度（不模拟）→ 终态落痕；onTick 供页面实时刷新。 */
+export async function executeJobOp(
+  op: TaskOpDef,
+  base: TaskRunRecord,
+  jobParams: Record<string, unknown>,
+  onTick?: (record: TaskRunRecord) => void,
+): Promise<TaskRunRecord> {
+  const startedAt = new Date(base.startedAt);
+  try {
+    const submitted = await submitJob(op.operation!, jobParams);
+    const submittedAt = new Date();
+    let current: TaskRunRecord = {
+      ...base,
+      path: `POST /v1/wealth-lab/v3/jobs（operation=${op.operation}）`,
+      request: { operation: op.operation, params: jobParams },
+      status: submitted.job.status,
+      jobId: submitted.job.job_id,
+      progress: submitted.job.progress,
+      recordsWritten: submitted.job.records_written,
+      resultSummary: submitted.message + (submitted.duplicated ? "（幂等命中进行中任务）" : ""),
+    };
+    onTick?.(current);
+    // 轮询：2s 间隔，上限 5 分钟
+    const deadline = Date.now() + 300_000;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const job = await fetchJob(submitted.job.job_id);
+      if (!job) {
+        current = { ...current, status: "FAILED", error: "任务查询失败：job 不存在" };
+        onTick?.(current);
+        break;
+      }
+      current = {
+        ...current,
+        status: job.status,
+        progress: job.progress,
+        recordsWritten: job.records_written,
+        backendRefId: current.backendRefId ?? (typeof job.result?.backtest_id === "string" ? job.result.backtest_id : null),
+        resultRef: job.result ?? null,
+        resultSummary: jobProgressSummary(job),
+        finishedAt: job.finished_at ?? current.finishedAt,
+      };
+      onTick?.(current);
+      if (TERMINAL_STATUSES.includes(job.status)) {
+        const finishedAt = new Date();
+        return {
+          ...current,
+          status: job.status,
+          finishedAt: finishedAt.toISOString(),
+          durationMs: finishedAt.getTime() - startedAt.getTime(),
+          error: job.error,
+          resultSummary: job.status === "SUCCEEDED" ? jobProgressSummary(job) : job.error ?? "任务失败",
+        };
+      }
+    }
+    return { ...current, status: "FAILED", error: "轮询超时（5 分钟）：任务仍在后端执行，可在后端任务队列查看后续状态" };
+  } catch (err) {
+    const finishedAt = new Date();
+    return {
+      ...base,
+      path: `POST /v1/wealth-lab/v3/jobs（operation=${op.operation}）`,
+      finishedAt: finishedAt.toISOString(),
+      durationMs: finishedAt.getTime() - startedAt.getTime(),
+      error: operationError(err),
+    };
+  }
+}
+
+function jobProgressSummary(job: JobPublic): string {
+  const parts = [`${job.progress}%`];
+  if (job.records_written) parts.push(`写入 ${job.records_written} 行`);
+  if (job.source) parts.push(job.source);
+  const result = (job.result ?? {}) as Record<string, unknown>;
+  for (const key of ["updated", "rows", "symbols", "backtest_id", "research_id", "review_id", "ai_verdict"]) {
+    if (result[key] !== undefined) parts.push(`${key}=${String(result[key])}`);
+  }
+  return parts.join(" · ");
 }
