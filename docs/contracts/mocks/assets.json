@@ -1,0 +1,61 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "assets": [
+      {
+        "symbol": "510300.SH",
+        "name": "沪深300ETF",
+        "category": "EQUITY_ETF",
+        "default_weight": 0.4,
+        "listing_date": "2012-05-28",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL"
+      },
+      {
+        "symbol": "511010.SH",
+        "name": "国债ETF",
+        "category": "BOND_ETF",
+        "default_weight": 0.4,
+        "listing_date": "2013-03-25",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL"
+      },
+      {
+        "symbol": "518880.SH",
+        "name": "黄金ETF",
+        "category": "GOLD_ETF",
+        "default_weight": 0.1,
+        "listing_date": "2013-07-29",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL"
+      },
+      {
+        "symbol": "511380.SH",
+        "name": "可转债ETF",
+        "category": "CONVERTIBLE_ETF",
+        "default_weight": 0.1,
+        "listing_date": "2020-03-12",
+        "data_first_date": "2020-04-07",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1587,
+        "data_status": "REAL"
+      }
+    ]
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T15:00:00+08:00",
+  "api_version": "router-0.10.0",
+  "research_only": true
+}

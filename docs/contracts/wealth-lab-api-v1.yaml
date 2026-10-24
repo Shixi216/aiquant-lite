@@ -1,0 +1,380 @@
+openapi: 3.1.0
+info:
+  title: 怡怡投研·大类资产配置实验室 API (Wealth Lab)
+  version: 1.0.0
+  description: |
+    AIQUANT-LITE 财富管理实验室统一接口契约 · **v1 已冻结（2026-10-24）**。
+
+    ## 冻结条款
+    - 本契约冻结后，任何一方不得单方面修改字段名、类型、枚举值与语义。
+    - 确需变更时：先在此文件升版本（v1.1/v2）并附带变更记录，通知前端后再实施。
+    - 新增可选字段视为兼容变更，仍须先更新本契约。
+
+    ## 字段规范（全局约定）
+    | 类别 | 约定 |
+    |---|---|
+    | 日期 | `YYYY-MM-DD`（如 2026-10-23） |
+    | 时间戳 | RFC3339 带时区，项目基准 `+08:00` |
+    | 资产代码 | Tushare ts_code 格式：`510300.SH` / `511010.SH` |
+    | 收益率/权重/比例 | 一律小数：`0.023` 表示 2.3%；字段名含 `_pct` 的除外（源数据保留字段） |
+    | 金额 | 人民币元（CNY），float |
+    | 数据来源 | `source` 字符串：`xiaodefa-tushare/fund_daily`、`xiaodefa-tushare/fund_adj`、`synthetic` |
+    | 数据模式 | `data_mode`: `REAL` / `DEMO` / `UNAVAILABLE`（见下） |
+    | 错误响应 | 统一 envelope：`error_code` + `sanitized_error`，绝不包含 token、内部路径等敏感信息 |
+
+    ## 数据模式（防演示数据混入真实结果）
+    - `REAL`：自建数据池中的真实行情（经双端点核验：fund_daily + fund_adj）。
+    - `DEMO`：合成演示数据，仅供前端联调。响应中 `data_mode=DEMO` 且序列含
+      `demo:true` 标记；前端必须以醒目样式区分展示。
+    - `UNAVAILABLE`：数据缺失（如区间早于 ETF 上市日、数据源不可达且本地无缓存），
+      `data` 为 null，`error_code=DATA_UNAVAILABLE`。
+
+    所有响应沿用项目统一信封（UnifiedResponse）：`request_id`、`status`、`data`、
+    `error_code`、`sanitized_error`、`warnings`、`risk_flags`、`data_cutoff`、
+    `generated_at`、`api_version`、`research_only:true`；wealth-lab 在 data 内额外
+    携带 `data_mode`。
+
+servers:
+  - url: http://127.0.0.1:8765
+    description: 本地 Router（DuckDB 唯一 Owner）
+
+paths:
+  /v1/wealth-lab/meta:
+    get:
+      operationId: getWealthLabMeta
+      summary: 实验室元信息（版本、数据池状态、契约版本）
+      responses:
+        "200":
+          description: 元信息
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MetaResponse" }
+
+  /v1/wealth-lab/assets:
+    get:
+      operationId: listWealthLabAssets
+      summary: 资产列表与数据覆盖
+      responses:
+        "200":
+          description: 四只 ETF 的名称、类别、默认权重、数据区间与数据状态
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssetsResponse" }
+
+  /v1/wealth-lab/backtests/run:
+    post:
+      operationId: runWealthLabBacktest
+      summary: 执行组合回测（默认月度再平衡）
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BacktestRequest" }
+      responses:
+        "200":
+          description: 回测结果（净值、回撤、调仓、指标、基准）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BacktestResponse" }
+        "422":
+          description: 参数校验失败（如权重和≠1、区间非法）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /v1/wealth-lab/backtests/{backtest_id}:
+    get:
+      operationId: getWealthLabBacktest
+      summary: 获取已保存的回测结果
+      parameters:
+        - name: backtest_id
+          in: path
+          required: true
+          schema: { type: string, pattern: "^wlbt_[0-9a-f]{12}$" }
+      responses:
+        "200":
+          description: 已保存的回测
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BacktestResponse" }
+        "404":
+          description: 回测不存在
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /v1/wealth-lab/backtests/{backtest_id}/risk:
+    get:
+      operationId: getWealthLabRisk
+      summary: 风险指标详情（含滚动序列）
+      parameters:
+        - name: backtest_id
+          in: path
+          required: true
+          schema: { type: string, pattern: "^wlbt_[0-9a-f]{12}$" }
+      responses:
+        "200":
+          description: 风险指标与滚动序列
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RiskResponse" }
+
+  /v1/wealth-lab/stress-tests:
+    post:
+      operationId: runWealthLabStressTest
+      summary: 压力测试（历史窗口或合成冲击）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StressTestRequest" }
+      responses:
+        "200":
+          description: 压力测试结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StressTestResponse" }
+
+components:
+  schemas:
+    DataMode:
+      type: string
+      enum: [REAL, DEMO, UNAVAILABLE]
+      description: REAL=真实数据；DEMO=合成演示（不得混入真实结论）；UNAVAILABLE=数据缺失
+
+    Envelope:
+      type: object
+      properties:
+        request_id: { type: string, pattern: "^req_[0-9a-f]{24}$" }
+        status: { type: string, enum: [SUCCESS, DEGRADED, FAILED] }
+        data: {}
+        error_code: { type: [string, "null"] }
+        sanitized_error: { type: [string, "null"] }
+        warnings: { type: array, items: { type: string } }
+        risk_flags: { type: array, items: { type: string } }
+        data_cutoff: { type: [string, "null"], format: date-time }
+        generated_at: { type: string, format: date-time }
+        api_version: { type: string }
+        research_only: { const: true }
+
+    MetaResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                data_mode: { $ref: "#/components/schemas/DataMode" }
+                contract_version: { const: "wealth-lab/v1" }
+                engine_version: { type: string, example: "wealth-lab-backtest/1.0" }
+                pool: { $ref: "#/components/schemas/DataPoolStatus" }
+
+    DataPoolStatus:
+      type: object
+      properties:
+        database: { type: string, example: "database/wealth_lab.duckdb" }
+        row_count: { type: integer }
+        first_date: { type: [string, "null"], format: date }
+        last_date: { type: [string, "null"], format: date }
+        sources: { type: array, items: { type: string } }
+
+    Asset:
+      type: object
+      properties:
+        symbol: { type: string, example: "510300.SH" }
+        name: { type: string, example: "沪深300ETF" }
+        category: { type: string, enum: [EQUITY_ETF, BOND_ETF, GOLD_ETF, CONVERTIBLE_ETF] }
+        default_weight: { type: number, example: 0.4 }
+        listing_date: { type: string, format: date }
+        data_first_date: { type: [string, "null"], format: date }
+        data_last_date: { type: [string, "null"], format: date }
+        data_rows: { type: integer }
+        data_status: { type: string, enum: [REAL, DEMO, UNAVAILABLE] }
+
+    AssetsResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                data_mode: { $ref: "#/components/schemas/DataMode" }
+                assets: { type: array, items: { $ref: "#/components/schemas/Asset" } }
+
+    BacktestRequest:
+      type: object
+      properties:
+        weights:
+          type: object
+          description: 资产权重（小数），缺省 {510300.SH:0.4, 511010.SH:0.4, 518880.SH:0.1, 511380.SH:0.1}
+          additionalProperties: { type: number, minimum: 0, maximum: 1 }
+        start_date: { type: string, format: date, example: "2020-04-08" }
+        end_date: { type: string, format: date, example: "2026-10-23" }
+        rebalance: { type: string, enum: [monthly, quarterly, none], default: monthly }
+        cost_bps:
+          type: number
+          default: 5
+          description: 单边交易成本（基点），按换手率扣减
+        initial_capital: { type: number, default: 1000000 }
+        benchmarks:
+          type: array
+          items: { type: string, enum: [EQUAL_WEIGHT, 510300.SH] }
+          default: [EQUAL_WEIGHT, "510300.SH"]
+        allow_demo:
+          type: boolean
+          default: false
+          description: 数据不足时是否返回 DEMO 合成结果（默认拒绝并返回 UNAVAILABLE）
+
+    BacktestResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                data_mode: { $ref: "#/components/schemas/DataMode" }
+                backtest_id: { type: string, pattern: "^wlbt_[0-9a-f]{12}$" }
+                params: { $ref: "#/components/schemas/BacktestRequest" }
+                series: { $ref: "#/components/schemas/BacktestSeries" }
+                rebalances: { type: array, items: { $ref: "#/components/schemas/RebalanceEvent" } }
+                metrics: { $ref: "#/components/schemas/Metrics" }
+                benchmarks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      benchmark: { type: string }
+                      metrics: { $ref: "#/components/schemas/Metrics" }
+                data_quality: { $ref: "#/components/schemas/DataQuality" }
+
+    BacktestSeries:
+      type: object
+      description: 等长序列，日期数组 + 各序列数组（一一对应）
+      properties:
+        dates: { type: array, items: { type: string, format: date } }
+        portfolio_nav: { type: array, items: { type: number }, description: 组合净值（首日=1.0） }
+        portfolio_drawdown: { type: array, items: { type: number }, description: 回撤（负小数） }
+        benchmark_nav: { type: array, items: { type: number }, description: 主基准（EQUAL_WEIGHT）净值 }
+        demo: { type: boolean, default: false, description: DEMO 模式必须为 true }
+
+    RebalanceEvent:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        trades:
+          type: array
+          items:
+            type: object
+            properties:
+              symbol: { type: string }
+              weight_before: { type: number }
+              weight_after: { type: number }
+              turnover: { type: number, description: 单边换手（小数） }
+        cost: { type: number, description: 本次调仓成本（元） }
+
+    Metrics:
+      type: object
+      properties:
+        total_return: { type: number }
+        annual_return: { type: number }
+        annual_volatility: { type: number }
+        sharpe_ratio: { type: number, description: rf=2%/年 }
+        max_drawdown: { type: number }
+        calmar_ratio: { type: number }
+        monthly_win_rate: { type: number }
+        trading_days: { type: integer }
+
+    RiskResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                data_mode: { $ref: "#/components/schemas/DataMode" }
+                backtest_id: { type: string }
+                metrics: { $ref: "#/components/schemas/Metrics" }
+                rolling:
+                  type: object
+                  properties:
+                    dates: { type: array, items: { type: string, format: date } }
+                    volatility_63d: { type: array, items: { type: number } }
+                    sharpe_252d: { type: array, items: { type: number } }
+                    drawdown: { type: array, items: { type: number } }
+                worst_days:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      date: { type: string, format: date }
+                      daily_return: { type: number }
+                value_at_risk_95_1d: { type: number, description: 1日 VaR95（历史法，负小数） }
+
+    StressTestRequest:
+      type: object
+      required: [scenario]
+      properties:
+        scenario:
+          oneOf:
+            - type: object
+              properties:
+                kind: { const: historical }
+                label: { type: string, example: "2020-03 疫情冲击" }
+                start_date: { type: string, format: date }
+                end_date: { type: string, format: date }
+            - type: object
+              properties:
+                kind: { const: synthetic }
+                label: { type: string, example: "股债金三杀" }
+                shocks:
+                  type: object
+                  additionalProperties: { type: number }
+                  description: 各资产单日冲击收益率（小数），如 {"510300.SH": -0.07}
+        weights: { type: object, additionalProperties: { type: number } }
+
+    StressTestResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                data_mode: { $ref: "#/components/schemas/DataMode" }
+                scenario_label: { type: string }
+                portfolio_shock_return: { type: number }
+                portfolio_nav_path:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      date: { type: string, format: date }
+                      nav: { type: number }
+                asset_contributions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      symbol: { type: string }
+                      weight: { type: number }
+                      shock_return: { type: number }
+                      contribution: { type: number }
+
+    DataQuality:
+      type: object
+      properties:
+        adjusted: { type: boolean, description: 是否后复权净值（fund_adj 因子） }
+        sources: { type: array, items: { type: string } }
+        missing_days: { type: integer, description: 四资产共同交易日缺口数 }
+        caveats: { type: array, items: { type: string } }
+
+    ErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            data: { type: "null" }

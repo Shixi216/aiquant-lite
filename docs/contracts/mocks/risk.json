@@ -1,0 +1,83 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "backtest_id": "wlbt_0123456789ab",
+    "metrics": {
+      "total_return": 0.5843,
+      "annual_return": 0.0731,
+      "annual_volatility": 0.0712,
+      "sharpe_ratio": 0.746,
+      "max_drawdown": -0.0812,
+      "calmar_ratio": 0.9,
+      "monthly_win_rate": 0.6325,
+      "trading_days": 1587
+    },
+    "rolling": {
+      "dates": [
+        "2020-12-31",
+        "2021-12-31",
+        "2022-12-30",
+        "2023-12-29",
+        "2024-06-28",
+        "2024-12-31",
+        "2025-06-30",
+        "2025-12-31",
+        "2026-10-23"
+      ],
+      "volatility_63d": [
+        0.0812,
+        0.0745,
+        0.0698,
+        0.0721,
+        0.0688,
+        0.0654,
+        0.0632,
+        0.0601,
+        0.0587
+      ],
+      "sharpe_252d": [
+        0.51,
+        0.62,
+        0.68,
+        0.71,
+        0.69,
+        0.73,
+        0.76,
+        0.75,
+        0.78
+      ],
+      "drawdown": [
+        -0.0321,
+        -0.0458,
+        -0.0683,
+        -0.0512,
+        -0.0387,
+        -0.0264,
+        -0.0332,
+        -0.0198,
+        -0.0145
+      ]
+    },
+    "worst_days": [
+      {
+        "date": "2024-01-22",
+        "daily_return": -0.0212
+      },
+      {
+        "date": "2024-02-05",
+        "daily_return": -0.0187
+      }
+    ],
+    "value_at_risk_95_1d": -0.0068
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T15:00:00+08:00",
+  "api_version": "router-0.10.0",
+  "research_only": true
+}

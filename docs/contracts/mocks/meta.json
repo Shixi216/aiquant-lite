@@ -1,0 +1,27 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "contract_version": "wealth-lab/v1",
+    "engine_version": "wealth-lab-backtest/1.0",
+    "pool": {
+      "database": "database/wealth_lab.duckdb",
+      "row_count": 5466,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-23",
+      "sources": [
+        "xiaodefa-tushare/fund_daily",
+        "xiaodefa-tushare/fund_adj"
+      ]
+    }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T15:00:00+08:00",
+  "api_version": "router-0.10.0",
+  "research_only": true
+}

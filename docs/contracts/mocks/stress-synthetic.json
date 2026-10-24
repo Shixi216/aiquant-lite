@@ -1,0 +1,53 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "DEMO",
+    "scenario_label": "股债金三杀（合成）",
+    "portfolio_shock_return": -0.058,
+    "portfolio_nav_path": [
+      {
+        "date": "2026-10-23",
+        "nav": 1.0
+      },
+      {
+        "date": "2026-10-24",
+        "nav": 0.942
+      }
+    ],
+    "asset_contributions": [
+      {
+        "symbol": "510300.SH",
+        "weight": 0.4,
+        "shock_return": -0.1,
+        "contribution": -0.04
+      },
+      {
+        "symbol": "511010.SH",
+        "weight": 0.4,
+        "shock_return": -0.02,
+        "contribution": -0.008
+      },
+      {
+        "symbol": "518880.SH",
+        "weight": 0.1,
+        "shock_return": -0.08,
+        "contribution": -0.008
+      },
+      {
+        "symbol": "511380.SH",
+        "weight": 0.1,
+        "shock_return": -0.02,
+        "contribution": -0.002
+      }
+    ]
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T15:00:00+08:00",
+  "api_version": "router-0.10.0",
+  "research_only": true
+}
