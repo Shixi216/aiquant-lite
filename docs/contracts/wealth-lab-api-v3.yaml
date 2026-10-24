@@ -1,0 +1,135 @@
+openapi: 3.1.0
+info:
+  title: 怡怡投研·大类资产配置实验室 API v3（中国多资产研究池）
+  version: 3.0.0
+  description: |
+    Wealth Lab v3 扩展契约：基于双数据源的中国多资产研究池。
+    v1/v2 契约保持冻结与完全兼容；本契约只新增 /v1/wealth-lab/v3/*。
+
+    ## 核心语义
+    - **Research Universe**：经真实数据核验的全部研究资产（含 DEGRADED）。
+    - **Backtest Eligible（PIT）**：按历史决策时点判定（上市/退市/历史长度/流动性/数据质量），
+      拒绝用 2026 年存续名单冒充历史市场；幸存者偏差未消除、已在响应中如实声明。
+    - 行情与审计复用既有 `wealth_lab.duckdb.etf_daily`（行级 data_source=OFFICIAL/PROXY）。
+
+    ## 双数据源使用（本轮实测）
+    | 接口 | 官方 Tushare | 代理源 | 用途 |
+    |---|---|---|---|
+    | fund_basic / fund_daily / fund_adj / fund_nav / cb_daily / trade_cal | ✓ | ✓ | 主力（本轮 33 只全部 OFFICIAL，代理零调用） |
+    | etf_basic / etf_share_size | ✗（无权限） | ✓ | 仅补充核验，明确标注 PROXY，不冒充官方 |
+
+    中国市场约定（SSE/SZSE、CNY、fund_adj 后复权、fund_daily.amount 千元→元）同 v2。
+    复权因子缺失不填充；金额统一元；缺失率以池内真实交易日历为分母。
+
+servers:
+  - url: http://127.0.0.1:8765
+
+paths:
+  /v1/wealth-lab/v3/universes:
+    get:
+      operationId: listWealthUniverses
+      summary: 资产池列表（版本、成员数、幸存者偏差声明）
+      responses:
+        "200": { description: 池列表, content: { application/json: { schema: { $ref: "#/components/schemas/V3Envelope" } } } }
+
+  /v1/wealth-lab/v3/universes/{universe_id}/assets:
+    get:
+      operationId: getUniverseAssets
+      summary: 池内资产与质量审计
+      parameters:
+        - { name: universe_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 资产明细, content: { application/json: { schema: { $ref: "#/components/schemas/V3Envelope" } } } }
+
+  /v1/wealth-lab/v3/quality:
+    get:
+      operationId: getUniverseQuality
+      summary: 全部研究资产的数据质量审计（可按类别过滤）
+      parameters:
+        - { name: category, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 质量报告, content: { application/json: { schema: { $ref: "#/components/schemas/V3Envelope" } } } }
+
+  /v1/wealth-lab/v3/eligible:
+    get:
+      operationId: getBacktestEligible
+      summary: 历史可投资资产（PIT 判定）
+      parameters:
+        - { name: universe_id, in: query, required: true, schema: { type: string } }
+        - { name: asof, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: PIT 判定结果, content: { application/json: { schema: { $ref: "#/components/schemas/V3Envelope" } } } }
+
+  /v1/wealth-lab/v3/strategies/{strategy_id}/backtest:
+    post:
+      operationId: runUniverseBacktest
+      summary: 在指定资产池上运行策略（eligible 过滤后执行）
+      parameters:
+        - { name: strategy_id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                universe_id: { type: string, example: "rotation-v1" }
+                start_date: { type: string, format: date }
+                end_date: { type: string, format: date }
+                cost_bps: { type: number, default: 5 }
+                params_override: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: 池回测结果（含 common_window 与 eligible 快照）, content: { application/json: { schema: { $ref: "#/components/schemas/V3Envelope" } } } }
+
+components:
+  schemas:
+    V3Envelope:
+      type: object
+      description: 同 v1/v2 统一信封；data 内含 data_mode
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [SUCCESS, DEGRADED, FAILED] }
+        data: { type: object }
+        error_code: { type: [string, "null"] }
+        sanitized_error: { type: [string, "null"] }
+        warnings: { type: array, items: { type: string } }
+        generated_at: { type: string, format: date-time }
+        api_version: { type: string, example: "wealth-lab/v3" }
+        research_only: { const: true }
+
+    UniverseInfo:
+      type: object
+      properties:
+        universe_id: { type: string }
+        universe_version: { type: string }
+        name: { type: string }
+        description: { type: string }
+        members: { type: integer }
+        survivorship_bias_note: { type: string }
+
+    AssetQuality:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        category: { type: string }
+        exchange: { type: string }
+        list_date: { type: [string, "null"], format: date }
+        delist_date: { type: [string, "null"], format: date }
+        data_first: { type: [string, "null"], format: date }
+        data_last: { type: [string, "null"], format: date }
+        valid_days: { type: integer }
+        expected_days: { type: integer }
+        missing_ratio: { type: number }
+        adj_missing: { type: integer }
+        avg_amount_20d_cny: { type: number }
+        source_breakdown: { type: object, additionalProperties: { type: integer } }
+        quality_status: { type: string, enum: [QUALIFIED, DEGRADED, REJECTED] }
+        notes: { type: string }
+
+    EligibilityItem:
+      type: object
+      properties:
+        symbol: { type: string }
+        eligible: { type: boolean }
+        reasons: { type: array, items: { type: string } }
+        history_days_at_asof: { type: integer }

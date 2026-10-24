@@ -1,0 +1,65 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "universe_id": "multi-asset-v1",
+  "asof": "2024-01-04",
+  "eligible_count": 25,
+  "total": 29,
+  "survivorship_note": "基于当前存续名录构建，未含历史退市产品；偏差未消除、仅如实记录",
+  "eligibility": [
+   {
+    "symbol": "159545.SZ",
+    "eligible": false,
+    "reasons": [
+     "尚未上市（上市 2024-04-15）",
+     "历史不足（0<250 天）",
+     "流动性不足（20日均 0.00 亿元口径 0 元）"
+    ],
+    "history_days_at_asof": 0
+   },
+   {
+    "symbol": "159915.SZ",
+    "eligible": true,
+    "reasons": [],
+    "history_days_at_asof": 972
+   },
+   {
+    "symbol": "159949.SZ",
+    "eligible": true,
+    "reasons": [],
+    "history_days_at_asof": 973
+   },
+   {
+    "symbol": "159972.SZ",
+    "eligible": true,
+    "reasons": [],
+    "history_days_at_asof": 968
+   },
+   {
+    "symbol": "159985.SZ",
+    "eligible": true,
+    "reasons": [],
+    "history_days_at_asof": 973
+   },
+   {
+    "symbol": "162411.SZ",
+    "eligible": true,
+    "reasons": [],
+    "history_days_at_asof": 973
+   },
+   {
+    "...": "完整清单见接口"
+   }
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-24T20:33:31.604875+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

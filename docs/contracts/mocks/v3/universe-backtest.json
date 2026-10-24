@@ -1,0 +1,139 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "backtest_id": "wlbt_v3sample0001",
+  "universe_id": "rotation-v1",
+  "strategy": {
+   "strategy_id": "S2_cross_momentum",
+   "strategy_version": "1.0",
+   "name": "ETF横截面动量轮动",
+   "description": "按 lookback 日动量排序持有前 top_k 名；动量<min_momentum 的不持有（留现金）",
+   "params": {
+    "lookback_days": 126,
+    "top_k": 2,
+    "min_momentum": 0.0
+   },
+   "min_history_days": 130,
+   "rebalance": "monthly",
+   "risk_notes": "动量崩溃风险；趋势反转时回撤可能加大；历史不足时持币",
+   "asset_selection": "横截面动量排序取前2"
+  },
+  "common_window": {
+   "start_date": "2020-03-04",
+   "end_date": "2026-10-23",
+   "trading_days": 1607
+  },
+  "pit_gate": {
+   "asof": "2020-03-04",
+   "eligible": [
+    "510300.SH",
+    "510500.SH",
+    "512170.SH",
+    "512480.SH",
+    "512660.SH",
+    "512690.SH",
+    "512800.SH",
+    "515030.SH"
+   ],
+   "excluded": {},
+   "note": "PIT 判定基于上市/退市/历史长度/流动性；幸存者偏差未消除"
+  },
+  "series": {
+   "dates": [
+    "2020-03-04",
+    "2020-12-25",
+    "2021-11-01",
+    "2022-08-24",
+    "2023-06-26",
+    "2024-04-22",
+    "2025-02-20",
+    "2025-12-12",
+    "2026-10-15"
+   ],
+   "nav": [
+    1.0,
+    1.332,
+    1.5587,
+    1.233,
+    0.7758,
+    0.7396,
+    0.819,
+    0.8725,
+    0.8935
+   ],
+   "drawdown": [
+    0.0,
+    -0.0014,
+    -0.082,
+    -0.2738,
+    -0.5431,
+    -0.5644,
+    -0.5176,
+    -0.4862,
+    -0.4737
+   ],
+   "cash_weight": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "demo": false
+  },
+  "metrics": {
+   "total_return": -0.11606537959647811,
+   "annual_return": -0.019160535130372414,
+   "annual_volatility": 0.24962135414793576,
+   "sharpe_ratio": -0.1568797479848791,
+   "max_drawdown": -0.6110829172305148,
+   "calmar_ratio": -0.03135504951964581,
+   "monthly_win_rate": 0.3924050632911392,
+   "trading_days": 1607,
+   "sortino_ratio": -0.1924,
+   "avg_turnover_per_rebalance": 0.511
+  },
+  "weight_history": [
+   {
+    "date": "2020-03-04",
+    "decision_data_through": "2020-03-03",
+    "weights": {}
+   },
+   {
+    "date": "2020-04-01",
+    "decision_data_through": "2020-03-31",
+    "weights": {}
+   },
+   {
+    "...": "完整序列见接口"
+   }
+  ],
+  "rebalances": [
+   {
+    "date": "2020-03-04",
+    "cost": 0.0
+   },
+   {
+    "date": "2020-04-01",
+    "cost": 0.0
+   },
+   {
+    "...": "完整记录见接口"
+   }
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-24T20:33:31.767121+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}
