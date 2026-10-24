@@ -204,5 +204,20 @@ class WealthLabRepository:
             return None
         return {"params": json.loads(row[0]), "result": json.loads(row[1])}
 
+    def liquidity_20d_avg(self, symbols: list[str], asof=None) -> dict[str, float | None]:
+        """20 日日均成交额（元），只用于评分时点之前的数据。"""
+        with _LOCK, _connect(self._path) as con:
+            result = {}
+            for symbol in symbols:
+                query = "SELECT amount FROM etf_daily WHERE symbol=? AND amount IS NOT NULL"
+                params: list = [symbol]
+                if asof is not None:
+                    query += " AND trade_date <= ?"
+                    params.append(asof)
+                rows = con.execute(query + " ORDER BY trade_date DESC LIMIT 20", params).fetchall()
+                values = [float(r[0]) for r in rows if r[0] is not None]
+                result[symbol] = round(sum(values) / len(values), 2) if values else None
+        return result
+
 
 PROXY_FALLBACK_LABEL = "PROXY"
