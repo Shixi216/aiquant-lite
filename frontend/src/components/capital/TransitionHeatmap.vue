@@ -3,11 +3,13 @@ import { computed, ref, watch } from "vue";
 
 import type { StateDefinitions, TransitionRow } from "../../api/capitalBehavior";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 
 const props = defineProps<{ rows: TransitionRow[]; definitions: StateDefinitions }>();
 
 const chartEl = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(chartEl);
+const ct = useChartTheme();
 
 const stateNames = computed(() => Object.keys(props.definitions.states));
 
@@ -39,13 +41,13 @@ const option = computed(() => {
     xAxis: {
       type: "category",
       data: names,
-      axisLabel: { color: "#8494a7", rotate: 45, fontSize: 10 },
+      axisLabel: { color: ct.value.dim, rotate: 45, fontSize: 10 },
       splitArea: { show: true },
     },
     yAxis: {
       type: "category",
       data: names,
-      axisLabel: { color: "#8494a7", fontSize: 10 },
+      axisLabel: { color: ct.value.dim, fontSize: 10 },
       splitArea: { show: true },
     },
     visualMap: {
@@ -55,9 +57,9 @@ const option = computed(() => {
       orient: "vertical",
       right: 8,
       top: "center",
-      textStyle: { color: "#8494a7" },
+      textStyle: { color: ct.value.dim },
       formatter: (value: number) => `${(value * 100).toFixed(0)}%`,
-      inRange: { color: ["#10161f", "#1c4d80", "#2f7ed8", "#7fc3ff"] },
+      inRange: { color: [...ct.value.heat] },
     },
     series: [
       {
@@ -67,7 +69,7 @@ const option = computed(() => {
           names.indexOf(row.from_state),
           row.transition_probability,
         ]),
-        emphasis: { itemStyle: { borderColor: "#d8dee6", borderWidth: 1 } },
+        emphasis: { itemStyle: { borderColor: ct.value.text, borderWidth: 1 } },
       },
     ],
   };

@@ -148,7 +148,7 @@ const warnings = computed(() => props.backtest?.warnings ?? []);
 .sub-panel {
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(10, 14, 20, 0.5);
+  background: var(--bg-hover);
   padding: 12px 14px;
 }
 .sub-panel h4 { margin: 0 0 10px; font-size: 12.5px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.5px; }

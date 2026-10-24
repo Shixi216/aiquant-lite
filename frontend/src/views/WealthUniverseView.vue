@@ -61,8 +61,8 @@ const pageLoading = ref(false);
 const pageError = ref<string | null>(null);
 const pageSource = ref<DataSource>("live");
 
-/** 质量状态筛选契约暂无服务端参数：改为全量拉取 + 前端过滤 + 前端分页，并明确标注。 */
-const statusFilterLocal = computed(() => statusFilter.value !== "all");
+/** v3.2 起质量状态/关键字有服务端参数（status/q）；离线 Mock 模式仍走前端过滤分页。 */
+const statusFilterLocal = computed(() => source.value === "offline-mock" && statusFilter.value !== "all");
 
 const total = computed(() => pageData.value?.data.total ?? 0);
 const currentPage = computed(() => pageData.value?.data.page ?? page.value);
@@ -74,8 +74,8 @@ const pageRangeText = computed(() => {
   return `${start}–${end}`;
 });
 
-/** 质量状态筛选 / 关键字搜索契约暂无服务端参数：全量拉取 + 前端过滤分页，并明确标注。 */
-const localPaged = computed(() => statusFilterLocal.value || !!searchText.value.trim() || source.value === "offline-mock");
+/** 仅离线 Mock 模式走"全量拉取 + 前端过滤分页"；真实后端由 status/q 服务端筛选。 */
+const localPaged = computed(() => source.value === "offline-mock");
 
 /** 当前页展示行：全量模式 → 前端过滤+切片；服务端模式 → 后端行 + 当前页排序。 */
 const tableRows = computed<AssetQuality[]>(() => {
@@ -125,18 +125,19 @@ async function loadPage(target = page.value): Promise<void> {
   pageError.value = null;
   try {
     const category = categoryFilter.value === "all" ? undefined : categoryFilter.value;
-    // 状态筛选 / 关键字搜索（契约暂无服务端参数）与 Mock 模式均拉全量后前端过滤/切片
+    // v3.2：status/q 为服务端参数；仅 Mock 模式回退前端过滤分页
     const useLocalPaging = localPaged.value;
     const limit = useLocalPaging ? 200 : PAGE_SIZE;
     const requestPage = useLocalPaging ? 1 : target;
-    const response = await fetchV3Quality(category, requestPage, limit);
+    const statusParam = statusFilter.value === "all" ? undefined : statusFilter.value;
+    const response = await fetchV3Quality(category, requestPage, limit, statusParam, searchText.value);
     if (seq !== pageSeq) return;
     pageData.value = response.envelope;
     pageSource.value = response.source;
     if (useLocalPaging) {
       const keyword = searchText.value.trim().toLowerCase();
       let filtered = response.envelope.data.assets;
-      if (statusFilterLocal.value) filtered = filtered.filter((asset) => asset.quality_status === statusFilter.value);
+      if (statusFilter.value !== "all") filtered = filtered.filter((asset) => asset.quality_status === statusFilter.value);
       if (keyword) filtered = filtered.filter((asset) => asset.symbol.toLowerCase().includes(keyword) || asset.name.toLowerCase().includes(keyword));
       localFilteredTotal.value = filtered.length;
       const start = (target - 1) * PAGE_SIZE;
@@ -336,8 +337,8 @@ onMounted(load);
         </select>
         <span class="dim">
           {{ displayTotal ? `第 ${pageRangeText} 条 / 共 ${displayTotal} 只` : "无记录" }}
-          <template v-if="statusFilterLocal">· 质量状态筛选为前端过滤（契约暂无服务端参数）</template>
-          <template v-else-if="searchText.trim()">· 搜索为前端过滤（服务端搜索待接入）</template>
+          <template v-if="statusFilterLocal">· 离线 Mock：筛选为前端过滤</template>
+          <template v-else-if="statusFilter !== 'all' || searchText.trim()">· 服务端筛选（status/q）</template>
           <template v-if="pageSource === 'offline-mock'">· Mock 本地分页</template>
         </span>
         <span class="pager">
@@ -393,7 +394,7 @@ onMounted(load);
         </table>
       </div>
       <p v-if="!tableRows.length && !pageLoading" class="empty">没有符合筛选条件的资产。</p>
-      <p class="dim page-note">搜索与排序在当前页内生效（服务端搜索/排序待接入）；官方与代理来源明细见下方技术审计。</p>
+      <p class="dim page-note">排序在当前页内生效（服务端排序待接入）；筛选（状态/关键字/类别）由服务端执行；官方与代理来源明细见下方技术审计。</p>
     </section>
 
     <!-- 3. 历史可投资资产池 -->
@@ -497,7 +498,7 @@ onMounted(load);
 .head-sub { margin: 0; font-size: 13px; }
 .head-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.cat-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: rgba(10, 14, 20, 0.5); display: flex; flex-direction: column; gap: 8px; }
+.cat-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--bg-hover); display: flex; flex-direction: column; gap: 8px; }
 .cat-card.pending { opacity: 0.75; border-style: dashed; }
 .cat-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cat-head strong { font-size: 13.5px; }
@@ -516,8 +517,8 @@ onMounted(load);
 .sortable { cursor: pointer; user-select: none; }
 .sortable:hover { color: var(--accent); }
 .dim-chips { display: flex; flex-direction: column; gap: 3px; }
-.dim-chip { display: inline-block; width: fit-content; padding: 1px 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: var(--text); background: rgba(38, 49, 64, 0.4); }
-.dim-chip.warn-chip { border-color: rgba(245, 166, 35, 0.4); color: var(--warn); }
+.dim-chip { display: inline-block; width: fit-content; padding: 1px 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 11px; color: var(--text); background: var(--bg-hover); }
+.dim-chip.warn-chip { border-color: color-mix(in srgb, var(--warn) 40%, transparent); color: var(--warn); }
 .reason-cell { max-width: 260px; }
 .notes-line { margin: 5px 0 0; font-size: 11.5px; color: var(--text-dim); line-height: 1.55; }
 .page-note { margin: 10px 0 0; font-size: 11.5px; color: var(--text-dim); }
@@ -525,26 +526,26 @@ onMounted(load);
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-dim); }
 .field select { min-width: 220px; }
 button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 16px; }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .pit-strip {
   display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
   margin-bottom: 12px; padding: 10px 14px;
-  border: 1px solid rgba(34, 211, 238, 0.35); border-radius: 10px;
-  background: rgba(34, 211, 238, 0.05); font-size: 13px; font-variant-numeric: tabular-nums;
+  border: 1px solid var(--accent-ring); border-radius: 10px;
+  background: var(--accent-softer); font-size: 13px; font-variant-numeric: tabular-nums;
 }
 .pit-strip b { color: var(--text-dim); font-weight: 600; margin-right: 6px; }
 .pit-strip em { font-style: normal; font-size: 16px; font-weight: 700; }
 .pit-strip .dim { font-size: 12px; }
-.reason-chip { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 9px; border: 1px solid rgba(245, 166, 35, 0.4); border-radius: 9px; font-size: 11.5px; color: var(--warn); }
+.reason-chip { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 9px; border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); border-radius: 9px; font-size: 11.5px; color: var(--warn); }
 .audit { margin-top: 4px; }
 .audit summary { cursor: pointer; color: var(--text-dim); font-size: 13px; user-select: none; padding: 6px 0; }
 .audit summary:hover { color: var(--accent); }
 .audit-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-top: 12px; }
-.r-block { border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; background: rgba(10, 14, 20, 0.5); }
+.r-block { border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; background: var(--bg-hover); }
 .r-block h4 { margin: 0 0 8px; font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
 .w-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.w-chip { display: inline-block; padding: 3px 10px; border: 1px solid rgba(0, 196, 140, 0.35); border-radius: 9px; font-size: 12px; color: var(--down); font-variant-numeric: tabular-nums; }
-.w-chip.proxy { border-color: rgba(245, 166, 35, 0.45); color: var(--warn); }
+.w-chip { display: inline-block; padding: 3px 10px; border: 1px solid color-mix(in srgb, var(--down) 35%, transparent); border-radius: 9px; font-size: 12px; color: var(--down); font-variant-numeric: tabular-nums; }
+.w-chip.proxy { border-color: color-mix(in srgb, var(--warn) 45%, transparent); color: var(--warn); }
 .dim-line { font-size: 12.5px; color: var(--text-dim); margin: 6px 0 0; line-height: 1.65; }
 .research-note { margin: 6px 0 0; font-size: 12px; color: var(--text-dim); text-align: center; }
 @media (max-width: 1280px) {

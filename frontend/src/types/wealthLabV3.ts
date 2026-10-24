@@ -1,8 +1,11 @@
 /**
  * 1:1 镜像 docs/contracts/wealth-lab-api-v3.yaml（中国多资产研究池）。
  * v1/v2 契约冻结不动；v3 只新增 /v1/wealth-lab/v3/*。
- * 注意：契约 AssetQuality.source_breakdown 声明为 object，
- * 但后端实际返回 JSON 字符串（如 "{\"OFFICIAL\": 1648}"），前端解析需双兼容（见 wealthV3Format.parseSourceBreakdown）。
+ * v3.2 增量（后端在途/已交付均可选返回，前端字段存在才展示）：
+ * - AssetQuality.source_breakdown 统一为 object（历史字符串由 parseSourceBreakdown 双兼容）；
+ * - quality 增加 status / q 服务端筛选参数；
+ * - PIT 拒绝响应带 requested_start_date / suggested_start_date / excluded_reasons；
+ * - 回测结果带 time_semantics 三日期与 pit_rebalance_snapshots.rebalance_records 逐调仓明细。
  */
 
 import type { DataMode, WealthEnvelope } from "./wealthLab";
@@ -135,12 +138,49 @@ export interface V3WeightSnapshot {
   weights: Record<string, number>;
 }
 
-/** 单个 PIT 调仓快照点（v3.1：仅提供首末两个端点，中间逐调仓明细未提供）。 */
+/** 单个 PIT 调仓快照点（v3.1：eligible_count+excluded；v3.2 起复用 RebalanceRecord 结构）。 */
 export interface PitSnapshotPoint {
   decision_date: string;
-  eligible_count: number;
-  /** 被排除资产 → 原因列表。 */
-  excluded: Record<string, string[]>;
+  eligible_count?: number;
+  /** 被排除资产 → 原因列表（v3.1 键名）。 */
+  excluded?: Record<string, string[]>;
+  /* ---- v3.2 起后端可能返回 RebalanceRecord 同构字段 ---- */
+  eligible_assets?: string[];
+  excluded_reasons?: Record<string, string[]>;
+  decision_data_through?: string;
+  selected_assets?: string[];
+  target_weights?: Record<string, number>;
+  cash_weight?: number;
+  cost?: number;
+}
+
+/** v3.2 逐调仓完整记录（后端可选返回；存在时审计区渲染逐行表 + 合格数折线）。 */
+export interface RebalanceRecord {
+  decision_date: string;
+  /** 该次决策可用的最新数据截止日（T-1 口径）。 */
+  decision_data_through: string;
+  /** PIT 判定合格的资产（后端排序）。 */
+  eligible_assets: string[];
+  /** 实际入选（非现金）资产。 */
+  selected_assets: string[];
+  /** 目标权重（symbol → 权重）。 */
+  target_weights: Record<string, number>;
+  /** 现金仓位（1 - Σ权重）。 */
+  cash_weight: number;
+  cost: number;
+  /** 被排除资产 → 原因列表（v3.2 键名；个别版本可能缺省）。 */
+  excluded_reasons?: Record<string, string[]>;
+}
+
+/** v3.2 时间语义：消除"回测起点"歧义（请求起点 ≠ 实际首个交易日 ≠ 首次建仓日）。 */
+export interface TimeSemantics {
+  requested_start_date: string;
+  effective_start_date: string;
+  first_investment_date: string | null;
+  end_date: string;
+  actual_trading_days: number;
+  start_shift_reason: string | null;
+  note: string;
 }
 
 /** v3.1 逐调仓 PIT 审计（dict 结构：note/rebalances 计数/first/last 端点/min-max）。 */
@@ -151,6 +191,8 @@ export interface PitRebalanceSnapshots {
   last?: PitSnapshotPoint;
   eligible_count_min: number;
   eligible_count_max: number;
+  /** v3.2：逐调仓完整记录（后端增量，旧后端无此字段）。 */
+  rebalance_records?: RebalanceRecord[];
 }
 
 /** v3 池回测结果：series/metrics/weight_history 与 v2 同构，另带 common_window 与 PIT 门控快照。 */
@@ -174,6 +216,8 @@ export interface UniverseBacktestData {
     end_date: string;
     trading_days: number;
   };
+  /** v3.2：逐调仓完整记录（后端可能放在顶层或嵌在 pit_rebalance_snapshots 内）。 */
+  rebalance_records?: RebalanceRecord[];
   pit_gate: {
     asof: string;
     eligible: string[];
@@ -182,6 +226,8 @@ export interface UniverseBacktestData {
   };
   /** v3.1：每个调仓决策时点重新判定资产资格的审计快照。 */
   pit_rebalance_snapshots?: PitRebalanceSnapshots;
+  /** v3.2：时间语义（requested/effective/first_investment 三日期）。 */
+  time_semantics?: TimeSemantics;
   series: {
     dates: string[];
     nav: number[];

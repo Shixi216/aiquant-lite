@@ -90,6 +90,20 @@ const router = createRouter({
       meta: { title: "实验与系统状态" },
       component: () => import("../views/ResearchHealthView.vue"),
     },
+    // 数据与研究任务中心（阶段二：按钮→真实后端控制 API）
+    {
+      path: "/task-center",
+      name: "task-center",
+      meta: { title: "数据与研究任务中心" },
+      component: () => import("../views/TaskCenterView.vue"),
+    },
+    // 系统设置：主题与布局定制中心
+    {
+      path: "/settings",
+      name: "settings",
+      meta: { title: "外观与布局设置" },
+      component: () => import("../views/SettingsView.vue"),
+    },
     { path: "/:pathMatch(.*)*", redirect: "/dashboard" },
   ],
 });

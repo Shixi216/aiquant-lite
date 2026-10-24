@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import type { CostRow, WalkForwardRow, YearlyRow } from "../../api/research";
 import { fetchStrategyLab } from "../../api/research";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { errorMessage } from "../../api/client";
 import { getCandidateLabel, getWalkForwardLabel } from "../../domain/labels";
 
@@ -11,6 +12,7 @@ const foldsEl = ref<HTMLElement | null>(null);
 const costEl = ref<HTMLElement | null>(null);
 const foldsChart = useECharts(foldsEl);
 const costChart = useECharts(costEl);
+const ct = useChartTheme();
 
 const walkForward = ref<WalkForwardRow[]>([]);
 const yearly = ref<YearlyRow[]>([]);
@@ -49,18 +51,18 @@ function num(value: unknown): number | null {
 function foldsOption() {
   const rows = selectedFolds.value;
   return {
-    title: { text: "滚动样本外验证", textStyle: { color: "#8494a7", fontSize: 13 }, top: 0 },
+    title: { text: "滚动样本外验证", textStyle: { color: ct.value.dim, fontSize: 13 }, top: 0 },
     tooltip: { trigger: "axis" },
-    legend: { data: rows.some((row) => num(row.sortino) !== null) ? ["夏普比率", "索提诺比率"] : ["夏普比率"], textStyle: { color: "#8494a7" }, top: 22 },
+    legend: { data: rows.some((row) => num(row.sortino) !== null) ? ["夏普比率", "索提诺比率"] : ["夏普比率"], textStyle: { color: ct.value.dim }, top: 22 },
     grid: { left: 48, right: 48, top: 56, bottom: 48 },
-    xAxis: { type: "category", data: rows.map(getWalkForwardLabel), axisLabel: { color: "#8494a7", fontSize: 10, rotate: 15 } },
-    yAxis: [{ type: "value", axisLabel: { color: "#8494a7" } }, { type: "value", axisLabel: { color: "#8494a7" } }],
+    xAxis: { type: "category", data: rows.map(getWalkForwardLabel), axisLabel: { color: ct.value.dim, fontSize: 10, rotate: 15 } },
+    yAxis: [{ type: "value", axisLabel: { color: ct.value.dim } }, { type: "value", axisLabel: { color: ct.value.dim } }],
     series: [
       {
         name: "夏普比率",
         type: "bar",
         data: rows.map((row) => num(row.sharpe)),
-        itemStyle: { color: "#4da3ff" },
+        itemStyle: { color: ct.value.accent },
         barMaxWidth: 30,
       },
       {
@@ -68,7 +70,7 @@ function foldsOption() {
         type: "line",
         yAxisIndex: 1,
         data: rows.map((row) => num(row.sortino)),
-        itemStyle: { color: "#e6a23c" },
+        itemStyle: { color: ct.value.warn },
         smooth: true,
       },
     ],
@@ -78,21 +80,21 @@ function foldsOption() {
 function costOption() {
   const rows = selectedCost.value;
   return {
-    title: { text: "成本敏感性", textStyle: { color: "#8494a7", fontSize: 13 }, top: 0 },
+    title: { text: "成本敏感性", textStyle: { color: ct.value.dim, fontSize: 13 }, top: 0 },
     tooltip: { trigger: "axis" },
-    legend: { data: ["夏普比率", "最大回撤%"], textStyle: { color: "#8494a7" }, top: 22 },
+    legend: { data: ["夏普比率", "最大回撤%"], textStyle: { color: ct.value.dim }, top: 22 },
     grid: { left: 48, right: 56, top: 56, bottom: 28 },
-    xAxis: { type: "category", data: rows.map((row) => `${row.cost_bp}bp`), axisLabel: { color: "#8494a7" } },
+    xAxis: { type: "category", data: rows.map((row) => `${row.cost_bp}bp`), axisLabel: { color: ct.value.dim } },
     yAxis: [
-      { type: "value", axisLabel: { color: "#8494a7" } },
-      { type: "value", axisLabel: { color: "#8494a7", formatter: "{value}%" } },
+      { type: "value", axisLabel: { color: ct.value.dim } },
+      { type: "value", axisLabel: { color: ct.value.dim, formatter: "{value}%" } },
     ],
     series: [
       {
         name: "夏普比率",
         type: "line",
         data: rows.map((row) => num(row.sharpe)),
-        itemStyle: { color: "#4da3ff" },
+        itemStyle: { color: ct.value.accent },
         smooth: true,
       },
       {
@@ -100,7 +102,7 @@ function costOption() {
         type: "line",
         yAxisIndex: 1,
         data: rows.map((row) => (num(row.max_drawdown) === null ? null : Number((num(row.max_drawdown) as number * 100).toFixed(2)))),
-        itemStyle: { color: "#f04848" },
+        itemStyle: { color: ct.value.up },
         smooth: true,
       },
     ],
@@ -128,6 +130,11 @@ async function load() {
 }
 
 watch([selectedFolds, selectedCost], () => {
+  foldsChart.setOption(foldsOption(), true);
+  costChart.setOption(costOption(), true);
+});
+
+watch(ct, () => {
   foldsChart.setOption(foldsOption(), true);
   costChart.setOption(costOption(), true);
 });

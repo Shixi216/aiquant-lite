@@ -1,0 +1,398 @@
+/**
+ * Design Tokens（主题系统唯一取色处）
+ * ------------------------------------------------------------------
+ * 结构：语义变量（组件层只允许引用这里的变量，禁止硬编码色值）。
+ * 预设 × 模式：4 套主题（晨雾青绿 / 云朵浅蓝 / 奶油杏金 / 极夜专业版），
+ * 每套均有 light 与 dark 两个变体，由 <html data-wl-theme data-wl-mode> 驱动。
+ * 用户级覆盖（主色/背景/圆角等）由主题 store 写入 <html> 内联样式，
+ * 优先级高于这里的预设值；全部取值不涉及任何金融数据或凭据。
+ *
+ * 兼容性：--bg/--bg-panel/… 等旧变量名全部保留，存量组件样式无需改动即可换肤。
+ */
+
+:root {
+  /* 结构 tokens（与主题无关；可被用户设置覆盖） */
+  --radius-card: 14px;
+  --radius-inner: 10px;
+  --radius-ctrl: 9px;
+  --font-base: 14px;
+  --pad-panel-y: 16px;
+  --pad-panel-x: 18px;
+  --row-pad-y: 8px;
+  --sidebar-width: 232px;
+  --shadow-level: 1; /* 0 关闭 / 1 柔和 / 2 明显（供组件参考，实际值见 --shadow） */
+}
+
+/* ================================================================
+ * 晨雾青绿（默认）：珍珠白背景 + 薄荷卡片 + 青绿主色
+ * ================================================================ */
+
+:root,
+[data-wl-theme="mist-jade"] {
+  color-scheme: light;
+  --bg: #f3f7f5;
+  --bg-wash-1: rgba(15, 155, 132, 0.05);
+  --bg-wash-2: rgba(53, 162, 184, 0.04);
+  --bg-panel: #ffffff;
+  --bg-panel-2: #fbfdfc;
+  --bg-mint: #eef7f2;
+  --bg-hover: #edf4f0;
+  --bg-active: #e3efe9;
+  --control-bg: #ffffff;
+  --border: #dbe5df;
+  --border-soft: rgba(30, 68, 54, 0.09);
+  --border-strong: #c2d3c9;
+  --text: #1f2e28;
+  --text-dim: #5f7469;
+  --text-faint: #90a49a;
+  --accent: #0f9b84;
+  --accent-strong: #0b7d6b;
+  --accent-2: #35a2b8;
+  --accent-contrast: #ffffff;
+  --accent-grad: linear-gradient(135deg, #23b49b 0%, #0f9b84 70%, #1590a8 100%);
+  --up: #d9414e;
+  --down: #159a72;
+  --warn: #bd7c17;
+  --veto: #d9414e;
+  --gold: #a9812f;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-softer: color-mix(in srgb, var(--accent) 6%, transparent);
+  --accent-ring: color-mix(in srgb, var(--accent) 22%, transparent);
+  --table-head-bg: rgba(246, 250, 248, 0.96);
+  --scroll-thumb: #c2d4cb;
+  --overlay: rgba(24, 42, 35, 0.4);
+  --shadow: 0 1px 2px rgba(23, 52, 42, 0.05), 0 10px 32px -20px rgba(23, 52, 42, 0.28);
+  --shadow-pop: 0 4px 12px -4px rgba(23, 52, 42, 0.12), 0 18px 44px -16px rgba(23, 52, 42, 0.24);
+  --glow: 0 0 0 1px var(--accent-ring);
+  --banner-bg: #fdf6e7;
+  --banner-border: #e4d3ab;
+  --banner-text: #8a6a1f;
+  --rank-t1: #a9812f;
+  --rank-t2: #64748b;
+  --rank-t3: #b3703c;
+  --sidebar-bg: linear-gradient(180deg, #f7fbf9, #eff5f1);
+}
+
+[data-wl-theme="mist-jade"][data-wl-mode="dark"] {
+  color-scheme: dark;
+  --bg: #0c1411;
+  --bg-wash-1: rgba(44, 194, 165, 0.06);
+  --bg-wash-2: rgba(70, 184, 207, 0.05);
+  --bg-panel: #111c17;
+  --bg-panel-2: #14221c;
+  --bg-mint: #14261f;
+  --bg-hover: #1a2a23;
+  --bg-active: #21332b;
+  --control-bg: rgba(10, 18, 15, 0.8);
+  --border: #22352c;
+  --border-soft: rgba(52, 80, 66, 0.5);
+  --border-strong: #31493d;
+  --text: #d9e5de;
+  --text-dim: #7e958a;
+  --text-faint: #5a6f65;
+  --accent: #2cc2a5;
+  --accent-strong: #48d6ba;
+  --accent-2: #46b8cf;
+  --accent-contrast: #06211b;
+  --accent-grad: linear-gradient(135deg, #46c8ad 0%, #2cc2a5 60%, #3fb4cf 100%);
+  --up: #ff6b76;
+  --down: #2ecf9a;
+  --warn: #e8a53c;
+  --veto: #ff6b76;
+  --gold: #e0b56a;
+  --table-head-bg: rgba(17, 28, 23, 0.96);
+  --scroll-thumb: #2c4237;
+  --overlay: rgba(3, 8, 6, 0.62);
+  --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 14px 40px -12px rgba(0, 0, 0, 0.6);
+  --banner-bg: #2a2312;
+  --banner-border: #57451f;
+  --banner-text: #e7c476;
+  --rank-t1: #ffd76a;
+  --rank-t2: #cdd7e3;
+  --rank-t3: #e8a26a;
+  --sidebar-bg: linear-gradient(180deg, #101a15, #0b120e);
+}
+
+/* ================================================================
+ * 云朵浅蓝
+ * ================================================================ */
+
+[data-wl-theme="cloud-blue"] {
+  color-scheme: light;
+  --bg: #f2f6fb;
+  --bg-wash-1: rgba(47, 126, 216, 0.05);
+  --bg-wash-2: rgba(56, 163, 201, 0.04);
+  --bg-panel: #ffffff;
+  --bg-panel-2: #fafcfe;
+  --bg-mint: #eef4fb;
+  --bg-hover: #ecf3fa;
+  --bg-active: #e0ecf7;
+  --control-bg: #ffffff;
+  --border: #d8e2ee;
+  --border-soft: rgba(30, 58, 92, 0.09);
+  --border-strong: #bfd2e4;
+  --text: #1e2a38;
+  --text-dim: #5c6f84;
+  --text-faint: #8fa1b5;
+  --accent: #2f7ed8;
+  --accent-strong: #2565b0;
+  --accent-2: #38a3c9;
+  --accent-contrast: #ffffff;
+  --accent-grad: linear-gradient(135deg, #4d97e6 0%, #2f7ed8 70%, #38a3c9 100%);
+  --up: #d9414e;
+  --down: #159a72;
+  --warn: #bd7c17;
+  --veto: #d9414e;
+  --gold: #a9812f;
+  --table-head-bg: rgba(244, 248, 253, 0.96);
+  --scroll-thumb: #bfd2e4;
+  --overlay: rgba(20, 33, 48, 0.4);
+  --shadow: 0 1px 2px rgba(24, 42, 66, 0.05), 0 10px 32px -20px rgba(24, 42, 66, 0.3);
+  --shadow-pop: 0 4px 12px -4px rgba(24, 42, 66, 0.12), 0 18px 44px -16px rgba(24, 42, 66, 0.26);
+  --banner-bg: #fdf6e7;
+  --banner-border: #e4d3ab;
+  --banner-text: #8a6a1f;
+  --rank-t1: #a9812f;
+  --rank-t2: #64748b;
+  --rank-t3: #b3703c;
+  --sidebar-bg: linear-gradient(180deg, #f6fafe, #ecf2f9);
+}
+
+[data-wl-theme="cloud-blue"][data-wl-mode="dark"] {
+  color-scheme: dark;
+  --bg: #0c1220;
+  --bg-wash-1: rgba(90, 162, 240, 0.07);
+  --bg-wash-2: rgba(70, 192, 221, 0.05);
+  --bg-panel: #111a2b;
+  --bg-panel-2: #142036;
+  --bg-mint: #12203a;
+  --bg-hover: #1a2740;
+  --bg-active: #21304e;
+  --control-bg: rgba(9, 14, 26, 0.8);
+  --border: #24344d;
+  --border-soft: rgba(62, 88, 122, 0.45);
+  --border-strong: #33486a;
+  --text: #dae4f0;
+  --text-dim: #7e92ab;
+  --text-faint: #5a6c85;
+  --accent: #5aa2f0;
+  --accent-strong: #7fbaf6;
+  --accent-2: #46c0dd;
+  --accent-contrast: #071527;
+  --accent-grad: linear-gradient(135deg, #7fbaf6 0%, #5aa2f0 60%, #46c0dd 100%);
+  --up: #ff6b76;
+  --down: #2ecf9a;
+  --warn: #e8a53c;
+  --veto: #ff6b76;
+  --gold: #e0b56a;
+  --table-head-bg: rgba(17, 26, 43, 0.96);
+  --scroll-thumb: #2c3d5c;
+  --overlay: rgba(2, 5, 12, 0.62);
+  --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 14px 40px -12px rgba(0, 0, 0, 0.6);
+  --banner-bg: #2a2312;
+  --banner-border: #57451f;
+  --banner-text: #e7c476;
+  --rank-t1: #ffd76a;
+  --rank-t2: #cdd7e3;
+  --rank-t3: #e8a26a;
+  --sidebar-bg: linear-gradient(180deg, #101827, #0b111d);
+}
+
+/* ================================================================
+ * 奶油杏金
+ * ================================================================ */
+
+[data-wl-theme="cream-apricot"] {
+  color-scheme: light;
+  --bg: #f9f5ee;
+  --bg-wash-1: rgba(185, 127, 36, 0.055);
+  --bg-wash-2: rgba(217, 164, 65, 0.04);
+  --bg-panel: #fffdf8;
+  --bg-panel-2: #fcf8f1;
+  --bg-mint: #f8f1e3;
+  --bg-hover: #f4ecdf;
+  --bg-active: #ede2cd;
+  --control-bg: #fffdf8;
+  --border: #e7dcc8;
+  --border-soft: rgba(94, 74, 40, 0.1);
+  --border-strong: #d3c3a2;
+  --text: #332c1e;
+  --text-dim: #7d715a;
+  --text-faint: #a29678;
+  --accent: #b97f24;
+  --accent-strong: #99661a;
+  --accent-2: #4e9e8e;
+  --accent-contrast: #fffaf0;
+  --accent-grad: linear-gradient(135deg, #d29a3e 0%, #b97f24 70%, #4e9e8e 130%);
+  --up: #d9414e;
+  --down: #159a72;
+  --warn: #bd7c17;
+  --veto: #d9414e;
+  --gold: #a97e2f;
+  --table-head-bg: rgba(250, 245, 234, 0.96);
+  --scroll-thumb: #d3c3a2;
+  --overlay: rgba(48, 40, 24, 0.4);
+  --shadow: 0 1px 2px rgba(72, 56, 24, 0.06), 0 10px 32px -20px rgba(72, 56, 24, 0.3);
+  --shadow-pop: 0 4px 12px -4px rgba(72, 56, 24, 0.13), 0 18px 44px -16px rgba(72, 56, 24, 0.26);
+  --banner-bg: #fdf6e7;
+  --banner-border: #e4d3ab;
+  --banner-text: #8a6a1f;
+  --rank-t1: #a9812f;
+  --rank-t2: #64748b;
+  --rank-t3: #b3703c;
+  --sidebar-bg: linear-gradient(180deg, #fbf7ef, #f4eee1);
+}
+
+[data-wl-theme="cream-apricot"][data-wl-mode="dark"] {
+  color-scheme: dark;
+  --bg: #15120c;
+  --bg-wash-1: rgba(224, 169, 78, 0.06);
+  --bg-wash-2: rgba(78, 158, 142, 0.04);
+  --bg-panel: #1d1912;
+  --bg-panel-2: #221d14;
+  --bg-mint: #241e12;
+  --bg-hover: #2a2418;
+  --bg-active: #342c1d;
+  --control-bg: rgba(20, 16, 10, 0.8);
+  --border: #3a3222;
+  --border-soft: rgba(96, 82, 52, 0.5);
+  --border-strong: #4d422c;
+  --text: #ece4d2;
+  --text-dim: #a3947a;
+  --text-faint: #776a52;
+  --accent: #e0a94e;
+  --accent-strong: #edc276;
+  --accent-2: #5cb8a5;
+  --accent-contrast: #201605;
+  --accent-grad: linear-gradient(135deg, #edc276 0%, #e0a94e 60%, #5cb8a5 130%);
+  --up: #ff6b76;
+  --down: #2ecf9a;
+  --warn: #e8a53c;
+  --veto: #ff6b76;
+  --gold: #e0b56a;
+  --table-head-bg: rgba(29, 25, 18, 0.96);
+  --scroll-thumb: #4d422c;
+  --overlay: rgba(8, 6, 2, 0.62);
+  --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 14px 40px -12px rgba(0, 0, 0, 0.6);
+  --banner-bg: #2a2312;
+  --banner-border: #57451f;
+  --banner-text: #e7c476;
+  --rank-t1: #ffd76a;
+  --rank-t2: #cdd7e3;
+  --rank-t3: #e8a26a;
+  --sidebar-bg: linear-gradient(180deg, #1a160e, #120f09);
+}
+
+/* ================================================================
+ * 极夜专业版（原有深色量化终端，完整保留）
+ * ================================================================ */
+
+[data-wl-theme="polar-night"] {
+  color-scheme: dark;
+  --bg: #0a0e14;
+  --bg-wash-1: rgba(34, 211, 238, 0.07);
+  --bg-wash-2: rgba(124, 140, 255, 0.06);
+  --bg-panel: #11161f;
+  --bg-panel-2: #151b26;
+  --bg-mint: #131a26;
+  --bg-hover: #1a2230;
+  --bg-active: #1f2938;
+  --control-bg: rgba(10, 14, 20, 0.8);
+  --border: #232c3b;
+  --border-soft: rgba(38, 49, 64, 0.6);
+  --border-strong: #2f3b4f;
+  --text: #dde4ee;
+  --text-dim: #8595aa;
+  --text-faint: #5f7086;
+  --accent: #4da3ff;
+  --accent-strong: #74b8ff;
+  --accent-2: #22d3ee;
+  --accent-contrast: #061018;
+  --accent-grad: linear-gradient(135deg, #22d3ee 0%, #4da3ff 60%, #7c8cff 100%);
+  --up: #ff5464;
+  --down: #00c48c;
+  --warn: #f5a623;
+  --veto: #ff5464;
+  --gold: #e8b45a;
+  --table-head-bg: rgba(17, 22, 31, 0.96);
+  --scroll-thumb: #2a3547;
+  --overlay: rgba(4, 6, 10, 0.62);
+  --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 14px 40px -12px rgba(0, 0, 0, 0.65);
+  --glow: 0 0 0 1px rgba(77, 163, 255, 0.35), 0 8px 28px -8px rgba(77, 163, 255, 0.35);
+  --banner-bg: #362b19;
+  --banner-border: #70512b;
+  --banner-text: #f1c477;
+  --rank-t1: #ffd76a;
+  --rank-t2: #cdd7e3;
+  --rank-t3: #e8a26a;
+  --sidebar-bg: linear-gradient(180deg, rgba(21, 27, 38, 0.96), rgba(13, 17, 24, 0.96));
+}
+
+/* 极夜·昼：中性浅色对应变体（模式切换可用，主色保持原有蓝） */
+[data-wl-theme="polar-night"][data-wl-mode="light"] {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --bg-wash-1: rgba(77, 163, 255, 0.05);
+  --bg-wash-2: rgba(34, 211, 238, 0.04);
+  --bg-panel: #ffffff;
+  --bg-panel-2: #fafbfc;
+  --bg-mint: #eff4f9;
+  --bg-hover: #eef1f5;
+  --bg-active: #e4e9f0;
+  --control-bg: #ffffff;
+  --border: #dfe3ea;
+  --border-soft: rgba(33, 41, 54, 0.09);
+  --border-strong: #c8d0dc;
+  --text: #212936;
+  --text-dim: #64748b;
+  --text-faint: #94a3b8;
+  --accent: #2f7ed8;
+  --accent-strong: #2565b0;
+  --accent-2: #0ea5b7;
+  --accent-contrast: #ffffff;
+  --accent-grad: linear-gradient(135deg, #4da3ff 0%, #2f7ed8 70%, #0ea5b7 100%);
+  --up: #d9414e;
+  --down: #159a72;
+  --warn: #bd7c17;
+  --veto: #d9414e;
+  --gold: #a9812f;
+  --table-head-bg: rgba(245, 246, 248, 0.96);
+  --scroll-thumb: #c8d0dc;
+  --overlay: rgba(15, 23, 42, 0.4);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 32px -20px rgba(15, 23, 42, 0.28);
+  --shadow-pop: 0 4px 12px -4px rgba(15, 23, 42, 0.12), 0 18px 44px -16px rgba(15, 23, 42, 0.24);
+  --glow: 0 0 0 1px var(--accent-ring);
+  --banner-bg: #fdf6e7;
+  --banner-border: #e4d3ab;
+  --banner-text: #8a6a1f;
+  --rank-t1: #a9812f;
+  --rank-t2: #64748b;
+  --rank-t3: #b3703c;
+  --sidebar-bg: linear-gradient(180deg, #f8f9fb, #f0f2f5);
+}
+
+/* ================================================================
+ * 密度档位（紧凑 / 舒适 / 宽松）：调整面板内边距与行高
+ * ================================================================ */
+
+[data-wl-density="compact"] {
+  --pad-panel-y: 12px;
+  --pad-panel-x: 14px;
+  --row-pad-y: 6px;
+}
+
+[data-wl-density="comfortable"] {
+  --pad-panel-y: 20px;
+  --pad-panel-x: 22px;
+  --row-pad-y: 11px;
+}
+
+/* 阴影档位 0：无投影 */
+[data-wl-shadow="0"] {
+  --shadow: none;
+  --shadow-pop: 0 6px 24px -10px rgba(0, 0, 0, 0.28);
+}

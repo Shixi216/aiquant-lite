@@ -19,6 +19,7 @@ import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
 import echarts, { type EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
+import { useChartTheme } from "../domain/chartTheme";
 import { fmtPct, fmtRatio, returnColorClass } from "../domain/wealthFormat";
 import { OPTIMIZATION_METHOD_LABELS } from "../domain/wealthV2Format";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
@@ -115,6 +116,7 @@ const metricColumns = [
 
 const barEl = ref<HTMLElement | null>(null);
 const barChart = useECharts(barEl as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const barOption = computed<EChartsCoreOption | null>(() => {
   const rows = comparison.value;
@@ -124,34 +126,34 @@ const barOption = computed<EChartsCoreOption | null>(() => {
     animationDuration: 600,
     tooltip: {
       trigger: "axis",
-      backgroundColor: "rgba(13,17,24,0.95)",
-      borderColor: "#232c3b",
-      textStyle: { color: "#dde4ee", fontSize: 13 },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 13 },
     },
-    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 12, itemHeight: 8, textStyle: { color: "#8595aa", fontSize: 12.5 } },
+    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 12, itemHeight: 8, textStyle: { color: ct.value.dim, fontSize: 12.5 } },
     grid: { left: 56, right: 20, top: 38, bottom: 34 },
     xAxis: {
       type: "category",
       data: names,
-      axisLine: { lineStyle: { color: "#232c3b" } },
-      axisLabel: { color: "#dde4ee", fontSize: 12, interval: 0, rotate: names.length > 4 ? 16 : 0 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      axisLabel: { color: ct.value.text, fontSize: 12, interval: 0, rotate: names.length > 4 ? 16 : 0 },
     },
     yAxis: [
       {
         type: "value",
-        axisLabel: { color: "#8595aa", fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
-        splitLine: { lineStyle: { color: "rgba(38,49,64,0.5)" } },
+        axisLabel: { color: ct.value.dim, fontSize: 12, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
+        splitLine: { lineStyle: { color: ct.value.grid } },
       },
       {
         type: "value",
-        axisLabel: { color: "#8595aa", fontSize: 12 },
+        axisLabel: { color: ct.value.dim, fontSize: 12 },
         splitLine: { show: false },
       },
     ],
     series: [
-      { name: "年化收益", type: "bar", data: rows.map((r) => r.metrics.annual_return), itemStyle: { color: "#f04848", borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
-      { name: "最大回撤", type: "bar", data: rows.map((r) => r.metrics.max_drawdown), itemStyle: { color: "#2ebd85", borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
-      { name: "夏普比率", type: "bar", yAxisIndex: 1, data: rows.map((r) => r.metrics.sharpe_ratio), itemStyle: { color: "#e8b45a", borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
+      { name: "年化收益", type: "bar", data: rows.map((r) => r.metrics.annual_return), itemStyle: { color: ct.value.up, borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
+      { name: "最大回撤", type: "bar", data: rows.map((r) => r.metrics.max_drawdown), itemStyle: { color: ct.value.down, borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
+      { name: "夏普比率", type: "bar", yAxisIndex: 1, data: rows.map((r) => r.metrics.sharpe_ratio), itemStyle: { color: ct.value.gold, borderRadius: [4, 4, 0, 0] }, barWidth: 14 },
     ],
   } satisfies EChartsCoreOption;
 });
@@ -198,12 +200,16 @@ const optData = computed(() => optResult.value?.data ?? null);
 const donutEl = ref<HTMLElement | null>(null);
 const donutChart = useECharts(donutEl as Ref<HTMLElement | null>);
 
-const ASSET_COLORS: Record<string, string> = {
-  "510300.SH": "#4da3ff",
-  "511010.SH": "#22d3ee",
-  "518880.SH": "#e8b45a",
-  "511380.SH": "#b58cff",
-};
+/** 资产语义色：取当前主题图表色盘前四席，保持与全站图表一致并随主题联动。 */
+const ASSET_COLORS = computed<Record<string, string>>(() => {
+  const palette = ct.value.palette;
+  return {
+    "510300.SH": palette[0] ?? ct.value.accent,
+    "511010.SH": palette[1] ?? ct.value.accent2,
+    "518880.SH": palette[2] ?? ct.value.gold,
+    "511380.SH": palette[3] ?? ct.value.warn,
+  };
+});
 
 const donutOption = computed<EChartsCoreOption | null>(() => {
   const weights = optData.value?.weights ?? {};
@@ -213,20 +219,20 @@ const donutOption = computed<EChartsCoreOption | null>(() => {
     animationDuration: 500,
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(13,17,24,0.94)",
-      borderColor: "#232c3b",
-      textStyle: { color: "#dde4ee", fontSize: 12 },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
       formatter: (p: { name: string; value: number }) => `${strategyName(p.name)}<br/>权重 ${(p.value * 100).toFixed(1)}%`,
     },
-    legend: { bottom: 0, icon: "roundRect", itemWidth: 10, itemHeight: 10, textStyle: { color: "#8595aa", fontSize: 11.5 } },
+    legend: { bottom: 0, icon: "roundRect", itemWidth: 10, itemHeight: 10, textStyle: { color: ct.value.dim, fontSize: 11.5 } },
     title: {
       text: OPTIMIZATION_METHOD_LABELS[optData.value?.method ?? ""] ?? optData.value?.method ?? "",
       subtext: `算法适配器：${optData.value?.adapter_used === "native" ? "内置纯 numpy 实现" : optData.value?.adapter_used ?? "—"}`,
       left: "center",
       top: "34%",
       itemGap: 6,
-      textStyle: { color: "#dde4ee", fontSize: 16, fontWeight: 700 },
-      subtextStyle: { color: "#8595aa", fontSize: 10.5 },
+      textStyle: { color: ct.value.text, fontSize: 16, fontWeight: 700 },
+      subtextStyle: { color: ct.value.dim, fontSize: 10.5 },
     },
     series: [
       {
@@ -235,13 +241,13 @@ const donutOption = computed<EChartsCoreOption | null>(() => {
         radius: ["52%", "74%"],
         center: ["50%", "46%"],
         padAngle: 2,
-        itemStyle: { borderColor: "#11161f", borderWidth: 2, borderRadius: 6 },
+        itemStyle: { borderColor: ct.value.isDark ? "#11161f" : "#ffffff", borderWidth: 2, borderRadius: 6 },
         label: { show: false },
         labelLine: { show: false },
         data: entries.map(([symbol, weight]) => ({
           name: symbol,
           value: Math.round(weight * 10000) / 10000,
-          itemStyle: { color: ASSET_COLORS[symbol] ?? "#8595aa" },
+          itemStyle: { color: ASSET_COLORS.value[symbol] ?? ct.value.dim },
         })),
       },
     ],
@@ -406,8 +412,8 @@ onMounted(async () => {
 .window-strip {
   display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
   margin-bottom: 12px; padding: 10px 14px;
-  border: 1px solid rgba(34, 211, 238, 0.35); border-radius: 10px;
-  background: rgba(34, 211, 238, 0.05); font-size: 13px; color: var(--text);
+  border: 1px solid var(--accent-ring); border-radius: 10px;
+  background: var(--accent-softer); font-size: 13px; color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 .window-strip b { color: var(--text-dim); font-weight: 600; margin-right: 6px; }
@@ -416,7 +422,7 @@ onMounted(async () => {
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-dim); }
 .field input { min-width: 130px; }
 button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 16px; }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .compare-table td.best { color: var(--gold); font-weight: 700; }
 .compare-table th, .compare-table td { padding: 11px 12px; font-size: 13.5px; }
 .chart-caption { display: flex; align-items: baseline; justify-content: space-between; margin-top: 10px; }
@@ -426,7 +432,7 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .opt-grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; margin-top: 8px; }
 .donut { min-height: 300px; }
 .opt-info { display: flex; flex-direction: column; gap: 12px; }
-.opt-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 16px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: rgba(10, 14, 20, 0.5); }
+.opt-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 16px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--bg-hover); }
 .m-item { display: flex; flex-direction: column; gap: 2px; }
 .m-item span { font-size: 11.5px; color: var(--text-dim); }
 .m-item b { font-size: 16px; font-variant-numeric: tabular-nums; }

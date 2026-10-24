@@ -3,11 +3,13 @@ import { computed, ref, watch } from "vue";
 
 import type { SnapshotRow } from "../../api/simDaily";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 
 const props = defineProps<{ rows: SnapshotRow[] }>();
 
 const chartEl = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(chartEl);
+const ct = useChartTheme();
 
 const option = computed(() => {
   const groups = ["命中组", "临界组", "对照组"];
@@ -18,20 +20,20 @@ const option = computed(() => {
     return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
   });
   return {
-    title: { text: "分组平均涨跌幅（%）", textStyle: { color: "#8494a7", fontSize: 13 } },
+    title: { text: "分组平均涨跌幅（%）", textStyle: { color: ct.value.dim, fontSize: 13 } },
     tooltip: { trigger: "axis" },
     grid: { left: 48, right: 20, top: 44, bottom: 28 },
-    xAxis: { type: "category", data: groups, axisLabel: { color: "#8494a7" } },
-    yAxis: { type: "value", axisLabel: { color: "#8494a7", formatter: "{value}%" } },
+    xAxis: { type: "category", data: groups, axisLabel: { color: ct.value.dim } },
+    yAxis: { type: "value", axisLabel: { color: ct.value.dim, formatter: "{value}%" } },
     series: [
       {
         type: "bar",
         data: means.map((value) => ({
           value: Number(value.toFixed(3)),
-          itemStyle: { color: value > 0 ? "#f04848" : value < 0 ? "#2ebd85" : "#8494a7" },
+          itemStyle: { color: value > 0 ? ct.value.up : value < 0 ? ct.value.down : ct.value.dim },
         })),
         barWidth: 42,
-        label: { show: true, position: "top", color: "#d8dee6", formatter: "{c}%" },
+        label: { show: true, position: "top", color: ct.value.text, formatter: "{c}%" },
       },
     ],
   };

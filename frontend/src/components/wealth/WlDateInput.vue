@@ -66,5 +66,5 @@ function commit(): void {
 .wl-date { display: flex; flex-direction: column; gap: 4px; }
 .wl-date-label { font-size: 11.5px; color: var(--text-dim); }
 .wl-date-input { min-width: 128px; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
-.wl-date-input.invalid { border-color: var(--warn); box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15); }
+.wl-date-input.invalid { border-color: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 15%, transparent); }
 </style>

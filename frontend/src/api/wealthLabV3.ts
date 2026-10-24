@@ -44,12 +44,40 @@ function toBusinessError(err: unknown, label: string): Error {
   return new Error(`${label}失败：${errorMessage(err)}`);
 }
 
-async function withFallback<T>(live: () => Promise<WealthEnvelope<T>>, mock: () => WealthEnvelope<T>, label: string): Promise<WealthResult<T>> {
+/** HTTP 200 + status=FAILED（如 PIT 闸门拒绝）的富信息错误：携带信封内数据供页面展示。 */
+export class V3BacktestRejectedError extends Error {
+  /** FAILED 信封的 data（v3.2 含 requested_start_date / suggested_start_date / excluded_reasons）。 */
+  readonly rejection: Record<string, unknown>;
+
+  constructor(label: string, message: string, rejection: Record<string, unknown>) {
+    super(`${label}失败：${message}`);
+    this.name = "V3BacktestRejectedError";
+    this.rejection = rejection;
+  }
+}
+
+function toBusinessErrorRich(err: unknown, label: string): Error {
+  if (axios.isAxiosError(err)) {
+    const envelope = err.response?.data as
+      | { status?: string; error_code?: string | null; sanitized_error?: string | null; data?: Record<string, unknown> }
+      | undefined;
+    const detail = envelope?.sanitized_error || envelope?.error_code;
+    if (detail) {
+      if (envelope?.status === "FAILED" && envelope.data && typeof envelope.data === "object") {
+        return new V3BacktestRejectedError(label, detail, envelope.data);
+      }
+      return new Error(`${label}失败：${detail}`);
+    }
+  }
+  return toBusinessError(err, label);
+}
+
+async function withFallback<T>(live: () => Promise<WealthEnvelope<T>>, mock: () => WealthEnvelope<T>, label: string, onBusinessError?: (err: unknown) => Error): Promise<WealthResult<T>> {
   try {
     return { envelope: await live(), source: "live" };
   } catch (err) {
     if (isBackendMissing(err)) return { envelope: mock(), source: "offline-mock" };
-    throw toBusinessError(err, label);
+    throw onBusinessError ? onBusinessError(err) : toBusinessError(err, label);
   }
 }
 
@@ -71,12 +99,20 @@ export function fetchV3UniverseAssets(universeId: string): Promise<WealthResult<
   );
 }
 
-/* ---------------- GET /v1/wealth-lab/v3/quality?category=&page=&limit= ---------------- */
+/* ---------------- GET /v1/wealth-lab/v3/quality?category=&status=&q=&page=&limit= ---------------- */
 
-/** v3.1：分页 + 类别过滤；page 从 1 起，limit 缺省由后端决定。 */
-export function fetchV3Quality(category?: string, page?: number, limit?: number): Promise<WealthResult<QualityData>> {
+/** v3.1：分页 + 类别过滤；v3.2 增量：status（质量状态）与 q（代码/名称关键字）服务端参数。 */
+export function fetchV3Quality(
+  category?: string,
+  page?: number,
+  limit?: number,
+  status?: string,
+  q?: string,
+): Promise<WealthResult<QualityData>> {
   const params: Record<string, string | number> = {};
   if (category) params.category = category;
+  if (status && status !== "all") params.status = status;
+  if (q && q.trim()) params.q = q.trim();
   if (page) params.page = page;
   if (limit) params.limit = limit;
   return withFallback(
@@ -103,5 +139,6 @@ export function runV3UniverseBacktest(strategyId: string, payload: UniverseBackt
     () => http.post<WealthEnvelope<UniverseBacktestData>>(`/v1/wealth-lab/v3/strategies/${strategyId}/backtest`, payload).then((r) => r.data),
     () => universeBacktestMock,
     "资产池回测",
+    toBusinessErrorRich,
   );
 }

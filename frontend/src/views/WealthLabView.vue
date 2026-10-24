@@ -209,16 +209,16 @@ onBeforeUnmount(() => {
 .head-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mode-banner {
   padding: 11px 14px; margin-bottom: 16px;
-  border: 1px solid rgba(245, 166, 35, 0.5);
-  background: rgba(245, 166, 35, 0.08);
+  border: 1px solid color-mix(in srgb, var(--warn) 50%, transparent);
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
   border-radius: 10px;
-  color: #f1c477;
+  color: var(--banner-text);
   font-size: 12.5px;
   line-height: 1.7;
 }
-.mode-banner.demo { border-color: rgba(232, 180, 90, 0.55); }
+.mode-banner.demo { border-color: color-mix(in srgb, var(--gold) 55%, transparent); }
 .mode-banner code { color: var(--accent-2); font-size: 11.5px; }
-.mode-banner strong { color: #ffd76a; }
+.mode-banner strong { color: var(--gold); }
 .research-note { margin: 4px 0 0; font-size: 11.5px; color: var(--text-dim); text-align: center; }
 .wealth-lab :deep(section.panel) { scroll-margin-top: 16px; }
 </style>

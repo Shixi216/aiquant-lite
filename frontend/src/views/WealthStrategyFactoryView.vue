@@ -13,7 +13,7 @@ import { STRATEGY_PARAM_LABELS, strategyFamily } from "../domain/wealthV2Format"
 import { fmtPct, REBALANCE_LABELS } from "../domain/wealthFormat";
 import { useWealthLabV2Store } from "../stores/wealthLabV2";
 import { fetchV3Universes, runV3UniverseBacktest } from "../api/wealthLabV3";
-import type { UniversesData, UniverseBacktestData, WealthEnvelope as V3Envelope } from "../types/wealthLabV3";
+import type { UniversesData, UniverseBacktestData, TimeSemantics, WealthEnvelope as V3Envelope } from "../types/wealthLabV3";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
 import type { StrategyMeta } from "../types/wealthLabV2";
 
@@ -42,6 +42,10 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const errorHint = ref<string | null>(null);
 const pitAudit = ref<import("../types/wealthLabV3").PitRebalanceSnapshots | null>(null);
+/** v3.2 时间语义（requested/effective/first_investment 三日期；旧后端无此字段时为 null）。 */
+const timeSemantics = ref<TimeSemantics | null>(null);
+/** PIT 闸门拒绝时的建议起始日期（v3.2 增量；旧后端无此字段时为 null）。 */
+const rejected = ref<{ requested: string | null; suggested: string | null } | null>(null);
 const wealthLabV2 = useWealthLabV2Store();
 let requestSeq = 0;
 
@@ -141,6 +145,12 @@ function selectStrategy(meta: StrategyMeta): void {
       : {};
 }
 
+function applySuggestedStart(): void {
+  if (!rejected.value?.suggested) return;
+  form.value = { ...form.value, start_date: rejected.value.suggested };
+  void runBacktest();
+}
+
 const paramsOverride = computed<Record<string, unknown> | undefined>(() => {
   if (!selected.value) return undefined;
   const override: Record<string, unknown> = {};
@@ -186,13 +196,29 @@ async function runBacktest(): Promise<void> {
       // 200+FAILED（如 PIT 闸门：回测起点无合格资产）按业务失败呈现，不进入结果适配
       if (response.envelope.status === "FAILED" || !("series" in (response.envelope.data as object))) {
         result.value = null;
-        const reason = (response.envelope.data as { reason?: string } | null)?.reason;
+        pitAudit.value = null;
+        timeSemantics.value = null;
+        const data = response.envelope.data as { reason?: string; requested_start_date?: string; suggested_start_date?: string | null } | null;
+        rejected.value = {
+          requested: data?.requested_start_date ?? null,
+          suggested: data?.suggested_start_date ?? null,
+        };
         error.value = response.envelope.sanitized_error || response.envelope.error_code || "资产池回测不可用";
-        errorHint.value = `${reason ? `${reason}。` : ""}PIT 闸门要求回测起点时池内存在合格资产：可在「多资产研究池」查看该池历史可投资性，或将开始日期后移至有合格资产的时点。后端暂未提供建议起始日期字段。`;
+        errorHint.value = [
+          data?.reason ? `${data.reason}。` : "",
+          data?.suggested_start_date
+            ? `后端建议起始日期：${data.suggested_start_date}（点击可直接采用）。`
+            : "后端暂未返回建议起始日期（v3.2 增量字段）。",
+          "PIT 闸门要求回测起点时池内存在合格资产：可在「多资产研究池」查看该池历史可投资性。",
+        ].join("");
         return;
       }
       const v3 = response.envelope.data as UniverseBacktestData;
-      pitAudit.value = v3.pit_rebalance_snapshots ?? null;
+      // v3.2 过渡兼容：逐调仓记录可能在顶层或嵌于 pit_rebalance_snapshots
+      const records = v3.rebalance_records ?? v3.pit_rebalance_snapshots?.rebalance_records ?? [];
+      pitAudit.value = { ...(v3.pit_rebalance_snapshots ?? { note: "", rebalances: 0, eligible_count_min: 0, eligible_count_max: 0 }), rebalance_records: records };
+      timeSemantics.value = v3.time_semantics ?? null;
+      rejected.value = null;
       // 适配为 v2 结果结构复用同一结果组件（data_quality 由池信息合成，不虚构来源）
       result.value = {
         ...response.envelope,
@@ -237,6 +263,8 @@ async function runBacktest(): Promise<void> {
       result.value = response.envelope;
       resultSource.value = response.source;
       pitAudit.value = null; // 基线回测无 v3 PIT 快照
+      timeSemantics.value = null;
+      rejected.value = null;
     }
     if (result.value) {
       // 记录最近一次真实回测（含资产池上下文），供 AI 研究与决策包校验后关联
@@ -366,7 +394,7 @@ onMounted(async () => {
                   type="range" min="0" max="100" step="1"
                   :value="weightPct(String(symbol))"
                   :aria-label="`${assetNameOf(String(symbol))} 权重滑杆`"
-                  :style="{ accentColor: '#4da3ff' }"
+                  :style="{ accentColor: 'var(--accent)' }"
                   @input="setWeightPct(String(symbol), Number(($event.target as HTMLInputElement).value))"
                 />
                 <input
@@ -411,6 +439,10 @@ onMounted(async () => {
             <span v-if="selected" class="dim">最少历史 {{ selected.min_history_days }} 个交易日</span>
           </div>
           <p v-if="errorHint" class="error-hint">※ {{ errorHint }}</p>
+          <div v-if="rejected?.suggested" class="suggested-row">
+            <span>建议起始日期：<b>{{ rejected.suggested }}</b><template v-if="rejected.requested">（原请求 {{ rejected.requested }}）</template></span>
+            <button class="mini primary" type="button" :disabled="loading" @click="applySuggestedStart">采用并重跑</button>
+          </div>
         </div>
       </section>
     </div>
@@ -422,6 +454,7 @@ onMounted(async () => {
       :universe="universe"
       :pool-info="poolInfo"
       :pit-audit="pitAudit"
+      :time-semantics="timeSemantics"
     />
   </div>
 </template>
@@ -435,11 +468,11 @@ onMounted(async () => {
 .strategy-card {
   display: flex; flex-direction: column; gap: 4px; text-align: left;
   border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
-  background: rgba(10, 14, 20, 0.55); color: var(--text); cursor: pointer;
+  background: var(--bg-panel-2); color: var(--text); cursor: pointer;
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.strategy-card:hover { border-color: rgba(77, 163, 255, 0.5); transform: translateX(2px); }
-.strategy-card.active { border-color: var(--accent); background: linear-gradient(90deg, rgba(77, 163, 255, 0.12), rgba(34, 211, 238, 0.06)); box-shadow: inset 0 0 16px rgba(77, 163, 255, 0.08); }
+.strategy-card:hover { border-color: var(--accent-ring); transform: translateX(2px); }
+.strategy-card.active { border-color: var(--accent); background: var(--accent-soft); }
 .family { font-size: 10px; color: var(--accent-2); letter-spacing: 1px; }
 .s-head { display: flex; align-items: baseline; gap: 8px; }
 .s-head strong { font-size: 13.5px; }
@@ -450,8 +483,8 @@ onMounted(async () => {
 .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-dim); }
 .field input { min-width: 130px; }
-.strategy-params { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: rgba(10, 14, 20, 0.5); }
-.weight-editor { border-color: rgba(77, 163, 255, 0.35); }
+.strategy-params { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--bg-hover); }
+.weight-editor { border-color: var(--accent-ring); }
 .weight-rows { display: flex; flex-direction: column; gap: 8px; }
 .weight-row { display: grid; grid-template-columns: 110px 92px 1fr 78px 16px; align-items: center; gap: 10px; }
 .w-name { font-size: 13px; color: var(--text); }
@@ -471,12 +504,14 @@ onMounted(async () => {
 .risk-note { margin: 8px 0 0; font-size: 11.5px; color: var(--warn); }
 .actions { display: flex; align-items: center; gap: 12px; }
 button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 18px; }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .dim { color: var(--text-dim); font-size: 12px; }
 .chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .pool-note { margin: 10px 0 0; font-size: 12.5px; color: var(--text-dim); line-height: 1.7; }
 .pool-note strong { color: var(--text); }
 .error-hint { margin: 10px 0 0; font-size: 12.5px; color: var(--warn); line-height: 1.7; }
+.suggested-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; font-size: 12.5px; color: var(--text); }
+.suggested-row b { color: var(--accent-strong); font-variant-numeric: tabular-nums; }
 @media (max-width: 1280px) {
   .factory-grid { grid-template-columns: 1fr; }
 }

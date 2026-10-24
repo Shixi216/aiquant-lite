@@ -77,8 +77,8 @@ const maxAbsWeight = computed(() => {
 function weightBarStyle(weight: number): Record<string, string> {
   const width = `${(Math.abs(weight) / maxAbsWeight.value) * 48}%`;
   return weight >= 0
-    ? { left: "50%", width, background: "#4da3ff" }
-    : { right: "50%", width, background: "#f04848" };
+    ? { left: "50%", width, background: "var(--accent)" }
+    : { right: "50%", width, background: "var(--up)" };
 }
 </script>
 

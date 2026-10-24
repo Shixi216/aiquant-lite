@@ -13,6 +13,7 @@ import { runWealthStressTest } from "../../api/wealthLab";
 import { errorMessage } from "../../api/client";
 import echarts, { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { ASSET_COLORS, fmtCny, fmtPct, isWeightsValid } from "../../domain/wealthFormat";
 import { DOWN_COLOR, UP_COLOR } from "../../domain/labels";
 
@@ -103,11 +104,12 @@ function assetName(symbol: string): string {
 
 function assetColor(symbol: string): string {
   const category = props.assets?.find((asset) => asset.symbol === symbol)?.category;
-  return category ? ASSET_COLORS[category] : "#8595aa";
+  return category ? ASSET_COLORS[category] : ct.value.dim;
 }
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const contributionOption = computed<EChartsCoreOption | null>(() => {
   const items: AssetContribution[] = data.value?.asset_contributions ?? [];
@@ -117,9 +119,9 @@ const contributionOption = computed<EChartsCoreOption | null>(() => {
     animationDuration: 500,
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(13,17,24,0.94)",
-      borderColor: "#232c3b",
-      textStyle: { color: "#dde4ee", fontSize: 12 },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
       formatter: (p: { dataIndex: number }) => {
         const item = sorted[p.dataIndex]!;
         return `${assetName(item.symbol)}<br/>权重 ${fmtPct(item.weight, 1, false)} · 单日冲击 ${fmtPct(item.shock_return)}<br/>组合贡献 ${fmtPct(item.contribution)}（${fmtCny(props.initialCapital * item.contribution, 2)}）`;
@@ -128,14 +130,14 @@ const contributionOption = computed<EChartsCoreOption | null>(() => {
     grid: { left: 88, right: 48, top: 10, bottom: 24 },
     xAxis: {
       type: "value",
-      axisLabel: { color: "#8595aa", fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(1)}%` },
-      splitLine: { lineStyle: { color: "rgba(38,49,64,0.5)" } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(1)}%` },
+      splitLine: { lineStyle: { color: ct.value.grid } },
     },
     yAxis: {
       type: "category",
       data: sorted.map((item) => assetName(item.symbol)),
-      axisLabel: { color: "#dde4ee", fontSize: 11.5 },
-      axisLine: { lineStyle: { color: "#232c3b" } },
+      axisLabel: { color: ct.value.text, fontSize: 11.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
     },
     series: [
       {
@@ -150,7 +152,7 @@ const contributionOption = computed<EChartsCoreOption | null>(() => {
         label: {
           show: true,
           position: "right",
-          color: "#8595aa",
+          color: ct.value.dim,
           fontSize: 10.5,
           formatter: (p: { value: number }) => fmtPct(p.value),
         },
@@ -378,10 +380,10 @@ onMounted(run);
 .shock-row input { width: 90px; text-align: right; font-variant-numeric: tabular-nums; }
 .pct-unit { color: var(--text-dim); font-size: 12px; }
 .assumption { margin: 0; font-size: 11.5px; color: var(--text-dim); }
-.profile-box { border: 1px dashed rgba(245, 166, 35, 0.45); border-radius: 10px; padding: 10px 12px; }
+.profile-box { border: 1px dashed color-mix(in srgb, var(--warn) 45%, transparent); border-radius: 10px; padding: 10px 12px; }
 .profile-title { display: block; font-size: 12px; color: var(--warn); margin-bottom: 8px; }
 .profile-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.assumption-box { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: rgba(10, 14, 20, 0.5); }
+.assumption-box { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--bg-hover); }
 .assumption-box strong { font-size: 12.5px; }
 .assumption-box ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
 .assumption-box li { font-size: 11.5px; color: var(--text-dim); }
@@ -390,7 +392,7 @@ onMounted(run);
 .loss-card {
   display: flex; flex-direction: column; gap: 5px;
   border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
-  background: linear-gradient(180deg, rgba(26, 34, 48, 0.9), rgba(17, 22, 31, 0.9));
+  background: linear-gradient(180deg, var(--bg-panel-2));
 }
 .loss-label { font-size: 12px; color: var(--text-dim); }
 .loss-value { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -402,8 +404,8 @@ onMounted(run);
 .contrib-table { max-height: none; }
 .dot { width: 8px; height: 8px; border-radius: 3px; display: inline-block; margin-right: 8px; }
 .risk-warning {
-  border: 1px solid rgba(245, 166, 35, 0.5);
-  background: rgba(245, 166, 35, 0.08);
+  border: 1px solid color-mix(in srgb, var(--warn) 50%, transparent);
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
   border-radius: 10px;
   padding: 12px 14px;
 }

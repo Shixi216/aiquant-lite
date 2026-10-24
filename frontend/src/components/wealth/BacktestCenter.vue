@@ -11,6 +11,7 @@ import type { Ref } from "vue";
 import type { Asset, BacktestData, BacktestFormParams, Metrics, RiskData, WealthEnvelope } from "../../types/wealthLab";
 import echarts, { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme, withAlpha } from "../../domain/chartTheme";
 import {
   REBALANCE_LABELS,
   assetName,
@@ -44,38 +45,37 @@ const navChart = useECharts(navEl as Ref<HTMLElement | null>);
 const drawdownChart = useECharts(drawdownEl as Ref<HTMLElement | null>);
 const rollingChart = useECharts(rollingEl as Ref<HTMLElement | null>);
 
-const AXIS_TEXT = "#8595aa";
-const SPLIT_LINE = "rgba(38,49,64,0.5)";
-const TOOLTIP_STYLE = {
-  backgroundColor: "rgba(13,17,24,0.94)",
-  borderColor: "#232c3b",
-  textStyle: { color: "#dde4ee", fontSize: 12 } as const,
-};
+const ct = useChartTheme();
+const tooltipBase = computed(() => ({
+  backgroundColor: ct.value.tooltipBg,
+  borderColor: ct.value.border,
+  textStyle: { color: ct.value.tooltipText, fontSize: 12 } as const,
+}));
 
 const navOption = computed<EChartsCoreOption | null>(() => {
   const s = series.value;
   if (!s?.dates.length) return null;
   return {
     animationDuration: 700,
-    tooltip: { trigger: "axis", ...TOOLTIP_STYLE, valueFormatter: (v: number) => fmtNav(v) },
-    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 14, itemHeight: 4, textStyle: { color: AXIS_TEXT, fontSize: 12 } },
+    tooltip: { trigger: "axis", ...tooltipBase.value, valueFormatter: (v: number) => fmtNav(v) },
+    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 14, itemHeight: 4, textStyle: { color: ct.value.dim, fontSize: 12 } },
     grid: { left: 60, right: 74, top: 34, bottom: 62 },
     xAxis: {
       type: "category",
       data: s.dates,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: "#232c3b" } },
-      axisLabel: { color: AXIS_TEXT, fontSize: 10.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5 },
     },
     yAxis: {
       type: "value",
       scale: true,
-      axisLabel: { color: AXIS_TEXT, fontSize: 10.5, formatter: (v: number) => v.toFixed(2) },
-      splitLine: { lineStyle: { color: SPLIT_LINE } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5, formatter: (v: number) => v.toFixed(2) },
+      splitLine: { lineStyle: { color: ct.value.grid } },
     },
     dataZoom: [
       { type: "inside" },
-      { type: "slider", height: 18, bottom: 10, borderColor: "#232c3b", backgroundColor: "rgba(10,14,20,0.5)", fillerColor: "rgba(77,163,255,0.15)", handleStyle: { color: "#4da3ff" }, textStyle: { color: AXIS_TEXT, fontSize: 10 } },
+      { type: "slider", height: 18, bottom: 10, borderColor: ct.value.border, backgroundColor: ct.value.isDark ? "rgba(10,14,20,0.5)" : "rgba(255,255,255,0.6)", fillerColor: withAlpha(ct.value.accent, 0.15), handleStyle: { color: ct.value.accent }, textStyle: { color: ct.value.dim, fontSize: 10 } },
     ],
     series: [
       {
@@ -83,24 +83,24 @@ const navOption = computed<EChartsCoreOption | null>(() => {
         type: "line",
         data: s.portfolio_nav,
         showSymbol: false,
-        lineStyle: { width: 2.6, color: "#4da3ff" },
+        lineStyle: { width: 2.6, color: ct.value.accent },
         areaStyle: {
           color: {
             type: "linear", x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(77,163,255,0.28)" },
-              { offset: 1, color: "rgba(77,163,255,0.02)" },
+              { offset: 0, color: withAlpha(ct.value.accent, 0.28) },
+              { offset: 1, color: withAlpha(ct.value.accent, 0.02) },
             ],
           },
         },
-        endLabel: { show: true, color: "#4da3ff", fontSize: 11, formatter: (p: { value: number }) => fmtNav(p.value) },
+        endLabel: { show: true, color: ct.value.accent, fontSize: 11, formatter: (p: { value: number }) => fmtNav(p.value) },
       },
       {
         name: "等权基准（EQUAL_WEIGHT）",
         type: "line",
         data: s.benchmark_nav,
         showSymbol: false,
-        lineStyle: { width: 1.6, color: "#8595aa", type: "dashed" },
+        lineStyle: { width: 1.6, color: ct.value.dim, type: "dashed" },
       },
     ],
   } satisfies EChartsCoreOption;
@@ -111,20 +111,20 @@ const drawdownOption = computed<EChartsCoreOption | null>(() => {
   if (!s?.dates.length) return null;
   return {
     animationDuration: 700,
-    tooltip: { trigger: "axis", ...TOOLTIP_STYLE, valueFormatter: (v: number) => fmtPct(v) },
+    tooltip: { trigger: "axis", ...tooltipBase.value, valueFormatter: (v: number) => fmtPct(v) },
     grid: { left: 60, right: 20, top: 20, bottom: 26 },
     xAxis: {
       type: "category",
       data: s.dates,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: "#232c3b" } },
-      axisLabel: { color: AXIS_TEXT, fontSize: 10.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5 },
     },
     yAxis: {
       type: "value",
       max: 0,
-      axisLabel: { color: AXIS_TEXT, fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
-      splitLine: { lineStyle: { color: SPLIT_LINE } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
+      splitLine: { lineStyle: { color: ct.value.grid } },
     },
     series: [
       {
@@ -132,13 +132,13 @@ const drawdownOption = computed<EChartsCoreOption | null>(() => {
         type: "line",
         data: s.portfolio_drawdown,
         showSymbol: false,
-        lineStyle: { width: 2, color: "#f5a623" },
+        lineStyle: { width: 2, color: ct.value.warn },
         areaStyle: {
           color: {
             type: "linear", x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(245,166,35,0.03)" },
-              { offset: 1, color: "rgba(245,166,35,0.30)" },
+              { offset: 0, color: withAlpha(ct.value.warn, 0.03) },
+              { offset: 1, color: withAlpha(ct.value.warn, 0.3) },
             ],
           },
         },
@@ -152,25 +152,25 @@ const rollingOption = computed<EChartsCoreOption | null>(() => {
   if (!rolling?.dates.length) return null;
   return {
     animationDuration: 700,
-    tooltip: { trigger: "axis", ...TOOLTIP_STYLE },
-    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 14, itemHeight: 4, textStyle: { color: AXIS_TEXT, fontSize: 12 } },
+    tooltip: { trigger: "axis", ...tooltipBase.value },
+    legend: { top: 0, right: 0, icon: "roundRect", itemWidth: 14, itemHeight: 4, textStyle: { color: ct.value.dim, fontSize: 12 } },
     grid: { left: 60, right: 56, top: 34, bottom: 26 },
     xAxis: {
       type: "category",
       data: rolling.dates,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: "#232c3b" } },
-      axisLabel: { color: AXIS_TEXT, fontSize: 10.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      axisLabel: { color: ct.value.dim, fontSize: 10.5 },
     },
     yAxis: [
       {
         type: "value",
-        axisLabel: { color: AXIS_TEXT, fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
-        splitLine: { lineStyle: { color: SPLIT_LINE } },
+        axisLabel: { color: ct.value.dim, fontSize: 10.5, formatter: (v: number) => `${(v * 100).toFixed(0)}%` },
+        splitLine: { lineStyle: { color: ct.value.grid } },
       },
       {
         type: "value",
-        axisLabel: { color: AXIS_TEXT, fontSize: 10.5, formatter: (v: number) => v.toFixed(1) },
+        axisLabel: { color: ct.value.dim, fontSize: 10.5, formatter: (v: number) => v.toFixed(1) },
         splitLine: { show: false },
       },
     ],
@@ -181,7 +181,7 @@ const rollingOption = computed<EChartsCoreOption | null>(() => {
         yAxisIndex: 0,
         data: rolling.volatility_63d,
         showSymbol: false,
-        lineStyle: { width: 2, color: "#22d3ee" },
+        lineStyle: { width: 2, color: ct.value.accent2 },
       },
       {
         name: "滚动夏普（252日）",
@@ -189,7 +189,7 @@ const rollingOption = computed<EChartsCoreOption | null>(() => {
         yAxisIndex: 1,
         data: rolling.sharpe_252d,
         showSymbol: false,
-        lineStyle: { width: 2, color: "#e8b45a" },
+        lineStyle: { width: 2, color: ct.value.gold },
       },
     ],
   } satisfies EChartsCoreOption;
@@ -348,7 +348,7 @@ function onCostChange(event: Event): void {
 .field-static { font-size: 12px; color: var(--text); padding-bottom: 8px; font-variant-numeric: tabular-nums; }
 .field-static.dim { color: var(--text-dim); }
 button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 16px; }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .chart-caption { display: flex; align-items: baseline; justify-content: space-between; margin: 6px 0 2px; }
 .chart-caption strong { font-size: 13px; }
 .chart-caption span { font-size: 11px; color: var(--text-dim); }
@@ -359,9 +359,9 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .metric-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 14px; }
 .m-card {
   border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
-  background: linear-gradient(180deg, rgba(26, 34, 48, 0.9), rgba(17, 22, 31, 0.9));
+  background: linear-gradient(180deg, var(--bg-panel-2));
 }
-.m-card.accent { border-color: rgba(77, 163, 255, 0.45); box-shadow: inset 0 0 24px rgba(77, 163, 255, 0.06); }
+.m-card.accent { border-color: var(--accent-ring); box-shadow: inset 0 0 24px var(--accent-softer); }
 .m-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
 .m-head strong { font-size: 13.5px; }
 .m-head small { color: var(--text-dim); font-size: 11px; }

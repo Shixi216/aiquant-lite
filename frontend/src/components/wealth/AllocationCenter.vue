@@ -9,6 +9,7 @@ import type { Ref } from "vue";
 import type { Asset, WealthEnvelope, AssetsData } from "../../types/wealthLab";
 import echarts, { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import {
   ASSET_CATEGORY_LABELS,
   ASSET_COLORS,
@@ -30,6 +31,7 @@ const weights = defineModel<Record<string, number>>("weights", { required: true 
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 // assets 接口不可用时的结构兜底（仅控件骨架，不虚构行情数据）。
 const DEFAULT_ASSET_ROWS: Asset[] = [
@@ -78,9 +80,9 @@ const option = computed<EChartsCoreOption>(() => {
     animationDuration: 500,
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(13,17,24,0.94)",
-      borderColor: "#232c3b",
-      textStyle: { color: "#dde4ee", fontSize: 12 },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
       formatter: (p: { name: string; value: number; percent: number }) =>
         `${p.name}<br/>权重 ${p.value.toFixed(1)}% · 市值 ${fmtCny((props.initialCapital * p.value) / 100)}`,
     },
@@ -89,7 +91,7 @@ const option = computed<EChartsCoreOption>(() => {
       icon: "roundRect",
       itemWidth: 10,
       itemHeight: 10,
-      textStyle: { color: "#8595aa", fontSize: 11.5 },
+      textStyle: { color: ct.value.dim, fontSize: 11.5 },
     },
     title: {
       text: sumOk ? "100%" : sumText.value,
@@ -97,8 +99,8 @@ const option = computed<EChartsCoreOption>(() => {
       left: "center",
       top: "34%",
       itemGap: 6,
-      textStyle: { color: sumOk ? "#dde4ee" : "#f5a623", fontSize: 22, fontWeight: 700 },
-      subtextStyle: { color: sumOk ? "#8595aa" : "#f5a623", fontSize: 11 },
+      textStyle: { color: sumOk ? ct.value.text : ct.value.warn, fontSize: 22, fontWeight: 700 },
+      subtextStyle: { color: sumOk ? ct.value.dim : ct.value.warn, fontSize: 11 },
     },
     series: [
       {
@@ -107,7 +109,7 @@ const option = computed<EChartsCoreOption>(() => {
         radius: ["54%", "74%"],
         center: ["50%", "46%"],
         padAngle: 2,
-        itemStyle: { borderColor: "#11161f", borderWidth: 2, borderRadius: 6 },
+        itemStyle: { borderColor: ct.value.isDark ? "#11161f" : "#ffffff", borderWidth: 2, borderRadius: 6 },
         label: { show: false },
         labelLine: { show: false },
         emphasis: { scaleSize: 6, label: { show: false } },
@@ -200,16 +202,16 @@ watchEffect(() => {
 .sum-line {
   display: flex; flex-direction: column; gap: 3px;
   padding: 10px 12px; border-radius: 10px; font-size: 12.5px;
-  border: 1px solid var(--border); background: rgba(10, 14, 20, 0.5);
+  border: 1px solid var(--border); background: var(--bg-hover);
   font-variant-numeric: tabular-nums;
 }
-.sum-line.ok { border-color: rgba(0, 196, 140, 0.35); }
+.sum-line.ok { border-color: color-mix(in srgb, var(--down) 35%, transparent); }
 .sum-line.bad { border-color: var(--warn); }
 .sum-error { color: var(--warn); font-size: 11.5px; }
 .sum-ok { color: var(--down); font-size: 11.5px; }
 .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 button.primary { border-color: var(--accent); color: var(--accent); }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .hint { color: var(--text-dim); font-size: 11.5px; }
 .hint code { color: var(--accent-2); font-size: 11px; }
 @media (max-width: 1100px) {

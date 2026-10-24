@@ -12,6 +12,7 @@ import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
 import echarts, { type EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
+import { useChartTheme } from "../domain/chartTheme";
 import { fmtCny, fmtPct, fmtRatio, returnColorClass } from "../domain/wealthFormat";
 import { V2_CATEGORY_LABELS } from "../domain/wealthV2Format";
 import { FACTOR_HINTS, FACTOR_LABELS, compositeMetric } from "../domain/wealthLabLabels";
@@ -40,6 +41,7 @@ function assetCategory(symbol: string): string {
 
 const rankEl = ref<HTMLElement | null>(null);
 const rankChart = useECharts(rankEl as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const rankOption = computed<EChartsCoreOption | null>(() => {
   const rows = [...factors.value].sort((a, b) => a.composite_rank - b.composite_rank);
@@ -48,9 +50,9 @@ const rankOption = computed<EChartsCoreOption | null>(() => {
     animationDuration: 500,
     tooltip: {
       trigger: "item",
-      backgroundColor: "rgba(13,17,24,0.95)",
-      borderColor: "#232c3b",
-      textStyle: { color: "#dde4ee", fontSize: 13 },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 13 },
       formatter: (p: { dataIndex: number }) => {
         const row = rows[p.dataIndex]!;
         return `<b>${assetName(row.symbol)}</b>（${row.symbol}）<br/>${composite.value.label}：<b>${fmtRatio(row.composite_rank, 2)}</b><br/>${FACTOR_LABELS.momentum_126d}：${fmtPct(row.momentum_126d)}<br/>${FACTOR_LABELS.trend_score}：${fmtPct(row.trend_score)}<br/>${FACTOR_LABELS.volatility_63d}：${fmtPct(row.volatility_63d, 2, false)}<br/>${FACTOR_LABELS.max_drawdown_252d}：${fmtPct(row.max_drawdown_252d)}`;
@@ -59,26 +61,26 @@ const rankOption = computed<EChartsCoreOption | null>(() => {
     grid: { left: 168, right: 64, top: 14, bottom: 28 },
     xAxis: {
       type: "value",
-      axisLabel: { color: "#8595aa", fontSize: 12, formatter: (v: number) => v.toFixed(1) },
-      splitLine: { lineStyle: { color: "rgba(38,49,64,0.5)" } },
+      axisLabel: { color: ct.value.dim, fontSize: 12, formatter: (v: number) => v.toFixed(1) },
+      splitLine: { lineStyle: { color: ct.value.grid } },
     },
     yAxis: {
       type: "category",
       data: rows.map((row) => `${assetName(row.symbol)} ${row.symbol}`),
-      axisLabel: { color: "#dde4ee", fontSize: 12.5 },
-      axisLine: { lineStyle: { color: "#232c3b" } },
+      axisLabel: { color: ct.value.text, fontSize: 12.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
     },
     series: [
       {
         name: composite.value.label,
         type: "bar",
         barWidth: 20,
-        itemStyle: { color: "#4da3ff", borderRadius: 4 },
+        itemStyle: { color: ct.value.accent, borderRadius: 4 },
         data: rows.map((row) => row.composite_rank),
         label: {
           show: true,
           position: "right",
-          color: "#dde4ee",
+          color: ct.value.text,
           fontSize: 12,
           formatter: (p: { value: number }) => fmtRatio(p.value, 2),
         },

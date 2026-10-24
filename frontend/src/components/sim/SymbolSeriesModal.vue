@@ -4,6 +4,7 @@ import { nextTick, onMounted, ref } from "vue";
 import { errorMessage } from "../../api/client";
 import { fetchSymbolSeries, type SymbolSeries } from "../../api/simDaily";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 
 const props = defineProps<{ date: string; symbol: string }>();
 defineEmits<{ close: [] }>();
@@ -12,6 +13,7 @@ const data = ref<SymbolSeries | null>(null);
 const error = ref<string | null>(null);
 const chartEl = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(chartEl);
+const ct = useChartTheme();
 
 function render(series: SymbolSeries) {
   const labels = series.series.map((point) => point.timepoint);
@@ -33,12 +35,12 @@ function render(series: SymbolSeries) {
           return lines.join("<br/>");
         },
       },
-      legend: { data: ["总评分", "涨跌幅%"], textStyle: { color: "#8494a7" }, top: 0 },
+      legend: { data: ["总评分", "涨跌幅%"], textStyle: { color: ct.value.dim }, top: 0 },
       grid: { left: 48, right: 48, top: 36, bottom: 28 },
-      xAxis: { type: "category", data: labels, axisLabel: { color: "#8494a7" } },
+      xAxis: { type: "category", data: labels, axisLabel: { color: ct.value.dim } },
       yAxis: [
-        { type: "value", min: 0, max: 1, axisLabel: { color: "#8494a7" }, name: "评分" },
-        { type: "value", axisLabel: { color: "#8494a7", formatter: "{value}%" }, name: "涨跌幅" },
+        { type: "value", min: 0, max: 1, axisLabel: { color: ct.value.dim }, name: "评分" },
+        { type: "value", axisLabel: { color: ct.value.dim, formatter: "{value}%" }, name: "涨跌幅" },
       ],
       series: [
         {
@@ -46,7 +48,7 @@ function render(series: SymbolSeries) {
           type: "line",
           data: series.series.map((point) => point.score),
           smooth: true,
-          itemStyle: { color: "#4da3ff" },
+          itemStyle: { color: ct.value.accent },
         },
         {
           name: "涨跌幅%",
@@ -56,7 +58,7 @@ function render(series: SymbolSeries) {
             point.pct === null || point.pct === undefined ? null : Number(point.pct.toFixed(2)),
           ),
           smooth: true,
-          itemStyle: { color: "#e6a23c" },
+          itemStyle: { color: ct.value.warn },
         },
       ],
     },

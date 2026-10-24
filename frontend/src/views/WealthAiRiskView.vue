@@ -500,11 +500,11 @@ onMounted(async () => {
 .field input, .field select { min-width: 150px; }
 .field.grow { flex: 1; min-width: 200px; }
 button.primary { border-color: var(--accent); color: var(--accent); }
-button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
+button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .summary { margin: 8px 0 12px; font-size: 13.5px; line-height: 1.85; color: var(--text); border-left: 3px solid var(--accent); padding-left: 12px; }
 .research-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.r-block { border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; background: rgba(10, 14, 20, 0.5); }
-.r-block.warn { border-color: rgba(245, 166, 35, 0.4); }
+.r-block { border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; background: var(--bg-hover); }
+.r-block.warn { border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
 .r-block.veto { border-color: rgba(255, 84, 100, 0.5); }
 .r-block h4 { margin: 0 0 8px; font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
 .r-block ul { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -513,12 +513,12 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .verdict-big { font-size: 14px; font-weight: 700; padding: 4px 14px; border-radius: 12px; }
 .dim-line { font-size: 12.5px; color: var(--text-dim); margin: 6px 0 0; }
 .link-hint { color: var(--accent-2); }
-.verdict-note { margin: 8px 0 10px; font-size: 12.5px; color: var(--text); line-height: 1.7; border-left: 3px solid rgba(38, 49, 64, 0.9); padding-left: 10px; }
+.verdict-note { margin: 8px 0 10px; font-size: 12.5px; color: var(--text); line-height: 1.7; border-left: 3px solid var(--border); padding-left: 10px; }
 .flow-strip {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
   margin-bottom: 16px; padding: 10px 14px;
-  border: 1px solid rgba(77, 163, 255, 0.3); border-radius: 10px;
-  background: rgba(77, 163, 255, 0.05);
+  border: 1px solid var(--accent-ring); border-radius: 10px;
+  background: var(--accent-softer);
 }
 .flow-step {
   display: inline-flex; align-items: center; gap: 7px;
@@ -528,14 +528,14 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .flow-step i {
   font-style: normal; display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; border-radius: 50%;
-  background: rgba(38, 49, 64, 0.6); font-size: 11px;
+  background: var(--bg-hover); font-size: 11px;
 }
-.flow-step.done { color: var(--text); border-color: rgba(0, 196, 140, 0.45); }
-.flow-step.done i { background: rgba(0, 196, 140, 0.18); color: var(--down); font-weight: 700; }
+.flow-step.done { color: var(--text); border-color: color-mix(in srgb, var(--down) 45%, transparent); }
+.flow-step.done i { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--down); font-weight: 700; }
 .flow-arrow { color: var(--text-dim); }
 .flow-note { margin-left: auto; font-size: 11.5px; color: var(--text-dim); }
 .warn-text { color: var(--warn); }
-.audit { margin-top: 12px; border: 1px dashed rgba(38, 49, 64, 0.9); border-radius: 10px; padding: 8px 12px; }
+.audit { margin-top: 12px; border: 1px dashed var(--border); border-radius: 10px; padding: 8px 12px; }
 .audit summary { cursor: pointer; color: var(--text-dim); font-size: 12px; user-select: none; }
 .audit summary:hover { color: var(--accent); }
 .audit-body { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -543,7 +543,7 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .hash-line { margin: 4px 0; }
 .hash-line code { font-size: 11.5px; color: var(--accent-2); word-break: break-all; }
 .check-grid { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
-.check-form { display: flex; flex-direction: column; gap: 11px; border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; background: rgba(10, 14, 20, 0.5); }
+.check-form { display: flex; flex-direction: column; gap: 11px; border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; background: var(--bg-hover); }
 .check-form h4 { margin: 0; font-size: 12.5px; color: var(--text-dim); }
 .w-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
 .w-row span { width: 90px; color: var(--text); }
@@ -552,11 +552,11 @@ button.primary:hover:not(:disabled) { background: rgba(77, 163, 255, 0.12); }
 .check-table th, .check-table td { font-size: 13px; padding: 10px 12px; }
 .adjusted-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
 .w-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.w-chip { display: inline-block; padding: 3px 10px; border: 1px solid var(--border); border-radius: 9px; font-size: 12.5px; color: var(--text); background: rgba(38, 49, 64, 0.4); font-variant-numeric: tabular-nums; }
+.w-chip { display: inline-block; padding: 3px 10px; border: 1px solid var(--border); border-radius: 9px; font-size: 12.5px; color: var(--text); background: var(--bg-hover); font-variant-numeric: tabular-nums; }
 .w-chip.cash { border-color: rgba(232, 180, 90, 0.5); color: var(--gold); }
 .packet-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 14px; }
 .packet-grid { display: grid; grid-template-columns: 340px 1fr; gap: 14px; align-items: stretch; }
-.packet-head-card { display: flex; flex-direction: column; gap: 9px; border: 1px solid rgba(34, 211, 238, 0.4); border-radius: 12px; padding: 14px 16px; background: rgba(10, 14, 20, 0.5); }
+.packet-head-card { display: flex; flex-direction: column; gap: 9px; border: 1px solid var(--accent-ring); border-radius: 12px; padding: 14px 16px; background: var(--bg-hover); }
 .packet-id { font-size: 18px; font-weight: 700; color: var(--accent-2); font-variant-numeric: tabular-nums; }
 .metric-block { display: flex; }
 .metric-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 16px; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }

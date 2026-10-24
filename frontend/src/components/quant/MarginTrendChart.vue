@@ -4,12 +4,14 @@ import type { Ref } from "vue";
 import type { MarginPoint } from "../../types/v2";
 import echarts, { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { formatAmountYi } from "../../domain/labels";
 
 const props = defineProps<{ points: MarginPoint[] }>();
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const option = computed<EChartsCoreOption | null>(() => {
   const data = props.points;
@@ -38,7 +40,7 @@ const option = computed<EChartsCoreOption | null>(() => {
         data: values,
         smooth: true,
         showSymbol: false,
-        lineStyle: { width: 2.2, color: "#e8b45a" },
+        lineStyle: { width: 2.2, color: ct.value.gold },
         areaStyle: {
           color: {
             type: "linear", x: 0, y: 0, x2: 0, y2: 1,
