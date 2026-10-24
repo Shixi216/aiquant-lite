@@ -1,0 +1,479 @@
+openapi: 3.1.0
+info:
+  title: 怡怡投研·大类资产配置实验室 API v2（策略工厂/优化/风控/AI）
+  version: 2.0.0
+  description: |
+    Wealth Lab v2 扩展契约 · **以中国金融市场为核心**。
+    v1 契约（wealth-lab-api-v1.yaml）已冻结并保持 100% 向后兼容；
+    本契约只新增独立扩展接口（/v1/wealth-lab/v2/*），不改动任何 v1 字段。
+    变更规则同 v1：字段变更必须先升契约版本并通知前端。
+
+    ## 中国市场适配（强制约定）
+    | 类别 | 约定 |
+    |---|---|
+    | 交易日历 | 上交所（SSE）真实交易日；数据池缺失即 UNAVAILABLE，不自动补造 |
+    | 货币 | 人民币 CNY |
+    | 资产代码 | 沪深 ts_code（510300.SH / 159915.SZ） |
+    | 净值口径 | fund_daily × fund_adj 后复权（分红再投资），仅境内场内基金 |
+    | 资产类别 | CN_EQUITY_ETF / CN_BOND_ETF / CN_GOLD_ETF / CN_CONVERTIBLE_ETF / CN_REIT / QDII_ETF |
+    | 成本模型 | ETF 场内双边佣金按 Σ\|Δw\|×cost_bps/1e4；QDII 额外汇率/时差风险在 risk_notes 注明 |
+    | 开源工具 | PyPortfolioOpt/QuantStats/bt/skfolio 仅作通用算法参考（适配器隔离），不引入其海外行情与交易假设 |
+
+    ## 数据模式（同 v1 语义）
+    REAL（真实池内数据）/ DEMO（合成，series.demo=true 强制标记）/
+    UNAVAILABLE（数据缺失，error_code=DATA_UNAVAILABLE）。
+    AI 输出恒为研究辅助（research_only=true），不修改硬风险规则结果。
+
+    ## 防未来函数
+    所有策略/优化只在调仓决策时点使用截至前一交易日的历史窗口；
+    估计窗口与验证窗口严格分离；样本外结果标记 exploratory=true。
+
+servers:
+  - url: http://127.0.0.1:8765
+    description: 本地 Router
+
+paths:
+  /v1/wealth-lab/v2/universe:
+    get:
+      operationId: getWealthLabUniverse
+      summary: 多资产研究池（中国市场核心，逐步扩容）
+      responses:
+        "200":
+          description: 资产清单（含数据覆盖与来源审计）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/factors:
+    get:
+      operationId: getWealthLabFactors
+      summary: ETF 多因子评分（动量/趋势/波动/回撤/流动性）
+      parameters:
+        - name: asof
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: 因子评分与综合排序
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/strategies:
+    get:
+      operationId: listWealthLabStrategies
+      summary: 可用策略列表与参数结构（S0-S8）
+      responses:
+        "200":
+          description: 策略元信息
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/strategies/{strategy_id}/backtest:
+    post:
+      operationId: runStrategyBacktest
+      summary: 单策略回测（统一引擎、统一成本与年化口径）
+      parameters:
+        - name: strategy_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StrategyBacktestRequest" }
+      responses:
+        "200":
+          description: 回测结果
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/strategies/compare:
+    post:
+      operationId: compareStrategies
+      summary: 多策略统一比较（同区间/成本/口径）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                strategy_ids: { type: array, items: { type: string }, minItems: 1 }
+                start_date: { type: string, format: date }
+                end_date: { type: string, format: date }
+                cost_bps: { type: number, default: 5 }
+      responses:
+        "200":
+          description: 比较矩阵
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/optimization/run:
+    post:
+      operationId: runOptimization
+      summary: 组合优化（min_vol / max_sharpe / hrp；适配器：pypfopt 可选，纯 numpy 兜底）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OptimizationRequest" }
+      responses:
+        "200":
+          description: 优化结果（标准化目标权重 + 估计窗口审计）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/risk/check:
+    post:
+      operationId: runWealthRiskCheck
+      summary: 独立风险核查（数据/资产/组合/AI 四类；PASS/WARN/VETO/INSUFFICIENT_DATA）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RiskCheckRequest" }
+      responses:
+        "200":
+          description: 风险核查结果（硬规则由确定性程序执行；AI 仅解释）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/ai/research:
+    post:
+      operationId: runWealthAiResearch
+      summary: AI 多资产研究（复用 AIQUANT-LITE Router，真实模型调用，独立审计）
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                strategy_id: { type: string }
+                backtest_id: { type: string }
+                context: { type: string, description: 补充研究关注点（可选） }
+      responses:
+        "200":
+          description: 结构化研究输出（Pydantic 校验）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/ai/risk-review:
+    post:
+      operationId: runWealthAiRiskReview
+      summary: AI 风险复核（核查研究结论证据、识别幻觉；不影响硬 VETO 执行）
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                research_id: { type: string }
+                claims: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: 结构化风险复核
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+  /v1/wealth-lab/v2/decision-packets:
+    post:
+      operationId: createWealthDecisionPacket
+      summary: 生成 WealthDecisionPacket（独立持久化，不可变版本，内容哈希）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DecisionPacketRequest" }
+      responses:
+        "200":
+          description: 决策包
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/decision-packets/{packet_id}:
+    get:
+      operationId: getWealthDecisionPacket
+      summary: 查询决策包
+      parameters:
+        - name: packet_id
+          in: path
+          required: true
+          schema: { type: string, pattern: "^wldec_[0-9a-f]{12}$" }
+      responses:
+        "200":
+          description: 决策包详情
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+  /v1/wealth-lab/v2/reports/{backtest_id}:
+    get:
+      operationId: getWealthRiskReport
+      summary: 风险分析报告（QuantStats 等效：Sortino/月度矩阵/滚动指标/HTML）
+      parameters:
+        - name: backtest_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: format
+          in: query
+          schema: { type: string, enum: [json, html], default: json }
+      responses:
+        "200":
+          description: 报告（html 返回 text/html）
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/V2Envelope" }
+
+components:
+  schemas:
+    V2Envelope:
+      type: object
+      description: 与 v1 统一信封一致（request_id/status/data/...research_only）+ data.data_mode
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [SUCCESS, DEGRADED, FAILED] }
+        data:
+          type: object
+          properties:
+            data_mode: { type: string, enum: [REAL, DEMO, UNAVAILABLE] }
+        error_code: { type: [string, "null"] }
+        sanitized_error: { type: [string, "null"] }
+        warnings: { type: array, items: { type: string } }
+        risk_flags: { type: array, items: { type: string } }
+        generated_at: { type: string, format: date-time }
+        api_version: { type: string, example: "wealth-lab/v2" }
+        research_only: { const: true }
+
+    UniverseAsset:
+      type: object
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        category: { type: string, enum: [CN_EQUITY_ETF, CN_BOND_ETF, CN_GOLD_ETF, CN_CONVERTIBLE_ETF, CN_REIT, QDII_ETF] }
+        exchange: { type: string, enum: [SSE, SZSE] }
+        currency: { const: CNY }
+        listing_date: { type: string, format: date }
+        data_first_date: { type: [string, "null"], format: date }
+        data_last_date: { type: [string, "null"], format: date }
+        data_rows: { type: integer }
+        data_status: { type: string, enum: [REAL, DEMO, UNAVAILABLE] }
+        source_breakdown: { type: object, additionalProperties: { type: integer } }
+        risk_notes: { type: string }
+
+    FactorScore:
+      type: object
+      properties:
+        symbol: { type: string }
+        asof: { type: string, format: date }
+        momentum_126d: { type: number, description: 126日收益率（小数） }
+        trend_score: { type: number, description: 价格/SMA200 - 1（小数，可为负） }
+        volatility_63d: { type: number }
+        max_drawdown_252d: { type: number }
+        liquidity_20d_avg_amount_cny: { type: number, description: 20日日均成交额（元） }
+        composite_rank: { type: number, description: 综合分位 0-1 }
+
+    StrategyMeta:
+      type: object
+      properties:
+        strategy_id: { type: string, example: "S2_cross_momentum" }
+        strategy_version: { type: string }
+        name: { type: string }
+        description: { type: string }
+        params: { type: object, additionalProperties: true }
+        min_history_days: { type: integer }
+        rebalance: { type: string, enum: [monthly, quarterly, none] }
+        risk_notes: { type: string }
+        asset_selection: { type: string, description: 资产选择逻辑说明 }
+
+    StrategyBacktestRequest:
+      type: object
+      properties:
+        params_override: { type: object, additionalProperties: true }
+        symbols: { type: array, items: { type: string } }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        cost_bps: { type: number, default: 5 }
+        initial_capital: { type: number, default: 1000000 }
+
+    StrategyBacktestResult:
+      type: object
+      properties:
+        backtest_id: { type: string }
+        strategy: { $ref: "#/components/schemas/StrategyMeta" }
+        series:
+          type: object
+          properties:
+            dates: { type: array, items: { type: string, format: date } }
+            nav: { type: array, items: { type: number } }
+            drawdown: { type: array, items: { type: number } }
+            cash_weight: { type: array, items: { type: number } }
+            demo: { type: boolean }
+        metrics: { $ref: "#/components/schemas/V2Metrics" }
+        weight_history:
+          type: array
+          description: 每个调仓日目标权重快照（防未来函数可审计）
+          items:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              decision_data_through: { type: string, format: date, description: 决策所用数据截止（含） }
+              weights: { type: object, additionalProperties: { type: number } }
+        rebalances: { type: array, items: { type: object } }
+        data_quality: { type: object }
+
+    V2Metrics:
+      type: object
+      properties:
+        total_return: { type: number }
+        annual_return: { type: number }
+        annual_volatility: { type: number }
+        sharpe_ratio: { type: number }
+        sortino_ratio: { type: number }
+        calmar_ratio: { type: number }
+        max_drawdown: { type: number }
+        monthly_win_rate: { type: number }
+        avg_turnover_per_rebalance: { type: number }
+        trading_days: { type: integer }
+
+    OptimizationRequest:
+      type: object
+      required: [method]
+      properties:
+        method: { type: string, enum: [min_vol, max_sharpe, hrp] }
+        symbols: { type: array, items: { type: string } }
+        estimation_window_days: { type: integer, default: 252, description: 估计窗口（只用截至 asof 的历史） }
+        asof: { type: string, format: date, description: 决策时点（缺省为最新数据日） }
+        risk_free_rate: { type: number, default: 0.02 }
+        adapter: { type: string, enum: [auto, pypfopt, native], default: auto }
+
+    OptimizationResult:
+      type: object
+      properties:
+        method: { type: string }
+        adapter_used: { type: string, description: "pypfopt 或 native（纯 numpy）" }
+        asof: { type: string, format: date }
+        estimation_window: { type: string, description: "实际使用的估计区间 [start..end]" }
+        weights: { type: object, additionalProperties: { type: number } }
+        cash_weight: { type: number }
+        expected_annual_return: { type: number, description: 窗口内估计值（非预测承诺） }
+        estimated_annual_volatility: { type: number }
+        estimated_sharpe: { type: number }
+        notes: { type: array, items: { type: string } }
+
+    RiskCheckRequest:
+      type: object
+      required: [weights]
+      properties:
+        weights: { type: object, additionalProperties: { type: number } }
+        backtest_id: { type: string }
+        portfolio_context:
+          type: object
+          properties:
+            current_drawdown: { type: number }
+            stress_loss_recent: { type: number }
+            ai_claims: { type: array, items: { type: string } }
+
+    RiskCheckResult:
+      type: object
+      properties:
+        verdict: { type: string, enum: [PASS, WARN, VETO, INSUFFICIENT_DATA] }
+        checks:
+          type: array
+          items:
+            type: object
+            properties:
+              category: { type: string, enum: [DATA, ASSET, PORTFOLIO, AI] }
+              rule: { type: string }
+              severity: { type: string, enum: [INFO, WARN, VETO] }
+              triggered: { type: boolean }
+              detail: { type: string }
+        adjusted_weights: { type: object, additionalProperties: { type: number } }
+        cash_weight_after_adjustment: { type: number, description: 被削减权重保留为现金，不自动重分配 }
+        policy_version: { type: string }
+
+    AiResearchOutput:
+      type: object
+      properties:
+        research_id: { type: string }
+        model: { type: string }
+        model_call_ids: { type: array, items: { type: string } }
+        summary: { type: string }
+        strategy_differences: { type: array, items: { type: string } }
+        key_risks: { type: array, items: { type: string } }
+        counter_evidence: { type: array, items: { type: string } }
+        data_gaps: { type: array, items: { type: string } }
+        used_backtest_id: { type: string }
+        prompt_version: { type: string }
+        schema_valid: { const: true }
+
+    AiRiskReviewOutput:
+      type: object
+      properties:
+        review_id: { type: string }
+        model: { type: string }
+        verdict: { type: string, enum: [SUPPORTED, NEEDS_MORE_EVIDENCE, CONTRADICTED] }
+        unchecked_claims: { type: array, items: { type: string } }
+        hallucination_flags: { type: array, items: { type: string } }
+        human_review_required: { type: boolean }
+        notes: { type: string }
+
+    DecisionPacketRequest:
+      type: object
+      required: [weights, strategy_id]
+      properties:
+        portfolio_id: { type: string, default: "wealth-lab-default" }
+        strategy_id: { type: string }
+        strategy_version: { type: string }
+        weights: { type: object, additionalProperties: { type: number } }
+        backtest_id: { type: string }
+        research_id: { type: string }
+        risk_check: { type: object }
+
+    WealthDecisionPacket:
+      type: object
+      properties:
+        packet_id: { type: string, pattern: "^wldec_[0-9a-f]{12}$" }
+        portfolio_id: { type: string }
+        version: { type: integer }
+        supersedes_version: { type: [integer, "null"] }
+        strategy_id: { type: string }
+        strategy_version: { type: string }
+        weights: { type: object, additionalProperties: { type: number } }
+        backtest_window: { type: object }
+        data_cutoff: { type: string, format: date-time }
+        data_sources: { type: array, items: { type: string } }
+        metrics: { type: object }
+        cost_assumptions: { type: object }
+        risk_check: { type: object }
+        ai_research: { type: object }
+        ai_risk_review: { type: object }
+        model_call_ids: { type: array, items: { type: string } }
+        evidence_ids: { type: array, items: { type: string } }
+        content_hash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        created_at: { type: string, format: date-time }
+        research_only: { const: true }
+
+    RiskReport:
+      type: object
+      properties:
+        backtest_id: { type: string }
+        engine: { type: string, example: "native-equivalent(quantstats-compatible)" }
+        metrics: { $ref: "#/components/schemas/V2Metrics" }
+        monthly_returns:
+          type: object
+          description: "年 -> 月(01..12) 的收益率矩阵（小数，null=当月无数据）"
+          additionalProperties:
+            type: object
+            additionalProperties: { type: [number, "null"] }
+        rolling: { type: object }
+        worst_days: { type: array, items: { type: object } }
+        html_available: { type: boolean, description: "format=html 返回独立报告页" }

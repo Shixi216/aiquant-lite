@@ -1,0 +1,97 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "window": {
+      "start_date": "2020-04-08",
+      "end_date": "2026-10-23",
+      "cost_bps": 5
+    },
+    "comparison": [
+      {
+        "strategy_id": "S0_fixed_weight",
+        "metrics": {
+          "total_return": 0.3343,
+          "annual_return": 0.0469,
+          "annual_volatility": 0.0851,
+          "sharpe_ratio": 0.316,
+          "sortino_ratio": 0.512,
+          "calmar_ratio": 0.34,
+          "max_drawdown": -0.1377,
+          "monthly_win_rate": 0.59,
+          "avg_turnover_per_rebalance": 0.019,
+          "trading_days": 1587
+        }
+      },
+      {
+        "strategy_id": "S1_equal_weight",
+        "metrics": {
+          "total_return": 0.4756,
+          "annual_return": 0.0637,
+          "annual_volatility": 0.1061,
+          "sharpe_ratio": 0.514,
+          "sortino_ratio": 0.743,
+          "calmar_ratio": 0.43,
+          "max_drawdown": -0.147,
+          "monthly_win_rate": 0.609,
+          "avg_turnover_per_rebalance": 0.031,
+          "trading_days": 1587
+        }
+      },
+      {
+        "strategy_id": "S2_cross_momentum",
+        "metrics": {
+          "total_return": 0.6233,
+          "annual_return": 0.0792,
+          "annual_volatility": 0.0987,
+          "sharpe_ratio": 0.608,
+          "sortino_ratio": 0.891,
+          "calmar_ratio": 0.87,
+          "max_drawdown": -0.0903,
+          "monthly_win_rate": 0.6125,
+          "avg_turnover_per_rebalance": 0.1834,
+          "trading_days": 1587
+        }
+      },
+      {
+        "strategy_id": "S4_inverse_volatility",
+        "metrics": {
+          "total_return": 0.4102,
+          "annual_return": 0.0568,
+          "annual_volatility": 0.0792,
+          "sharpe_ratio": 0.464,
+          "sortino_ratio": 0.702,
+          "calmar_ratio": 0.41,
+          "max_drawdown": -0.1201,
+          "monthly_win_rate": 0.598,
+          "avg_turnover_per_rebalance": 0.041,
+          "trading_days": 1587
+        }
+      },
+      {
+        "strategy_id": "S8_hrp",
+        "metrics": {
+          "total_return": 0.4489,
+          "annual_return": 0.0609,
+          "annual_volatility": 0.0873,
+          "sharpe_ratio": 0.47,
+          "sortino_ratio": 0.688,
+          "calmar_ratio": 0.42,
+          "max_drawdown": -0.1298,
+          "monthly_win_rate": 0.601,
+          "avg_turnover_per_rebalance": 0.048,
+          "trading_days": 1587
+        }
+      }
+    ]
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

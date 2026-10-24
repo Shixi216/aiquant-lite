@@ -1,0 +1,58 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "asof": "2026-10-23",
+    "factors": [
+      {
+        "symbol": "518880.SH",
+        "asof": "2026-10-23",
+        "momentum_126d": 0.1823,
+        "trend_score": 0.1128,
+        "volatility_63d": 0.1312,
+        "max_drawdown_252d": -0.0934,
+        "liquidity_20d_avg_amount_cny": 812000000.0,
+        "composite_rank": 0.94
+      },
+      {
+        "symbol": "511380.SH",
+        "asof": "2026-10-23",
+        "momentum_126d": 0.0512,
+        "trend_score": 0.0394,
+        "volatility_63d": 0.0617,
+        "max_drawdown_252d": -0.0471,
+        "liquidity_20d_avg_amount_cny": 295000000.0,
+        "composite_rank": 0.71
+      },
+      {
+        "symbol": "510300.SH",
+        "asof": "2026-10-23",
+        "momentum_126d": 0.0284,
+        "trend_score": 0.0156,
+        "volatility_63d": 0.1723,
+        "max_drawdown_252d": -0.1328,
+        "liquidity_20d_avg_amount_cny": 1650000000.0,
+        "composite_rank": 0.48
+      },
+      {
+        "symbol": "511010.SH",
+        "asof": "2026-10-23",
+        "momentum_126d": 0.0119,
+        "trend_score": 0.0092,
+        "volatility_63d": 0.0131,
+        "max_drawdown_252d": -0.0087,
+        "liquidity_20d_avg_amount_cny": 88000000.0,
+        "composite_rank": 0.39
+      }
+    ]
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

@@ -1,0 +1,124 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "backtest_id": "wlbt_9a8b7c6d5e4f",
+    "strategy": {
+      "strategy_id": "S2_cross_momentum",
+      "strategy_version": "1.0",
+      "name": "ETF横截面动量轮动",
+      "description": "按126日动量排序持有前2名，动量<0不持有",
+      "params": {
+        "lookback_days": 126,
+        "top_k": 2,
+        "min_momentum": 0.0
+      },
+      "min_history_days": 130,
+      "rebalance": "monthly",
+      "risk_notes": "动量崩溃风险；趋势反转时回撤可能加大",
+      "asset_selection": "横截面动量排序取前2"
+    },
+    "series": {
+      "dates": [
+        "2020-04-08",
+        "2021-12-31",
+        "2022-12-30",
+        "2023-12-29",
+        "2024-12-31",
+        "2025-12-31",
+        "2026-10-23"
+      ],
+      "nav": [
+        1.0,
+        1.1284,
+        1.1201,
+        1.1876,
+        1.2902,
+        1.4558,
+        1.6233
+      ],
+      "drawdown": [
+        0.0,
+        -0.0412,
+        -0.0903,
+        -0.0521,
+        -0.0618,
+        -0.0387,
+        -0.0154
+      ],
+      "cash_weight": [
+        0.0,
+        0.0,
+        0.25,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "demo": false
+    },
+    "metrics": {
+      "total_return": 0.6233,
+      "annual_return": 0.0792,
+      "annual_volatility": 0.0987,
+      "sharpe_ratio": 0.608,
+      "sortino_ratio": 0.891,
+      "calmar_ratio": 0.87,
+      "max_drawdown": -0.0903,
+      "monthly_win_rate": 0.6125,
+      "avg_turnover_per_rebalance": 0.1834,
+      "trading_days": 1587
+    },
+    "weight_history": [
+      {
+        "date": "2020-05-06",
+        "decision_data_through": "2020-04-30",
+        "weights": {
+          "510300.SH": 0.5,
+          "518880.SH": 0.5
+        }
+      },
+      {
+        "date": "2020-06-01",
+        "decision_data_through": "2020-05-29",
+        "weights": {
+          "510300.SH": 0.5,
+          "518880.SH": 0.5
+        }
+      }
+    ],
+    "rebalances": [
+      {
+        "date": "2020-05-06",
+        "trades": [
+          {
+            "symbol": "510300.SH",
+            "weight_before": 0.5123,
+            "weight_after": 0.5,
+            "turnover": 0.0123
+          }
+        ],
+        "cost": 6.15
+      }
+    ],
+    "data_quality": {
+      "adjusted": true,
+      "sources": [
+        "xiaodefa-tushare/fund_daily"
+      ],
+      "missing_days": 0,
+      "caveats": [
+        "动量策略历史不足时首期持有现金"
+      ]
+    }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

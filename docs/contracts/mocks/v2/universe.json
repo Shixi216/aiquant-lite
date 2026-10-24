@@ -1,0 +1,81 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "assets": [
+      {
+        "symbol": "510300.SH",
+        "name": "沪深300ETF",
+        "category": "CN_EQUITY_ETF",
+        "exchange": "SSE",
+        "currency": "CNY",
+        "listing_date": "2012-05-28",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL",
+        "source_breakdown": {
+          "OFFICIAL": 1648
+        },
+        "risk_notes": "宽基权益暴露"
+      },
+      {
+        "symbol": "511010.SH",
+        "name": "国债ETF",
+        "category": "CN_BOND_ETF",
+        "exchange": "SSE",
+        "currency": "CNY",
+        "listing_date": "2013-03-25",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL",
+        "source_breakdown": {
+          "OFFICIAL": 1648
+        },
+        "risk_notes": "利率风险；久期约5年"
+      },
+      {
+        "symbol": "518880.SH",
+        "name": "黄金ETF",
+        "category": "CN_GOLD_ETF",
+        "exchange": "SSE",
+        "currency": "CNY",
+        "listing_date": "2013-07-29",
+        "data_first_date": "2020-01-02",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1648,
+        "data_status": "REAL",
+        "source_breakdown": {
+          "OFFICIAL": 1648
+        },
+        "risk_notes": "商品价格与人民币汇率风险"
+      },
+      {
+        "symbol": "511380.SH",
+        "name": "可转债ETF",
+        "category": "CN_CONVERTIBLE_ETF",
+        "exchange": "SSE",
+        "currency": "CNY",
+        "listing_date": "2020-03-12",
+        "data_first_date": "2020-04-07",
+        "data_last_date": "2026-10-23",
+        "data_rows": 1587,
+        "data_status": "REAL",
+        "source_breakdown": {
+          "OFFICIAL": 1587
+        },
+        "risk_notes": "转股溢价与信用风险"
+      }
+    ]
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

@@ -1,0 +1,55 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "verdict": "WARN",
+    "policy_version": "wealth-risk-policy/1.0",
+    "checks": [
+      {
+        "category": "DATA",
+        "rule": "history_depth>=252",
+        "severity": "INFO",
+        "triggered": false,
+        "detail": "全部资产 ≥1587 天"
+      },
+      {
+        "category": "ASSET",
+        "rule": "max_single_asset_weight<=0.6",
+        "severity": "WARN",
+        "triggered": true,
+        "detail": "511010.SH 权重 0.65 超限，削减至 0.60"
+      },
+      {
+        "category": "PORTFOLIO",
+        "rule": "equity_exposure<=0.5",
+        "severity": "INFO",
+        "triggered": false,
+        "detail": "权益暴露 0.24"
+      },
+      {
+        "category": "AI",
+        "rule": "ai_claims_have_evidence",
+        "severity": "INFO",
+        "triggered": false,
+        "detail": "2/2 结论有计算依据"
+      }
+    ],
+    "adjusted_weights": {
+      "511010.SH": 0.6,
+      "510300.SH": 0.24,
+      "518880.SH": 0.16
+    },
+    "cash_weight_after_adjustment": 0.0
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [
+    "SINGLE_ASSET_CONCENTRATION"
+  ],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}
