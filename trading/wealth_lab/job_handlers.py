@@ -32,6 +32,9 @@ def execute(mgr: JobManager, job: Job) -> None:
         "run_backtest": _run_backtest,
         "run_ai_research": _run_ai_research,
         "generate_report": _generate_report,
+        "refresh_wealth_news": _refresh_wealth_news,
+        "analyze_wealth_sentiment": _analyze_wealth_sentiment,
+        "rebuild_wealth_sentiment_factor": _rebuild_wealth_sentiment_factor,
     }[job.operation]
     handler(mgr, job)
 
@@ -250,3 +253,59 @@ def _generate_report(mgr: JobManager, job: Job) -> None:
     mgr.update(job, 100, "完成")
     job.result_ref = {"backtest_id": backtest_id, "metrics": report["metrics"],
                       "years": sorted(report["monthly_returns"])}
+
+
+# ---------------------------------------------------------------- Wealth Sentiment v1
+def _refresh_wealth_news(mgr: JobManager, job: Job) -> None:
+    """真实采集多资产资讯（独立库，绝不返回假成功；失败源如实计入结果）。"""
+    from trading.wealth_lab.sentiment import service as sentiment_service
+    mgr.update(job, 5, "开始真实采集（AKShare 东财/百度公开接口）")
+    result = sentiment_service.refresh_news(
+        progress=lambda msg: mgr.update(job, log=msg),
+        sources=job.params.get("sources"),
+        fund_symbols=job.params.get("fund_symbols"),
+    )
+    job.source = "/".join(s["source_name"] for s in result["sources"])
+    total = max(len(result["sources"]), 1)
+    job.result_ref = result
+    for i, s in enumerate(result["sources"]):
+        if not mgr.update(job, 5 + int(90 * (i + 1) / total),
+                          f"{s['source_name']}: {s['status']} +{s['items_new']}"
+                          f"（字段完整率 {s['field_completeness']}）"):
+            return
+    if result["failed_sources"] and not result["ok"]:
+        raise RuntimeError(f"全部采集源失败: {result['failed_sources']}")
+    job.records_written = result["total_new"]
+    mgr.update(job, 100, f"完成：新增 {result['total_new']} 条，失败源 {result['failed_sources'] or '无'}")
+
+
+def _analyze_wealth_sentiment(mgr: JobManager, job: Job) -> None:
+    """批量 LLM 结构化分析（deepseek-flash 优先，qwen 兜底，每事件一次调用）。"""
+    from trading.wealth_lab.sentiment import service as sentiment_service
+    mgr.update(job, 10, f"取 PENDING 事件，batch={job.params.get('limit', 8)}")
+    result = sentiment_service.analyze_sentiment(
+        progress=lambda msg: mgr.update(job, log=msg),
+        limit=job.params.get("limit"),
+    )
+    by_status = result["by_status"]
+    total = result["analyzed"]
+    mgr.update(job, 90, f"批次完成：{by_status}")
+    job.result_ref = {k: v for k, v in result.items() if k != "results"}
+    job.result_ref["event_results"] = result["results"]
+    job.source = "router/deepseek-flash+qwen-fallback"
+    mgr.update(job, 100, f"完成：分析 {total} 个事件 {by_status}")
+
+
+def _rebuild_wealth_sentiment_factor(mgr: JobManager, job: Job) -> None:
+    """确定性聚合重建情绪因子快照（无 LLM 调用）。"""
+    from trading.wealth_lab.sentiment import service as sentiment_service
+    lookback = job.params.get("lookback_hours", 168)
+    mgr.update(job, 20, f"确定性聚合：窗口 {lookback}h")
+    result = sentiment_service.rebuild_factor(
+        progress=lambda msg: mgr.update(job, log=msg),
+        lookback_hours=lookback,
+    )
+    job.result_ref = result
+    job.source = "deterministic-aggregation/" + result.get("sentiment_version", "")
+    job.records_written = (1 if result.get("market") else 0) + len(result.get("assets") or {})
+    mgr.update(job, 100, "完成（研究因子，不触碰策略与风控）")

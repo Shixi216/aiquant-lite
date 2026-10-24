@@ -55,6 +55,10 @@ OPERATIONS = (
     "run_backtest",
     "run_ai_research",
     "generate_report",
+    # ---- Wealth Sentiment v1（独立情绪研究模块，白名单受控）----
+    "refresh_wealth_news",
+    "analyze_wealth_sentiment",
+    "rebuild_wealth_sentiment_factor",
 )
 
 
@@ -108,8 +112,8 @@ class JobManager:
     def submit(self, operation: str, params: dict, request_id: str | None = None) -> tuple[Job, bool]:
         if operation not in OPERATIONS:
             raise ValueError(f"operation not in whitelist: {OPERATIONS}")
-        if operation == "run_ai_research" and not params.get("confirm"):
-            raise ValueError("run_ai_research 涉及真实付费模型调用，需 params.confirm=true")
+        if operation in ("run_ai_research", "analyze_wealth_sentiment") and not params.get("confirm"):
+            raise ValueError(f"{operation} 涉及真实付费模型调用，需 params.confirm=true")
         dedup = hashlib.sha256(
             json.dumps({"op": operation, "params": params}, sort_keys=True, ensure_ascii=False).encode()
         ).hexdigest()[:16]
