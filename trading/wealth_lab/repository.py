@@ -98,9 +98,10 @@ class WealthLabRepository:
         return len(rows)
 
     def read_close_matrix(
-        self, symbols: list[str], start: date | None = None, end: date | None = None
+        self, symbols: list[str], start: date | None = None, end: date | None = None,
+        *, join: str = "inner",
     ) -> pd.DataFrame:
-        """返回 index=trade_date、columns=symbol 的后复权收盘矩阵（共同交易日）。"""
+        """共同（inner）或并集（outer）交易日的后复权收盘矩阵。"""
         with _LOCK, _connect(self._path) as con:
             frames = []
             for symbol in symbols:
@@ -119,6 +120,8 @@ class WealthLabRepository:
                     frames.append(frame[symbol])
         if not frames:
             return pd.DataFrame()
+        if join == "outer":
+            return pd.concat(frames, axis=1, join="outer").sort_index()
         return pd.concat(frames, axis=1, join="inner").sort_index()
 
     def pool_status(self) -> dict:
@@ -182,7 +185,7 @@ class WealthLabRepository:
     def save_backtest(self, backtest_id: str, params: dict, result: dict) -> None:
         with _LOCK, _connect(self._path) as con:
             con.execute(
-                "INSERT OR REPLACE INTO backtest_runs VALUES (?,?,?,?,?)",
+                "INSERT OR REPLACE INTO backtest_runs VALUES (?,?,?,?)",
                 [
                     backtest_id,
                     datetime.now(),
