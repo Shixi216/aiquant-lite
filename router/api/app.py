@@ -79,6 +79,7 @@ from trading.decision_support.routes_packet_v2 import (
     router as decision_packet_v2_router,
 )
 from trading.wealth_lab.routes import router as wealth_lab_router
+from trading.wealth_lab.routes_v2 import router as wealth_lab_v2_router
 from router.integration.routes import router as integration_router
 from router.integration.schemas import ErrorCode, ResponseStatus, UnifiedResponse
 from router.integration.identifiers import new_request_id
@@ -412,5 +413,6 @@ app.include_router(market_breadth_router)
 app.include_router(cross_section_router)
 app.include_router(decision_packet_v2_router)
 app.include_router(wealth_lab_router)
+app.include_router(wealth_lab_v2_router)
 app.include_router(integration_router)
 install_documented_openapi(app)

@@ -215,7 +215,8 @@ class WealthLabRepository:
                     query += " AND trade_date <= ?"
                     params.append(asof)
                 rows = con.execute(query + " ORDER BY trade_date DESC LIMIT 20", params).fetchall()
-                values = [float(r[0]) for r in rows if r[0] is not None]
+                # fund_daily.amount 单位为千元，统一换算为元（CNY）
+                values = [float(r[0]) * 1000.0 for r in rows if r[0] is not None]
                 result[symbol] = round(sum(values) / len(values), 2) if values else None
         return result
 
