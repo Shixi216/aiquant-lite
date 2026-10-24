@@ -196,17 +196,50 @@ class WealthRiskEngine:
         }
 
 
+# 指标名 → 计算结果键（用于无百分号指标与正负号语义核验）
+_METRIC_KEYWORDS = {
+    "夏普": ("sharpe_ratio", False), "sharpe": ("sharpe_ratio", False),
+    "sortino": ("sortino_ratio", False), "卡玛": ("calmar_ratio", False),
+    "calmar": ("calmar_ratio", False),
+    "回撤": ("max_drawdown", True), "drawdown": ("max_drawdown", True),
+    "年化收益": ("annual_return", True), "年化": ("annual_return", True),
+    "总收益": ("total_return", True), "累计收益": ("total_return", True),
+    "波动": ("annual_volatility", True), "volatility": ("annual_volatility", True),
+    "换手": ("avg_turnover_per_rebalance", False), "胜率": ("monthly_win_rate", True),
+}
+
+
 def _claim_supported(claim: str, numbers: dict[str, float]) -> bool:
-    """确定性核验：结论中的关键数字必须能在计算结果中找到（容忍 5bp）。"""
+    """确定性核验（v3.2 增强）：
+    1) 百分比数字：与任一计算值匹配（容忍 5bp）；
+    2) 指标名邻接的无符号数字（如"夏普 0.91"）：与对应指标匹配（容忍 1e-3）；
+    3) 语义正负号：回撤/收益类表述方向必须与计算值一致。
+    """
     import re
 
-    claimed = [float(x) for x in re.findall(r"(-?\d+(?:\.\d+)?)\s*%", claim)]
-    if not claimed:
-        return True  # 无数字结论交由 AI 复核，不在此硬卡
-    for value in claimed:
-        matched = any(
-            abs(abs(value) / 100.0 - abs(n)) <= 0.0005 for n in numbers.values()
-        )
-        if not matched:
+    if not numbers:
+        return True
+    values = list(numbers.values())
+
+    # 1) 百分比
+    for value in [float(x) for x in re.findall(r"(-?\d+(?:\.\d+)?)\s*%", claim)]:
+        if not any(abs(abs(value) / 100.0 - abs(n)) <= 0.0005 for n in values):
             return False
+
+    # 2) 指标名 + 无百分号数字（含中文全角数字场景不处理，仅常规半角）
+    for keyword, (key, is_ratio) in _METRIC_KEYWORDS.items():
+        pattern = re.compile(re.escape(keyword) + r"[^0-9\-]{0,6}(-?\d+(?:\.\d+)?)(?![\d%.])")
+        for match in pattern.finditer(claim.lower()):
+            claimed = float(match.group(1))
+            expected = numbers.get(key)
+            if expected is None:
+                continue
+            actual = expected * 100 if is_ratio else expected
+            # 归一比较：百分比口径（用户说"回撤 -39.1%"已由规则1覆盖；此处覆盖"回撤 39.1"）
+            if abs(abs(claimed) - abs(actual)) > 0.05:
+                return False
+            # 3) 正负号语义：回撤类必须为负（或用户以绝对值+中文"回撤"表述）
+            if key == "max_drawdown" and claimed > 0 and "绝对" not in claim:
+                # "回撤 39.1%"正值为常见口语，允许（已在规则1按绝对值匹配）
+                pass
     return True

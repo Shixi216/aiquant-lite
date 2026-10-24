@@ -1,0 +1,41 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "rebalance_records": [
+   {
+    "decision_date": "2026-09-01",
+    "decision_data_through": "2026-08-31",
+    "eligible_assets": [
+     "510300.SH",
+     "510500.SH",
+     "511010.SH",
+     "518880.SH"
+    ],
+    "selected_assets": [
+     "510500.SH",
+     "518880.SH"
+    ],
+    "target_weights": {
+     "510500.SH": 0.5,
+     "518880.SH": 0.5
+    },
+    "cash_weight": 0.0,
+    "cost": 615.2,
+    "excluded_reasons": {
+     "511090.SH": [
+      "历史不足（130<250 天）"
+     ]
+    }
+   }
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T00:09:03.039883+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

@@ -1,0 +1,26 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "FAILED",
+ "data": {
+  "data_mode": "UNAVAILABLE",
+  "reason": "asof 2024-01-04 时点池内无可投资资产（PIT 闸门）",
+  "requested_start_date": "2024-01-04",
+  "suggested_start_date": "2024-04-15",
+  "excluded_reasons": {
+   "563020.SH": [
+    "尚未上市（上市 2024-03-20）"
+   ],
+   "159545.SZ": [
+    "尚未上市（上市 2024-04-15）"
+   ]
+  }
+ },
+ "error_code": "DATA_UNAVAILABLE",
+ "sanitized_error": "数据不可用：回测起点无 PIT 合格资产；建议起始日 2024-04-15",
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T00:09:03.040954+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

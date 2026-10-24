@@ -62,6 +62,17 @@ SURVIVORSHIP_NOTE = (
 )
 
 
+def _serialize_breakdown(value) -> str:
+    """dict -> JSON 字符串；已是合法 JSON 字符串则原样（避免双重序列化）。"""
+    if isinstance(value, str):
+        try:
+            json.loads(value)
+            return value
+        except Exception:
+            return "{}"
+    return json.dumps(value or {})
+
+
 def _connect():
     con = duckdb.connect(str(WEALTH_LAB_DB_PATH))
     con.execute(UNIVERSE_SCHEMA)
@@ -103,7 +114,7 @@ def upsert_assets(rows: list[dict]) -> None:
                     row.get("data_first"), row.get("data_last"),
                     row.get("valid_days", 0), row.get("expected_days", 0),
                     row.get("missing_ratio", 1.0), row.get("adj_missing", 0),
-                    row.get("avg_amount_20d_cny"), json.dumps(row.get("source_breakdown", {})),
+                    row.get("avg_amount_20d_cny"), _serialize_breakdown(row.get("source_breakdown")),
                     row.get("quality_status", "REJECTED"), row.get("notes", ""),
                     row.get("product_form", "ETF"), row.get("underlying", ""),
                     row.get("market_scope", "DOMESTIC"), row.get("currency_risk", "NONE"),
@@ -164,10 +175,17 @@ def assets_report(symbols: list[str] | None = None) -> list[dict]:
     out = []
     for row in rows:
         item = dict(zip(cols, row))
-        try:
-            item["source_breakdown"] = json.loads(item.get("source_breakdown") or "{}")
-        except Exception:
-            pass
+        raw = item.get("source_breakdown")
+        for _ in range(3):  # 兼容历史双重编码
+            if isinstance(raw, str):
+                try:
+                    raw = json.loads(raw or "{}")
+                except Exception:
+                    raw = {}
+            else:
+                break
+        item["source_breakdown"] = raw if isinstance(raw, dict) else {}
+        # v3.2: 日期字段统一 ISO 字符串（历史行为保持）
         for key in ("list_date", "delist_date", "data_first", "data_last"):
             if item.get(key) is not None:
                 item[key] = item[key].isoformat()

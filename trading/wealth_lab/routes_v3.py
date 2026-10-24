@@ -47,10 +47,17 @@ def v3_universe_assets(universe_id: str):
 
 
 @router.get("/quality")
-def v3_quality(category: str | None = None, page: int = 1, limit: int | None = None):
+def v3_quality(category: str | None = None, status: str | None = None,
+               q: str | None = None, page: int = 1, limit: int | None = None):
     rows = assets_report()
     if category:
         rows = [r for r in rows if r["category"] == category]
+    if status:
+        rows = [r for r in rows if r["quality_status"] == status.upper()]
+    if q:
+        needle = q.strip().lower()
+        rows = [r for r in rows
+                if needle in r["symbol"].lower() or needle in str(r.get("name", "")).lower()]
     total = len(rows)
     page = max(1, page)
     limit = max(1, min(limit or total, total)) if total else 0
@@ -113,16 +120,41 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
                         sanitized_error="数据不可用：回测起点无 PIT 合格资产")
 
     import uuid
-    pit_snapshots: list[dict] = []
+
+    # PIT 拒绝时给出建议起始日（P2-3）：逐月向前扫描
+    def _suggested_start(members_list, wanted):
+        import calendar
+        probe = wanted
+        for _ in range(30):
+            verdict = backtest_eligible(members_list, probe)
+            if any(v["eligible"] for v in verdict.values()):
+                return probe.isoformat()
+            year, month = (probe.year + 1, 1) if probe.month == 12 else (probe.year, probe.month + 1)
+            probe = date(year, month, min(4, calendar.monthrange(year, month)[1]))
+        return None
+
+    eligible_at_start = backtest_eligible(members, start)
+    if not any(v["eligible"] for v in eligible_at_start.values()):
+        suggested = _suggested_start(members, start)
+        return envelope({
+            "data_mode": "UNAVAILABLE",
+            "reason": f"asof {start} 时点池内无可投资资产（PIT 闸门）",
+            "requested_start_date": start.isoformat(),
+            "suggested_start_date": suggested,
+            "excluded_reasons": {s_: v["reasons"] for s_, v in eligible_at_start.items()},
+        }, status="FAILED", error_code="DATA_UNAVAILABLE",
+           sanitized_error="数据不可用：回测起点无 PIT 合格资产"
+                           + (f"；建议起始日 {suggested}" if suggested else ""))
+
+    pit_records: dict[str, dict] = {}
 
     def eligibility_fn(decision_date, symbols):
         verdict = backtest_eligible(list(symbols), decision_date)
         eligible = {s for s, v in verdict.items() if v["eligible"]}
-        pit_snapshots.append({
-            "decision_date": decision_date.isoformat(),
-            "eligible_count": len(eligible),
-            "excluded": {s: v["reasons"][:1] for s, v in verdict.items() if not v["eligible"]},
-        })
+        pit_records[decision_date.isoformat()] = {
+            "eligible_assets": sorted(eligible),
+            "excluded_reasons": {s: v["reasons"][:2] for s, v in verdict.items() if not v["eligible"]},
+        }
         return eligible
 
     try:
@@ -132,11 +164,48 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     backtest_id = "wlbt_" + uuid.uuid4().hex[:12]
     metrics = compute_v2_metrics(output)
+
+    # 逐调仓完整记录（P0-1）
+    cost_by_date: dict[str, float] = {}
+    for rb in output.rebalances:
+        cost_by_date[rb.date.isoformat()] = cost_by_date.get(rb.date.isoformat(), 0.0) + rb.cost
+    rebalance_records = []
+    for snap in output.weight_history:
+        date_key = snap["date"]
+        pit = pit_records.get(snap.get("decision_data_through", ""), {})
+        weights = snap["weights"]
+        rebalance_records.append({
+            "decision_date": date_key,
+            "decision_data_through": snap["decision_data_through"],
+            "eligible_assets": pit.get("eligible_assets", []),
+            "selected_assets": sorted(weights),
+            "target_weights": weights,
+            "cash_weight": round(max(0.0, 1.0 - sum(weights.values())), 6),
+            "cost": cost_by_date.get(date_key, 0.0),
+            "excluded_reasons": pit.get("excluded_reasons", {}),
+        })
+    first_invested = next((r["decision_date"] for r in rebalance_records
+                           if r["selected_assets"]), None)
+    start_shift_reason = None
+    if output.dates[0].isoformat() != start.isoformat():
+        start_shift_reason = f"请求起点 {start} 非交易日或无行情，顺延至首个有效交易日"
+    elif rebalance_records and not rebalance_records[0]["selected_assets"]:
+        start_shift_reason = "起点时点策略历史预热（min_history 不足），首期持币"
+
     result = {
         "data_mode": "REAL",
         "backtest_id": backtest_id,
         "universe_id": body.universe_id,
         "strategy": strategy.describe(),
+        "time_semantics": {
+            "requested_start_date": start.isoformat(),
+            "effective_start_date": output.dates[0].isoformat(),
+            "first_investment_date": first_invested,
+            "end_date": output.dates[-1].isoformat(),
+            "actual_trading_days": len(output.dates),
+            "start_shift_reason": start_shift_reason,
+            "note": "决策只用截至前一交易日数据；PIT 资格逐调仓重评",
+        },
         "common_window": {"start_date": output.dates[0].isoformat(),
                           "end_date": output.dates[-1].isoformat(),
                           "trading_days": len(output.dates)},
@@ -145,12 +214,13 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
                      "note": "PIT 判定基于上市/退市/历史长度/流动性；幸存者偏差未消除"},
         "pit_rebalance_snapshots": {
             "note": "每个调仓决策时点重新评估资格；不合格资产清仓至现金",
-            "rebalances": len(pit_snapshots),
-            "first": pit_snapshots[0] if pit_snapshots else None,
-            "last": pit_snapshots[-1] if pit_snapshots else None,
-            "eligible_count_min": min((s["eligible_count"] for s in pit_snapshots), default=0),
-            "eligible_count_max": max((s["eligible_count"] for s in pit_snapshots), default=0),
+            "rebalances": len(rebalance_records),
+            "first": rebalance_records[0] if rebalance_records else None,
+            "last": rebalance_records[-1] if rebalance_records else None,
+            "eligible_count_min": min((len(r["eligible_assets"]) for r in rebalance_records), default=0),
+            "eligible_count_max": max((len(r["eligible_assets"]) for r in rebalance_records), default=0),
         },
+        "rebalance_records": rebalance_records,
         "series": {"dates": [d.isoformat() for d in output.dates],
                    "nav": [round(float(v), 6) for v in output.nav],
                    "drawdown": [round(float(v), 6) for v in output.drawdown],

@@ -1,0 +1,23 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "job_id": "wljob_012345abcdef",
+  "status": "SUCCEEDED",
+  "logs": [
+   "[21:00:00] 任务已受理（QUEUED）",
+   "[21:00:01] 增量更新开始：2 只，截至 20261024",
+   "[21:00:01] 510300.SH: +3 行（20261020~20261024）",
+   "[21:00:02] 511010.SH: +3 行（20261020~20261024）",
+   "[21:00:03] 完成：共写入 6 行"
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T00:09:03.039350+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

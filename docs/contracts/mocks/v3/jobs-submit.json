@@ -1,0 +1,45 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "job_id": "wljob_012345abcdef",
+  "operation": "update_market_data",
+  "request_id": null,
+  "status": "SUCCEEDED",
+  "progress": 100,
+  "source": "fund_daily:OFFICIAL fund_adj:OFFICIAL",
+  "asset_scope": [
+   "510300.SH",
+   "511010.SH"
+  ],
+  "records_written": 6,
+  "error": null,
+  "result": {
+   "rows": 6,
+   "symbols": 2
+  },
+  "created_at": "2026-10-24T21:00:00+08:00",
+  "started_at": "2026-10-24T21:00:01+08:00",
+  "finished_at": "2026-10-24T21:00:03+08:00",
+  "duplicated": false,
+  "message": "任务已受理",
+  "whitelist": [
+   "update_fund_basic",
+   "update_market_data",
+   "update_adj_factors",
+   "run_quality_check",
+   "rebuild_pit",
+   "run_backtest",
+   "run_ai_research",
+   "generate_report"
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T00:09:03.036165+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}
