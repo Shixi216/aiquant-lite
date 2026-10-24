@@ -12,6 +12,7 @@ from router.config import router_settings
 from router.services.audit import AuditStore
 from router.services.provider_registry import get_model_provider
 from trading.research.sentiment.event_normalizer import normalize_event
+from trading.research.sentiment.black_swan_rules import FORCE_NEGATIVE, match_black_swan
 from trading.research.sentiment.models import (
     EventBundle,
     ExtractionResult,
@@ -19,6 +20,8 @@ from trading.research.sentiment.models import (
 )
 from trading.research.sentiment.policy import SENTIMENT_PROMPT_VERSION
 from trading.research.sentiment.schemas import (
+    FactType,
+    ImpactHorizon,
     ModelSentimentExtraction,
     SchemaValidationStatus,
     SentimentEventType,
@@ -71,10 +74,9 @@ def _provider_ready(provider: str) -> bool:
 
 
 def _primary_route(bundle: EventBundle) -> tuple[str, str]:
-    # 新闻处理用 qwen（唯一稳定可用的事件提取模型）
-    # 公告提取用 longcat 试验（对比 qwen 在公告场景的效果）
+    # 2026-10-01 用户：longcat 不可用，公告与新闻统一走 qwen（唯一稳定提取模型）
     if bundle.cluster_event_type == "announcement":
-        return "longcat", "announcement_verifier"
+        return "qwen", "announcement_verifier"
     return "qwen", "news_processor"
 
 
@@ -213,11 +215,8 @@ class SentimentEventExtractor:
         provider = self.provider_factory(provider_name)
         if provider is None or not _provider_ready(provider_name):
             return None, [], SchemaValidationStatus.NOT_CALLED
-        # 备用模型链：主模型失败时切换（qwen 稳定 → longcat 兜底）
-        fallback_chain = {
-            "qwen": ["longcat"],
-            "longcat": ["qwen"],
-        }.get(provider_name, [])
+        # 2026-10-01 用户：longcat 不可用，取消跨模型兜底（保留同模型 repair 重试）
+        fallback_chain: list[str] = []
         input_hash = _stable_hash(
             {
                 "prompt_version": SENTIMENT_PROMPT_VERSION,
@@ -298,8 +297,43 @@ class SentimentEventExtractor:
                         )
                     )
                     tried += 1
-                    break
+                    # 2026-10-01 用户：基础设施类失败(空内容/超时/限流)也重试一次
+                    if attempt + 1 >= max_attempts:
+                        break
+                    continue
         return None, call_ids, SchemaValidationStatus.INVALID
+
+    @staticmethod
+    def _force_negative(
+        bundle: EventBundle,
+        extraction: ModelSentimentExtraction,
+    ) -> tuple[ModelSentimentExtraction, bool]:
+        primary = bundle.primary_source
+        text = " ".join(
+            (
+                bundle.canonical_title,
+                str(primary.payload.get("content") or ""),
+            )
+        )
+        match = match_black_swan(
+            text,
+            source_level=primary.source_level,
+            source_name=primary.source_name,
+            verified=primary.verified,
+        )
+        if match is None:
+            return extraction, False
+        return extraction.model_copy(
+            update={
+                "event_type": match.event_type,
+                "direction": -1,
+                "intensity": max(match.intensity, extraction.intensity),
+                "confidence": max(0.8, extraction.confidence),
+                "impact_horizon": ImpactHorizon.LONG_TERM,
+                "fact_type": FactType.OFFICIAL_FACT,
+                "summary": f"[{FORCE_NEGATIVE}:{match.keyword}] {bundle.canonical_title}"[:1000],
+            }
+        ), True
 
     @staticmethod
     def _needs_escalation(
@@ -311,6 +345,8 @@ class SentimentEventExtractor:
                 SentimentEventType.REGULATORY_PENALTY,
                 SentimentEventType.INVESTIGATION,
                 SentimentEventType.MAJOR_LITIGATION,
+                SentimentEventType.ORDER_RESTRICTION,
+                SentimentEventType.REGULATORY_LETTER,
             }
             or extraction.confidence
             < settings.sentiment_escalation_confidence_threshold
@@ -325,10 +361,16 @@ class SentimentEventExtractor:
         allow_model_calls: bool,
     ) -> ExtractionResult:
         fallback = normalize_event(bundle)
+        fallback, fallback_forced = self._force_negative(bundle, fallback)
         if not allow_model_calls:
             return ExtractionResult(
                 extraction=fallback,
                 validation_status=SchemaValidationStatus.NOT_CALLED,
+                risk_flags=(
+                    [SentimentRiskFlag.FORCE_NEGATIVE]
+                    if fallback_forced
+                    else []
+                ),
                 used_model=False,
             )
 
@@ -345,6 +387,8 @@ class SentimentEventExtractor:
                 if status == SchemaValidationStatus.NOT_CALLED
                 else SentimentRiskFlag.MODEL_OUTPUT_INVALID
             )
+            if fallback_forced:
+                flags.append(SentimentRiskFlag.FORCE_NEGATIVE)
             return ExtractionResult(
                 extraction=fallback,
                 model_call_ids=call_ids,
@@ -389,6 +433,9 @@ class SentimentEventExtractor:
             elif review_status == SchemaValidationStatus.INVALID:
                 flags.append(SentimentRiskFlag.MODEL_OUTPUT_INVALID)
 
+        extraction, forced = self._force_negative(bundle, extraction)
+        if forced and SentimentRiskFlag.FORCE_NEGATIVE not in flags:
+            flags.append(SentimentRiskFlag.FORCE_NEGATIVE)
         return ExtractionResult(
             extraction=extraction,
             model_call_ids=call_ids,

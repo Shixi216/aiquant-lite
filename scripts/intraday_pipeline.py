@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import sys
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import timezone, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from data_hub.services.market_realtime_snapshot import MarketRealtimeSnapshotService
 from data_hub.services.trading_calendar_service import TradingCalendarService
 from trading.scanner.query_router import (
-    AnalysisHorizon, DualTimeline, TwoStagePipeline, route_query,
+    AnalysisHorizon, TwoStagePipeline, route_query,
 )
 
 TZ = timezone(timedelta(hours=8))
@@ -35,6 +35,16 @@ class IntradayPipeline:
     def __init__(self, realtime_service: Optional[MarketRealtimeSnapshotService] = None):
         self.realtime = realtime_service or MarketRealtimeSnapshotService()
         self.pipeline = TwoStagePipeline(self.realtime)
+        self._regime_cache: str | None = None
+        self._regime_fetched = False
+
+    def _market_regime(self) -> str | None:
+        """市况（实例级缓存：盘中批量选股只判定一次）。"""
+        if not self._regime_fetched:
+            from trading.research.technical.market_regime import get_market_regime
+            self._regime_cache = get_market_regime()
+            self._regime_fetched = True
+        return self._regime_cache
 
     # ------------------------------------------------------------------
     # 阶段1：盘中候选（实时确定性指标）
@@ -102,7 +112,7 @@ class IntradayPipeline:
         if not bars:
             return {**realtime, "status": "NO_BARS", "error": "无日线数据"}
 
-        tech = technical_signal(bars)
+        tech = technical_signal(bars, self._market_regime())
         fund = fundamental_factor(fin)
         # Signal 对象用属性访问（.score/.confidence）
         tech_score = tech.score if hasattr(tech, "score") else 0

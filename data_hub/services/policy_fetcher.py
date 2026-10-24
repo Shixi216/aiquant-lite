@@ -21,7 +21,6 @@ import re
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
 
 import httpx
 from urllib.parse import urlparse
@@ -256,7 +255,6 @@ def classify_policy(title: str, content: str = "") -> tuple[list[str], str]:
 
 def persist_policy(items: list[dict]) -> int:
     """政策事件入库（data_records, data_type='policy'）"""
-    import duckdb
     from config.settings import settings
 
     db_path = Path(settings.opc_database_path)

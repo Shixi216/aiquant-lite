@@ -28,6 +28,17 @@ class ScannerFeatureSet:
     database_query_count: int
 
 
+def _latest_open_date(data_cutoff: datetime) -> object | None:
+    """cutoff 前最近开市日；日历不可用时返回 None（跳过 trade_date 检查）。"""
+    try:
+        from data_hub.services.trading_calendar_service import (
+            TradingCalendarService,
+        )
+        return TradingCalendarService().current_or_latest_open_date(data_cutoff)
+    except Exception:
+        return None
+
+
 class ScannerFeatureLoader:
     """One-query loader with an in-process snapshot-aware bounded cache."""
 
@@ -79,10 +90,24 @@ class ScannerFeatureLoader:
         output["snapshot_age_seconds"] = (
             cutoff - snapshot_times
         ).dt.total_seconds()
-        output["snapshot_stale"] = (
+        age_stale = (
             output["snapshot_age_seconds"]
             > settings.full_market_snapshot_max_age_seconds
         ) | output["snapshot_time"].isna()
+        expected_trade = _latest_open_date(data_cutoff)
+        if expected_trade is not None and "history_dates" in output.columns:
+            history_last = output["history_dates"].map(
+                lambda dates: (
+                    pd.Timestamp(max(dates))
+                    if dates is not None and len(dates)
+                    else pd.NaT
+                )
+            )
+            output["snapshot_stale"] = age_stale | (
+                history_last < pd.Timestamp(expected_trade)
+            )
+        else:
+            output["snapshot_stale"] = age_stale
 
         def risk_values(row: object) -> list[str]:
             values: list[str] = []

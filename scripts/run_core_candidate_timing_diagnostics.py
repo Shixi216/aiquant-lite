@@ -7,7 +7,6 @@ from dataclasses import asdict
 from datetime import date, datetime
 from pathlib import Path
 from statistics import fmean
-from typing import Any
 
 from scripts.run_formal_timeline_replay import _trade_counts
 from scripts.run_timeline_quality_validation import (

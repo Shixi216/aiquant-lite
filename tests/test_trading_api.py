@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from types import SimpleNamespace
 
+import pytest
 from fastapi.testclient import TestClient
 
 from config.settings import settings
@@ -129,6 +130,44 @@ def test_decision_from_data_bridges_verified_records_to_agents(
     assert len(packet.source_record_ids) == 60
     assert packet.symbol == "600000.SH"
     assert packet.hash_is_valid()
+
+
+def test_decision_from_data_uses_cross_section_score(tmp_path, monkeypatch):
+    """方案 B：/from-data 的 formal_score 走 FormalScoreResolver 四维分。
+
+    cross composite=0.75 → BUY + target=0.75*0.20=0.15；strategy_agent
+    stance 与 cross 分一致（bullish）。
+    """
+    monkeypatch.setattr(settings, "opc_database_path", tmp_path / "from-data-cs.duckdb")
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.75, None),
+    )
+    records = _market_records()
+    _install_decision_service(monkeypatch, records)
+    from trading.routes import create_decision_from_data
+
+    import asyncio
+
+    packet = asyncio.run(
+        create_decision_from_data(
+            DecisionFromDataRequest(
+                symbol="600000",
+                start_date=date(2025, 1, 1),
+                end_date=date(2025, 3, 1),
+                portfolio=PortfolioState(cash=900_000, equity=1_000_000),
+            )
+        )
+    )
+    proposal = packet.decision.proposal
+    assert proposal.action.value == "buy"
+    assert proposal.target_weight == pytest.approx(0.15)
+    strategy_stance = next(
+        opinion.stance
+        for opinion in packet.decision.opinions
+        if opinion.role == "strategy_agent"
+    )
+    assert strategy_stance == "bullish"
 
 
 def test_paper_account_snapshot_survives_store_reload(tmp_path):

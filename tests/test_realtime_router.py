@@ -18,14 +18,12 @@
 """
 from __future__ import annotations
 
-import json
 import sys
 import threading
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import timezone, timedelta
 from pathlib import Path
 
-import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -265,7 +263,6 @@ class TestRealtimeBackground:
 class TestNoAbsoluteClaims:
     def test_stats_fields_present(self):
         """候选统计字段齐全（总数/研究数/完整/达标/降级/未完成）"""
-        from scripts.intraday_pipeline import IntradayPipeline
         # 直接验证统计结构
         stats = {
             "total": 20, "researched": 15, "complete": 12,
@@ -383,7 +380,6 @@ class TestRefreshScheduling:
         svc = self._svc()
         before = list(svc._snapshot)
         # 模拟拉取返回空 → refresh 失败 → 快照保持原样
-        import data_hub.services.market_realtime_snapshot as m
         monkeypatch_fetch = lambda self: []  # noqa: E731
         original = svc._fetch_from_tencent
         svc._fetch_from_tencent = monkeypatch_fetch

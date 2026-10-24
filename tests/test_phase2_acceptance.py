@@ -13,6 +13,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from trading.decision_support.action import Action
+from trading.decision_support.account_context import RESEARCH_DEFAULT_ACCOUNT_CONTEXT
 from trading.decision_support.data_status import DataStatus
 from trading.decision_support.decision_engine import DecisionEngine, DecisionInput
 from trading.decision_support.manual_position_manager import ManualPositionManager
@@ -217,7 +218,9 @@ class TestDecisionEngine:
         )
         return DecisionInput(
             task=ctx, formal_score=score, technical_score=0.7,
-            fundamental_score=0.5, sentiment_score=0.1, policy_score=0.2,
+            fundamental_score=0.5, point_in_time_ok=True,
+            account_context=RESEARCH_DEFAULT_ACCOUNT_CONTEXT,
+            sentiment_score=0.1, policy_score=0.2,
             capital_score=0.3, confidence=conf, data_status=status,
             veto=veto, current_price=10.5, bars=make_bars(),
             coverage_ratio=1.0, major_risks=["测试风险"],
@@ -226,8 +229,9 @@ class TestDecisionEngine:
     def test_full_decision(self, temp_db):
         engine = DecisionEngine(plan_repo=TradePlanRepository(temp_db))
         resp = engine.decide(self._engine_input())
-        assert resp.action == Action.BUY
-        assert resp.action_zh == "建仓"
+        # v2：0.60 ≥ P90 回退 0.42 → STRONG_BUY
+        assert resp.action == Action.STRONG_BUY
+        assert resp.action_zh == "强烈建仓"
         assert resp.target_position_ratio > 0
         assert resp.price_zones.stop_loss_price is not None
 
@@ -264,5 +268,5 @@ class TestDecisionEngine:
         perms = PermissionService(repo)
         engine = DecisionEngine(permission_service=perms, plan_repo=TradePlanRepository(temp_db))
         resp = engine.decide(self._engine_input(user="ghost_user"))
-        # 分析是只读的，默认允许；ghost_user 无持仓 → 正常出动作
-        assert resp.action in (Action.BUY, Action.SMALL_BUY)
+        # 分析是只读的，默认允许；ghost_user 无持仓 → 正常出动作（v2：0.60 → STRONG_BUY）
+        assert resp.action in (Action.STRONG_BUY, Action.BUY, Action.SMALL_BUY)

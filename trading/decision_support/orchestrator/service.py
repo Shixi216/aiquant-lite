@@ -9,6 +9,10 @@ from config.version import ROUTER_GENERATOR_VERSION
 from data_hub.services.daily_bars_service import DailyBarsService
 from trading.decision_support.adversarial_review import adversarial_review
 from trading.decision_support.decision_packets import DecisionRepository
+from trading.decision_support.formal_score_resolver import (
+    CROSS_SECTION_SOURCE,
+    FormalScoreResolver,
+)
 from trading.decision_support.risk_rules import evaluate_strategy_risk
 from trading.research.fundamental import fundamental_signal
 from trading.research.fundamental.models import (
@@ -60,6 +64,9 @@ def _stance(score: float) -> str:
     return "neutral"
 
 
+_formal_score_resolver = FormalScoreResolver()
+
+
 def _opinion(signal: Signal) -> AgentOpinion:
     return AgentOpinion(
         role=signal.role,
@@ -71,8 +78,36 @@ def _opinion(signal: Signal) -> AgentOpinion:
     )
 
 
-def _generate_strategy(technical: Signal, fundamental: Signal) -> StrategyProposal:
-    combined = technical.score * 0.6 + fundamental.score * 0.4
+def _generate_strategy(
+    technical: Signal,
+    fundamental: Signal,
+    cross_score: float | None = None,
+    score_source: str = "cross_section_4d",
+) -> StrategyProposal:
+    if score_source == "legacy_60_40_fallback":
+        # G 守卫（P0）：legacy 60/40 分数无区分能力（封顶 0.8、技术分占位 0.418），
+        # 强制 HOLD、禁止新增，不产出 BUY/SELL。
+        return StrategyProposal(
+            name="auditable_multi_factor_v1",
+            action=Action.HOLD,
+            target_weight=0,
+            confidence=min(
+                0.5, technical.confidence * 0.6 + fundamental.confidence * 0.4
+            ),
+            entry_rule=(
+                "Legacy 60/40 fallback disabled by G guard "
+                "(score_source=legacy_60_40_fallback); forced HOLD, no new position."
+            ),
+            exit_rule="Score <= -0.20, stop loss, take profit, or risk veto.",
+            invalidation_rules=[
+                "legacy 60/40 fallback disabled (G guard)",
+                "stale or contradictory market data",
+                "daily loss or exposure limit reached",
+                "risk controller veto",
+            ],
+            evidence=[*technical.evidence, *fundamental.evidence],
+        )
+    combined = cross_score if cross_score is not None else technical.score * 0.6 + fundamental.score * 0.4
     confidence = technical.confidence * 0.6 + fundamental.confidence * 0.4
     if combined >= 0.2:
         action = Action.BUY
@@ -108,7 +143,20 @@ class TradingDecisionService:
             asyncio.to_thread(technical_signal, request.bars),
             asyncio.to_thread(fundamental_signal, request.fundamentals),
         )
-        proposal = _generate_strategy(technical, fundamental)
+        cross_score = _formal_score_resolver.resolve(
+            request.symbol, technical.score, fundamental.score
+        )
+        score_source = cross_score.source
+        proposal = _generate_strategy(
+            technical,
+            fundamental,
+            cross_score=(
+                cross_score.score
+                if cross_score.source == CROSS_SECTION_SOURCE
+                else None
+            ),
+            score_source=score_source,
+        )
         risk = evaluate_strategy_risk(proposal, request.portfolio, request.risk_limits)
         evidence = list(dict.fromkeys([*request.evidence_refs, *proposal.evidence]))
         review = adversarial_review(
@@ -118,10 +166,15 @@ class TradingDecisionService:
             fundamental.confidence,
         )
         opinions = [_opinion(technical), _opinion(fundamental)]
+        stance_score = (
+            cross_score.score
+            if cross_score.source == CROSS_SECTION_SOURCE
+            else technical.score * 0.6 + fundamental.score * 0.4
+        )
         opinions.append(
             AgentOpinion(
                 role="strategy_agent",
-                stance=_stance(technical.score * 0.6 + fundamental.score * 0.4),
+                stance=_stance(stance_score),
                 summary=f"Generated {proposal.name}: {proposal.action.value}.",
                 evidence=proposal.evidence,
                 counterpoints=proposal.invalidation_rules,

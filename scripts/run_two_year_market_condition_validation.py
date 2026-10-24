@@ -16,7 +16,7 @@ from typing import Any
 from scripts.run_formal_timeline_replay import _trade_counts
 from scripts.run_market_environment_attribution import _group, _market_states
 from scripts.run_timeline_quality_validation import (
-    _bars_for_sample, _date, _industry_code, _load_market_data,
+    _bars_for_sample, _industry_code, _load_market_data,
 )
 from trading.experiments.formal_replay_loader import FormalReplayInputLoader, load_candidate_file
 from trading.experiments.formal_strategy_validation import FormalStrategyReplayService

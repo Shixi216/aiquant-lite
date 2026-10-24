@@ -345,7 +345,15 @@ class SentimentV3Collector:
             ),
         }
         for key in failures:
-            flag, missing = mapping[key]
+            # 2026-09-29 第二批M6修复：未映射的失败键（未来扩充数据源或
+            # 辅助任务失败写入 failures 时）不再 KeyError 崩整个快照，
+            # 记通用 SOURCE_UNAVAILABLE + 保留键名进入 missing_fields。
+            entry = mapping.get(key)
+            if entry is None:
+                quality_flags.add(QualityFlag.SOURCE_UNAVAILABLE)
+                missing_fields.add(str(key))
+                continue
+            flag, missing = entry
             quality_flags.add(flag)
             missing_fields.add(missing)
             if failures[key].startswith("SourceSchemaChangedError"):

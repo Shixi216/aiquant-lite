@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -20,7 +22,10 @@ class StockReportRequest(BaseModel):
 @router.post("/stock-report")
 def stock_report(request: StockReportRequest) -> dict[str, object]:
     try:
-        report = StockReportService().run(**request.model_dump())
+        report = StockReportService().run(
+            **request.model_dump(),
+            request_id=f"stock-report-{uuid.uuid4().hex}",
+        )
         return {
             "report": report,
             "database_owner": "router",

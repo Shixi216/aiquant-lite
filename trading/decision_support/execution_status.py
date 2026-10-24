@@ -6,10 +6,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
-from typing import Optional
+from datetime import timedelta, timezone
 
 TZ = timezone(timedelta(hours=8))
 
@@ -52,7 +50,7 @@ def compute_execution_status(
     veto_triggered: bool,
     frozen_entry_zone: list,
     frozen_preferred_zone: list,
-    frozen_stop_loss_price: float,
+    frozen_stop_loss_price: float | None,
 ) -> tuple[str, str]:
     """基于冻结区间计算执行状态
 
@@ -71,7 +69,11 @@ def compute_execution_status(
         return "已失效", "VETO触发，禁止建仓"
 
     # 优先级2：止损（使用冻结的固定止损价）
-    if frozen_stop_loss_price > 0 and current_price <= frozen_stop_loss_price:
+    if (
+        frozen_stop_loss_price is not None
+        and frozen_stop_loss_price > 0
+        and current_price <= frozen_stop_loss_price
+    ):
         return "信号失效", f"当前价{current_price:.2f}≤止损价{frozen_stop_loss_price:.2f}"
 
     # 优先级3：回避
@@ -86,7 +88,11 @@ def compute_execution_status(
             if pref_low <= current_price <= pref_high:
                 return "立即执行", f"当前价{current_price:.2f}在优选区间[{pref_low:.2f},{pref_high:.2f}]内"
             elif current_price < pref_low:
-                if frozen_stop_loss_price > 0 and current_price > frozen_stop_loss_price:
+                if (
+                    frozen_stop_loss_price is not None
+                    and frozen_stop_loss_price > 0
+                    and current_price > frozen_stop_loss_price
+                ):
                     return "等待止跌确认", f"当前价{current_price:.2f}低于优选下沿{pref_low:.2f}但高于止损价{frozen_stop_loss_price:.2f}"
                 else:
                     return "等待止跌确认", f"当前价{current_price:.2f}低于优选下沿{pref_low:.2f}"

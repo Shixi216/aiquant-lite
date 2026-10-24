@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import math
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import asdict
 from datetime import date, datetime, time
 from pathlib import Path
 from statistics import fmean, median, pstdev
-from typing import Any, Iterable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 import pandas as pd

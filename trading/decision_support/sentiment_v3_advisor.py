@@ -1,7 +1,9 @@
 """Sentiment V3 Advisory 侧车（Phase S4A）
 
 基于 S3C 验证的风险提醒规则，为 DecisionEngine 提供情绪面风险信号。
-不改变正式 60/40 评分，仅通过置信度调节和动作降级提供风险保护。
+评分语义 v2 下 confidence 仅表示数据完整度（展示层），不参与动作映射；
+confidence_penalty 只作用于展示层 confidence，动作降级由 risk_reminder
+独立驱动（STRONG_BUY/BUY → SMALL_BUY）。
 
 规则 S3C_RISK_REMINDER_MEDIAN_V1：
   龙虎榜净额 < 中位数（机构净流出）
@@ -24,7 +26,11 @@ DEFAULT_CONFIDENCE_PENALTY = 0.15
 
 @dataclass
 class SentimentAdvisoryResult:
-    """Sentiment V3 Advisory 查询结果"""
+    """Sentiment V3 Advisory 查询结果
+
+    confidence_penalty：数据完整度/情绪风险状态的展示层扣减，
+    仅影响输出的 confidence 字段，不影响动作映射（v2）。
+    """
     risk_reminder: bool = False
     confidence_penalty: float = 0.0
     composite_score: float | None = None

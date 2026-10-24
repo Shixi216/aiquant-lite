@@ -49,7 +49,7 @@ class DecisionPacketV2:
     reference_price: float = 0.0     # 决策时参考价
     frozen_entry_zone: list = field(default_factory=list)
     frozen_preferred_zone: list = field(default_factory=list)
-    frozen_stop_loss_price: float = 0.0
+    frozen_stop_loss_price: Optional[float] = None
     zone_generated_at: str = ""      # 区间生成时间
     zone_version: str = "V1"         # 区间版本号
     zone_valid_until: str = ""       # 区间有效期
@@ -100,7 +100,7 @@ def create_decision_packet(
     reference_price: float = 0.0,
     frozen_entry_zone: list | None = None,
     frozen_preferred_zone: list | None = None,
-    frozen_stop_loss_price: float = 0.0,
+    frozen_stop_loss_price: Optional[float] = None,
     zone_version: str = "V1",
 ) -> DecisionPacketV2:
     """创建决策包（自动生成ID/时间戳/哈希）"""
@@ -184,8 +184,8 @@ class DecisionPacketV2Repository:
         return con
 
     def save(self, packet: DecisionPacketV2) -> DecisionPacketV2:
-        """保存（不可变——若存在同ID则拒绝覆盖）"""
         import json as _json
+        """保存（不可变——若存在同ID则拒绝覆盖）"""
         con = self._connect()
         try:
             exists = con.execute(
@@ -233,7 +233,6 @@ class DecisionPacketV2Repository:
         return packet
 
     def get(self, decision_id: str) -> Optional[DecisionPacketV2]:
-        import json as _json
         con = self._connect()
         try:
             row = con.execute(
@@ -248,7 +247,6 @@ class DecisionPacketV2Repository:
 
     def list_by_user(self, local_user_id: str, limit: int = 50) -> list[DecisionPacketV2]:
         """按用户列出决策（用户隔离）"""
-        import json as _json
         con = self._connect()
         try:
             rows = con.execute(
@@ -273,6 +271,51 @@ class DecisionPacketV2Repository:
             con.close()
         return [self._row_to_packet(r) for r in rows]
 
+    def latest_by_symbol(
+        self,
+        symbol: str,
+        *,
+        as_of: Optional[str] = None,
+        local_user_id: Optional[str] = None,
+    ) -> Optional[DecisionPacketV2]:
+        """GET 专用只读查询：最新未撤销决策包（无建表/写副作用）。
+
+        符号精确匹配：normalize_symbol 归一化后 symbol IN (canonical, 裸代码)，
+        禁止 LIKE 模糊匹配。表不存在（迁移未跑/全新库）→ None。
+        """
+        import duckdb as _duckdb
+
+        from data_hub.services.full_market_common import normalize_symbol
+        from database.db import get_connection
+
+        canonical = normalize_symbol(symbol)
+        if canonical is not None:
+            candidates = [canonical, canonical.split(".")[0]]
+        else:
+            candidates = [str(symbol).upper()]
+        placeholders = ", ".join("?" for _ in candidates)
+        clauses = [f"symbol IN ({placeholders})", "status != 'REVOKED'"]
+        parameters: list = list(candidates)
+        if local_user_id is not None:
+            clauses.append("local_user_id = ?")
+            parameters.append(local_user_id)
+        if as_of is not None:
+            clauses.append("created_at <= ?")
+            parameters.append(as_of)
+        sql = (
+            "SELECT * FROM decision_packets_v2 WHERE "
+            + " AND ".join(clauses)
+            + " ORDER BY created_at DESC LIMIT 1"
+        )
+        try:
+            with get_connection(read_only=True) as connection:
+                row = connection.execute(sql, parameters).fetchone()
+        except _duckdb.CatalogException:
+            return None
+        if row is None:
+            return None
+        return self._row_to_packet(row)
+
     def _row_to_packet(self, row) -> DecisionPacketV2:
         import json as _json
         return DecisionPacketV2(
@@ -291,7 +334,7 @@ class DecisionPacketV2Repository:
  reference_price=row[21] or 0,
  frozen_entry_zone=_json.loads(row[22]) if row[22] else [],
  frozen_preferred_zone=_json.loads(row[23]) if row[23] else [],
- frozen_stop_loss_price=row[24] or 0,
+ frozen_stop_loss_price=row[24],
  zone_generated_at=row[25] or "",
  zone_version=row[26] or "V1",
  zone_valid_until=row[27] or "",

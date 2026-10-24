@@ -1,4 +1,9 @@
-import base64, struct, zlib, json, urllib.request, sys
+import base64
+import struct
+import zlib
+import json
+import urllib.request
+import sys
 sys.path.insert(0, 'E:/hermes-opc')
 
 def png_rgb(w, h, r, g, b):

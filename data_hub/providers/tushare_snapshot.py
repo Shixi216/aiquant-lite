@@ -16,7 +16,6 @@ from database.db import open_database
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
-from typing import Any
 
 import pandas as pd
 
@@ -32,11 +31,17 @@ class TushareSnapshotResult:
     daily_basic: pd.DataFrame = field(default_factory=pd.DataFrame)
     moneyflow: pd.DataFrame = field(default_factory=pd.DataFrame)
     stk_limit: pd.DataFrame = field(default_factory=pd.DataFrame)
+    margin_detail: pd.DataFrame = field(default_factory=pd.DataFrame)   # 两融
+    top_list: pd.DataFrame = field(default_factory=pd.DataFrame)        # 龙虎榜
+    top_inst: pd.DataFrame = field(default_factory=pd.DataFrame)        # 龙虎榜机构席位
     request_count: int = 0
     row_counts: dict = field(default_factory=dict)
     coverage_ratio: float = 0.0          # 股票池覆盖率
     aligned: bool = False                # daily/daily_basic 对齐
+    trade_date_consistent: bool = False  # daily payload 与请求交易日一致
     moneyflow_missing: bool = False      # moneyflow 缺失标记
+    margin_missing: bool = False         # 两融缺失标记
+    top_list_missing: bool = False       # 龙虎榜缺失标记
     error: str = ""
     source: str = "Tushare"
 
@@ -136,16 +141,95 @@ class TushareSnapshotProvider:
         except Exception as exc:
             result.error += f" | stk_limit缺失: {str(exc)[:60]}"
 
+        # 5) margin_detail（两融）— 缺失单独标记（融资标的约2000只，非全市场）
+        try:
+            df5 = self.pro.margin_detail(trade_date=trade_date)
+            result.margin_detail = df5
+            result.request_count += 1
+            result.row_counts["margin_detail"] = len(df5)
+        except Exception as exc:
+            result.margin_missing = True
+            result.error += f" | margin_detail缺失: {str(exc)[:60]}"
+
+        # 6) top_list（龙虎榜）— 稀疏事件数据，缺失单独标记
+        try:
+            df6 = self.pro.top_list(trade_date=trade_date)
+            result.top_list = df6
+            result.request_count += 1
+            result.row_counts["top_list"] = len(df6)
+        except Exception as exc:
+            result.top_list_missing = True
+            result.error += f" | top_list缺失: {str(exc)[:60]}"
+
+        # 7) top_inst（龙虎榜机构席位）— 缺失单独标记
+        try:
+            df7 = self.pro.top_inst(trade_date=trade_date)
+            result.top_inst = df7
+            result.request_count += 1
+            result.row_counts["top_inst"] = len(df7)
+        except Exception as exc:
+            result.top_list_missing = True
+            result.error += f" | top_inst缺失: {str(exc)[:60]}"
+
         # 规则7：质量校验
         self._validate(result)
         return result
+
+    # ------------------------------------------------------------------
+    # 派生字段：两融净买入 + 龙虎榜净额/机构净额（供横截面 rank 使用）
+    # ------------------------------------------------------------------
+    def compute_cross_section_fields(self, result: TushareSnapshotResult) -> tuple[dict, dict]:
+        """从 margin_detail/top_list/top_inst 派生横截面字段。
+
+        返回 (margin_map, dragon_map)：
+          margin_map:  {ts_code: margin_net_buy}  两融净买入 = rzmre - rzche
+          dragon_map:  {ts_code: {"net_amount": ..., "institution_net_amount": ...}}
+            机构净额 = top_inst 中 exalter 含"机构专用"的席位 buy - sell 之和
+        """
+        INSTITUTION_SEAT = "机构专用"
+        margin_map: dict[str, float] = {}
+        if not result.margin_detail.empty:
+            for _, r in result.margin_detail.iterrows():
+                code = str(r["ts_code"])
+                buy = r.get("rzmre")
+                repay = r.get("rzche")
+                if buy is not None and repay is not None:
+                    margin_map[code] = float(buy) - float(repay)
+
+        dragon_map: dict[str, dict] = {}
+        if not result.top_list.empty:
+            for _, r in result.top_list.iterrows():
+                code = str(r["ts_code"])
+                net = r.get("net_amount")
+                dragon_map.setdefault(code, {"net_amount": None, "institution_net_amount": None})
+                dragon_map[code]["net_amount"] = float(net) if net is not None else None
+        if not result.top_inst.empty and not result.top_list.empty:
+            listed = set(str(x) for x in result.top_list["ts_code"])
+            for code in listed:
+                seats = result.top_inst[
+                    result.top_inst["ts_code"].astype(str) == code
+                ]
+                if seats.empty:
+                    continue
+                institutions = seats[
+                    seats["exalter"].astype(str).str.contains(
+                        INSTITUTION_SEAT, regex=False, na=False
+                    )
+                ]
+                if not institutions.empty:
+                    inst_buy = float(institutions["buy"].fillna(0).sum())
+                    inst_sell = float(institutions["sell"].fillna(0).sum())
+                    dragon_map.setdefault(
+                        code, {"net_amount": None, "institution_net_amount": None}
+                    )
+                    dragon_map[code]["institution_net_amount"] = inst_buy - inst_sell
+        return margin_map, dragon_map
 
     # ------------------------------------------------------------------
     # 规则7：质量校验（覆盖率≥99%、对齐、记录）
     # ------------------------------------------------------------------
     def _validate(self, result: TushareSnapshotResult) -> None:
         # 股票池
-        import duckdb
         from pathlib import Path
         db_path = Path(self.settings.opc_database_path)
         if not db_path.is_absolute():
@@ -156,9 +240,9 @@ class TushareSnapshotProvider:
         ).fetchone()[0]
         con.close()
 
-        # 覆盖率
+        # 覆盖率（Tushare 可能比 universe 多出新股/口径差，clamp 到 100%）
         if universe > 0 and not result.daily.empty:
-            result.coverage_ratio = len(result.daily) / universe
+            result.coverage_ratio = min(len(result.daily) / universe, 1.0)
 
         # 对齐检查：daily 与 daily_basic 的 ts_code 交集
         if not result.daily.empty and not result.daily_basic.empty:
@@ -166,6 +250,22 @@ class TushareSnapshotProvider:
             basic_codes = set(result.daily_basic["ts_code"])
             overlap = len(daily_codes & basic_codes) / max(len(daily_codes), 1)
             result.aligned = overlap >= 0.99
+
+        # 交易日期必须来自行情 payload，不能用采集时间推断。
+        if not result.daily.empty and "trade_date" in result.daily.columns:
+            observed = {
+                str(value).replace("-", "")
+                for value in result.daily["trade_date"].dropna().unique()
+            }
+            result.trade_date_consistent = observed == {str(result.trade_date)}
+            if not result.trade_date_consistent:
+                result.error += (
+                    f" | daily交易日期不一致（请求 {result.trade_date}，"
+                    f"实际 {sorted(observed) or ['缺失']}）"
+                )
+        else:
+            result.trade_date_consistent = False
+            result.error += " | daily缺少可核验trade_date"
 
 
 if __name__ == "__main__":

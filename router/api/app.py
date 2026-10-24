@@ -53,6 +53,7 @@ from trading.research.orchestration.routes import (
     router as orchestration_router,
 )
 from trading.research.stock_report_routes import router as stock_report_router
+from trading.research.equity_context_routes import router as equity_context_router
 from trading.research.overheat_shadow_routes import router as overheat_shadow_router
 from trading.scanner.routes import router as scanner_router
 from trading.experiments.routes import router as experiment_router
@@ -67,6 +68,14 @@ from data_hub.api.routes.announcements import router as announcements_router
 from data_hub.api.routes.finance_news import router as finance_news_router
 from data_hub.api.routes.history import router as history_router
 from data_hub.api.routes.market_fact import router as market_fact_router
+from data_hub.api.routes.historical_bars import router as historical_bars_router
+from data_hub.api.routes.market_breadth import router as market_breadth_router
+from trading.decision_support.routes_cross_section import (
+    router as cross_section_router,
+)
+from trading.decision_support.routes_packet_v2 import (
+    router as decision_packet_v2_router,
+)
 from router.integration.routes import router as integration_router
 from router.integration.schemas import ErrorCode, ResponseStatus, UnifiedResponse
 from router.integration.identifiers import new_request_id
@@ -171,6 +180,28 @@ async def health() -> dict[str, Any] | JSONResponse:
     if not database_ok:
         return JSONResponse(status_code=503, content=payload)
     return payload
+
+
+@app.get("/v1/providers/health")
+def providers_health() -> dict[str, Any]:
+    """L3 数据源健康：暴露各 Provider 熔断器状态。
+
+    供呆猫八条看门狗区分「外部 Provider 故障」（只降级不重启）
+    与「Router 内部故障」（需要重启）。仅返回熔断器状态快照，
+    不包含任何凭据。
+    """
+    from data_hub.services.circuit_breaker import breakers_snapshot
+    from data_hub.services.daily_bars_service import monitor_snapshot
+
+    snapshot = breakers_snapshot()
+    down = [item for item in snapshot if item["state"] == "open"]
+    return {
+        "status": "ok",
+        "provider_count": len(snapshot),
+        "open_breakers": down,
+        "providers": snapshot,
+        "monitor": monitor_snapshot(),
+    }
 
 @app.get("/v1/roles")
 def roles() -> dict[str, Any]:
@@ -327,6 +358,7 @@ app.include_router(policy_news_router)
 app.include_router(capital_flow_router)
 app.include_router(orchestration_router)
 app.include_router(stock_report_router, include_in_schema=False)
+app.include_router(equity_context_router)
 app.include_router(overheat_shadow_router, include_in_schema=False)
 app.include_router(scanner_router)
 app.include_router(experiment_router)
@@ -339,5 +371,9 @@ app.include_router(announcements_router, include_in_schema=False)
 app.include_router(finance_news_router, include_in_schema=False)
 app.include_router(history_router, include_in_schema=False)
 app.include_router(market_fact_router, include_in_schema=False)
+app.include_router(historical_bars_router)
+app.include_router(market_breadth_router)
+app.include_router(cross_section_router)
+app.include_router(decision_packet_v2_router)
 app.include_router(integration_router)
 install_documented_openapi(app)

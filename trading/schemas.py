@@ -68,12 +68,17 @@ class FundamentalSnapshot(TradingModel):
     pe_ttm: float | None = None
     pb: float | None = None
     roe: float | None = None
+    roe_dt: float | None = None
+    roe_source: str | None = None
     revenue_growth: float | None = None
     net_profit_growth: float | None = None
     debt_ratio: float | None = Field(default=None, ge=0)
     operating_cash_flow: float | None = None
     operating_cash_flow_positive: bool | None = None
     peg: float | None = None
+    net_profit_deducted: float | None = None
+    invest_income: float | None = None
+    invest_income_ratio: float | None = None
     report_period: str | None = None
     statement_types: list[str] = Field(default_factory=list)
     announcement_time: datetime | None = None

@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import threading
-from datetime import date, datetime, timedelta, timezone, tzinfo
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 
 TZ = timezone(timedelta(hours=8))

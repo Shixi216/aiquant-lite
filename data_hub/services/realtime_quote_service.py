@@ -45,10 +45,19 @@ def _normalize_symbol(value: str) -> tuple[str, str]:
     return code, f"{code}.{exchange}"
 
 
+def _tencent_market_prefix(symbol: str) -> str:
+    """按交易所后缀确定腾讯行情前缀（SH→sh / SZ→sz / BJ→bj）。
+
+    不能只看代码首字母：上证指数 000001.SH 首字母0 但必须用 sh000001，
+    若按旧逻辑(6→sh 否则→sz)会误判成深市 sz000001(平安银行)。(2026-09-24 修复)
+    """
+    ex = symbol.rsplit(".", 1)[-1].upper() if "." in symbol else ""
+    return {"SH": "sh", "SZ": "sz", "BJ": "bj"}.get(ex, "sh")
+
+
 def _to_float(value: object) -> float | None:
     if value is None:
         return None
-
     try:
         result = float(value)
     except (TypeError, ValueError):
@@ -112,17 +121,16 @@ class RealtimeQuoteService:
         }
 
     @staticmethod
-    def _fetch_tencent(code: str) -> dict[str, object]:
+    def _fetch_tencent(code: str, market: str) -> dict[str, object]:
         """腾讯实时行情源（qt.gtimg.cn）。
 
         东方财富 push2 接口对非浏览器 TLS 指纹/高频请求实施风控，
         腾讯行情接口更稳定，作为实时报价首选源。
         字段分隔符为 '~'，编码 GBK。
+        market 前缀由调用方按交易所后缀确定（SH→sh / SZ→sz / BJ→bj），
+        修正指数代码误判：000001.SH 必须用 sh000001 而非 sz000001（2026-09-24）。
         """
         import requests as _requests
-
-        symbol = code
-        market = "sh" if code.startswith("6") else "sz"
 
         response = _requests.get(
             f"https://qt.gtimg.cn/q={market}{code}",
@@ -184,8 +192,9 @@ class RealtimeQuoteService:
         symbol: str,
     ) -> MarketRecord:
         # 腾讯源优先（东财 push2 对非浏览器指纹有风控）
+        market = _tencent_market_prefix(symbol)
         try:
-            values = self._fetch_tencent(code)
+            values = self._fetch_tencent(code, market)
             source_name = "Tencent Realtime (qt.gtimg.cn)"
         except Exception:
             values = self._fetch_akshare(code)

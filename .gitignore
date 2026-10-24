@@ -30,6 +30,8 @@ htmlcov/
 .idea/
 .vscode/
 .DS_Store
+node_modules/
+.vite/
 
 # Runtime state and fetched third-party content
 cache/

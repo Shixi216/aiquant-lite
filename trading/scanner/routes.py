@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from trading.scanner.schemas import (
     ScannerEvaluationRequest,
     ScannerEvaluationResponse,
     ScannerParseRequest,
     ScannerParseResponse,
+    ScannerRunSummary,
+    ScannerRunsListResponse,
     ScannerScanRequest,
     ScannerScanResponse,
 )
@@ -48,6 +50,16 @@ def scan(
         return service.scan(request)
     except (KeyError, ValueError, RuntimeError) as exc:
         raise _error(exc) from exc
+
+
+@router.get("/runs", response_model=ScannerRunsListResponse)
+def list_runs(limit: int = Query(default=10, ge=1, le=100)) -> ScannerRunsListResponse:
+    return ScannerRunsListResponse(
+        items=[
+            ScannerRunSummary.model_validate(item)
+            for item in service.list_runs(limit=limit)
+        ]
+    )
 
 
 @router.get("/runs/{run_id}", response_model=dict[str, Any])

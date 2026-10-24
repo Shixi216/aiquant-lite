@@ -9,17 +9,14 @@
 """
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from trading.decision_support.action import Action
 from trading.decision_support.execution_status import (
     ExecutionStatusSnapshot,
     compute_execution_status,
 )
-from trading.decision_support.decision_response import PriceZone
 
 TZ = timezone(timedelta(hours=8))
 

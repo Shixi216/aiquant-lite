@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
@@ -11,6 +11,10 @@ from database.db import get_connection, initialize_database
 from data_hub.repositories import FactorOutputRepository
 from data_hub.schemas.unified import FactorOutput, FactorType
 from trading.research.capital_flow.models import MarketBar
+from trading.decision_support.formal_veto import (
+    FormalRiskEvent,
+    FormalRiskInput,
+)
 from trading.research.orchestration.schemas import (
     EvaluationRequest,
     FactorBundle,
@@ -22,6 +26,16 @@ def _load(value: Any) -> Any:
     if isinstance(value, str):
         return json.loads(value)
     return value
+
+
+def _margin_hash(
+    snapshot_id: str, symbol: str, score: float, data_cutoff: datetime
+) -> str:
+    payload = (
+        f"margin-snapshot-v1|{snapshot_id}|{symbol}|{score}|"
+        f"{data_cutoff.isoformat() if data_cutoff is not None else ''}"
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _dump(value: Any) -> str:
@@ -41,6 +55,7 @@ class BulkFactorData:
     factor_outputs: dict[str, dict[FactorType, FactorOutput]]
     sentiment_snapshots: dict[str, dict[str, Any]]
     policy_news_snapshots: dict[str, dict[str, Any]]
+    margin_snapshots: dict[str, dict[str, Any]] = field(default_factory=dict)
     database_connection_count: int = 1
 
 
@@ -183,6 +198,41 @@ class OrchestrationRepository:
                 [data_cutoff, *policy_parameters],
             ).fetchall()
 
+            # margin：两融净买入的截面 percent_rank（*2-1，与 composite 的
+            # duckdb RANK NULLS LAST 语义一致）。缺失不计。PIT 取最新 run。
+            margin_sql, margin_parameters = self._symbol_filter(selected, alias="ranked")
+            margin_rows = connection.execute(
+                f"""
+                WITH run AS (
+                    SELECT snapshot_id, data_cutoff
+                    FROM market_snapshot_runs
+                    WHERE data_cutoff <= ?
+                    ORDER BY snapshot_time DESC
+                    LIMIT 1
+                ),
+                items AS (
+                    SELECT i.symbol,
+                           CAST(json_extract_string(
+                               i.payload_json, '$.margin_net_buy'
+                           ) AS DOUBLE) AS margin_net_buy
+                    FROM market_snapshot_items i, run
+                    WHERE i.snapshot_id = run.snapshot_id
+                ),
+                ranked AS (
+                    SELECT symbol, margin_net_buy,
+                           percent_rank() OVER (ORDER BY margin_net_buy) AS pct
+                    FROM items
+                    WHERE margin_net_buy IS NOT NULL
+                )
+                SELECT ranked.symbol, ranked.pct * 2 - 1 AS score,
+                       run.snapshot_id, run.data_cutoff, ranked.margin_net_buy
+                FROM ranked, run
+                WHERE 1 = 1
+                  {margin_sql}
+                """,
+                [data_cutoff, *margin_parameters],
+            ).fetchall()
+
         bars_by_symbol: dict[str, list[MarketBar]] = defaultdict(list)
         for row in bar_rows:
             bars_by_symbol[row[1]].append(
@@ -253,12 +303,133 @@ class OrchestrationRepository:
             }
             for row in policy_rows
         }
+        generated_at = datetime.now().astimezone()
+        margin = {
+            row[0]: {
+                "snapshot_id": row[2],
+                "symbol": row[0],
+                "data_cutoff": row[3],
+                "score": float(row[1]),
+                "confidence": 1.0,
+                "evidence_ids": [f"mkt_snapshot:{row[2]}:{row[0]}"],
+                "risk_flags": [],
+                "input_snapshot_hash": _margin_hash(
+                    row[2], row[0], row[1], row[3]
+                ),
+                "algorithm_version": "margin-snapshot-v1",
+                "generated_at": generated_at,
+                "shadow_mode": True,
+            }
+            for row in margin_rows
+        }
         return BulkFactorData(
             symbols=selected,
             bars_by_symbol=dict(bars_by_symbol),
             factor_outputs=dict(factor_outputs),
             sentiment_snapshots=sentiment,
             policy_news_snapshots=policy,
+            margin_snapshots=margin,
+        )
+
+    def load_formal_risk_input(
+        self,
+        *,
+        symbol: str,
+        data_cutoff: datetime,
+    ) -> FormalRiskInput:
+        with get_connection() as connection:
+            universe = connection.execute(
+                """
+                SELECT listing_status, delist_date, is_st, is_suspended,
+                       verification_status, data_available_time
+                FROM stock_universe
+                WHERE symbol = ?
+                  AND data_available_time <= ?
+                ORDER BY data_available_time DESC, updated_at DESC,
+                         universe_version DESC
+                LIMIT 1
+                """,
+                [symbol, data_cutoff],
+            ).fetchone()
+            event_rows = connection.execute(
+                """
+                SELECT c.event_cluster_id, c.canonical_title, c.event_type,
+                       c.event_time, d.fetched_at, c.data_cutoff
+                FROM event_clusters c
+                JOIN event_symbol_links link
+                  ON link.event_cluster_id = c.event_cluster_id
+                JOIN data_records d
+                  ON d.record_id = c.primary_source_id
+                WHERE link.symbol = ?
+                  AND c.event_time <= ?
+                  AND c.data_cutoff <= ?
+                  AND d.fetched_at <= ?
+                ORDER BY c.event_time, c.event_cluster_id
+                """,
+                [symbol, data_cutoff, data_cutoff, data_cutoff],
+            ).fetchall()
+            sentiment = connection.execute(
+                """
+                SELECT missing_fields_json
+                FROM sentiment_symbol_snapshots
+                WHERE symbol = ?
+                  AND analysis_mode = 'DECISION'
+                  AND data_cutoff <= ?
+                ORDER BY data_cutoff DESC, generated_at DESC, snapshot_id
+                LIMIT 1
+                """,
+                [symbol, data_cutoff],
+            ).fetchone()
+            policy = connection.execute(
+                """
+                SELECT missing_fields_json
+                FROM policy_news_symbol_snapshots
+                WHERE symbol = ?
+                  AND analysis_mode = 'DECISION'
+                  AND data_cutoff <= ?
+                ORDER BY data_cutoff DESC, generated_at DESC, snapshot_id
+                LIMIT 1
+                """,
+                [symbol, data_cutoff],
+            ).fetchone()
+        events = tuple(
+            FormalRiskEvent(
+                event_id=row[0],
+                title=row[1],
+                risk_category=row[2],
+                event_time=row[3],
+                data_available_time=row[4],
+                data_cutoff=row[5],
+            )
+            for row in event_rows
+        )
+        event_coverage_complete = (
+            sentiment is not None
+            and policy is not None
+            and not _load(sentiment[0])
+            and not _load(policy[0])
+        )
+        status_complete = (
+            universe is not None
+            and str(universe[4]).upper() != "CONFLICT"
+            and universe[5] <= data_cutoff
+        )
+        return FormalRiskInput(
+            events=events,
+            suspended=(bool(universe[3]) if universe is not None else None),
+            delisted=(
+                bool(
+                    universe[0] != "ACTIVE"
+                    or universe[1] is not None
+                    and universe[1] <= data_cutoff.date()
+                )
+                if universe is not None
+                else None
+            ),
+            st_status=(bool(universe[2]) if universe is not None else None),
+            event_coverage_complete=event_coverage_complete,
+            security_status_complete=status_complete,
+            requested_cutoff=data_cutoff,
         )
 
     def save_factor(self, factor: FactorOutput) -> FactorOutput:

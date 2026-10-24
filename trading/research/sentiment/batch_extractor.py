@@ -15,7 +15,6 @@ import json
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 TZ = timezone(timedelta(hours=8))
 
@@ -26,6 +25,7 @@ STALE = "STALE"
 INSUFFICIENT = "INSUFFICIENT_DATA"
 FAILED = "FAILED"
 FALLBACK = "FALLBACK"
+FORCE_NEGATIVE = "FORCE_NEGATIVE"
 
 # 信息源权重（公告 > 政策 > 权威媒体 > 普通新闻）
 SOURCE_WEIGHTS = {
@@ -168,9 +168,23 @@ class BatchEventExtractor:
             seen_hashes.add(e.content_hash)
             deduped.append(e)
 
-        # 本地规则强制修正：风险提示/异常波动类标题，AI 可能判中性，
-        # 市场惯例视为利空，强制 direction=-1（本地确定性规则覆盖模型输出）
+        from trading.research.sentiment.black_swan_rules import match_black_swan
+
+        # 本地规则强制修正：可信来源黑天鹅覆盖模型中性/正向输出。
         for e in deduped:
+            forced = match_black_swan(
+                e.evidence,
+                source_level=e.source_level,
+            )
+            if forced is not None:
+                e.event_type = forced.event_type.value
+                e.direction = -1
+                e.intensity = max(e.intensity, forced.intensity)
+                e.confidence = max(e.confidence, 0.8)
+                e.fallback_status = FORCE_NEGATIVE
+                if FORCE_NEGATIVE not in e.evidence:
+                    e.evidence = f"[{FORCE_NEGATIVE}:{forced.keyword}] {e.evidence}"
+                continue
             if e.event_type == "OTHER" and e.direction == 0:
                 if any(k in e.evidence for k in ["异常波动", "风险提示", "风险"]):
                     e.direction = -1
@@ -183,6 +197,9 @@ class BatchEventExtractor:
                 pub = pub.replace(tzinfo=TZ)
             age_hours = (now - pub).total_seconds() / 3600
             freshness = 0.5 ** (age_hours / 72) if age_hours > 0 else 1.0
+            if e.fallback_status == FORCE_NEGATIVE and age_hours > 0:
+                # 长期硬风险不能按普通新闻 72h 半衰期迅速衰减为零。
+                freshness = 0.5 ** (age_hours / (180 * 24))
 
             # 来源可信度
             source_w = e.source_weight
@@ -210,6 +227,8 @@ class BatchEventExtractor:
                 "published_at": e.published_at.isoformat(),
                 "model": e.model,
                 "fallback_status": e.fallback_status,
+                "force_negative": e.fallback_status == FORCE_NEGATIVE,
+                "evidence": e.evidence,
             })
 
         # 归一化得分（有事件时）
@@ -315,7 +334,8 @@ def build_bundles_from_records(symbol: str, news_items: list[dict],
             record_id=cid, event_time=pub, fetched_at=datetime.now(tz=TZ),
             source_name=item.get("publisher", "media"),
             source_url=item.get("url", ""), source_level=item.get("source_level", "media"),
-            verified=False, content_hash=item.get("content_hash", "h"), payload=payload,
+            verified=bool(item.get("verified", False)),
+            content_hash=item.get("content_hash", "h"), payload=payload,
         )
         bundles.append(EventBundle(
             event_cluster_id=cid, canonical_title=title, cluster_event_type="UNKNOWN",

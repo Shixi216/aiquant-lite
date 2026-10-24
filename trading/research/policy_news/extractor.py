@@ -410,6 +410,35 @@ def _extract_explicit_values(
     return amounts, dates, conditions
 
 
+_BOILERPLATE_PENALTY_MARKERS = (
+    "被监管措施或处罚及整改",
+    "采取监管措施或处罚及整改",
+    "被证券监管部门和交易所采取监管措施或处罚",
+)
+
+_REFINANCING_TITLE_MARKERS = (
+    "向特定对象发行",
+    "定增",
+    "发行股票预案",
+    "非公开发行",
+)
+
+
+def _is_refinancing_penalty_boilerplate(title: str, text: str) -> bool:
+    """再融资（定增/向特定对象发行）申报的法定自查文件：
+    “最近五年被监管措施或处罚及整改情况”是格式性披露义务文件，
+    内容为历史情况陈述而非新处罚事实，不应判为负面监管事件。
+    盈新发展 000620 2026-08-18 曾因此被误分类。
+    """
+    if any(marker in title for marker in _BOILERPLATE_PENALTY_MARKERS):
+        return True
+    if any(
+        marker in title for marker in _REFINANCING_TITLE_MARKERS
+    ) and any(marker in text for marker in _BOILERPLATE_PENALTY_MARKERS):
+        return True
+    return False
+
+
 def normalize_event(
     bundle: EventBundle,
     *,
@@ -417,6 +446,28 @@ def normalize_event(
 ) -> ModelPolicyExtraction:
     text = _available_text(bundle)
     title = bundle.canonical_title.strip()
+    if _is_refinancing_penalty_boilerplate(title, text):
+        return ModelPolicyExtraction(
+            event_category=PolicyEventCategory.NOT_APPLICABLE,
+            event_type=PolicyEventType.NOT_APPLICABLE,
+            direction=0,
+            intensity=0,
+            confidence=0,
+            fact_type=PolicyFactType.UNKNOWN,
+            implementation_status_candidate="UNKNOWN",
+            impact_horizon=PolicyImpactHorizon.UNKNOWN,
+            affected_symbols=[],
+            affected_sectors=[],
+            summary=(
+                f"再融资配套自查文件（最近五年监管措施或处罚及整改情况），"
+                f"非真实处罚事实，不计负面：{title}"
+            )[:1000],
+            key_facts=[],
+            amounts=[],
+            dates=[],
+            entities=[],
+            conditions=[],
+        )
     for markers, category, event_type, direction, intensity, horizon in _RULES:
         if any(marker in text for marker in markers):
             amounts, dates, conditions = _extract_explicit_values(
@@ -493,7 +544,8 @@ def _primary_route(
         return "mimo", "vision_reader"
     if bundle.cluster_event_type == "announcement":
         return "qwen", "announcement_verifier"
-    return "longcat", "news_processor"
+    # 2026-10-01 用户：longcat 不可用，新闻统一走 qwen
+    return "qwen", "news_processor"
 
 
 def _prompt(
@@ -679,7 +731,10 @@ class PolicyNewsExtractor:
                         error=exc,
                     )
                 )
-                break
+                # 2026-10-01 用户：基础设施类失败(空内容/超时/限流)也重试一次
+                if attempt >= settings.policy_news_model_max_retries:
+                    break
+                continue
         return None, call_ids, SchemaValidationStatus.INVALID
 
     @staticmethod

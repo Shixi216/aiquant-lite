@@ -109,6 +109,9 @@ class FactorBundle(OrchestrationModel):
     sentiment: FactorView | None = None
     policy_news: FactorView | None = None
     capital_flow: FactorView | None = None
+    # margin（两融净买入截面 rank）不进五维 factor_map/coverage——缺失不降级；
+    # 仅参与 PIT 与 STALE 门槛检查（与四维 composite 的 margin 维度对应）。
+    margin: FactorView | None = None
     available_factor_types: list[FactorType] = Field(default_factory=list)
     missing_factor_types: list[FactorType] = Field(default_factory=list)
     stale_factor_types: list[FactorType] = Field(default_factory=list)

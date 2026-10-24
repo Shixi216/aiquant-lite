@@ -28,7 +28,7 @@ DEFAULT_MAIN_DB = ROOT / "database" / "hermes_opc.duckdb"
 DEFAULT_REPLAY_DB = ROOT / "database" / "sentiment_v3_replay.duckdb"
 DEFAULT_RESULTS_DB = ROOT / "Strategy_Lab_Results.duckdb"
 
-TECHNICAL_VERSION = "technical_signal_exact_v2026_08_04"
+TECHNICAL_VERSION = "technical_signal_exact_v2026_09_02"
 SENTIMENT_VERSION = "sentiment-v3-s3c-composite-v1"
 DATASET_VERSION = "strategy-lab-pit-dataset-v1"
 
@@ -61,8 +61,21 @@ def _finite_ema(values: np.ndarray, period: int, window: int = 60) -> np.ndarray
     return output
 
 
-def _technical_group(frame: pd.DataFrame) -> pd.DataFrame:
+def _technical_group(frame: pd.DataFrame, market_regime: str | None = None) -> pd.DataFrame:
+    """向量化复刻 technical_signal（技术分）。
+
+    market_regime：市况（RISING/SIDEWAYS/FALLING/UNKNOWN/None）。
+      - None/UNKNOWN：无差别过热惩罚（历史默认行为，回测 PIT 基线）。
+      - RISING：过热惩罚减半（0.5×）——与生产 technical_signal 一致
+        （乖离惩罚 + RSI>70 惩罚均乘 penalty_scale）。
+      - SIDEWAYS/FALLING：全额惩罚。
+    """
+    from trading.research.technical.analysis import _rsi
+
+    penalty_scale = 0.5 if market_regime == "RISING" else 1.0
+
     closes = frame["close"].to_numpy(dtype=np.float64)
+    highs = frame["high"].to_numpy(dtype=np.float64) if "high" in frame.columns else closes
     volumes = frame["volume"].to_numpy(dtype=np.float64)
     count = closes.size
     score = np.full(count, np.nan, dtype=np.float64)
@@ -78,28 +91,37 @@ def _technical_group(frame: pd.DataFrame) -> pd.DataFrame:
         sma60[indices] = (cumulative[indices + 1] - cumulative[indices - 59]) / 60.0
         sma20[indices] = (cumulative[indices + 1] - cumulative[indices - 19]) / 20.0
 
-        changes = np.diff(closes)
-        gains = np.maximum(changes, 0.0)
-        losses = np.maximum(-changes, 0.0)
-        gain_sum = np.concatenate(([0.0], np.cumsum(gains)))
-        loss_sum = np.concatenate(([0.0], np.cumsum(losses)))
-        avg_gain = (gain_sum[indices] - gain_sum[indices - 14]) / 14.0
-        avg_loss = (loss_sum[indices] - loss_sum[indices - 14]) / 14.0
-        relative_strength = np.divide(
-            avg_gain,
-            avg_loss,
-            out=np.full_like(avg_gain, np.inf),
-            where=avg_loss != 0.0,
+        # 逐个60根窗口复刻 production Wilder RSI，避免回测口径漂移。
+        rsi = np.array(
+            [_rsi(closes[row_index - 59 : row_index + 1].tolist()) for row_index in indices],
+            dtype=np.float64,
         )
-        rsi = 100.0 - 100.0 / (1.0 + relative_strength)
         rsi14[indices] = rsi
         dev = sma20[indices] / sma60[indices] - 1.0
         deviation[indices] = dev
         trend = np.clip(dev * 12.0, -1.0, 1.0)
-        trend = np.where(dev > 0.20, np.maximum(-1.0, trend - (dev - 0.20) * 5.0), trend)
+        # 乖离>20%：每多10个百分点 trend 减 0.5×penalty_scale（与生产 122 行一致）
+        trend = np.where(dev > 0.20, np.maximum(-1.0, trend - (dev - 0.20) * 5.0 * penalty_scale), trend)
+        sma5 = (cumulative[indices + 1] - cumulative[indices - 4]) / 5.0
+        sma10 = (cumulative[indices + 1] - cumulative[indices - 9]) / 10.0
+        short_pressure = (
+            (closes[indices] < sma5)
+            & (closes[indices] < sma10)
+            & (sma5 > sma20[indices])
+        )
+        trend = np.where(short_pressure, np.minimum(trend, -0.3), trend)
         momentum = np.clip((ema12[indices] / ema26[indices] - 1.0) * 25.0, -1.0, 1.0)
+        for output_index, row_index in enumerate(indices):
+            window_start = row_index - 9
+            recent_high = float(np.max(highs[window_start : row_index + 1]))
+            drawdown = (recent_high - closes[row_index]) / recent_high if recent_high else 0.0
+            recent_closes = closes[window_start : row_index + 1]
+            limit_down = bool(np.any(recent_closes[1:] / recent_closes[:-1] - 1.0 <= -0.095))
+            if drawdown >= 0.15 and limit_down:
+                momentum[output_index] = min(momentum[output_index], -0.5)
         rsi_score = np.clip((50.0 - np.abs(rsi - 50.0)) / 50.0, -1.0, 1.0)
-        rsi_score = np.where(rsi > 70.0, -0.5, np.where(rsi < 25.0, 0.25, rsi_score))
+        # RSI>70 惩罚：-0.5×penalty_scale（与生产 160 行一致，RISING 市减半）
+        rsi_score = np.where(rsi > 70.0, -0.5 * penalty_scale, np.where(rsi < 25.0, 0.25, rsi_score))
         score[indices] = np.clip(trend * 0.5 + momentum * 0.35 + rsi_score * 0.15, -1.0, 1.0)
 
     return pd.DataFrame(
@@ -295,7 +317,7 @@ class StrategyLabDatasetBuilder:
     def _build_technical_frame(connection: duckdb.DuckDBPyConnection) -> pd.DataFrame:
         bars = connection.execute(
             """
-            SELECT symbol,trade_date,close,volume
+            SELECT symbol,trade_date,high,close,volume
             FROM replay.replay_price_bars
             WHERE close IS NOT NULL
             ORDER BY symbol,trade_date

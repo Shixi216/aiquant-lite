@@ -18,10 +18,9 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from dataclasses import dataclass
+from datetime import timezone, timedelta
 from enum import StrEnum
-from typing import Optional
 
 TZ = timezone(timedelta(hours=8))
 

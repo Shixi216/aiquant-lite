@@ -32,6 +32,11 @@ STATEMENTS = {
     "balancesheet": "资产负债表",
     "cashflow": "现金流量表",
 }
+FINANCIAL_INDICATOR = "fina_indicator"
+FINANCIAL_INDICATOR_NAME = "财务指标"
+FINANCIAL_INDICATOR_FIELDS = (
+    "ts_code,ann_date,end_date,roe,roe_dt,or_yoy,netprofit_yoy,update_flag"
+)
 
 
 def _normalize_symbol(value: str) -> str:
@@ -167,18 +172,20 @@ class FinancialStatementService:
         end_date: str,
     ) -> tuple[pd.DataFrame | None, ProviderRun]:
         started = perf_counter()
-        provider_name = (
-            f"Tushare Pro / {STATEMENTS[statement_type]}"
-        )
+        statement_name = STATEMENTS.get(statement_type, FINANCIAL_INDICATOR_NAME)
+        provider_name = f"Tushare Pro / {statement_name}"
 
         try:
             fetcher = getattr(self._client, statement_type)
 
-            frame = fetcher(
-                ts_code=symbol,
-                start_date=start_date,
-                end_date=end_date,
-            )
+            kwargs = {
+                "ts_code": symbol,
+                "start_date": start_date,
+                "end_date": end_date,
+            }
+            if statement_type == FINANCIAL_INDICATOR:
+                kwargs["fields"] = FINANCIAL_INDICATOR_FIELDS
+            frame = fetcher(**kwargs)
 
             latency_ms = round(
                 (perf_counter() - started) * 1000
@@ -186,12 +193,12 @@ class FinancialStatementService:
 
             if frame.empty:
                 raise RuntimeError(
-                    f"{STATEMENTS[statement_type]}返回空数据"
+                    f"{statement_name}返回空数据"
                 )
 
             if "end_date" not in frame.columns:
                 raise RuntimeError(
-                    f"{STATEMENTS[statement_type]}缺少 end_date"
+                    f"{statement_name}缺少 end_date"
                 )
 
             return frame, ProviderRun(
@@ -261,7 +268,8 @@ class FinancialStatementService:
         }
 
         payload["statement_type"] = statement_type
-        payload["statement_name"] = STATEMENTS[statement_type]
+        statement_name = STATEMENTS.get(statement_type, FINANCIAL_INDICATOR_NAME)
+        payload["statement_name"] = statement_name
         payload["report_period"] = report_period
         announcement_time = None
         for field in ("f_ann_date", "ann_date"):
@@ -274,9 +282,7 @@ class FinancialStatementService:
         payload["announcement_time"] = announcement_time
         payload["data_available_time"] = announcement_time
 
-        source_name = (
-            f"Tushare Pro / {STATEMENTS[statement_type]}"
-        )
+        source_name = f"Tushare Pro / {statement_name}"
 
         return MarketRecord(
             symbol=symbol,
@@ -488,9 +494,12 @@ class FinancialStatementService:
         symbol: str,
         frames: dict[str, pd.DataFrame],
     ) -> list[MarketRecord]:
+        statement_frames = {
+            key: frame for key, frame in frames.items() if key in STATEMENTS
+        }
         period_sets = [
             set(frame["end_date"].dropna().astype(str).tolist())
-            for frame in frames.values()
+            for frame in statement_frames.values()
         ]
         if not period_sets:
             return []
@@ -498,6 +507,8 @@ class FinancialStatementService:
         records: list[MarketRecord] = []
         for report_period in common_periods:
             for statement_type, frame in frames.items():
+                if report_period not in set(frame["end_date"].dropna().astype(str)):
+                    continue
                 row = cls._select_row(
                     frame=frame,
                     report_period=report_period,
@@ -528,7 +539,7 @@ class FinancialStatementService:
             raise ValueError("start_date must not be later than end_date")
         frames: dict[str, pd.DataFrame] = {}
         provider_runs: list[ProviderRun] = []
-        for statement_type in STATEMENTS:
+        for statement_type in (*STATEMENTS, FINANCIAL_INDICATOR):
             frame, run = self._run_statement(
                 statement_type=statement_type,
                 symbol=canonical_symbol,
@@ -538,7 +549,7 @@ class FinancialStatementService:
             provider_runs.append(run)
             if frame is not None:
                 frames[statement_type] = frame
-        if not frames:
+        if not any(key in STATEMENTS for key in frames):
             raise RuntimeError("all financial statement providers failed")
         records = self._build_history_records(
             symbol=canonical_symbol,
@@ -568,7 +579,7 @@ class FinancialStatementService:
         frames: dict[str, pd.DataFrame] = {}
         provider_runs: list[ProviderRun] = []
 
-        for statement_type in STATEMENTS:
+        for statement_type in (*STATEMENTS, FINANCIAL_INDICATOR):
             frame, run = self._run_statement(
                 statement_type=statement_type,
                 symbol=canonical_symbol,
@@ -581,7 +592,7 @@ class FinancialStatementService:
             if frame is not None:
                 frames[statement_type] = frame
 
-        if not frames:
+        if not any(key in STATEMENTS for key in frames):
             errors = "; ".join(
                 f"{run.provider}: {run.error_message}"
                 for run in provider_runs
@@ -597,7 +608,8 @@ class FinancialStatementService:
                 .astype(str)
                 .tolist()
             )
-            for frame in frames.values()
+            for statement_type, frame in frames.items()
+            if statement_type in STATEMENTS
         ]
 
         common_periods = set.intersection(*period_sets)
@@ -612,6 +624,8 @@ class FinancialStatementService:
         records: list[MarketRecord] = []
 
         for statement_type, frame in frames.items():
+            if report_period not in set(frame["end_date"].dropna().astype(str)):
+                continue
             row = self._select_row(
                 frame=frame,
                 report_period=report_period,

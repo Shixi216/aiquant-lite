@@ -54,6 +54,7 @@ class DecisionResponse:
     formal_score: float = 0.0
     enhanced_score: Optional[float] = None
     confidence: float = 0.5
+    sentiment_v3_risk_reminder: bool = False
     consistency_status: str = ""       # CONSISTENT / INCONSISTENT / NA
     inconsistency_reason: str = ""
 
@@ -62,6 +63,9 @@ class DecisionResponse:
     target_position_ratio: float = 0.0
     position_change_ratio: float = 0.0
     recommended_batches: int = 1
+    account_context_source: str = ""
+    account_context_is_research_assumption: bool = False
+    position_ratio_source: str = ""
 
     # 交易区间（结构占位）
     price_zones: PriceZone = field(default_factory=PriceZone)
@@ -79,7 +83,7 @@ class DecisionResponse:
     # 冻结价格区间（首次决策时生成，后续不可修改）
     frozen_entry_zone: list = field(default_factory=list)
     frozen_preferred_zone: list = field(default_factory=list)
-    frozen_stop_loss_price: float = 0.0
+    frozen_stop_loss_price: Optional[float] = None
     zone_version: str = "V1"
 
     def to_dict(self) -> dict:
@@ -103,12 +107,18 @@ class DecisionResponse:
             "formal_score": self.formal_score,
             "enhanced_score": self.enhanced_score,
             "confidence": self.confidence,
+            "sentiment_v3_risk_reminder": self.sentiment_v3_risk_reminder,
             "consistency_status": self.consistency_status,
             "inconsistency_reason": self.inconsistency_reason,
             "current_position_ratio": self.current_position_ratio,
             "target_position_ratio": self.target_position_ratio,
             "position_change_ratio": self.position_change_ratio,
             "recommended_batches": self.recommended_batches,
+            "account_context_source": self.account_context_source,
+            "account_context_is_research_assumption": (
+                self.account_context_is_research_assumption
+            ),
+            "position_ratio_source": self.position_ratio_source,
             "price_zones": {
                 "entry_zone": self.price_zones.entry_zone,
                 "preferred_zone": self.price_zones.preferred_zone,

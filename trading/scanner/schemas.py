@@ -231,6 +231,24 @@ class ScannerEvaluationResponse(ScannerModel):
     is_trade_recommendation: Literal[False] = False
 
 
+class ScannerRunSummary(ScannerModel):
+    run_id: str
+    query_id: str | None = None
+    analysis_mode: str | None = None
+    data_cutoff: datetime | None = None
+    snapshot_id: str | None = None
+    universe_count: int | None = None
+    scanned_count: int | None = None
+    matched_count: int | None = None
+    returned_count: int | None = None
+    status: str | None = None
+    generated_at: datetime | None = None
+
+
+class ScannerRunsListResponse(ScannerModel):
+    items: list[ScannerRunSummary]
+
+
 __all__ = [
     "ScannerCandidateCard",
     "ScannerCandidateLayers",
@@ -241,6 +259,8 @@ __all__ = [
     "ScannerParseResponse",
     "ScannerPerformance",
     "ScannerQueryPlan",
+    "ScannerRunSummary",
+    "ScannerRunsListResponse",
     "ScannerScanRequest",
     "ScannerScanResponse",
     "ScannerScoreComponents",

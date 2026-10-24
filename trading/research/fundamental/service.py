@@ -193,6 +193,8 @@ class FundamentalAnalysisService:
             pe_ttm=snapshot.pe_ttm,
             pb=snapshot.pb,
             roe=snapshot.roe,
+            roe_dt=snapshot.roe_dt,
+            roe_source=snapshot.roe_source,
             revenue_growth=snapshot.revenue_growth,
             net_profit_growth=snapshot.net_profit_growth,
             debt_ratio=snapshot.debt_ratio,
@@ -385,6 +387,8 @@ class FundamentalAnalysisService:
             pe_ttm=metrics.pe_ttm,
             pb=metrics.pb,
             roe=metrics.roe,
+            roe_dt=metrics.roe_dt,
+            roe_source=metrics.roe_source,
             revenue_growth=metrics.revenue_growth,
             net_profit_growth=metrics.net_profit_growth,
             debt_ratio=metrics.debt_ratio,
@@ -393,6 +397,9 @@ class FundamentalAnalysisService:
                 metrics.operating_cash_flow_positive
             ),
             peg=metrics.peg,
+            net_profit_deducted=metrics.net_profit_deducted,
+            invest_income=metrics.invest_income,
+            invest_income_ratio=metrics.invest_income_ratio,
             report_period=metrics.report_period,
             statement_types=metrics.statement_types,
             announcement_time=(

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from router.integration.identifiers import new_request_id
+from trading.decision_support.user_context import UserContext
 from trading.research.orchestration.schemas import (
     DecisionShadowRequest,
     ResearchRequest,
@@ -153,18 +154,30 @@ class InteractionWorkflowService:
         *,
         request_id: str,
     ) -> DecisionWorkflowResult:
-        result = self._orchestration_factory().decision_shadow(
-            DecisionShadowRequest(
-                symbol=request.symbol,
-                data_cutoff=request.data_cutoff,
-                technical_score=request.technical_score,
-                technical_confidence=request.technical_confidence,
-                fundamental_score=request.fundamental_score,
-                fundamental_confidence=request.fundamental_confidence,
-                hard_veto=request.hard_veto,
-                persist_shadow=False,
-            )
+        orchestration = self._orchestration_factory()
+        decision_request = DecisionShadowRequest(
+            symbol=request.symbol,
+            data_cutoff=request.data_cutoff,
+            technical_score=request.technical_score,
+            technical_confidence=request.technical_confidence,
+            fundamental_score=request.fundamental_score,
+            fundamental_confidence=request.fundamental_confidence,
+            hard_veto=request.hard_veto,
+            persist_shadow=False,
         )
+        canonical_audit = getattr(
+            orchestration,
+            "decision_shadow_with_canonical_audit",
+            None,
+        )
+        if canonical_audit is None:
+            result = orchestration.decision_shadow(decision_request)
+        else:
+            result = canonical_audit(
+                decision_request,
+                request_id=request_id,
+                user_context=UserContext.finance_mcp_shadow(),
+            )
         missing_factors = [
             item.value for item in result.missing_factors
         ]

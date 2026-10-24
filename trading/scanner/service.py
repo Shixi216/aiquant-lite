@@ -310,6 +310,9 @@ class MarketScannerService:
     def run_detail(self, run_id: str) -> dict[str, object] | None:
         return self.repository.run_detail(run_id)
 
+    def list_runs(self, limit: int = 10) -> list[dict[str, object]]:
+        return self.repository.list_runs(limit=limit)
+
     def run_candidates(self, run_id: str) -> list[dict[str, object]]:
         return self.repository.run_candidates(run_id)
 

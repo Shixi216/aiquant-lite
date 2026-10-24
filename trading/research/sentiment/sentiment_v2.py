@@ -21,12 +21,9 @@
 from __future__ import annotations
 
 import json
-import math
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
 
 TZ = timezone(timedelta(hours=8))
 
@@ -76,6 +73,30 @@ W_ATTENTION = 0.10
 
 def _zh(v: float) -> str:
     return f"{v:+.3f}"
+
+
+def _event_freshness(latest_event_time: str, cutoff: datetime) -> float:
+    """事件新鲜度：最新事件距 cutoff 的衰减（2026-09-28，S3修复配套）。
+
+    - 7天内 → 1.0
+    - 7~30天 → 1.0 线性衰减到 0.6
+    - >30天 或时间戳缺失/解析失败 → 0.6
+    """
+    if not latest_event_time:
+        return 0.6
+    try:
+        ts_str = str(latest_event_time)[:19].replace("T", " ")
+        ev = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=TZ)
+    except (ValueError, TypeError):
+        return 0.6
+    if ev.tzinfo is None or cutoff.tzinfo is None:
+        return 0.6
+    age_days = (cutoff - ev).total_seconds() / 86400
+    if age_days <= 7:
+        return 1.0
+    if age_days >= 30:
+        return 0.6
+    return 1.0 - (age_days - 7) / 23 * 0.4
 
 
 class SentimentV2:
@@ -226,8 +247,12 @@ class SentimentV2:
             breadth = (up - down) / max(n, 1)
             # 涨停跌停比
             limit_ratio = (limit_up - limit_down) / max(n, 1)
-            # 成交额（万亿）
-            amount_t = total_amount / 1e6  # 千元→万亿约
+            # 成交额（万亿）——Tushare daily.amount 单位为千元
+            # 2026-09-28修复：原 /1e6 是百万元口径（差1000倍），
+            # 导致 amount_t≈1000+ 恒超封顶、amount_score 恒为 +0.3 饱和。
+            # 实证：2026-09-24 全市场 amount 原始和≈1.669亿(千元)，
+            # /1e9=1.669万亿，符合A股真实日成交1.5-2万亿。
+            amount_t = total_amount / 1e9  # 千元→万亿
             amount_score = min(0.3, max(-0.3, (amount_t - 1.0) * 0.1))
 
             score = breadth * 0.5 + limit_ratio * 0.3 + amount_score
@@ -375,9 +400,17 @@ class SentimentV2:
         result.attention_score = round(at_score, 3)
 
         # 新鲜度：事件情绪的时间衰减
+        # 2026-09-28修复：原实现"有事件数据 freshness=0.9"方向写反——
+        # 事件齐全反而被打9折、缺失时=1.0。改为基于最新事件时间距
+        # cutoff 的真实衰减：7天内=1.0，30天内线性衰减到0.6，
+        # 更早或无时间戳=0.6（不再无端打折，缺数据惩罚由coverage承担）。
         freshness = 1.0
         if ev_missing == []:
-            freshness = 0.9  # 有事件数据，较新
+            freshness = _event_freshness(
+                tavily_meta.get("latest_event_time", ""), cutoff
+            )
+        else:
+            freshness = 1.0  # 无事件数据时不额外打折
         result.freshness_ratio = round(freshness, 3)
 
         # 平均置信度

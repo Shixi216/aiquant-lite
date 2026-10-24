@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 
 from trading.decision_support.decision_engine import DecisionEngine, DecisionInput
 from trading.decision_support.task_context import TaskContext
+from trading.decision_support.account_context import RESEARCH_DEFAULT_ACCOUNT_CONTEXT
 from trading.decision_support.data_status import DataStatus
 from trading.decision_support.price_zones import Bar
 
@@ -43,6 +44,8 @@ def test_decision_engine_accepts_read_only_position_reader() -> None:
             formal_score=0.5,
             technical_score=0.5,
             fundamental_score=0.5,
+            point_in_time_ok=True,
+            account_context=RESEARCH_DEFAULT_ACCOUNT_CONTEXT,
             confidence=0.8,
             data_status=DataStatus.FRESH,
             current_price=10.0,

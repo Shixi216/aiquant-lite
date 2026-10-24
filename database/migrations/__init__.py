@@ -52,6 +52,21 @@ from database.migrations.v0116_overheat_preproduction_shadow import (
 from database.migrations.v0117_freeze_overheat_shadow_b import (
     apply_migration as apply_freeze_overheat_shadow_b_migration,
 )
+from database.migrations.v0118_canonical_decision_shadow import (
+    apply_migration as apply_canonical_decision_shadow_migration,
+)
+from database.migrations.v0119_canonical_shadow_observation_v2 import (
+    apply_migration as apply_canonical_shadow_observation_v2_migration,
+)
+from database.migrations.v0120_canonical_shadow_real_observation import (
+    apply_migration as apply_canonical_shadow_real_observation_migration,
+)
+from database.migrations.v0122_jinniu_shadow_history import (
+    apply_migration as apply_jinniu_shadow_history_migration,
+)
+from database.migrations.v0123_cross_section_thresholds import (
+    apply_migration as apply_cross_section_thresholds_migration,
+)
 
 
 Migration = Callable[[duckdb.DuckDBPyConnection], bool]
@@ -73,6 +88,11 @@ MIGRATIONS: tuple[Migration, ...] = (
     apply_financial_history_persistence_index_migration,
     apply_overheat_preproduction_shadow_migration,
     apply_freeze_overheat_shadow_b_migration,
+    apply_canonical_decision_shadow_migration,
+    apply_canonical_shadow_observation_v2_migration,
+    apply_canonical_shadow_real_observation_migration,
+    apply_jinniu_shadow_history_migration,
+    apply_cross_section_thresholds_migration,
 )
 
 
