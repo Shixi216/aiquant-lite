@@ -10,6 +10,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from trading.wealth_lab.backtest import compute_v2_metrics, run_strategy_backtest
 from trading.wealth_lab.repository import WealthLabRepository
 from trading.wealth_lab.schemas import envelope
+
+
+def envelope_v3(data, **kwargs):
+    return envelope(data, api_version="wealth-lab/v3", **kwargs)
 from trading.wealth_lab.strategies import get_strategy
 from trading.wealth_lab.universe import (
     assets_report,
@@ -33,7 +37,7 @@ class UniverseBacktestBody(BaseModel):
 
 @router.get("/universes")
 def v3_universes():
-    return envelope({"data_mode": "REAL", "universes": list_universes()})
+    return envelope_v3({"data_mode": "REAL", "universes": list_universes()})
 
 
 @router.get("/universes/{universe_id}/assets")
@@ -42,7 +46,7 @@ def v3_universe_assets(universe_id: str):
     if not members:
         raise HTTPException(status_code=404, detail="universe not found")
     rows = [a for a in assets_report(members)]
-    return envelope({"data_mode": "REAL", "universe_id": universe_id,
+    return envelope_v3({"data_mode": "REAL", "universe_id": universe_id,
                      "assets": rows, "members": len(rows)})
 
 
@@ -66,7 +70,7 @@ def v3_quality(category: str | None = None, status: str | None = None,
     counts: dict[str, int] = {}
     for row in rows:
         counts[row["quality_status"]] = counts.get(row["quality_status"], 0) + 1
-    return envelope({
+    return envelope_v3({
         "data_mode": "REAL", "total": total, "quality_counts": counts,
         "page": page, "limit": limit or total,
         "next_page": page + 1 if start_index + limit < total else None,
@@ -82,7 +86,7 @@ def v3_eligible(universe_id: str, asof: date):
     if not members:
         raise HTTPException(status_code=404, detail="universe not found")
     result = backtest_eligible(members, asof)
-    return envelope({
+    return envelope_v3({
         "data_mode": "REAL", "universe_id": universe_id, "asof": asof.isoformat(),
         "eligible_count": sum(1 for v in result.values() if v["eligible"]),
         "total": len(result),
@@ -105,7 +109,7 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
 
     close = repository.read_close_matrix(members)
     if close.empty:
-        return envelope({"data_mode": "UNAVAILABLE", "reason": "池内无共同行情"},
+        return envelope_v3({"data_mode": "UNAVAILABLE", "reason": "池内无共同行情"},
                         status="FAILED", error_code="DATA_UNAVAILABLE",
                         sanitized_error="数据不可用：池内无共同行情")
     start = body.start_date or close.index[0].date()
@@ -113,11 +117,6 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
     eligible = backtest_eligible(members, start)
     excluded = {s: v["reasons"] for s, v in eligible.items() if not v["eligible"]}
     eligible_symbols = [s for s, v in eligible.items() if v["eligible"]]
-    if not eligible_symbols:
-        return envelope({"data_mode": "UNAVAILABLE",
-                         "reason": f"asof {start} 时点池内无可投资资产（PIT 闸门）"},
-                        status="FAILED", error_code="DATA_UNAVAILABLE",
-                        sanitized_error="数据不可用：回测起点无 PIT 合格资产")
 
     import uuid
 
@@ -136,7 +135,7 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
     eligible_at_start = backtest_eligible(members, start)
     if not any(v["eligible"] for v in eligible_at_start.values()):
         suggested = _suggested_start(members, start)
-        return envelope({
+        return envelope_v3({
             "data_mode": "UNAVAILABLE",
             "reason": f"asof {start} 时点池内无可投资资产（PIT 闸门）",
             "requested_start_date": start.isoformat(),
@@ -236,4 +235,4 @@ def v3_universe_backtest(strategy_id: str, body: UniverseBacktestBody):
         {"strategy_id": strategy_id, "universe_id": body.universe_id, **body.params_override},
         result,
     )
-    return envelope(result)
+    return envelope_v3(result)

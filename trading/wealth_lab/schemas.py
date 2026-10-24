@@ -28,6 +28,7 @@ def envelope(
     warnings: list[str] | None = None,
     risk_flags: list[str] | None = None,
     data_cutoff: datetime | None = None,
+    api_version: str = API_VERSION,
 ) -> dict:
     return {
         "request_id": new_request_id(),
@@ -39,7 +40,7 @@ def envelope(
         "risk_flags": risk_flags or [],
         "data_cutoff": data_cutoff,
         "generated_at": datetime.now().astimezone(),
-        "api_version": API_VERSION,
+        "api_version": api_version,
         "research_only": True,
     }
 
