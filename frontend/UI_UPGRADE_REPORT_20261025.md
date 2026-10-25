@@ -110,6 +110,7 @@
 15. `15-ai-research-zh.png` — AI 研究页中文化（稳定研究/实验性研究/研究员角色）
 16. `16-task-center-zh-1280.png` — 任务中心中文化（1280 宽，无溢出）
 17. `17-sentiment-navy-thememenu.png` — 深海军主题下的情绪页与五预设主题菜单
+18. `18-mist-jade-restored-pixel-icons.png` — 晨雾青绿恢复 + 像素图标导航与主题控件
 
 ## 七、待后端补充/确认的接口
 
@@ -207,6 +208,31 @@
 - vue-tsc 0 错误 · vite build 通过 · 19/19 单测。
 
 **截图**：13 深海军总览（1920）、14 情绪页中文化（1920）、15 AI 研究中文化、16 任务中心（1280）、17 情绪页深海军+主题菜单。
+
+
+
+## 十二、第五轮：恢复明亮默认主题 + 像素风图标（pixelarticons, MIT）
+
+**主题恢复（精确回退 e176fad 的 navy 改动，diff 逐块核对）**：
+- `styles/tokens.css`：删除 navy-pro 全部 token 块与侧栏覆盖变量（-107 行），完整还原四套预设原始配色；
+- `domain/theme.ts`：预设列表回到晨雾青绿（默认）/云朵浅蓝/奶油杏金/极夜专业版四套，默认 preset=mist-jade；
+- `style.css`：侧栏颜色全部恢复原 token 绑定（--text-dim/--accent-soft 等）；e176fad 中的按钮精修（:active 按压、:hover:not(:disabled)、统一行高）**有意保留**——与本轮按钮细则一致；
+- `MainLayout.vue`：侧栏 footer 颜色还原。
+
+**像素图标（真实可用的本地方案，零新增依赖）**：
+- 图形数据精选自 pixelarticons（MIT License, © Gerrit Halfmann），内联 29 组 24×24 path 到 `domain/pixelIconPaths.ts`（模块头注明来源与许可）；
+- `components/global/PixelIcon.vue`：currentColor 单色渲染（自动随主题）、默认 16px、shape-rendering=crispEdges、基线对齐；
+- 接入位置（保持文字/功能/位置/尺寸不变）：六个工作区 tab + 全部二级导航（emoji → 像素图标，共 24 处）、主题菜单扳手与浅色/深色切换（aria-label 保留）、仪表盘与设置页组件排序 ↑↓、四处弹窗关闭 ✕（任务中心/情绪抽屉/情绪确认/决策版本链，中文 aria-label 补齐）。
+
+**验收（真实浏览器操作）**：
+- 清除缓存后默认主题即晨雾青绿（bg 断言 rgb(243,247,245)）；UI 菜单 极夜 ↔ 晨雾青绿 往返正常；
+- 32 个像素图标渲染于总览页（9 个于情绪页），着色随主题（rgb(11,125,107) 青绿）；
+- 1920/1280/1024 三档宽度零溢出、零控制台错误；禁用按钮 cursor:not-allowed、无误导性悬停；
+- vue-tsc 0 错误 · vite build 通过 · 19/19 单测。
+
+**截图**：`18-mist-jade-restored-pixel-icons.png`（晨雾青绿恢复 + 像素图标导航 + 像素主题控件）。
+
+**未完成/遗留**：管理后台其余文字按钮（如「刷新」「运行」）按"不推倒重做"要求保持纯文字；社区情绪模块接入仍待后续任务。
 
 ## 九、已知边界（如实记录）
 
