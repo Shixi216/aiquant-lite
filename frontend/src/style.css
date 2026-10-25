@@ -69,6 +69,7 @@ body {
   font-weight: 700;
   padding: 6px 10px 16px;
   letter-spacing: 0.5px;
+  color: var(--sidebar-text-strong);
 }
 
 .sidebar .brand .logo-mark,
@@ -89,7 +90,7 @@ body {
 .sidebar .brand small {
   display: block;
   font-weight: 400;
-  color: var(--text-dim);
+  color: var(--sidebar-text);
   font-size: 11px;
   margin-top: 4px;
 }
@@ -111,7 +112,7 @@ body {
   padding: 9px 12px;
   border-radius: var(--radius-ctrl);
   border: 1px solid transparent;
-  color: var(--text-dim);
+  color: var(--sidebar-text);
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 600;
@@ -123,14 +124,14 @@ body {
 }
 
 .workspace-tab:hover {
-  background: var(--bg-hover);
-  color: var(--text);
+  background: var(--sidebar-item-hover-bg);
+  color: var(--sidebar-text-strong);
 }
 
 .workspace-tab.active {
-  background: var(--accent-soft);
-  border-color: var(--accent-ring);
-  color: var(--accent-strong);
+  background: var(--sidebar-item-active-bg);
+  border-color: transparent;
+  color: var(--sidebar-item-active-text);
 }
 
 .workspace-tab .ws-icon {
@@ -154,7 +155,7 @@ body {
   gap: 9px;
   padding: 9px 12px;
   border-radius: var(--radius-ctrl);
-  color: var(--text-dim);
+  color: var(--sidebar-text);
   text-decoration: none;
   font-size: 13.5px;
   border: 1px solid transparent;
@@ -170,15 +171,15 @@ body {
 }
 
 .sidebar a:hover {
-  background: var(--bg-hover);
-  color: var(--text);
+  background: var(--sidebar-item-hover-bg);
+  color: var(--sidebar-text-strong);
   transform: translateX(2px);
 }
 
 .sidebar a.router-link-active {
-  background: var(--accent-soft);
-  border-color: var(--accent-ring);
-  color: var(--accent-strong);
+  background: var(--sidebar-item-active-bg);
+  border-color: transparent;
+  color: var(--sidebar-item-active-text);
   font-weight: 600;
 }
 
@@ -633,14 +634,20 @@ button.mini {
   border-radius: var(--radius-ctrl);
   padding: 6px 12px;
   font-size: 12px;
+  line-height: 1.5;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
 }
 
-button.mini:hover {
+button.mini:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent-strong);
   box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+button.mini:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 button.mini.primary {

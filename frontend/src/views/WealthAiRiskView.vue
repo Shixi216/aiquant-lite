@@ -250,7 +250,7 @@ onMounted(async () => {
       <div class="head-chips">
         <span v-if="researchSource === 'offline-mock'" class="badge warn">契约 Mock 样例</span>
         <span v-else-if="research?.data.data_mode === 'REAL'" class="badge ok">真实数据</span>
-        <span class="badge action">契约 wealth-lab/v2</span>
+        <span class="badge action" title="后端接口契约版本 wealth-lab/v2">接口版本 v2</span>
       </div>
     </div>
 

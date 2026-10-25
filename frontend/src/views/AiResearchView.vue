@@ -18,6 +18,7 @@ import {
 import { errorMessage } from "../api/client";
 import { useWealthLabV2Store } from "../stores/wealthLabV2";
 import { fmtPct, fmtRatio } from "../domain/wealthFormat";
+import { getResearchRoleLabel, getResearchStatusLabel } from "../domain/labels";
 import type {
   NumericVerification,
   ResearchExperiment,
@@ -415,16 +416,21 @@ function fmtTime(iso: string | null | undefined): string {
           <div class="field">
             <span class="field-label">运行模式</span>
             <div class="seg mode-seg">
-              <button type="button" :class="{ active: mode === 'STABLE_RESEARCH' }" @click="switchMode('STABLE_RESEARCH')">
-                STABLE_RESEARCH<span class="mode-tag">默认</span>
+              <button
+                type="button"
+                :class="{ active: mode === 'STABLE_RESEARCH' }"
+                title="稳定研究：基于既有回测证据，2 次模型调用（后端模式 STABLE_RESEARCH）"
+                @click="switchMode('STABLE_RESEARCH')"
+              >
+                稳定研究<span class="mode-tag">推荐</span>
               </button>
               <button
                 type="button"
                 :class="{ active: mode === 'EXPERIMENTAL_AI_RESEARCH' }"
                 :disabled="experimentalMode !== null && !experimentalMode.enabled"
-                :title="experimentalMode && !experimentalMode.enabled ? `未启用（需设置 ${experimentalMode.flag ?? 'WEALTH_LAB_EXPERIMENTAL_AI'}）` : '实验模式：AI 规划 + 多组实验（预算 3 次调用）'"
+                :title="experimentalMode && !experimentalMode.enabled ? `未启用（需后端设置 ${experimentalMode.flag ?? 'WEALTH_LAB_EXPERIMENTAL_AI'}）` : '实验模式：AI 规划 + 多组实验（3 次调用预算；后端模式 EXPERIMENTAL_AI_RESEARCH）'"
                 @click="switchMode('EXPERIMENTAL_AI_RESEARCH')"
-              >EXPERIMENTAL_AI_RESEARCH</button>
+              >实验性研究</button>
             </div>
             <p v-if="experimentalMode && !experimentalMode.enabled" class="hint warn-text">
               实验模式未启用（需后端设置 {{ experimentalMode.flag ?? 'WEALTH_LAB_EXPERIMENTAL_AI' }}）；按契约后端将拒绝（403），此处先行禁用。
@@ -443,7 +449,7 @@ function fmtTime(iso: string | null | undefined): string {
 
           <template v-if="mode === 'STABLE_RESEARCH'">
             <label class="field">
-              <span class="field-label">既有回测 ID（stable 模式基于已存档回测）</span>
+              <span class="field-label">既有回测编号（稳定研究基于已存档的回测结果）</span>
               <div class="row">
                 <input v-model="backtestId" type="text" placeholder="wlbt_xxxxxxxxxxxx" />
                 <button
@@ -455,13 +461,13 @@ function fmtTime(iso: string | null | undefined): string {
               </div>
               <span class="hint">可在「策略工厂」运行回测后自动关联，或在「数据中心 → 任务记录」查看历史 backtest_id。</span>
             </label>
-            <label class="check-field">
+            <label class="check-field" title="对应后端参数 allow_reuse">
               <input v-model="allowReuse" type="checkbox" />
-              <span>allow_reuse：复用同 backtest_id 的已完成研究（相同数据与参数）</span>
+              <span>复用既有结论：同一回测（相同数据与参数）已完成研究时直接采用，不重复调用模型</span>
             </label>
-            <label class="check-field paid">
+            <label class="check-field paid" title="对应后端参数 confirm_paid_calls">
               <input v-model="confirmPaidCalls" type="checkbox" />
-              <span>confirm_paid_calls：我确认本次研究包含 <b>{{ stableMode?.model_call_budget ?? 2 }} 次真实付费模型调用</b>（Qwen 研究 + DeepSeek Pro 复核）</span>
+              <span>我确认本次研究包含 <b>{{ stableMode?.model_call_budget ?? 2 }} 次真实付费模型调用</b>（AI 研究结论 + 独立风险复核）</span>
             </label>
           </template>
 
@@ -477,17 +483,17 @@ function fmtTime(iso: string | null | undefined): string {
 
           <div class="field">
             <span class="field-label">模型调用预算（后端契约固定）</span>
-            <span class="badge">{{ mode === 'STABLE_RESEARCH' ? 'STABLE' : 'EXPERIMENTAL' }} ≤ {{ budgetTotal }} 次付费调用</span>
+            <span class="badge">{{ mode === 'STABLE_RESEARCH' ? '稳定研究' : '实验性研究' }} · 最多 {{ budgetTotal }} 次付费调用</span>
           </div>
 
           <button class="mini primary run-btn" type="button" :disabled="!canSubmit" @click="submitResearch">
-            {{ phase === "planning" ? "AI 规划中（真实请求在途）…" : phase === "executing" ? "后端执行中…" : mode === "STABLE_RESEARCH" ? "发起稳定模式研究" : "提交目标给 AI 规划" }}
+            {{ phase === "planning" ? "AI 规划中（真实请求进行中）…" : phase === "executing" ? "后端执行中…" : mode === "STABLE_RESEARCH" ? "发起稳定研究" : "提交目标，开始 AI 规划" }}
           </button>
           <p v-if="submitError" class="error-box" role="alert">{{ submitError }}</p>
           <p v-for="warning in submitWarnings" :key="warning" class="hint warn-text">※ {{ warning }}</p>
 
           <div class="field lookup">
-            <span class="field-label">按 run_id 查询历史研究</span>
+            <span class="field-label">按运行编号查询历史研究（编号形如 wlrun_…，可在审计记录中找到）</span>
             <div class="row">
               <input v-model="lookupRunId" type="text" placeholder="wlrun_xxxxxxxxxxxx" />
               <button class="mini" type="button" @click="lookupRun">查询</button>
@@ -504,14 +510,14 @@ function fmtTime(iso: string | null | undefined): string {
           <div v-if="rolesError" class="error-box">{{ rolesError }}</div>
           <div v-for="role in roleList" :key="role.role" class="role-card">
             <div class="role-head">
-              <strong>{{ role.role }}</strong>
-              <span class="badge" :class="role.available ? 'ok' : 'warn'">{{ role.available ? "可用" : "不可用" }}</span>
+              <strong>{{ getResearchRoleLabel(role.role) }}<small class="role-en">{{ role.role }}</small></strong>
+              <span class="badge" :class="role.available ? 'ok' : 'warn'">{{ role.available ? "可用" : "暂不可用" }}</span>
             </div>
             <p class="role-model">{{ role.display_model_name }}<small v-if="role.actual_model_id"> · {{ role.actual_model_id }}</small></p>
             <p class="role-note">{{ roleNote(role) }}</p>
           </div>
           <p v-if="roleList.some((r) => !r.available)" class="hint warn-text">
-            ※ 存在不可用模型：对应阶段将按 MODEL_UNAVAILABLE 处理（后端降级/终止），不会猜测替代模型。
+            ※ 存在暂不可用模型：对应阶段将由后端明确标记并降级或终止，不会猜测替代模型。
           </p>
         </section>
       </div>
@@ -524,7 +530,7 @@ function fmtTime(iso: string | null | undefined): string {
             <span v-if="runRecord" class="h3-extra">
               {{ runRecord.research_run_id }} · {{ runRecord.mode }} · 预算 {{ runRecord.model_calls_used }}/{{ runRecord.model_call_budget }}
             </span>
-            <span v-if="runRecord" :class="statusBadgeCls">{{ runRecord.status }}</span>
+            <span v-if="runRecord" :class="statusBadgeCls">{{ getResearchStatusLabel(runRecord.status) }}</span>
           </h3>
 
           <div v-if="phase === 'planning'" class="phase-note" role="status">
@@ -544,7 +550,7 @@ function fmtTime(iso: string | null | undefined): string {
                 <b>{{ stepMeta[index]!.title }}</b>
                 <small v-if="step.state === 'skipped'">— {{ step.note }}</small>
                 <small v-else-if="step.state === 'active'">— 进行中（后端真实状态）</small>
-                <small v-else-if="step.state === 'failed'">— 未通过</small>
+                <small v-else-if="step.state === 'failed'">— 未通过（原因见下方说明）</small>
                 <small v-else-if="step.note && step.state === 'pending'">— {{ step.note }}</small>
               </span>
             </li>
@@ -574,7 +580,7 @@ function fmtTime(iso: string | null | undefined): string {
           </h3>
           <div class="plan-grid">
             <div><span>研究目标</span><b>{{ plan.research_goal }}</b></div>
-            <div><span>资产池（AI 规划）</span><b>{{ plan.universe_id }}</b></div>
+            <div><span>资产池（AI 规划）</span><b>{{ getAssetCategoryLabelV3(plan.universe_id) === plan.universe_id ? plan.universe_id : getAssetCategoryLabelV3(plan.universe_id) + '（' + plan.universe_id + '）' }}</b></div>
             <div><span>历史区间</span><b>{{ plan.start_date }} ~ {{ plan.end_date }}</b></div>
             <div><span>基准</span><b>{{ plan.benchmark ?? "EQUAL_WEIGHT" }}</b></div>
           </div>
@@ -666,7 +672,7 @@ function fmtTime(iso: string | null | undefined): string {
         <!-- 10b. 决策包 -->
         <section v-if="result?.decision_packet_id || runRecord?.decision_packet_id" class="panel">
           <h3>
-            决策包（WealthDecisionPacket · research_only）
+            研究决策包（仅限研究用途，不构成投资指令）
             <code class="mono">{{ result?.decision_packet_id ?? runRecord?.decision_packet_id }}</code>
           </h3>
           <button
@@ -745,6 +751,7 @@ function fmtTime(iso: string | null | undefined): string {
 .role-card { border: 1px solid var(--border); border-radius: var(--radius-ctrl); padding: 9px 12px; margin-bottom: 8px; background: var(--bg-panel-2); }
 .role-head { display: flex; justify-content: space-between; align-items: center; }
 .role-head strong { font-size: 12.5px; }
+.role-en { margin-left: 6px; font-size: 10px; color: var(--text-faint); font-weight: 400; }
 .role-model { margin: 4px 0 0; font-size: 12.5px; color: var(--text); }
 .role-model small { color: var(--text-faint); }
 .role-note { margin: 3px 0 0; font-size: 11px; color: var(--text-faint); line-height: 1.55; }

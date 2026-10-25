@@ -71,9 +71,9 @@ const RUN_STATUS_CLS: Record<string, string> = {
 };
 const RUN_STATUS_LABELS: Record<string, string> = {
   QUEUED: "排队中",
-  RUNNING: "运行中",
-  SUCCEEDED: "SUCCEEDED",
-  FAILED: "FAILED",
+  RUNNING: "执行中",
+  SUCCEEDED: "执行成功",
+  FAILED: "执行失败",
   CANCELLED: "已取消",
 };
 const recentFailedCount = computed(() => runRecords.value.filter((r) => r.status === "FAILED").length);
@@ -292,7 +292,7 @@ const providerChips = computed(() => {
 <template>
   <div class="task-center">
     <p class="page-sub">
-      所有操作按钮均调用真实后端接口：数据/研究任务走后端任务队列（提交 → job_id → 真实进度轮询），
+      所有操作按钮均调用真实后端接口：数据与研究任务提交到后端受控任务队列（受理后返回任务编号，进度为真实轮询），
       Router 门面操作按其当前只读部署如实返回。后端未提供的能力显示「暂不可用」，不伪造成功。
     </p>
 
@@ -311,7 +311,7 @@ const providerChips = computed(() => {
         <div class="stat-card">
           <span class="stat-label">研究资产数</span>
           <span class="stat-value">{{ quality?.total ?? "—" }}</span>
-          <span class="stat-foot">A股名录 {{ status?.universe?.total ?? "—" }} 条 · 版本 {{ status?.universe?.universe_version ?? "—" }}</span>
+          <span class="stat-foot">A 股名录 {{ status?.universe?.total ?? "—" }} 条 · 已按版本登记</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">数据质量</span>
@@ -329,7 +329,7 @@ const providerChips = computed(() => {
         <div class="stat-card">
           <span class="stat-label">最后更新时刻</span>
           <span class="stat-value">{{ fmtTime(status?.fetchedAt).slice(11) || "—" }}</span>
-          <span class="stat-foot">Router：{{ status?.routerHealth?.status ?? "不可达" }}</span>
+          <span class="stat-foot">路由网关：{{ status?.routerHealth?.status === "ok" ? "正常" : (status?.routerHealth?.status ?? "不可达") }}</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">待处理任务</span>
@@ -356,8 +356,16 @@ const providerChips = computed(() => {
           <header class="op-head">
             <strong>{{ op.label }}</strong>
             <span v-if="op.unavailable" class="badge warn">暂不可用</span>
-            <span v-else-if="op.kind === 'job'" class="badge">任务队列 · {{ op.operation }}</span>
-            <span v-else class="badge">{{ op.base === "wealth" ? "8765 可写" : "8767 只读门面" }} · {{ op.method }} {{ op.path }}</span>
+            <span
+              v-else-if="op.kind === 'job'"
+              class="badge"
+              :title="`受控任务（后端白名单校验）：${op.operation}`"
+            >受控任务 · 真实执行</span>
+            <span
+              v-else
+              class="badge"
+              :title="`技术信息（保留审计）：${op.method} ${op.path}`"
+            >{{ op.base === "wealth" ? "即时接口 · 财富后端" : "即时接口 · 只读网关" }}</span>
           </header>
           <p class="op-desc">{{ op.description }}</p>
           <p v-if="op.unavailable && op.unavailableReason" class="op-unavailable-reason">{{ op.unavailableReason }}</p>
@@ -385,7 +393,7 @@ const providerChips = computed(() => {
                 @click="requestRun(op)"
               >{{ runningOpId === op.id ? "执行中…" : "运行" }}</button>
               <details class="op-preview">
-                <summary>请求体预览</summary>
+                <summary>技术详情（请求参数）</summary>
                 <pre>{{ requestPreviewOf(op) }}</pre>
               </details>
             </footer>
@@ -476,7 +484,7 @@ const providerChips = computed(() => {
                 <th>状态</th>
                 <th>开始时间</th>
                 <th>耗时</th>
-                <th>后端引用 ID</th>
+                <th>引用编号（审计）</th>
                 <th>结果摘要 / 失败原因</th>
                 <th></th>
               </tr>
@@ -484,7 +492,7 @@ const providerChips = computed(() => {
             <tbody>
               <template v-for="record in runRecords" :key="record.runKey">
                 <tr>
-                  <td>{{ record.opLabel }}<small class="run-path">{{ record.path }}</small></td>
+                  <td>{{ record.opLabel }}<small class="run-path">{{ record.path.includes("/jobs") ? "经受控任务队列执行" : "经只读网关执行（当前部署）" }}</small></td>
                   <td><span class="badge" :class="RUN_STATUS_CLS[record.status] ?? (record.status === 'SUCCEEDED' ? 'ok' : 'veto')">{{ RUN_STATUS_LABELS[record.status] ?? record.status }}</span></td>
                   <td class="num">{{ fmtTime(record.startedAt) }}</td>
                   <td class="num">{{ (record.durationMs / 1000).toFixed(1) }}s</td>
@@ -496,11 +504,11 @@ const providerChips = computed(() => {
                   <td colspan="7">
                     <div class="detail-grid">
                       <div>
-                        <h4>请求体</h4>
+                        <h4>请求参数（技术审计）</h4>
                         <pre>{{ JSON.stringify(record.request, null, 2) }}</pre>
                       </div>
                       <div>
-                        <h4>响应（审计留痕）</h4>
+                        <h4>后端响应原文（审计留痕）</h4>
                         <pre>{{ JSON.stringify(record.resultPayload, null, 2) ?? "—" }}</pre>
                       </div>
                     </div>

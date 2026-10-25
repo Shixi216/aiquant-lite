@@ -25,6 +25,7 @@ import {
   productFormLabel,
 } from "../domain/wealthV3Format";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
+import { getAssetCategoryLabelV3 } from "../domain/labels";
 
 const PAGE_SIZE = 10; // 验收口径：每页 10 条，33 只 = 10+10+10+3
 
@@ -275,7 +276,7 @@ onMounted(load);
       <div class="head-chips">
         <span v-if="offlineMode" class="badge warn">后端未连接 · 契约 Mock 样例</span>
         <span v-else-if="qualityEnvelope?.data.data_mode === 'REAL'" class="badge ok">真实数据</span>
-        <span class="badge action">契约 wealth-lab/v3</span>
+        <span class="badge action" title="后端接口契约版本 wealth-lab/v3">接口版本 v3</span>
         <span class="badge">v3.1 分类修正</span>
         <button class="mini" @click="load">{{ loading ? "刷新中…" : "刷新" }}</button>
       </div>
@@ -326,7 +327,7 @@ onMounted(load);
         <select v-model="categoryFilter" aria-label="按类别筛选" @change="onFilterChange">
           <option value="all">全部类别</option>
           <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
-            {{ option.value }}（{{ option.count }}）
+            {{ getAssetCategoryLabelV3(option.value) }}（{{ option.count }}）
           </option>
         </select>
         <select v-model="statusFilter" aria-label="按数据状态筛选" @change="onFilterChange">
@@ -368,7 +369,7 @@ onMounted(load);
           <tbody>
             <tr v-for="asset in tableRows" :key="asset.symbol">
               <td><strong>{{ asset.name }}</strong><span class="sym-name">{{ asset.symbol }}</span></td>
-              <td>{{ asset.category }}</td>
+              <td>{{ getAssetCategoryLabelV3(asset.category) }}</td>
               <td>
                 <div class="dim-chips">
                   <span v-if="asset.product_form" class="dim-chip">{{ productFormLabel(asset.product_form) }}</span>
@@ -400,7 +401,7 @@ onMounted(load);
     <!-- 3. 历史可投资资产池 -->
     <section class="panel" aria-labelledby="v3-eligible-title">
       <h3 id="v3-eligible-title">
-        历史可投资资产池（Backtest Eligible · PIT）
+        历史可投资资产池（逐时点资格判定 · 防未来函数）
         <span class="h3-extra">研究资产池 = 全部已验证资产；历史可投资池 = 指定历史决策日满足上市/覆盖/流动性/策略约束的资产</span>
       </h3>
       <div class="eligible-form">

@@ -2,7 +2,7 @@
 /**
  * 多资产市场情绪工作台（wealth-sentiment/v1.1，CURRENT_RESEARCH_ONLY）。
  * 契约：trading/wealth_lab/sentiment/CONTRACT.md。
- * 读端点直连情绪模块；三个写操作走受控 Jobs API（提交 → job_id → 真实轮询）。
+ * 读端点直连情绪模块；三个写操作提交到受控任务队列（提交后返回任务编号，进度为真实轮询）。
  * 证据口径以后端为准：EXACT=直接证据；CLASS_LEVEL=间接推导（置信度封顶 0.6）；
  * INSUFFICIENT_DATA=证据不足（灰显，不得当作信号）。前端聚合视图均明确标注。
  */
@@ -26,6 +26,13 @@ import {
 import { errorMessage } from "../api/client";
 import type { AssetNewsItem, NewsEvent, ScoreEvidenceDetail, SentimentJobSubmitData, SentimentScore } from "../types/sentiment";
 import type { AssetQuality } from "../types/wealthLabV3";
+import {
+  getAssetCategoryLabelV3,
+  getNewsCategoryLabel,
+  getSentimentAnalysisStatusLabel,
+  getSentimentDirectionLabel,
+  getValidationFlagLabel,
+} from "../domain/labels";
 import type { JobPublic } from "../api/taskCenter";
 
 /* ---------------- 资产主数据（v3 研究池质量接口） ---------------- */
@@ -349,9 +356,9 @@ onMounted(() => {
 <template>
   <div class="sentiment-view">
     <p class="page-sub">
-      wealth-sentiment/v1.1 · CURRENT_RESEARCH_ONLY（仅研究界面可读，不接入正式策略）。
+      多资产市场情绪 · 数据版本 1.1 · 仅限研究用途（不接入正式策略、不构成投资建议）。
       只有新闻点名资产代码/全名构成<b>直接证据</b>；仅类别推导的情绪置信度封顶 0.6 并标注"间接推导"；
-      无观测即"证据不足"。三个写操作走受控 Jobs API，无假成功。
+      无观测即"证据不足"。三个写操作均提交到后端受控任务队列，真实执行、无假成功。
     </p>
 
     <div class="layout">
@@ -383,7 +390,7 @@ onMounted(() => {
             <p class="dim-line">版本 {{ marketScore.sentiment_version }} · 快照 {{ fmtTime(marketScore.asof) }} · 最新证据 {{ fmtTime(marketScore.last_evidence_at) }}</p>
             <div v-if="marketScore.component_breakdown?.by_direction" class="dir-chips">
               <span v-for="(count, direction) in marketScore.component_breakdown.by_direction" :key="direction" class="chip static">
-                {{ direction }} {{ count }}
+                {{ getSentimentDirectionLabel(direction) }} {{ count }}
               </span>
             </div>
             <button class="mini" type="button" @click="loadEvidence(marketScore, '市场总体情绪评分审计')">查看评分审计（证据下钻）</button>
@@ -392,7 +399,7 @@ onMounted(() => {
         </section>
 
         <section class="panel">
-          <h3>受控更新操作（Jobs API）</h3>
+          <h3>受控更新操作（后端任务队列）</h3>
           <div class="op-row">
             <button class="mini" type="button" :disabled="jobSubmitting !== null" @click="requestJob('refresh')">更新资讯</button>
             <button class="mini" type="button" :disabled="jobSubmitting !== null" @click="requestJob('analyze')">重新分析</button>
@@ -414,7 +421,7 @@ onMounted(() => {
             <span v-if="activeJob.error" class="error-text">{{ activeJob.error }}</span>
           </div>
           <p v-if="jobError" class="error-box" role="alert">{{ jobError }}</p>
-          <p class="hint">任务在后端串行队列执行；进度为真实轮询（3s）。全量任务管理见「数据中心 → 任务中心」。</p>
+          <p class="hint">任务在后端串行队列执行；进度为真实轮询。全量任务管理见「数据中心 → 任务中心」。</p>
         </section>
 
         <section class="panel">
@@ -427,7 +434,7 @@ onMounted(() => {
               </span>
             </div>
             <details v-if="sources.rejected.length" class="audit">
-              <summary>已弃用来源（{{ sources.rejected.length }}）及原因</summary>
+              <summary>已停用数据来源（{{ sources.rejected.length }}）及原因</summary>
               <pre class="payload">{{ JSON.stringify(sources.rejected, null, 2) }}</pre>
             </details>
           </template>
@@ -443,7 +450,7 @@ onMounted(() => {
           </h3>
           <div class="cat-grid">
             <div v-for="cat in categoryOverview" :key="cat.category" class="cat-card">
-              <div class="cat-head"><strong>{{ cat.category }}</strong><span class="dim">{{ cat.scored }}/{{ cat.total }} 有分</span></div>
+              <div class="cat-head"><strong>{{ getAssetCategoryLabelV3(cat.category) }}</strong><span class="dim">{{ cat.scored }}/{{ cat.total }} 有分</span></div>
               <div class="cat-score" :class="scoreClass(cat.avgScore)">
                 {{ cat.avgScore === null ? "证据不足" : `${cat.avgScore > 0 ? "+" : ""}${cat.avgScore.toFixed(1)}` }}
               </div>
@@ -469,7 +476,7 @@ onMounted(() => {
               <tbody>
                 <tr v-for="{ asset, score } in scoredAssets" :key="asset.symbol" class="asset-row" @click="toggleAssetNews(asset.symbol)">
                   <td><strong>{{ asset.name }}</strong><span class="sym-name">{{ asset.symbol }}</span></td>
-                  <td>{{ asset.category }}</td>
+                  <td>{{ getAssetCategoryLabelV3(asset.category) }}</td>
                   <td class="num" :class="score && score !== 'INSUFFICIENT' ? scoreClass(score.sentiment_score) : 'dim'">
                     <template v-if="score && score !== 'INSUFFICIENT'">{{ score.sentiment_score > 0 ? "+" : "" }}{{ score.sentiment_score.toFixed(1) }}</template>
                     <template v-else>证据不足</template>
@@ -487,7 +494,7 @@ onMounted(() => {
                 </tr>
                 <template v-for="{ asset } in scoredAssets" :key="`news-${asset.symbol}`">
                   <tr v-if="expandedAsset === asset.symbol" class="news-row">
-                    <td colspan="9">
+                    <td colspan="10">
                       <span v-if="assetNewsLoading === asset.symbol" class="dim">读取资讯中…</span>
                       <template v-else-if="assetNews[asset.symbol]?.length">
                         <div v-for="item in assetNews[asset.symbol]" :key="String(item.news_id ?? item.title)" class="news-item">
@@ -535,21 +542,30 @@ onMounted(() => {
           <div class="table-scroll">
             <table class="data">
               <thead>
-                <tr><th>发布时间</th><th>事件标题</th><th>方向</th><th>状态</th><th>关联资产（分级）</th><th class="num">新闻/来源</th></tr>
+                <tr><th>发布时间</th><th>事件标题</th><th>类别</th><th>方向</th><th>状态</th><th>关联资产（分级）</th><th class="num">新闻/来源</th></tr>
               </thead>
               <tbody>
                 <tr v-for="event in events" :key="event.event_id">
                   <td class="num">{{ fmtTime(event.published_at) }}</td>
                   <td class="event-title" :title="event.title">{{ event.title }}</td>
+                  <td><span class="badge">{{ getNewsCategoryLabel(event.raw_category) }}</span></td>
                   <td>
-                    <span v-if="event.sentiment_direction" class="badge" :class="event.sentiment_direction === 'POSITIVE' ? 'ok' : event.sentiment_direction === 'NEGATIVE' ? 'veto' : ''">
-                      {{ event.sentiment_direction }}
+                    <span
+                      v-if="event.sentiment_direction"
+                      class="badge"
+                      :class="event.sentiment_direction === 'POSITIVE' ? 'ok' : event.sentiment_direction === 'NEGATIVE' ? 'veto' : ''"
+                    >
+                      {{ getSentimentDirectionLabel(event.sentiment_direction) }}
                     </span>
                     <span v-else class="dim">—</span>
                   </td>
                   <td>
-                    <span class="badge" :class="event.analysis_status === 'ANALYZED' ? 'action' : event.analysis_status === 'MERGED' ? 'warn' : ''">
-                      {{ event.analysis_status }}
+                    <span
+                      class="badge"
+                      :class="event.analysis_status === 'ANALYZED' ? 'action' : event.analysis_status === 'MERGED' ? 'warn' : ''"
+                      :title="event.merged_into ? `已归并到规范事件 ${event.merged_into}` : ''"
+                    >
+                      {{ getSentimentAnalysisStatusLabel(event.analysis_status) }}
                     </span>
                     <small v-if="event.merged_into" class="run-path">→ {{ event.merged_into }}</small>
                   </td>
@@ -596,7 +612,7 @@ onMounted(() => {
           <h4 class="audit-h4">分析记录（含校验标记）</h4>
           <div v-for="analysis in evidenceFor.detail.analyses" :key="analysis.analysis_id" class="analysis-card">
             <div class="analysis-head">
-              <strong>{{ analysis.sentiment_direction ?? "—" }}</strong>
+              <strong>{{ getSentimentDirectionLabel(analysis.sentiment_direction) }}</strong>
               <code class="mono">{{ analysis.analysis_id }}</code>
             </div>
             <p v-if="analysis.title" class="dim-line">{{ analysis.title }}</p>
@@ -604,7 +620,7 @@ onMounted(() => {
               <span v-for="symbol in analysis.affected_symbols" :key="symbol" class="chip static">{{ symbol }}</span>
             </div>
             <div v-if="analysis.validation_flags?.length" class="dir-chips">
-              <span v-for="flag in analysis.validation_flags" :key="flag" class="badge warn">{{ flag }}</span>
+              <span v-for="flag in analysis.validation_flags" :key="flag" class="badge warn" :title="flag">{{ getValidationFlagLabel(flag) }}</span>
             </div>
           </div>
           <details class="audit">

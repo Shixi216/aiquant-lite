@@ -158,7 +158,7 @@ onBeforeUnmount(() => {
         <span v-if="offlineMode" class="badge warn">后端未连接 · 契约 Mock 样例</span>
         <span v-else-if="backtest?.data.data_mode === 'DEMO'" class="badge warn">演示数据模式 DEMO</span>
         <span v-else-if="backtest?.data.data_mode === 'REAL'" class="badge ok">真实数据模式 REAL</span>
-        <span class="badge action">契约 wealth-lab/v1（冻结）</span>
+        <span class="badge action" title="后端接口契约版本 wealth-lab/v1（冻结，不再变更）">接口版本 v1（冻结）</span>
         <button class="mini" @click="loadBase">{{ assetsLoading ? "刷新中…" : "刷新" }}</button>
       </div>
     </div>

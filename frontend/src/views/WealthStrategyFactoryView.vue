@@ -313,7 +313,7 @@ onMounted(async () => {
       <div class="head-chips">
         <span v-if="baseSource === 'offline-mock'" class="badge warn">后端未连接 · 契约 Mock 样例</span>
         <span v-else-if="strategiesEnvelope?.data.data_mode === 'REAL'" class="badge ok">策略库 · 真实数据</span>
-        <span class="badge action">契约 wealth-lab/v2</span>
+        <span class="badge action" title="后端接口契约版本 wealth-lab/v2">接口版本 v2</span>
         <span class="badge action">v3 资产池扩展</span>
       </div>
     </div>

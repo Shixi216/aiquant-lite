@@ -105,6 +105,11 @@
 10. `10-ai-research-roles-and-error.png` — 模型角色面板与真实失败提示
 11. `11-sentiment-workspace.png` — 多资产市场情绪工作台（市场卡/类别/33 资产/任务条）
 12. `12-market-data-regression-fixed.png` — 行情增量更新回归：昨日 FAILED vs 今日 SUCCEEDED 同框
+13. `13-navy-dashboard-1920.png` — 深海军专业版默认主题（1920）
+14. `14-sentiment-zh-1920.png` — 情绪页全面中文化（1920）
+15. `15-ai-research-zh.png` — AI 研究页中文化（稳定研究/实验性研究/研究员角色）
+16. `16-task-center-zh-1280.png` — 任务中心中文化（1280 宽，无溢出）
+17. `17-sentiment-navy-thememenu.png` — 深海军主题下的情绪页与五预设主题菜单
 
 ## 七、待后端补充/确认的接口
 
@@ -166,6 +171,42 @@
 **开发期修复**：资产评分批量加载曾全量失败——根因是前端 import 遗漏（`fetchAssetScore` 未导入）叠加后端并发连接的瞬态锁竞争；已修复导入、错误信息透出真实原因、并按任务中心既有先例增加一次静默重试。经验教训：此前 vue-tsc 输出被管道截断掩盖了真实类型错误，本轮起类型检查不再截断输出。
 
 **控制中心遗留问题回归**：后端 `723000f` 修复 `_update_market_data` 的 list-set TypeError 后，重跑「增量更新 ETF 行情」→ `wljob_64074752707c` **SUCCEEDED 100%**（rows=0 为正确语义：周末无新增交易日；来源审计 fund_daily/fund_adj 均 OFFICIAL）。任务记录中昨日 FAILED 与今日 SUCCEEDED 同框对照（截图 `12`）。8767 只读门面的 6 个按钮维持如实失败展示，未绕过。
+
+
+
+## 十一、第四轮：中文化专项 + 深海军专业主题 + 全站精修
+
+**设计规范升级**：新增「深海军专业版」预设并设为默认（深海军蓝侧栏 + 白/浅灰内容区 + 克制蓝 #2f6fed 强调；参考 art-design-pro / vben-admin 的专业后台配色结构）。侧栏文字改为独立 token（--sidebar-text 系列），深色侧栏预设可配浅色文字；其余四套主题全部保留可切换（含深浅模式与全部定制能力）。按钮体系补齐按压态（:active）、禁用悬停抑制（:hover:not(:disabled)）与统一行高。
+
+**技术字段中文化（对照）**：
+
+| 位置 | 修改前 | 修改后 |
+|---|---|---|
+| 任务中心操作卡徽章 | `POST /v1/universe/sync`、`8765 可写` | 「即时接口 · 只读网关」「受控任务 · 真实执行」（技术路径移入悬浮提示，保留审计） |
+| 任务状态 | `SUCCEEDED` / `FAILED` / `RUNNING` | 执行成功 / 执行失败 / 执行中 |
+| 任务描述 | `POST /v1/data-expansion/run（expansion_type=DAILY_BARS）…` | 纯中文业务说明 |
+| 状态面板 | `Router：ok`、`版本 universe_7b64…` | 路由网关：正常 · 已按版本登记 |
+| 请求/响应详情 | 「请求体/响应」裸 JSON | 「请求参数（技术审计）/后端响应原文（审计留痕）」 |
+| AI 研究模式按钮 | `STABLE_RESEARCH` / `EXPERIMENTAL_AI_RESEARCH` | 稳定研究（推荐）/ 实验性研究（英文枚举移入悬浮提示） |
+| AI 研究状态徽章 | `COMPLETED` / `VETOED`… | 研究完成 / 风险否决（VETO）…（labels.ts 统一词典） |
+| 模型角色 | `RESEARCHER` | 研究员 RESEARCHER（中文职责为主） |
+| AI 参数名 | `allow_reuse：…`、`confirm_paid_calls：…` | 中文语义（对应后端参数名移入悬浮提示） |
+| 情绪方向/状态 | `POSITIVE` / `ANALYZED` / `MERGED` | 利好 / 利空 / 已分析 / 重复报道（已归并）… |
+| 情绪类别 | `MACRO_DATA` / `CN_BOND_ETF` | 宏观数据 / 债券 ETF（新增 v3 九类中文映射） |
+| 校验标记 | `cleared_symbols_on_insufficient` | 证据不足，已清除资产断言（悬浮保留原文） |
+| 契约徽章 | `契约 wealth-lab/v2` | 接口版本 v2（悬浮保留完整契约名） |
+| `Jobs API` 措辞 | 受控更新操作（Jobs API） | 受控更新操作（后端任务队列） |
+
+集中词典落在 `src/domain/labels.ts`（延续"唯一中文语义层"约定）：RESEARCH_STATUS / RESEARCH_ROLE / RESEARCH_MODE / JOB_STATUS_ZH / SENTIMENT_DIRECTION / SENTIMENT_ANALYSIS_STATUS / NEWS_CATEGORY / ASSET_CATEGORY_LABELS_V3 / VALIDATION_FLAG 九组映射 + 全函数。
+
+**浏览器回归（真实操作）**：
+- 18 条路由全部渲染正确中文标题、零横向溢出（1920/1440/1280/1024 四档抽验）。
+- 主题：清除缓存后默认即深海军专业版；UI 菜单晨雾青绿 ↔ 深海军往返切换正常（bg 计算值断言）。
+- 中文化断言：情绪页无 POSITIVE/ANALYZED/MACRO_DATA 残留；AI 页无 STABLE_RESEARCH/EXPERIMENTAL_AI_RESEARCH 裸露；任务中心徽章/状态/网关文案全部中文。
+- /capital-behavior「暂无对应数据」为后端 404 如实展示（既有行为，非本轮引入）。
+- vue-tsc 0 错误 · vite build 通过 · 19/19 单测。
+
+**截图**：13 深海军总览（1920）、14 情绪页中文化（1920）、15 AI 研究中文化、16 任务中心（1280）、17 情绪页深海军+主题菜单。
 
 ## 九、已知边界（如实记录）
 

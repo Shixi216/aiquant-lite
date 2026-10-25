@@ -547,3 +547,129 @@ export function formatAmountYi(value: number | null | undefined): string {
   if (Math.abs(value) >= 1e4) return `${(value / 1e4).toFixed(1)}万`;
   return value.toFixed(0);
 }
+
+/* ==================================================================
+ * v3.3/v3.4 + 情绪工作区中文映射（同一语义层，跨工作区复用）
+ * ================================================================== */
+
+/** AI 研究运行状态（后端枚举 → 中文）。 */
+export const RESEARCH_STATUS_LABELS: Record<string, string> = {
+  INIT: "已登记",
+  PLANNING: "AI 规划中",
+  VALIDATION: "参数与数据校验中",
+  APPROVAL_PENDING: "等待用户确认",
+  BACKTESTING: "真实策略实验中",
+  HARD_RISK_CHECK: "确定性风险核查中",
+  RESEARCH: "AI 研究结论生成中",
+  REVIEW: "AI 风险复核中",
+  VERIFICATION: "数值核验中",
+  COMPLETED: "研究完成",
+  VETOED: "风险否决（VETO）",
+  VERIFICATION_FAILED: "数值核验未通过",
+  FAILED: "执行失败",
+};
+
+export function getResearchStatusLabel(status: string | null | undefined): string {
+  return fromDict(RESEARCH_STATUS_LABELS, status, status ?? "未知状态");
+}
+
+/** 三模型角色 → 中文职责（模型名另行展示）。 */
+export const RESEARCH_ROLE_LABELS: Record<string, string> = {
+  PLANNER: "研究规划师",
+  RESEARCHER: "研究员",
+  REVIEWER: "独立风险复核人",
+};
+
+export function getResearchRoleLabel(role: string | null | undefined): string {
+  return fromDict(RESEARCH_ROLE_LABELS, role, role ?? "未知角色");
+}
+
+/** 研究运行模式。 */
+export const RESEARCH_MODE_LABELS: Record<string, string> = {
+  STABLE_RESEARCH: "稳定研究（推荐）",
+  EXPERIMENTAL_AI_RESEARCH: "实验性 AI 研究",
+  STABLE: "稳定研究",
+  EXPERIMENTAL: "实验性研究",
+};
+
+/** 后端任务队列状态。 */
+export const JOB_STATUS_ZH: Record<string, string> = {
+  QUEUED: "排队中",
+  RUNNING: "执行中",
+  SUCCEEDED: "执行成功",
+  FAILED: "执行失败",
+  CANCELLED: "已取消",
+};
+
+export function getJobStatusLabel(status: string | null | undefined): string {
+  return fromDict(JOB_STATUS_ZH, status, status ?? "未知状态");
+}
+
+/** 情绪方向。 */
+export const SENTIMENT_DIRECTION_LABELS: Record<string, string> = {
+  POSITIVE: "利好",
+  NEGATIVE: "利空",
+  NEUTRAL: "中性",
+  MIXED: "多空交织",
+};
+
+export function getSentimentDirectionLabel(direction: string | null | undefined): string {
+  return fromDict(SENTIMENT_DIRECTION_LABELS, direction, direction ?? "待分析");
+}
+
+/** 情绪事件分析状态。 */
+export const SENTIMENT_ANALYSIS_STATUS_LABELS: Record<string, string> = {
+  ANALYZED: "已分析",
+  INSUFFICIENT_DATA: "证据不足",
+  MERGED: "重复报道（已归并）",
+  PENDING: "待分析",
+};
+
+export function getSentimentAnalysisStatusLabel(status: string | null | undefined): string {
+  return fromDict(SENTIMENT_ANALYSIS_STATUS_LABELS, status, status ?? "未知状态");
+}
+
+/** 情绪事件类别。 */
+export const NEWS_CATEGORY_LABELS: Record<string, string> = {
+  MACRO_DATA: "宏观数据",
+  POLICY: "政策动向",
+  COMPANY_ACTION: "公司行为",
+  MARKET_FLOW: "市场资金",
+  GENERAL: "综合资讯",
+  OTHER: "其他",
+};
+
+export function getNewsCategoryLabel(category: string | null | undefined): string {
+  return fromDict(NEWS_CATEGORY_LABELS, category, category ?? "综合资讯");
+}
+
+/** v3 多资产研究池类别（9 类，含 v3.1 新增）。 */
+export const ASSET_CATEGORY_LABELS_V3: Record<string, string> = {
+  CN_EQUITY_BROAD_ETF: "宽基权益 ETF",
+  CN_INDUSTRY_ETF: "行业主题 ETF",
+  CN_STYLE_ETF: "风格因子 ETF",
+  CN_BOND_ETF: "债券 ETF",
+  CN_COMMODITY_ETF: "商品 ETF",
+  CN_CONVERTIBLE_ETF: "可转债 ETF",
+  CN_REIT: "公募 REITs",
+  QDII_ETF: "跨境 QDII",
+  QDII_LOF: "跨境 QDII（LOF）",
+};
+
+export function getAssetCategoryLabelV3(category: string | null | undefined): string {
+  return fromDict(ASSET_CATEGORY_LABELS_V3, category, category ?? "未分类");
+}
+
+/** 数值核验校验标记 → 中文提示。 */
+export const VALIDATION_FLAG_LABELS: Record<string, string> = {
+  cleared_symbols_on_insufficient: "证据不足，已清除资产断言",
+  capped_insufficient_confidence: "证据不足，置信度已封顶",
+  deterministic_event_type_refined: "事件类型已按规则修正",
+  llm_symbols_without_deterministic_link: "模型推断资产（未经规则确认）",
+  llm_symbols_not_exact: "模型推断资产（非直接点名）",
+  inherited_from_merge: "承自归并事件",
+};
+
+export function getValidationFlagLabel(flag: string | null | undefined): string {
+  return fromDict(VALIDATION_FLAG_LABELS, flag, flag ?? "校验标记");
+}

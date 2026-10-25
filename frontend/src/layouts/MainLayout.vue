@@ -301,7 +301,7 @@ onBeforeUnmount(() => {
   letter-spacing: 1px;
   padding: 12px 12px 4px;
 }
-.sidebar-footer { margin-top: auto; padding: 28px 12px 4px; color: var(--text-dim); font-size: 12px; }
+.sidebar-footer { margin-top: auto; padding: 28px 12px 4px; color: var(--sidebar-footer-text); font-size: 12px; }
 .sidebar-footer small { display: block; padding: 8px 0 0 14px; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; background: var(--accent-grad); color: var(--accent-contrast); border-radius: 12px; font-size: 23px; }

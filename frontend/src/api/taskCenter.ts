@@ -261,7 +261,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "data",
     label: "同步 A 股研究名录",
-    description: "POST /v1/universe/sync：按预算增量同步带版本与审计的 A 股 universe（默认 dry_run 预检）。",
+    description: "按预算同步最新 A 股研究名录（带版本与审计记录）。默认仅预检、不写入，可在参数中关闭预检。",
     method: "POST",
     path: "/v1/universe/sync",
     params: [
@@ -275,7 +275,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "data",
     label: "抓取全市场快照",
-    description: "POST /v1/market-snapshots/sync：抓取一批全市场快照（默认 SCREENING 模式、dry_run 预检）。",
+    description: "抓取一批全市场行情快照，用于市场宽度与个股监控。默认仅预检、不写入。",
     method: "POST",
     path: "/v1/market-snapshots/sync",
     params: [
@@ -289,7 +289,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "data",
     label: "增量补充日线行情",
-    description: "POST /v1/data-expansion/run（expansion_type=DAILY_BARS）：按预算补充指定资产日线（dry_run 优先）。",
+    description: "按预算为指定资产补充日线行情（可指定区间），默认仅预检。适合补齐少数资产的历史缺口。",
     confirm: "将按预算向后端请求补充日线行情。请确认预算与资产列表。",
     method: "POST",
     path: "/v1/data-expansion/run",
@@ -307,7 +307,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "data",
     label: "候选资产 enrichment",
-    description: "POST /v1/candidates/enrich：对 ≤20 只候选资产做研究模式富化（含历史长度与模型预算控制）。",
+    description: "对不超过 20 只候选资产做研究资料补全（含历史长度与调用预算控制）。",
     method: "POST",
     path: "/v1/candidates/enrich",
     params: [
@@ -323,7 +323,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "research",
     label: "新闻与公告分析流水线",
-    description: "POST /v1/pipelines/news-analysis：对指定资产在给定日期区间运行新闻+公告分析。",
+    description: "对指定资产在给定日期区间运行新闻与公告分析流水线。",
     method: "POST",
     path: "/v1/pipelines/news-analysis",
     params: [
@@ -338,7 +338,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "research",
     label: "官方公告核验流水线",
-    description: "POST /v1/pipelines/announcement-verification：对指定资产的官方公告做精确核验。",
+    description: "对指定资产的官方公告做精确核验，产出可追溯的核验结论。",
     method: "POST",
     path: "/v1/pipelines/announcement-verification",
     params: [
@@ -351,7 +351,7 @@ export const TASK_OPS: TaskOpDef[] = [
     kind: "sync",
     group: "research",
     label: "运行财富策略回测",
-    description: "POST /v1/wealth-lab/v2/strategies/{id}/backtest（8765 可写链路）：后台触发一次真实策略回测并留痕 backtest_id；结果亦可在「策略工厂」页查看。",
+    description: "立即触发一次真实策略回测，完成后生成回测编号，可在「策略工厂」页查看完整结果。",
     method: "POST",
     path: "/v1/wealth-lab/v2/strategies/{strategyId}/backtest",
     base: "wealth",
