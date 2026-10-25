@@ -48,6 +48,10 @@ class DatabaseOwnershipError(RuntimeError):
     pass
 
 
+class DatabaseBusyError(RuntimeError):
+    """A transient lock or connection-gate timeout, safe for callers to retry."""
+
+
 def _main_module() -> str:
     module = sys.modules.get("__main__")
     spec = getattr(module, "__spec__", None)
@@ -266,7 +270,7 @@ def connect_database(
             # 2026-08-26 修复：门锁加超时，防止线程卡在 duckdb.connect 时
             # 永久持有锁导致全进程数据库操作排队
             if not gate.acquire(timeout=GATE_ACQUIRE_TIMEOUT_SECONDS):
-                raise RuntimeError(
+                raise DatabaseBusyError(
                     f"数据库连接门锁获取超时（{GATE_ACQUIRE_TIMEOUT_SECONDS:.0f}s），"
                     f"疑似其他线程卡在数据库连接上 @ {caller}"
                 )
@@ -312,7 +316,7 @@ def connect_database(
                             "lock_error": str(exc),
                         },
                     )
-                    raise RuntimeError(
+                    raise DatabaseBusyError(
                         "数据库暂时繁忙，已自动重试3次仍未恢复。"
                     ) from exc
                 raise
@@ -380,6 +384,7 @@ def connect_database(
 
 
 __all__ = [
+    "DatabaseBusyError",
     "DatabaseOwnershipError",
     "ManagedDuckDBConnection",
     "connect_database",
