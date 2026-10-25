@@ -255,8 +255,9 @@ def _generate_report(mgr: JobManager, job: Job) -> None:
     params = record["params"]
     series = result.get("series") or {}
     dates = series.get("dates") or []
-    nav = series.get("portfolio_nav") or []
-    dd = series.get("portfolio_drawdown") or []
+    # v3 存档字段为 nav/drawdown；v2 为 portfolio_nav/portfolio_drawdown — 兼容
+    nav = series.get("nav") or series.get("portfolio_nav") or []
+    dd = series.get("drawdown") or series.get("portfolio_drawdown") or []
     if len(dates) < 2 or len(nav) < 2:
         raise ValueError(
             f"存档 {backtest_id} 缺少精确日收益序列，无法生成可靠报告；请重跑回测"
@@ -267,6 +268,7 @@ def _generate_report(mgr: JobManager, job: Job) -> None:
     nav_arr = np.array(nav, dtype=float)
     dd_arr = np.array(dd, dtype=float)
     daily = np.zeros(len(nav_arr))
+    daily[0] = nav_arr[0] - 1.0  # 首日含建仓成本（nav 从初始 1.0 出发）
     daily[1:] = nav_arr[1:] / nav_arr[:-1] - 1.0
     rebalances = [
         RebalanceEvent(
