@@ -13,6 +13,7 @@ import RiskCenter from "../components/dashboard/RiskCenter.vue";
 import MarketContext from "../components/dashboard/MarketContext.vue";
 import DragonTigerBoard from "../components/dashboard/DragonTigerBoard.vue";
 import { errorMessage } from "../api/client";
+import PixelIcon from "../components/global/PixelIcon.vue";
 
 const themeStore = useThemeStore();
 const dashboard = ref<DashboardResponse | null>(null);
@@ -78,8 +79,8 @@ function moveWidget(id: string, direction: -1 | 1) {
                 {{ widgetNames[id] ?? id }}
               </label>
               <span class="widget-order">
-                <button class="mini" type="button" :disabled="index === 0" @click="moveWidget(id, -1)">↑</button>
-                <button class="mini" type="button" :disabled="index === themeStore.settings.dashboardOrder.length - 1" @click="moveWidget(id, 1)">↓</button>
+                <button class="mini" type="button" :disabled="index === 0" @click="moveWidget(id, -1)"><PixelIcon name="arrow-up" :size="14" /></button>
+                <button class="mini" type="button" :disabled="index === themeStore.settings.dashboardOrder.length - 1" @click="moveWidget(id, 1)"><PixelIcon name="arrow-down" :size="14" /></button>
               </span>
             </li>
           </ul>

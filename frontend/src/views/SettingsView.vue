@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import PixelIcon from "../components/global/PixelIcon.vue";
 
 import {
   CHART_PALETTES,
@@ -261,8 +262,8 @@ const densityOptions: { value: ThemeSettings["density"]; label: string }[] = [
             <span>{{ widget.name }}</span>
           </label>
           <span class="widget-order">
-            <button class="mini" type="button" :disabled="index === 0" @click="moveWidget(widget.id, -1)">↑</button>
-            <button class="mini" type="button" :disabled="index === widgetList.length - 1" @click="moveWidget(widget.id, 1)">↓</button>
+            <button class="mini" type="button" :disabled="index === 0" @click="moveWidget(widget.id, -1)"><PixelIcon name="arrow-up" :size="14" /></button>
+            <button class="mini" type="button" :disabled="index === widgetList.length - 1" @click="moveWidget(widget.id, 1)"><PixelIcon name="arrow-down" :size="14" /></button>
           </span>
         </li>
       </ul>

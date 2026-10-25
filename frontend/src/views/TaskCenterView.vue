@@ -18,6 +18,7 @@ import {
   type TaskRunRecord,
 } from "../api/taskCenter";
 import { errorMessage } from "../api/client";
+import PixelIcon from "../components/global/PixelIcon.vue";
 import { usePolling } from "../composables/usePolling";
 import type { MetaData } from "../types/wealthLab";
 import type { QualityData } from "../types/wealthLabV3";
@@ -526,7 +527,7 @@ const providerChips = computed(() => {
       <div class="modal confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
         <div class="modal-head">
           <h3 id="confirm-title">确认执行：{{ pendingConfirm.label }}</h3>
-          <button class="close-btn" type="button" aria-label="取消" @click="pendingConfirm = null">✕</button>
+          <button class="close-btn" type="button" aria-label="取消" @click="pendingConfirm = null"><PixelIcon name="close" :size="14" /></button>
         </div>
         <p class="confirm-text">{{ pendingConfirm.confirm }}</p>
         <h4>将发送的请求体（POST {{ pendingConfirm.path }}）</h4>

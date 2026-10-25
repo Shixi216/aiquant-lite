@@ -4,6 +4,7 @@ import { onMounted, ref } from "vue";
 import axios from "axios";
 
 import { errorMessage, isRouterDown } from "../api/client";
+import PixelIcon from "../components/global/PixelIcon.vue";
 import type { DailyReview, DecisionPacket, TradePlan } from "../api/decisions";
 import { fetchDailyReview, fetchDecisionVersions, fetchTradePlans } from "../api/decisions";
 import {
@@ -245,7 +246,7 @@ onMounted(loadReview);
     <div class="modal">
       <div class="modal-head">
         <h3 style="margin: 0">决策版本链</h3>
-        <button class="close-btn" @click="versionChain = null; versionError = null">✕</button>
+        <button class="close-btn" aria-label="关闭" @click="versionChain = null; versionError = null"><PixelIcon name="close" :size="14" /></button>
       </div>
       <div v-if="versionError" class="error-box">{{ versionError }}</div>
       <template v-else-if="versionChain">

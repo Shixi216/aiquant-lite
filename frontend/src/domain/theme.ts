@@ -3,7 +3,7 @@
  * 持久化仅存外观偏好（localStorage），不涉及任何金融数据或凭据。
  */
 
-export type ThemePresetId = "navy-pro" | "mist-jade" | "cloud-blue" | "cream-apricot" | "polar-night";
+export type ThemePresetId = "mist-jade" | "cloud-blue" | "cream-apricot" | "polar-night";
 export type ThemeMode = "light" | "dark";
 export type Density = "compact" | "cozy" | "comfortable";
 export type NavLayout = "sidebar" | "top";
@@ -19,13 +19,6 @@ export interface ThemePresetMeta {
 }
 
 export const THEME_PRESETS: ThemePresetMeta[] = [
-  {
-    id: "navy-pro",
-    name: "深海军专业版",
-    description: "深海军蓝侧栏 · 白/浅灰内容区 · 克制蓝强调（默认，正式演示推荐）",
-    swatch: ["#f3f5f9", "#2f6fed", "#182747"],
-    defaultMode: "light",
-  },
   {
     id: "mist-jade",
     name: "晨雾青绿",
@@ -119,7 +112,7 @@ export interface ThemeSettings {
 }
 
 export const DEFAULT_SETTINGS: ThemeSettings = {
-  preset: "navy-pro",
+  preset: "mist-jade",
   mode: "light",
   primaryColor: null,
   secondaryColor: null,

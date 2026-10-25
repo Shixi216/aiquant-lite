@@ -5,6 +5,7 @@ import { searchStocks } from "../api/v2";
 import type { StockSearchItem } from "../types/v2";
 import { THEME_PRESETS } from "../domain/theme";
 import { useThemeStore } from "../stores/theme";
+import PixelIcon from "../components/global/PixelIcon.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -32,61 +33,61 @@ const workspaces: Workspace[] = [
   {
     id: "equity",
     label: "股票研究",
-    icon: "📈",
+    icon: "chart",
     items: [
-      { key: "dashboard", to: "/dashboard", label: "市场总览", icon: "🧭" },
-      { key: "opportunities", to: "/opportunities", label: "机会排序", icon: "🎯" },
-      { key: "quant", to: "/quant", label: "量化实验室", icon: "🧪" },
-      { key: "stock-intel", to: "/stocks/600519.SH", label: "个股研究", icon: "📊" },
-      { key: "sim-tracker", to: "/sim-tracker", label: "盘中模拟追踪", icon: "⏱️" },
-      { key: "capital-behavior", to: "/capital-behavior", label: "资金行为研究", icon: "💹" },
-      { key: "decisions", to: "/decisions", label: "决策卡片", icon: "🗂️" },
-      { key: "research-health", to: "/research-health", label: "实验与系统状态", icon: "🩺" },
+      { key: "dashboard", to: "/dashboard", label: "市场总览", icon: "monitor" },
+      { key: "opportunities", to: "/opportunities", label: "机会排序", icon: "filter" },
+      { key: "quant", to: "/quant", label: "量化实验室", icon: "test-tube" },
+      { key: "stock-intel", to: "/stocks/600519.SH", label: "个股研究", icon: "search" },
+      { key: "sim-tracker", to: "/sim-tracker", label: "盘中模拟追踪", icon: "clock" },
+      { key: "capital-behavior", to: "/capital-behavior", label: "资金行为研究", icon: "chart" },
+      { key: "decisions", to: "/decisions", label: "决策卡片", icon: "copy" },
+      { key: "research-health", to: "/research-health", label: "实验与系统状态", icon: "check" },
     ],
   },
   {
     id: "wealth",
     label: "财富管理",
-    icon: "💼",
+    icon: "briefcase",
     items: [
-      { key: "wealth-lab", to: "/wealth-lab", label: "大类资产配置", icon: "🏛️" },
-      { key: "wealth-factors", to: "/wealth-factors", label: "ETF 多因子研究", icon: "🧮" },
-      { key: "wealth-universe", to: "/wealth-universe", label: "多资产研究池", icon: "🌐" },
-      { key: "wealth-strategy-factory", to: "/wealth-strategy-factory", label: "策略工厂", icon: "🏭" },
-      { key: "wealth-strategy-compare", to: "/wealth-strategy-compare", label: "策略对比与优化", icon: "⚖️" },
-      { key: "wealth-ai-risk", to: "/wealth-ai-risk", label: "AI 研究与风控", icon: "🤖" },
+      { key: "wealth-lab", to: "/wealth-lab", label: "大类资产配置", icon: "briefcase" },
+      { key: "wealth-factors", to: "/wealth-factors", label: "ETF 多因子研究", icon: "zap" },
+      { key: "wealth-universe", to: "/wealth-universe", label: "多资产研究池", icon: "database" },
+      { key: "wealth-strategy-factory", to: "/wealth-strategy-factory", label: "策略工厂", icon: "save" },
+      { key: "wealth-strategy-compare", to: "/wealth-strategy-compare", label: "策略对比与优化", icon: "sliders" },
+      { key: "wealth-ai-risk", to: "/wealth-ai-risk", label: "AI 研究与风控", icon: "cpu" },
     ],
   },
   {
     id: "data",
     label: "数据中心",
-    icon: "🗄️",
+    icon: "database",
     items: [
-      { key: "task-center", to: "/task-center", label: "数据与研究任务中心", icon: "🗄️" },
+      { key: "task-center", to: "/task-center", label: "数据与研究任务中心", icon: "menu" },
     ],
   },
   {
     id: "system",
     label: "系统设置",
-    icon: "⚙️",
+    icon: "sliders",
     items: [
-      { key: "settings", to: "/settings", label: "外观与布局", icon: "🎨" },
+      { key: "settings", to: "/settings", label: "外观与布局", icon: "wand" },
     ],
   },
   {
     id: "ai",
     label: "AI 研究",
-    icon: "🧠",
+    icon: "cpu",
     items: [
-      { key: "ai-research", to: "/ai-research", label: "AI 智能研究工作台", icon: "🧠" },
+      { key: "ai-research", to: "/ai-research", label: "AI 智能研究工作台", icon: "cpu" },
     ],
   },
   {
     id: "sentiment",
     label: "市场情绪",
-    icon: "📡",
+    icon: "smile",
     items: [
-      { key: "wealth-sentiment", to: "/wealth-sentiment", label: "多资产市场情绪", icon: "📡" },
+      { key: "wealth-sentiment", to: "/wealth-sentiment", label: "多资产市场情绪", icon: "smile" },
     ],
   },
 ];
@@ -212,7 +213,7 @@ onBeforeUnmount(() => {
         :title="workspace.label"
         @click="switchWorkspace(workspace)"
       >
-        <span class="ws-icon" aria-hidden="true">{{ workspace.icon }}</span>
+        <span class="ws-icon" aria-hidden="true"><PixelIcon :name="workspace.icon" :size="16" /></span>
         <span v-if="!themeStore.settings.sidebarCollapsed">{{ workspace.label }}</span>
       </button>
     </div>
@@ -224,7 +225,7 @@ onBeforeUnmount(() => {
         :title="item.label"
         :class="{ 'router-link-active': isItemActive(item) }"
       >
-        <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+        <span class="nav-icon" aria-hidden="true"><PixelIcon :name="item.icon" :size="15" /></span>
         <span v-if="!themeStore.settings.sidebarCollapsed">{{ item.label }}</span>
       </RouterLink>
     </nav>
@@ -260,7 +261,7 @@ onBeforeUnmount(() => {
           <span v-if="searchError" id="stock-search-error" class="search-error" role="alert">{{ searchError }}</span>
         </form>
         <details class="theme-menu">
-          <summary class="mini" title="主题与外观">🎨<span class="theme-menu-label">主题</span></summary>
+          <summary class="mini theme-menu-trigger" title="主题与外观"><PixelIcon name="layout" :size="15" /><span class="theme-menu-label">主题</span></summary>
           <div class="theme-menu-panel" role="menu" aria-label="快捷主题">
             <div class="theme-menu-row">
               <button
@@ -286,7 +287,13 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </details>
-        <button class="mini mode-toggle" type="button" :title="themeStore.isDark ? '切换到浅色模式' : '切换到深色模式'" @click="themeStore.toggleMode()">{{ themeStore.isDark ? '☀️' : '🌙' }}</button>
+        <button
+          class="mini mode-toggle"
+          type="button"
+          :aria-label="themeStore.isDark ? '切换到浅色模式' : '切换到深色模式'"
+          :title="themeStore.isDark ? '切换到浅色模式' : '切换到深色模式'"
+          @click="themeStore.toggleMode()"
+        ><PixelIcon :name="themeStore.isDark ? 'sun' : 'moon'" :size="15" /></button>
       </div>
     </header>
     <div id="main-content" tabindex="-1"><RouterView /></div>
@@ -301,7 +308,7 @@ onBeforeUnmount(() => {
   letter-spacing: 1px;
   padding: 12px 12px 4px;
 }
-.sidebar-footer { margin-top: auto; padding: 28px 12px 4px; color: var(--sidebar-footer-text); font-size: 12px; }
+.sidebar-footer { margin-top: auto; padding: 28px 12px 4px; color: var(--text-dim); font-size: 12px; }
 .sidebar-footer small { display: block; padding: 8px 0 0 14px; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; background: var(--accent-grad); color: var(--accent-contrast); border-radius: 12px; font-size: 23px; }

@@ -69,7 +69,6 @@ body {
   font-weight: 700;
   padding: 6px 10px 16px;
   letter-spacing: 0.5px;
-  color: var(--sidebar-text-strong);
 }
 
 .sidebar .brand .logo-mark,
@@ -90,7 +89,7 @@ body {
 .sidebar .brand small {
   display: block;
   font-weight: 400;
-  color: var(--sidebar-text);
+  color: var(--text-dim);
   font-size: 11px;
   margin-top: 4px;
 }
@@ -112,7 +111,7 @@ body {
   padding: 9px 12px;
   border-radius: var(--radius-ctrl);
   border: 1px solid transparent;
-  color: var(--sidebar-text);
+  color: var(--text-dim);
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 600;
@@ -124,14 +123,14 @@ body {
 }
 
 .workspace-tab:hover {
-  background: var(--sidebar-item-hover-bg);
-  color: var(--sidebar-text-strong);
+  background: var(--bg-hover);
+  color: var(--text);
 }
 
 .workspace-tab.active {
-  background: var(--sidebar-item-active-bg);
-  border-color: transparent;
-  color: var(--sidebar-item-active-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-ring);
+  color: var(--accent-strong);
 }
 
 .workspace-tab .ws-icon {
@@ -155,7 +154,7 @@ body {
   gap: 9px;
   padding: 9px 12px;
   border-radius: var(--radius-ctrl);
-  color: var(--sidebar-text);
+  color: var(--text-dim);
   text-decoration: none;
   font-size: 13.5px;
   border: 1px solid transparent;
@@ -171,15 +170,15 @@ body {
 }
 
 .sidebar a:hover {
-  background: var(--sidebar-item-hover-bg);
-  color: var(--sidebar-text-strong);
+  background: var(--bg-hover);
+  color: var(--text);
   transform: translateX(2px);
 }
 
 .sidebar a.router-link-active {
-  background: var(--sidebar-item-active-bg);
-  border-color: transparent;
-  color: var(--sidebar-item-active-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-ring);
+  color: var(--accent-strong);
   font-weight: 600;
 }
 

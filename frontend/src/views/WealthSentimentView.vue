@@ -9,6 +9,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import { fetchV3Quality } from "../api/wealthLabV3";
+import PixelIcon from "../components/global/PixelIcon.vue";
 import { fetchJob } from "../api/taskCenter";
 import {
   fetchAssetNews,
@@ -591,7 +592,7 @@ onMounted(() => {
       <div class="modal" role="dialog" aria-modal="true" :aria-label="evidenceFor.title">
         <div class="modal-head">
           <h3>{{ evidenceFor.title }}<span class="h3-extra">评分审计 · 每条观测可追溯</span></h3>
-          <button class="close-btn" type="button" aria-label="关闭" @click="evidenceFor = null">✕</button>
+          <button class="close-btn" type="button" aria-label="关闭" @click="evidenceFor = null"><PixelIcon name="close" :size="14" /></button>
         </div>
         <div v-if="evidenceLoading" class="loading">读取证据中…</div>
         <div v-if="evidenceError" class="error-box">{{ evidenceError }}</div>
@@ -634,7 +635,7 @@ onMounted(() => {
     <!-- 任务确认对话框 -->
     <div v-if="confirmDialog" class="modal-mask" @click.self="confirmDialog = null">
       <div class="modal confirm-modal" role="alertdialog" aria-modal="true">
-        <div class="modal-head"><h3>确认提交任务</h3><button class="close-btn" type="button" aria-label="取消" @click="confirmDialog = null">✕</button></div>
+        <div class="modal-head"><h3>确认提交任务</h3><button class="close-btn" type="button" aria-label="取消" @click="confirmDialog = null"><PixelIcon name="close" :size="14" /></button></div>
         <p class="confirm-text">{{ confirmDialog.text }}</p>
         <div class="confirm-actions">
           <button class="mini" type="button" @click="confirmDialog = null">取消</button>
