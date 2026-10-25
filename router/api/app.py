@@ -84,6 +84,7 @@ from trading.wealth_lab.routes_v3 import router as wealth_lab_v3_router
 from trading.wealth_lab.routes_jobs import router as wealth_lab_jobs_router
 from trading.wealth_lab.routes_research import router as wealth_lab_research_router
 from trading.wealth_lab.sentiment.routes import router as wealth_sentiment_router
+from trading.wealth_lab.social_sentiment.routes import router as social_sentiment_router
 from router.integration.routes import router as integration_router
 from router.integration.schemas import ErrorCode, ResponseStatus, UnifiedResponse
 from router.integration.identifiers import new_request_id
@@ -422,5 +423,6 @@ app.include_router(wealth_lab_v3_router)
 app.include_router(wealth_lab_jobs_router)
 app.include_router(wealth_lab_research_router)
 app.include_router(wealth_sentiment_router)
+app.include_router(social_sentiment_router)
 app.include_router(integration_router)
 install_documented_openapi(app)
