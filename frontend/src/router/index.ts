@@ -104,6 +104,13 @@ const router = createRouter({
       meta: { title: "外观与布局设置" },
       component: () => import("../views/SettingsView.vue"),
     },
+    // AI 智能研究工作台（v3.3 三模型受控研究）
+    {
+      path: "/ai-research",
+      name: "ai-research",
+      meta: { title: "AI 智能研究" },
+      component: () => import("../views/AiResearchView.vue"),
+    },
     { path: "/:pathMatch(.*)*", redirect: "/dashboard" },
   ],
 });

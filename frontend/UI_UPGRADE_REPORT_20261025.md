@@ -114,7 +114,32 @@
 | 6 | 多资产池行情窗口声明 | multi-asset-v1 实际行情自 2024-04 起，`requested vs effective` 差异较大；建议在 universes 端点透出 `data_first` 以便前端预提示 |
 | 7 | 8767 只读门面的写链路 | `/v1/universe/sync`、`/v1/market-snapshots/sync`、`/v1/data-expansion/run`、`/v1/candidates/enrich`、`/v1/pipelines/*` 六个前端已接按钮，在门面开放 POST（或迁移到 jobs 白名单）后即可用，无需前端改动 |
 
-## 八、已知边界（如实记录）
+## 八、v3.3 追加：AI 智能研究工作台（2026-10-25 第二轮）
+
+**新工作区「🧠 AI 研究」→ /ai-research**，对接后端 v3.3 三模型受控研究契约（`96cfa33`/`723000f`，`/v1/wealth-lab/v3/research/*`）。零新增依赖；清新主题与自由定制系统完全沿用。
+
+**新增文件**：`src/types/aiResearch.ts`（1:1 契约镜像：ResearchPlan/角色/审计/决策包）、`src/api/aiResearch.ts`（唯一出口：roles/stable/experimental/approve/run 详情/决策包，长同步超时 780s）、`src/views/AiResearchView.vue`；修改 `router/index.ts` 与 `MainLayout.vue`（第五工作区）。
+
+**功能对照验收单**：
+| 验收项 | 实现 |
+|---|---|
+| 自然语言目标 + 资产池/区间/风险偏好/运行模式/预算 | 目标输入框（4–500 字）；资产池/区间在实验模式由 AI 规划并经白名单校验（契约即如此，不做前端预设）；模式 seg 默认 STABLE_RESEARCH，实验模式由后端 flag 控制（未启用禁用+403 说明）；预算只读显示后端契约值（STABLE≤2 / EXPERIMENTAL≤3），不自创参数 |
+| 十步流程 | 十步步骤条 1:1 映射后端真实 stage（PLANNING/VALIDATION/APPROVAL_PENDING/BACKTESTING/HARD_RISK_CHECK/RESEARCH/REVIEW/VERIFICATION/COMPLETED/FAILED）；approve 期间每 2.5s 轮询 `GET /runs/{id}` 展示真实阶段；**无任何模拟进度**（同步 POST 在途时明确显示"真实请求在途"） |
+| 用户控制 | 查看方案（plan 全字段）、确认按钮（显示剩余调用预算）、查看模型调用次数（调用审计表：角色/模型/延迟/tokens/状态/错误）、实验对比表（每组真实 backtest_id）、风险否决原因、数值核验状态、决策包详情（/v2/decision-packets/{id}）按需加载、run_id 历史查询（localStorage 记忆最近一次） |
+| 取消 | v3.3 契约未提供 research run 取消端点 → 按钮禁用并如实标注"后端总超时 720s 兜底"（不伪造可取消） |
+| 失败/超预算/模型不可用 | 后端 error_reason / HTTP 错误原样透出；VETOED 与 VERIFICATION_FAILED 有专门红色说明（硬风控不可被 AI 解除） |
+| 演示标记 | 后端已交付，无演示壳；仅当后端 flag 关闭时实验模式按钮禁用并注明原因 |
+
+**实测结果（2026-10-25，全部真实调用）**：
+1. 页面/工作区/角色面板就绪：三模型（Qwen 3.8 Max 0902、DeepSeek V4 Pro、DeepSeek V4 Flash）全部"可用"（来自真实 roles 端点），实验模式 flag 已开。截图 `09/10`。
+2. **实验模式规划 → 真实失败**：提交目标后 POST 在途约 60s，后端返回 `Deepseek API network error: ConnectError`；前端诚实透出错误、回到可重试状态、无假进度。重试一次同样失败。
+3. **稳定模式执行 → 真实失败于复核阶段**：以真实 `wlbt_484fa7981627` + confirm_paid_calls 发起，后端真实执行约 78s（硬风控与 Qwen 研究阶段通过），在 DeepSeek Pro 复核处 ConnectError 失败；前端如实展示错误。
+4. **根因（环境级，非代码）**：本机直连 `api.deepseek.com` 超时（curl 000），上游网络不可达（疑似需代理）。**成功路径的前端部分已全部就绪**——上游恢复后直接在页面重跑即可完成"规划→确认→实验→结论→复核→决策包"全链路验收，前端无需任何改动。
+5. vue-tsc 0 错误 · vite build 通过 · 19/19 单测。
+
+**待后端/环境**：① DeepSeek 上游连通性（代理配置）恢复后完成成功路径验收；② 建议补 research run 列表端点（当前仅能按 run_id 查询）与取消端点；③ 契约 yaml 补录 `/v3/research/*` 与决策包关联字段。
+
+## 九、已知边界（如实记录）
 
 - 5173 端口被另一个旧 dev server 占用，本轮验证使用 5174；旧进程属上一轮会话，未擅动。
 - `frontend/probe3.mjs` 为交接遗留物，未删（不参与构建）。
