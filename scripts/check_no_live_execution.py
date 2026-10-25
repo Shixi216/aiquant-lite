@@ -255,8 +255,71 @@ WEBUI_READ_ROUTE_METHODS = {
     ("GET", "/v1/equity-context/dragon-tiger"),
     ("GET", "/v1/equity-context/stocks/{symbol}"),
 }
+MODEL_AUDIT_READ_ROUTE_METHODS = {
+    ("GET", "/v1/audit/model-calls"),
+}
+WEALTH_LAB_ROUTE_METHODS = {
+    ("GET", "/v1/wealth-lab/assets"),
+        ("GET", "/v1/wealth-lab/backtests/{backtest_id}"),
+        ("GET", "/v1/wealth-lab/backtests/{backtest_id}/risk"),
+        ("GET", "/v1/wealth-lab/meta"),
+        ("GET", "/v1/wealth-lab/sentiment/assets/{symbol}/history"),
+        ("GET", "/v1/wealth-lab/sentiment/assets/{symbol}/news"),
+        ("GET", "/v1/wealth-lab/sentiment/assets/{symbol}/score"),
+        ("GET", "/v1/wealth-lab/sentiment/market"),
+        ("GET", "/v1/wealth-lab/sentiment/market/history"),
+        ("GET", "/v1/wealth-lab/sentiment/news/events"),
+        ("GET", "/v1/wealth-lab/sentiment/scores/{score_id}/evidence"),
+        ("GET", "/v1/wealth-lab/sentiment/sources"),
+        ("GET", "/v1/wealth-lab/social-sentiment/coverage"),
+        ("GET", "/v1/wealth-lab/social-sentiment/heatmap"),
+        ("GET", "/v1/wealth-lab/social-sentiment/platform-comparison"),
+        ("GET", "/v1/wealth-lab/social-sentiment/research"),
+        ("GET", "/v1/wealth-lab/social-sentiment/sentiment/distribution"),
+        ("GET", "/v1/wealth-lab/social-sentiment/sources"),
+        ("GET", "/v1/wealth-lab/social-sentiment/wordcloud"),
+        ("GET", "/v1/wealth-lab/v2/decision-packets/{packet_id}"),
+        ("GET", "/v1/wealth-lab/v2/factors"),
+        ("GET", "/v1/wealth-lab/v2/reports/{backtest_id}"),
+        ("GET", "/v1/wealth-lab/v2/strategies"),
+        ("GET", "/v1/wealth-lab/v2/universe"),
+        ("GET", "/v1/wealth-lab/v3/eligible"),
+        ("GET", "/v1/wealth-lab/v3/jobs"),
+        ("GET", "/v1/wealth-lab/v3/jobs/{job_id}"),
+        ("GET", "/v1/wealth-lab/v3/jobs/{job_id}/logs"),
+        ("GET", "/v1/wealth-lab/v3/quality"),
+        ("GET", "/v1/wealth-lab/v3/research/roles"),
+        ("GET", "/v1/wealth-lab/v3/research/runs/{research_run_id}"),
+        ("GET", "/v1/wealth-lab/v3/universes"),
+        ("GET", "/v1/wealth-lab/v3/universes/{universe_id}/assets"),
+        ("POST", "/v1/wealth-lab/backtests/run"),
+        ("POST", "/v1/wealth-lab/sentiment/analyze"),
+        ("POST", "/v1/wealth-lab/sentiment/rebuild-factor"),
+        ("POST", "/v1/wealth-lab/sentiment/refresh"),
+        ("POST", "/v1/wealth-lab/social-sentiment/analyze"),
+        ("POST", "/v1/wealth-lab/social-sentiment/collect"),
+        ("POST", "/v1/wealth-lab/social-sentiment/import"),
+        ("POST", "/v1/wealth-lab/social-sentiment/registry/status"),
+        ("POST", "/v1/wealth-lab/social-sentiment/summary"),
+        ("POST", "/v1/wealth-lab/stress-tests"),
+        ("POST", "/v1/wealth-lab/v2/ai/research"),
+        ("POST", "/v1/wealth-lab/v2/ai/risk-review"),
+        ("POST", "/v1/wealth-lab/v2/decision-packets"),
+        ("POST", "/v1/wealth-lab/v2/optimization/run"),
+        ("POST", "/v1/wealth-lab/v2/risk/check"),
+        ("POST", "/v1/wealth-lab/v2/strategies/compare"),
+        ("POST", "/v1/wealth-lab/v2/strategies/{strategy_id}/backtest"),
+        ("POST", "/v1/wealth-lab/v3/jobs"),
+        ("POST", "/v1/wealth-lab/v3/jobs/{job_id}/cancel"),
+        ("POST", "/v1/wealth-lab/v3/research/runs/experimental"),
+        ("POST", "/v1/wealth-lab/v3/research/runs/stable"),
+        ("POST", "/v1/wealth-lab/v3/research/runs/{research_run_id}/approve"),
+        ("POST", "/v1/wealth-lab/v3/strategies/{strategy_id}/backtest"),
+}
+
 CURRENT_ROUTE_METHODS = (
-    STAGE5_ROUTE_METHODS
+    WEALTH_LAB_ROUTE_METHODS
+    | STAGE5_ROUTE_METHODS
     | V0100_SENTIMENT_ROUTE_METHODS
     | V0100_POLICY_NEWS_ROUTE_METHODS
     | V0100_CAPITAL_FLOW_ROUTE_METHODS
@@ -268,6 +331,7 @@ CURRENT_ROUTE_METHODS = (
     | V0112_TRADE_PLAN_ROUTE_METHODS
     | V0112_PROVIDER_HEALTH_ROUTE_METHODS
     | WEBUI_READ_ROUTE_METHODS
+    | MODEL_AUDIT_READ_ROUTE_METHODS
 )
 STAGE5_DATABASE_SCHEMA_HASH = (
     "1e5ce68d74bd0ddd0b1ca947da59d6d258f91dc33f96856b9b6d21c39c546c11"
