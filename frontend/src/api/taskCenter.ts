@@ -11,6 +11,8 @@
 
 import axios from "axios";
 
+import { resolveSyncOutcome } from "./taskOutcome";
+
 import { api, errorMessage } from "./client";
 
 /** 财富后端（8765）出口：任务中心仅通过 /wealth-lab-api 代理调用，不直连端口。 */
@@ -343,7 +345,10 @@ export const TASK_OPS: TaskOpDef[] = [
     path: "/v1/pipelines/announcement-verification",
     params: [
       { key: "symbol", label: "资产代码", kind: "text", default: "600519.SH", required: true },
-      { key: "recordId", label: "公告记录 ID", kind: "text", default: "", hint: "选填" },
+      { key: "recordId", label: "公告记录 ID", kind: "text", default: "", hint: "record_id 与 announcement_id 至少提供一个" },
+      { key: "announcementId", label: "公告 ID", kind: "text", default: "", hint: "与 record_id 二选一" },
+      { key: "claims", label: "待核验声明", kind: "text", default: "", required: true, hint: "1-20 条，用 | 分隔；每条为需核验的声明原文" },
+      { key: "maxTokens", label: "输出上限 tokens", kind: "number", default: 5000, hint: "512-8192" },
     ],
   },
   {
@@ -514,6 +519,13 @@ export function buildPayload(op: TaskOpDef, params: Record<string, string>): Rec
     case "announcement-verification": {
       const payload: Record<string, unknown> = { symbol: params.symbol?.trim() };
       if (params.recordId?.trim()) payload.record_id = params.recordId.trim();
+      if (params.announcementId?.trim()) payload.announcement_id = params.announcementId.trim();
+      // 契约必填：1-20 条待核验声明（| 分隔输入）
+      payload.claims = (params.claims ?? "")
+        .split("|")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (params.maxTokens && Number(params.maxTokens) >= 512) payload.max_tokens = Number(params.maxTokens);
       return payload;
     }
     case "wealth-v2-backtest":
@@ -546,7 +558,15 @@ export function validateOp(op: TaskOpDef, params: Record<string, string>): strin
   if (op.id === "job-run-backtest" && params.startDate && params.endDate && params.startDate >= params.endDate) {
     return "开始日期必须早于结束日期";
   }
-  if (op.kind === "job" && (op.id === "job-run-ai-research" || op.id === "job-generate-report")) {
+  if (op.id === "announcement-verification") {
+    const claims = (params.claims ?? "").split("|").map((s) => s.trim()).filter(Boolean);
+    if (!claims.length) return "请填写至少 1 条待核验声明（多条用 | 分隔）";
+    if (claims.length > 20) return "待核验声明最多 20 条";
+    if (!(params.recordId ?? "").trim() && !(params.announcementId ?? "").trim()) {
+      return "请填写「公告记录 ID」或「公告 ID」之一";
+    }
+  }
+    if (op.kind === "job" && (op.id === "job-run-ai-research" || op.id === "job-generate-report")) {
     if (!(params.backtestId ?? "").trim()) return "请填写回测 ID（如 wlbt_xxxx）";
   }
   if (op.id === "job-update-market-data") {
@@ -596,7 +616,7 @@ export interface TaskRunRecord {
   opLabel: string;
   path: string;
   request: Record<string, unknown> | null;
-  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "DEGRADED" | "FAILED" | "CANCELLED";
   startedAt: string;
   finishedAt: string;
   durationMs: number;
@@ -695,14 +715,20 @@ export async function executeOp(
     const response = await http.post(url, request, { timeout: 180_000 });
     const payload = response.data;
     const finishedAt = new Date();
+    // P1-4（审计）：HTTP 200 ≠ 业务成功——先验信封，FAILED/UNAVAILABLE 记失败，DEGRADED 如实降级
+    const outcome = resolveSyncOutcome(payload);
     return {
       ...base,
-      status: "SUCCEEDED",
+      status: outcome.status,
       finishedAt: finishedAt.toISOString(),
       durationMs: finishedAt.getTime() - startedAt.getTime(),
       backendRefId: backendRefIdOf(payload),
-      resultSummary: summarize(op.id, payload),
+      resultSummary:
+        outcome.status === "SUCCEEDED"
+          ? summarize(op.id, payload)
+          : outcome.businessMessage ?? "后端返回业务失败",
       resultPayload: payload,
+      error: outcome.status === "FAILED" ? outcome.businessMessage : null,
     };
   } catch (err) {
     const finishedAt = new Date();

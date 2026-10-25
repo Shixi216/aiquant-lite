@@ -45,6 +45,8 @@ const goal = ref("");
 const backtestId = ref(wealthStore.lastStrategyBacktest?.backtestId ?? "");
 const allowReuse = ref(true);
 const confirmPaidCalls = ref(false);
+/** 实验模式：AI 规划（Flash）即首次付费调用，提交前必须显式确认（审计 P1-3 前端闸门）。 */
+const confirmPlanningCall = ref(false);
 
 const roles = ref<ResearchRolesData | null>(null);
 const rolesError = ref<string | null>(null);
@@ -104,7 +106,7 @@ const backtestValid = computed(() => /^wlbt_[0-9a-f]{6,}$/.test(backtestId.value
 const canSubmit = computed(() => {
   if (phase.value === "planning" || phase.value === "executing") return false;
   if (mode.value === "EXPERIMENTAL_AI_RESEARCH") {
-    return experimentalMode.value?.enabled === true && goalValid.value;
+    return experimentalMode.value?.enabled === true && goalValid.value && confirmPlanningCall.value;
   }
   return stableMode.value?.enabled === true && backtestValid.value && confirmPaidCalls.value;
 });
@@ -587,6 +589,10 @@ function fmtTime(iso: string | null | undefined): string {
                 资产池与区间由 AI 在后端白名单内规划，不做前端预设。
               </p>
             </div>
+            <label class="check-field paid">
+              <input v-model="confirmPlanningCall" type="checkbox" />
+              <span>我确认提交即触发 <b>1 次真实付费模型调用</b>（DeepSeek Flash 规划）；该调用发生在方案确认之前，不可撤销</span>
+            </label>
           </template>
 
           <div class="field">
@@ -664,6 +670,9 @@ function fmtTime(iso: string | null | undefined): string {
             </li>
           </ol>
 
+          <p v-if="runRecord?.status === 'COMPLETED'" class="hint completed-note">
+            ※ 「研究完成」表示流水线结束并已产出决策包；结论有效性以确定性风控与数值核验为准，独立复核结论见下方原文。
+          </p>
           <div v-if="runRecord?.error_reason" class="error-box" role="alert">
             后端记录失败原因：{{ runRecord.error_reason }}
           </div>
@@ -873,6 +882,7 @@ function fmtTime(iso: string | null | undefined): string {
 .role-model { margin: 4px 0 0; font-size: 12.5px; color: var(--text); }
 .role-model small { color: var(--text-faint); }
 .role-note { margin: 3px 0 0; font-size: 11px; color: var(--text-faint); line-height: 1.55; }
+.completed-note { margin: 8px 0 0; }
 .phase-note { padding: 10px 14px; border: 1px solid var(--accent-ring); border-radius: var(--radius-ctrl); background: var(--accent-softer); color: var(--text); font-size: 12.5px; line-height: 1.7; margin-bottom: 12px; }
 .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .step { display: flex; align-items: flex-start; gap: 9px; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius-ctrl); background: var(--bg-panel-2); }

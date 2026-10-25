@@ -67,6 +67,7 @@ const RUN_STATUS_CLS: Record<string, string> = {
   QUEUED: "",
   RUNNING: "action",
   SUCCEEDED: "ok",
+  DEGRADED: "warn",
   FAILED: "veto",
   CANCELLED: "warn",
 };
@@ -74,6 +75,7 @@ const RUN_STATUS_LABELS: Record<string, string> = {
   QUEUED: "排队中",
   RUNNING: "执行中",
   SUCCEEDED: "执行成功",
+  DEGRADED: "业务降级",
   FAILED: "执行失败",
   CANCELLED: "已取消",
 };
