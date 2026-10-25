@@ -293,6 +293,25 @@
 
 **7. 发布审查建议**：**建议进入发布审查**。前端功能完整、真实数据链路全部打通、无已知阻断缺陷。
 
+
+
+## 十五、复审第 1 项前端修复（confirm_paid_calls 进请求体）
+
+**Codex 复审第 1 项**（前端未传实验模式付费确认字段）修复并验证到请求体层：
+
+- `src/api/experimentalBody.ts`（新增，零依赖纯函数）：`experimentalRunBody(goal, confirmPaidCalls)`——`confirm_paid_calls` 仅在**严格布尔 true** 时发送（字符串 "true"/undefined 一律按未确认处理，防伪装）；
+- `api/aiResearch.ts`：`startExperimentalResearch` 使用该构造器（与工作区中已有的两参签名协同）；
+- 调用处（AiResearchView）传入 `confirmPlanningCall.value`（此为复审后另一窗口的未提交协同改动，本轮确认保留并接通）；
+- 回归测试 `tests/experimental-confirm-body.test.mjs`：5 用例（确认 true / 未确认 false / 字符串伪装 / undefined / goal 透传）。
+
+**请求体级证据**：浏览器实测提交后捕获实际 XHR body 为
+`{"goal":"比较核心四资产的历史风险","confirm_paid_calls":true}`
+——确认字段真实进入请求（复审复现的 `{goal}` 已消除）。
+
+**遗留（后端窗口）**：运行中的 8765 服务进程对该端点**任何请求体**（含裸 `{goal}`）均返回 "There was an error parsing the body"——服务进程代码与 HEAD（模型含 confirm_paid_calls）不同步，需重启服务对齐；对齐后前端即可走通 审批 422→200 全链路（前端已就绪，无需再改）。
+
+**验证**：vue-tsc 0 错误 · build ✓ · **30/30 测试**（新增 5 用例）。
+
 ## 九、已知边界（如实记录）
 
 - 5173 端口被另一个旧 dev server 占用，本轮验证使用 5174；旧进程属上一轮会话，未擅动。

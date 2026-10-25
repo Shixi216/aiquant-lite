@@ -126,7 +126,10 @@ async function submitResearch() {
   if (mode.value === "EXPERIMENTAL_AI_RESEARCH") {
     phase.value = "planning"; // POST 在途（AI 规划，最长 12 分钟）；期间不伪造进度
     try {
-      const response = await startExperimentalResearch(goal.value.trim());
+      const response = await startExperimentalResearch(
+        goal.value.trim(),
+        confirmPlanningCall.value,
+      );
       phase.value = "approval";
       plan.value = response.plan ?? null;
       pendingRunId.value = response.research_run_id;

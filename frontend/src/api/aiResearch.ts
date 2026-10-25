@@ -8,6 +8,8 @@
 
 import axios from "axios";
 
+import { experimentalRunBody } from "./experimentalBody";
+
 import { errorMessage } from "./client";
 import type { WealthEnvelope } from "../types/wealthLab";
 import type {
@@ -72,11 +74,14 @@ export async function runStableResearch(payload: StableRunPayload): Promise<Rese
 
 /* ---------------- POST /research/runs/experimental ---------------- */
 
-export async function startExperimentalResearch(goal: string): Promise<ResearchRunResult> {
+export async function startExperimentalResearch(
+  goal: string,
+  confirmPaidCalls: boolean,
+): Promise<ResearchRunResult> {
   try {
     const response = await http.post<WealthEnvelope<ResearchRunResult>>(
       "/v1/wealth-lab/v3/research/runs/experimental",
-      { goal },
+      experimentalRunBody(goal, confirmPaidCalls),
     );
     return unwrap(response.data);
   } catch (err) {
