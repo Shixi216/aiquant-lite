@@ -8,7 +8,6 @@
 
 import axios from "axios";
 
-import { errorMessage } from "./client";
 import type { WealthEnvelope } from "../types/wealthLab";
 import type {
   AssetNewsItem,

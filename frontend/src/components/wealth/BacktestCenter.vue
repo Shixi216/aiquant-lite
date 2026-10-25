@@ -9,7 +9,7 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { Asset, BacktestData, BacktestFormParams, Metrics, RiskData, WealthEnvelope } from "../../types/wealthLab";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
 import { useChartTheme, withAlpha } from "../../domain/chartTheme";
 import {

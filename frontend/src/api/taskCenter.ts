@@ -644,7 +644,7 @@ function innerData(payload: unknown): Record<string, unknown> {
   return outer;
 }
 
-function summarize(opId: string, payload: unknown): string {
+function summarize(_opId: string, payload: unknown): string {
   const record = innerData(payload);
   const parts: string[] = [];
   const candidates = ["run_id", "snapshot_id", "backtest_id", "status", "mode", "provider", "requested", "succeeded", "failed", "skipped", "total", "annual_return", "sharpe_ratio"];
@@ -751,7 +751,6 @@ export async function executeJobOp(
   const startedAt = new Date(base.startedAt);
   try {
     const submitted = await submitJob(op.operation!, jobParams);
-    const submittedAt = new Date();
     let current: TaskRunRecord = {
       ...base,
       path: `POST /v1/wealth-lab/v3/jobs（operation=${op.operation}）`,

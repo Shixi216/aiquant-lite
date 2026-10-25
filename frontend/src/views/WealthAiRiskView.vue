@@ -136,14 +136,14 @@ async function runCheck(): Promise<void> {
   checkLoading.value = true;
   checkError.value = null;
   try {
-    const payload: Record<string, unknown> = {
+    const payload: Parameters<typeof runV2RiskCheck>[0] = {
       weights: { ...checkWeights },
       portfolio_context: {
         ai_claims: reviewClaims.value.length ? reviewClaims.value : undefined,
       },
     };
     if (checkForm.backtest_id.trim()) payload.backtest_id = checkForm.backtest_id.trim();
-    const response = await runV2RiskCheck(payload as Parameters<typeof runV2RiskCheck>[0]);
+    const response = await runV2RiskCheck(payload);
     riskCheck.value = response.envelope;
     packetForm.risk_check = { verdict: response.envelope.data.verdict, policy_version: response.envelope.data.policy_version };
   } catch (err) {
@@ -187,7 +187,7 @@ async function createPacket(): Promise<void> {
   packetError.value = null;
   try {
     const strategy = strategies.value.find((s) => s.strategy_id === packetForm.strategy_id);
-    const payload: Record<string, unknown> = {
+    const payload: Parameters<typeof createV2DecisionPacket>[0] = {
       strategy_id: packetForm.strategy_id,
       weights: packetWeights.value,
     };
@@ -195,7 +195,7 @@ async function createPacket(): Promise<void> {
     if (packetForm.backtest_id.trim()) payload.backtest_id = packetForm.backtest_id.trim();
     if (packetForm.research_id.trim()) payload.research_id = packetForm.research_id.trim();
     if (packetForm.risk_check) payload.risk_check = packetForm.risk_check;
-    const response = await createV2DecisionPacket(payload as Parameters<typeof createV2DecisionPacket>[0]);
+    const response = await createV2DecisionPacket(payload);
     packet.value = response.envelope;
   } catch (err) {
     packetError.value = errorMessage(err);
@@ -364,7 +364,7 @@ onMounted(async () => {
       <div class="check-grid">
         <div class="check-form">
           <h4>组合权重（小数，可超 1 以演示集中度检查）</h4>
-          <label v-for="[symbol, weight] in weightEntries" :key="symbol" class="w-row">
+          <label v-for="[symbol] in weightEntries" :key="symbol" class="w-row">
             <span>{{ symbol }}</span>
             <input
               v-model.number="checkWeights[symbol]"
@@ -449,7 +449,7 @@ onMounted(async () => {
           <div class="packet-head-card">
             <span class="packet-id">{{ packet.data.packet_id }}</span>
             <span class="badge action">第 {{ packet.data.version }} 版<template v-if="packet.data.supersedes_version !== null"> · 替代第 {{ packet.data.supersedes_version }} 版</template></span>
-            <span class="badge">{{ strategies.find((s) => s.strategy_id === packet.data.strategy_id)?.name ?? packet.data.strategy_id }}</span>
+            <span class="badge">{{ strategies.find((s) => s.strategy_id === packet?.data.strategy_id)?.name ?? packet.data.strategy_id }}</span>
             <span class="badge">{{ packet.data.portfolio_id }}</span>
           </div>
           <div class="metric-block">

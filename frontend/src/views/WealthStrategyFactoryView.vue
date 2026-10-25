@@ -10,7 +10,7 @@ import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
 import StrategyBacktestResult from "../components/wealthv2/StrategyBacktestResult.vue";
 import { STRATEGY_PARAM_LABELS, strategyFamily } from "../domain/wealthV2Format";
-import { fmtPct, REBALANCE_LABELS } from "../domain/wealthFormat";
+import { REBALANCE_LABELS } from "../domain/wealthFormat";
 import { useWealthLabV2Store } from "../stores/wealthLabV2";
 import { fetchV3Universes, runV3UniverseBacktest } from "../api/wealthLabV3";
 import type { UniversesData, UniverseBacktestData, TimeSemantics, WealthEnvelope as V3Envelope } from "../types/wealthLabV3";
@@ -30,7 +30,7 @@ const selectedId = ref<string>("");
 const selected = computed(() => strategies.value.find((s) => s.strategy_id === selectedId.value) ?? null);
 
 /** 参数编辑状态：仅 primitive 键可编辑；提交时只带改动键（params_override 部分覆盖语义）。 */
-const paramEdits = ref<Record<string, number | string>>({});
+const paramEdits = ref<Record<string, number | string | boolean>>({});
 /** 固定权重类策略（params.weights 为对象）使用可视化权重控件；原始对象仍保留在参数详情。 */
 const weightEdits = ref<Record<string, number>>({});
 const editedStrategyId = ref<string>("");
@@ -111,7 +111,7 @@ function assetNameOf(symbol: string): string {
   return universe.value.find((asset) => asset.symbol === symbol)?.name ?? symbol;
 }
 
-function isEditable(value: unknown): boolean {
+function isEditable(value: unknown): value is number | string | boolean {
   return typeof value === "number" || typeof value === "string" || typeof value === "boolean";
 }
 
@@ -128,7 +128,7 @@ function selectStrategy(meta: StrategyMeta): void {
   result.value = null;
   error.value = null;
   editedStrategyId.value = meta.strategy_id;
-  const edits: Record<string, number | string> = {};
+  const edits: Record<string, number | string | boolean> = {};
   for (const [key, value] of Object.entries(meta.params)) {
     if (isEditable(value)) edits[key] = value;
   }
@@ -386,7 +386,7 @@ onMounted(async () => {
           <div v-if="weightParam" class="strategy-params weight-editor">
             <h4>目标权重（拖动或输入，合计需为 100%）</h4>
             <div class="weight-rows">
-              <div v-for="(value, symbol) in weightParam" :key="symbol" class="weight-row">
+              <div v-for="symbol in Object.keys(weightParam)" :key="symbol" class="weight-row">
                 <span class="w-name">{{ assetNameOf(String(symbol)) }}</span>
                 <span class="w-symbol">{{ symbol }}</span>
                 <input

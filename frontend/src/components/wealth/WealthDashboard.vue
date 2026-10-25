@@ -5,7 +5,6 @@
  * 所有数字来源于契约响应（BacktestResponse / RiskResponse / MetaResponse），禁止硬编码。
  */
 import { computed } from "vue";
-import type { Ref } from "vue";
 import type { BacktestData, MetaData, RiskData, WealthEnvelope } from "../../types/wealthLab";
 import type { DataSource } from "../../api/wealthLab";
 import {

@@ -3,7 +3,7 @@
  * 契约约定：收益率/权重/比例一律小数（0.023 = 2.3%）；金额为人民币元。
  */
 
-import type { Asset, AssetCategory } from "../types/wealthLab";
+import type { AssetCategory } from "../types/wealthLab";
 
 export const ASSET_CATEGORY_LABELS: Record<AssetCategory, string> = {
   EQUITY_ETF: "权益 ETF",

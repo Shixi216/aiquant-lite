@@ -4,7 +4,7 @@
  * 底层 v-model 值保持契约所需的 YYYY-MM-DD 字符串，不做任何格式转换。
  * 手动输入非法格式时标红并回退上次合法值。
  */
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 const props = defineProps<{
   modelValue: string;

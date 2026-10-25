@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { CrossSectionItem, OpportunitiesResponse } from "../../types/v2";
+import type { CrossSectionItem } from "../../types/v2";
 import ScoreCell from "./ScoreCell.vue";
 import BucketCell from "./BucketCell.vue";
 import {

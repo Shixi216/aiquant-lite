@@ -20,7 +20,7 @@ import { useWealthLabV2Store } from "../stores/wealthLabV2";
 import { fmtPct, fmtRatio } from "../domain/wealthFormat";
 import { getResearchRoleLabel, getResearchStatusLabel } from "../domain/labels";
 import type { Ref } from "vue";
-import echarts, { type EChartsCoreOption } from "../charts";
+import type { EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
 import { useChartTheme, withAlpha } from "../domain/chartTheme";
 import type {
@@ -29,6 +29,7 @@ import type {
   ResearchModeSpec,
   ResearchPlan,
   ResearchRoleSpec,
+  ResearchRolesData,
   ResearchRunRecord,
   ResearchRunResult,
   RiskCheckResult,
@@ -333,7 +334,7 @@ const steps = computed<StepView[]>(() => {
       ? { state: reached("VALIDATION") ? "done" : failedHere("VALIDATION") ? "failed" : "pending", note: "白名单校验：资产池/策略/区间" }
       : { state: res || record?.backtest_id ? "done" : active("BACKTESTING") ? "active" : "pending", note: "加载既有回测证据" },
     experimental
-      ? { state: record?.status === "APPROVAL_PENDING" || phase.value === "approval" ? "active" : reached("APPROVAL") && phase.value !== "approval" ? "done" : "pending", note: "等待用户确认后才开始实验" }
+      ? { state: record?.status === "APPROVAL_PENDING" || phase.value === "approval" ? "active" : reached("APPROVAL") ? "done" : "pending", note: "等待用户确认后才开始实验" }
       : { state: "done", note: "提交即确认（含付费调用确认）" },
     { state: reached("BACKTESTING") || (res?.experiments?.length ?? 0) > 0 ? "done" : active("BACKTESTING") ? "active" : "pending", note: "" },
     { state: (res?.experiments?.length ?? 0) > 0 ? "done" : "pending", note: "" },
@@ -700,7 +701,7 @@ function fmtTime(iso: string | null | undefined): string {
           </h3>
           <div class="plan-grid">
             <div><span>研究目标</span><b>{{ plan.research_goal }}</b></div>
-            <div><span>资产池（AI 规划）</span><b>{{ getAssetCategoryLabelV3(plan.universe_id) === plan.universe_id ? plan.universe_id : getAssetCategoryLabelV3(plan.universe_id) + '（' + plan.universe_id + '）' }}</b></div>
+            <div><span>资产池（AI 规划）</span><b>{{ plan.universe_id }}</b></div>
             <div><span>历史区间</span><b>{{ plan.start_date }} ~ {{ plan.end_date }}</b></div>
             <div><span>基准</span><b>{{ plan.benchmark ?? "EQUAL_WEIGHT" }}</b></div>
           </div>

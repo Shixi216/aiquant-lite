@@ -28,6 +28,8 @@ export interface ChartTokens {
   axisLine: string;
   tooltipBg: string;
   tooltipText: string;
+  bgPanel: string;
+  veto: string;
   /** 热力图 5 档色带（浅→深） */
   heat: [string, string, string, string, string];
   isDark: boolean;
@@ -75,6 +77,8 @@ export function useChartTheme(): ComputedRef<ChartTokens> {
       axisLine: border,
       tooltipBg: isDark ? "rgba(17, 22, 31, 0.96)" : "rgba(255, 255, 255, 0.98)",
       tooltipText: text,
+      bgPanel: num("--bg-panel", isDark ? "#11161f" : "#ffffff"),
+      veto: num("--veto", isDark ? "#ff5464" : "#d9414e"),
       heat: isDark
         ? ["#10161f", "#1c4d80", "#2f7ed8", "#7fc3ff", "#d8ecff"]
         : ["#eef5f1", "#bfe0d4", "#5db8a0", accent, "#0a5c4e"],

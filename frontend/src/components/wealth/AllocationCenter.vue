@@ -7,13 +7,12 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { Asset, WealthEnvelope, AssetsData } from "../../types/wealthLab";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
 import { useChartTheme } from "../../domain/chartTheme";
 import {
   ASSET_CATEGORY_LABELS,
   ASSET_COLORS,
-  DEFAULT_WEIGHTS,
   fmtCny,
   isWeightsValid,
   weightSum,

@@ -23,7 +23,7 @@ import {
   universeAssetsMock,
   universeBacktestMock,
 } from "../mocks/wealthLabV3Fixtures";
-import type { DataSource, WealthResult } from "./wealthLab";
+import type { WealthResult } from "./wealthLab";
 
 const http = axios.create({ baseURL: "/wealth-lab-api", timeout: 60000 });
 
@@ -139,6 +139,6 @@ export function runV3UniverseBacktest(strategyId: string, payload: UniverseBackt
     () => http.post<WealthEnvelope<UniverseBacktestData>>(`/v1/wealth-lab/v3/strategies/${strategyId}/backtest`, payload).then((r) => r.data),
     () => universeBacktestMock,
     "资产池回测",
-    toBusinessErrorRich,
+    (err) => toBusinessErrorRich(err, "资产池回测"),
   );
 }

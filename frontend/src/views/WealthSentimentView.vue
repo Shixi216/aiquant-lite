@@ -6,12 +6,12 @@
  * 证据口径以后端为准：EXACT=直接证据；CLASS_LEVEL=间接推导（置信度封顶 0.6）；
  * INSUFFICIENT_DATA=证据不足（灰显，不得当作信号）。前端聚合视图均明确标注。
  */
-import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue";
+import { computed, onMounted, ref, watchEffect } from "vue";
 
 import { fetchV3Quality } from "../api/wealthLabV3";
 import PixelIcon from "../components/global/PixelIcon.vue";
 import type { Ref } from "vue";
-import echarts, { type EChartsCoreOption } from "../charts";
+import type { EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
 import { useChartTheme, withAlpha } from "../domain/chartTheme";
 import { fetchJob } from "../api/taskCenter";
@@ -54,13 +54,6 @@ async function loadAssets() {
   finally {
     assetsLoading.value = false;
   }
-}
-
-function assetName(symbol: string): string {
-  return assets.value.find((a) => a.symbol === symbol)?.name ?? symbol;
-}
-function assetCategory(symbol: string): string {
-  return assets.value.find((a) => a.symbol === symbol)?.category ?? "—";
 }
 
 /* ---------------- 市场总体情绪 ---------------- */
@@ -259,7 +252,7 @@ const categoryBarEl = ref<HTMLElement | null>(null);
 const categoryBarChart = useECharts(categoryBarEl as Ref<HTMLElement | null>);
 const ct = useChartTheme();
 
-/** 市场情绪近 30 日变化（GET /market/history 真实快照序列）。 */
+/** 近 30 日窗口内的实际快照序列；同日可能存在多次记录。 */
 const trendOption = computed<EChartsCoreOption | null>(() => {
   const history = marketHistory.value;
   if (history.length < 2) return null;
@@ -533,8 +526,8 @@ onMounted(() => {
           <div v-if="marketInsufficient" class="empty">证据不足：{{ marketMessage ?? "窗口内无有效观测" }}</div>
           <template v-else-if="marketScore">
             <div class="viz-caption">
-              <strong>近 30 日情绪走势</strong>
-              <span>每日快照（后端历史接口）</span>
+              <strong>近 30 日窗口内情绪快照</strong>
+              <span>按实际记录时点；同日可有多条</span>
             </div>
             <div ref="trendEl" class="viz trend-viz"></div>
             <div class="hero">

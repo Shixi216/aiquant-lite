@@ -10,7 +10,7 @@ import type { FactorsData, UniverseData, WealthEnvelope } from "../types/wealthL
 import { fetchV2Factors, fetchV2Universe } from "../api/wealthLabV2";
 import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
-import echarts, { type EChartsCoreOption } from "../charts";
+import type { EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
 import { useChartTheme } from "../domain/chartTheme";
 import { fmtCny, fmtPct, fmtRatio, returnColorClass } from "../domain/wealthFormat";

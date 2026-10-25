@@ -144,7 +144,7 @@ export function normalizeSettings(raw: unknown): ThemeSettings {
     : DEFAULT_SETTINGS.preset;
   const mode: ThemeMode = input.mode === "dark" ? "dark" : "light";
   const paletteIds = CHART_PALETTES.map((p) => p.id);
-  const widgetIds = DASHBOARD_WIDGETS.map((w) => w.id);
+  const widgetIds: string[] = DASHBOARD_WIDGETS.map((w) => w.id);
   const order = Array.isArray(input.dashboardOrder)
     ? input.dashboardOrder.filter((id) => widgetIds.includes(id))
     : [];

@@ -316,7 +316,7 @@ export const backtestUnavailableMock = {
   generated_at: "2026-10-24T15:00:00+08:00",
   api_version: "router-0.10.0",
   research_only: true,
-} satisfies WealthEnvelope<BacktestData>;
+} satisfies WealthEnvelope<BacktestData | null>;
 
 export const riskMock = {
   request_id: "req_0123456789abcdef0123456",

@@ -365,18 +365,6 @@ export interface LimitPoolsData {
   limit_down_pool: LimitPoolRow[];
 }
 
-export interface DragonTigerItem {
-  symbol: string;
-  name: string;
-  buy_amount: number | null;
-  sell_amount: number | null;
-  net_amount: number | null;
-  institution_net_amount: number | null;
-  seat_count: number | null;
-  institution_seat_count: number | null;
-  reasons: string[];
-}
-
 export interface ScanItem {
   symbol: string;
   name: string;

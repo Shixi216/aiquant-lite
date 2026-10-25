@@ -10,17 +10,16 @@ import type {
   CompareData,
   OptimizationData,
   StrategiesData,
-  StrategyCompareRow,
   WealthEnvelope,
 } from "../types/wealthLabV2";
 import type { OptimizationMethod } from "../types/wealthLabV2";
 import { fetchV2Strategies, runV2Compare, runV2Optimization } from "../api/wealthLabV2";
 import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
-import echarts, { type EChartsCoreOption } from "../charts";
+import type { EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
 import { useChartTheme, withAlpha } from "../domain/chartTheme";
-import { fmtPct, fmtRatio, returnColorClass } from "../domain/wealthFormat";
+import { fmtPct, fmtRatio } from "../domain/wealthFormat";
 import { OPTIMIZATION_METHOD_LABELS } from "../domain/wealthV2Format";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
 
@@ -220,6 +219,7 @@ const scatterOption = computed<EChartsCoreOption | null>(() => {
 });
 
 watchEffect(() => {
+  barChart.setOption(barOption.value, true);
   const opt = scatterOption.value;
   if (opt) scatterChart.setOption(opt, true);
 });
@@ -239,14 +239,14 @@ async function runOptimization(): Promise<void> {
   optLoading.value = true;
   optError.value = null;
   try {
-    const payload: Record<string, unknown> = {
+    const payload: Parameters<typeof runV2Optimization>[0] = {
       method: optMethod.value,
       estimation_window_days: optForm.value.estimation_window_days,
       risk_free_rate: optForm.value.risk_free_rate,
       adapter: "auto",
     };
     if (optForm.value.asof) payload.asof = optForm.value.asof;
-    const response = await runV2Optimization(payload as Parameters<typeof runV2Optimization>[0]);
+    const response = await runV2Optimization(payload);
     optResult.value = response.envelope;
     optSource.value = response.source;
   } catch (err) {

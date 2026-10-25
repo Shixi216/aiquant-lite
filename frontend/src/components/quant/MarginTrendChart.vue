@@ -2,7 +2,7 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { MarginPoint } from "../../types/v2";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
 import { useChartTheme } from "../../domain/chartTheme";
 import { formatAmountYi } from "../../domain/labels";

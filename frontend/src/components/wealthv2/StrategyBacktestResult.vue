@@ -6,7 +6,7 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { StrategyBacktestData, WealthEnvelope } from "../../types/wealthLabV2";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
 import { useChartTheme, withAlpha } from "../../domain/chartTheme";
 import { fmtCny, fmtNav, fmtPct, fmtRatio, returnColorClass, assetName as resolveAssetName } from "../../domain/wealthFormat";

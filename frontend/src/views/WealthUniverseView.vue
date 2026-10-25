@@ -27,7 +27,7 @@ import {
 import WlDateInput from "../components/wealth/WlDateInput.vue";
 import { getAssetCategoryLabelV3 } from "../domain/labels";
 import type { Ref } from "vue";
-import echarts, { type EChartsCoreOption } from "../charts";
+import type { EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
 import { useChartTheme, withAlpha } from "../domain/chartTheme";
 

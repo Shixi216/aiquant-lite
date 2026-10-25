@@ -440,7 +440,10 @@ const providerChips = computed(() => {
                 <td class="num">{{ fmtTime(job.created_at) }}<br /><small class="run-path">{{ job.finished_at ? fmtTime(job.finished_at) : "进行中" }}</small></td>
                 <td class="job-result-cell">
                   <template v-if="job.error"><span class="error-text">{{ job.error }}</span></template>
-                  <template v-else-if="job.result && Object.keys(job.result).length">{{ JSON.stringify(job.result) }}</template>
+                  <details v-else-if="job.result && Object.keys(job.result).length">
+                    <summary>查看结果</summary>
+                    <pre>{{ JSON.stringify(job.result, null, 2) }}</pre>
+                  </details>
                   <template v-else>—</template>
                 </td>
                 <td class="job-actions">
@@ -551,6 +554,8 @@ const providerChips = computed(() => {
 .progress-bar { display: inline-block; width: 76px; height: 6px; border-radius: 4px; background: var(--bg-hover); overflow: hidden; }
 .progress-bar > span { display: block; height: 100%; border-radius: 4px; background: var(--accent-grad); transition: width 0.5s ease; }
 .job-result-cell { max-width: 300px; white-space: normal; word-break: break-all; font-size: 11.5px; color: var(--text-dim); }
+.job-result-cell summary { cursor: pointer; white-space: nowrap; }
+.job-result-cell pre { min-width: 220px; max-height: 220px; overflow: auto; white-space: pre-wrap; margin: 8px 0 0; }
 .job-actions { display: flex; gap: 6px; }
 .logs-cell { background: var(--bg-hover); white-space: normal; }
 .logs-cell h4 { margin: 0 0 6px; font-size: 12px; color: var(--text-dim); }

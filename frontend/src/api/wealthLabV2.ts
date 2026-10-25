@@ -42,7 +42,7 @@ import {
   strategyBacktestMock,
   universeMock,
 } from "../mocks/wealthLabV2Fixtures";
-import type { DataSource, WealthResult } from "./wealthLab";
+import type { WealthResult } from "./wealthLab";
 
 const http = axios.create({ baseURL: "/wealth-lab-api", timeout: 60000 });
 

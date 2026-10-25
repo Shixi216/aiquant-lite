@@ -42,7 +42,7 @@ export function useECharts(el: Ref<HTMLElement | null>) {
     return chart;
   }
 
-  function setOption(option: EChartsCoreOption, replace = false) {
+  function setOption(option: EChartsCoreOption | null | undefined, replace = false) {
     // 防御：数据未就绪时调用方可能传入 null/undefined，直接忽略，避免 ECharts 抛错。
     if (option === null || option === undefined) return;
     lastOption = option;

@@ -6,7 +6,6 @@ import {
   formatScore,
   getScoreSourceLabel,
   LEGACY_NOTE,
-  NO_DATA,
   RANK_TOOLTIP,
 } from "../../domain/labels";
 

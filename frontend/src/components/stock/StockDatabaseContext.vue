@@ -81,7 +81,7 @@ function scalarMetrics(value: unknown): Array<[string, string]> {
       <h3>财务与基本面记录</h3>
       <div v-if="data.financials.length" class="financial-grid">
         <article v-for="record in data.financials" :key="`${record.data_type}-${record.data_cutoff}`">
-          <header><strong>{{ getDataTypeLabel(record.data_type) }}</strong><span>{{ getVerificationStatusLabel(record.verification_status) }} · {{ record.source }}</span></header>
+          <header><strong>{{ getDataTypeLabel(typeof record.data_type === 'string' ? record.data_type : null) }}</strong><span>{{ getVerificationStatusLabel(typeof record.verification_status === 'string' ? record.verification_status : null) }} · {{ record.source }}</span></header>
           <dl><template v-for="metric in scalarMetrics(record.metrics)" :key="metric[0]"><dt>{{ metric[0] }}</dt><dd>{{ metric[1] }}</dd></template></dl>
           <small>报告期 {{ getFinancialReportPeriod(record.metrics) }} · 来源事件日 {{ formatDate(String(record.event_time ?? '')) }} · 数据截至 {{ formatDateTime(String(record.data_cutoff ?? '')) }}</small>
         </article>

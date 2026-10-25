@@ -11,7 +11,7 @@ import type { Asset, AssetContribution, StressTestData, WealthEnvelope } from ".
 import type { DataSource } from "../../api/wealthLab";
 import { runWealthStressTest } from "../../api/wealthLab";
 import { errorMessage } from "../../api/client";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
 import { useChartTheme } from "../../domain/chartTheme";
 import { ASSET_COLORS, fmtCny, fmtPct, isWeightsValid } from "../../domain/wealthFormat";
