@@ -25,69 +25,90 @@ let searchTimer: ReturnType<typeof setTimeout> | undefined;
 let blurTimer: ReturnType<typeof setTimeout> | undefined;
 let searchRequest = 0;
 
-/** 一级工作区：侧栏只展示当前工作区的二级导航，避免导航过长。 */
-interface NavItem { key: string; to: string; label: string; icon: string }
-interface Workspace { id: string; label: string; icon: string; items: NavItem[] }
+/**
+ * 一级工作区：侧栏只展示当前工作区的二级导航，避免导航过长。
+ * tint = 该功能的图标主题色（侧栏、页面标题保持一致）；清新轻盈的低饱和系。
+ */
+interface NavItem { key: string; to: string; label: string; icon: string; tint: string }
+interface Workspace { id: string; label: string; icon: string; tint: string; items: NavItem[] }
+
+/** 图标主题色（青春清新系，深浅主题均可读） */
+const TINT = {
+  mint: "#34b39a",      // 薄荷绿（首页）
+  coral: "#f2784b",     // 珊瑚橙（股票研究）
+  sky: "#3d9df0",       // 天空蓝（财富管理）
+  lavender: "#9a7ff0",  // 薰衣草紫（多资产研究池）
+  sakura: "#f0789f",    // 樱花粉（AI 研究）
+  lemon: "#d9a514",     // 柠檬黄（市场情绪）
+  teal: "#18a8c0",      // 青蓝（数据中心）
+  graypurple: "#a08bb8", // 浅灰紫（系统设置）
+} as const;
 
 const workspaces: Workspace[] = [
   {
     id: "equity",
     label: "股票研究",
     icon: "chart",
+    tint: TINT.coral,
     items: [
-      { key: "dashboard", to: "/dashboard", label: "市场总览", icon: "monitor" },
-      { key: "opportunities", to: "/opportunities", label: "机会排序", icon: "filter" },
-      { key: "quant", to: "/quant", label: "量化实验室", icon: "test-tube" },
-      { key: "stock-intel", to: "/stocks/600519.SH", label: "个股研究", icon: "search" },
-      { key: "sim-tracker", to: "/sim-tracker", label: "盘中模拟追踪", icon: "clock" },
-      { key: "capital-behavior", to: "/capital-behavior", label: "资金行为研究", icon: "chart" },
-      { key: "decisions", to: "/decisions", label: "决策卡片", icon: "copy" },
-      { key: "research-health", to: "/research-health", label: "实验与系统状态", icon: "check" },
+      { key: "dashboard", to: "/dashboard", label: "市场总览", icon: "monitor", tint: TINT.mint },
+      { key: "opportunities", to: "/opportunities", label: "机会排序", icon: "filter", tint: TINT.coral },
+      { key: "quant", to: "/quant", label: "量化实验室", icon: "test-tube", tint: TINT.coral },
+      { key: "stock-intel", to: "/stocks/600519.SH", label: "个股研究", icon: "search", tint: TINT.coral },
+      { key: "sim-tracker", to: "/sim-tracker", label: "盘中模拟追踪", icon: "clock", tint: TINT.coral },
+      { key: "capital-behavior", to: "/capital-behavior", label: "资金行为研究", icon: "chart", tint: TINT.coral },
+      { key: "decisions", to: "/decisions", label: "决策卡片", icon: "copy", tint: TINT.coral },
+      { key: "research-health", to: "/research-health", label: "实验与系统状态", icon: "check", tint: TINT.coral },
     ],
   },
   {
     id: "wealth",
     label: "财富管理",
     icon: "briefcase",
+    tint: TINT.sky,
     items: [
-      { key: "wealth-lab", to: "/wealth-lab", label: "大类资产配置", icon: "briefcase" },
-      { key: "wealth-factors", to: "/wealth-factors", label: "ETF 多因子研究", icon: "zap" },
-      { key: "wealth-universe", to: "/wealth-universe", label: "多资产研究池", icon: "database" },
-      { key: "wealth-strategy-factory", to: "/wealth-strategy-factory", label: "策略工厂", icon: "save" },
-      { key: "wealth-strategy-compare", to: "/wealth-strategy-compare", label: "策略对比与优化", icon: "sliders" },
-      { key: "wealth-ai-risk", to: "/wealth-ai-risk", label: "AI 研究与风控", icon: "cpu" },
+      { key: "wealth-lab", to: "/wealth-lab", label: "大类资产配置", icon: "briefcase", tint: TINT.sky },
+      { key: "wealth-factors", to: "/wealth-factors", label: "ETF 多因子研究", icon: "zap", tint: TINT.sky },
+      { key: "wealth-universe", to: "/wealth-universe", label: "多资产研究池", icon: "database", tint: TINT.lavender },
+      { key: "wealth-strategy-factory", to: "/wealth-strategy-factory", label: "策略工厂", icon: "save", tint: TINT.sky },
+      { key: "wealth-strategy-compare", to: "/wealth-strategy-compare", label: "策略对比与优化", icon: "sliders", tint: TINT.sky },
+      { key: "wealth-ai-risk", to: "/wealth-ai-risk", label: "AI 研究与风控", icon: "cpu", tint: TINT.sky },
     ],
   },
   {
     id: "data",
     label: "数据中心",
     icon: "database",
+    tint: TINT.teal,
     items: [
-      { key: "task-center", to: "/task-center", label: "数据与研究任务中心", icon: "menu" },
+      { key: "task-center", to: "/task-center", label: "数据与研究任务中心", icon: "menu", tint: TINT.teal },
     ],
   },
   {
     id: "system",
     label: "系统设置",
     icon: "sliders",
+    tint: TINT.graypurple,
     items: [
-      { key: "settings", to: "/settings", label: "外观与布局", icon: "wand" },
+      { key: "settings", to: "/settings", label: "外观与布局", icon: "wand", tint: TINT.graypurple },
     ],
   },
   {
     id: "ai",
     label: "AI 研究",
     icon: "cpu",
+    tint: TINT.sakura,
     items: [
-      { key: "ai-research", to: "/ai-research", label: "AI 智能研究工作台", icon: "cpu" },
+      { key: "ai-research", to: "/ai-research", label: "AI 智能研究工作台", icon: "cpu", tint: TINT.sakura },
     ],
   },
   {
     id: "sentiment",
     label: "市场情绪",
     icon: "smile",
+    tint: TINT.lemon,
     items: [
-      { key: "wealth-sentiment", to: "/wealth-sentiment", label: "多资产市场情绪", icon: "smile" },
+      { key: "wealth-sentiment", to: "/wealth-sentiment", label: "多资产市场情绪", icon: "smile", tint: TINT.lemon },
     ],
   },
 ];
@@ -111,6 +132,11 @@ function isItemActive(item: NavItem): boolean {
   if (item.key === "stock-intel") return route.name === "stock-intel";
   return route.path === item.to;
 }
+
+/** 当前页面（用于页标题同色图标）：优先精确匹配，个股研究等动态路由回退首项。 */
+const activeItem = computed<NavItem>(
+  () => activeWorkspace.value.items.find((item) => isItemActive(item)) ?? activeWorkspace.value.items[0]!,
+);
 
 function focusSearch() {
   if (blurTimer) clearTimeout(blurTimer);
@@ -213,7 +239,7 @@ onBeforeUnmount(() => {
         :title="workspace.label"
         @click="switchWorkspace(workspace)"
       >
-        <span class="ws-icon" aria-hidden="true"><PixelIcon :name="workspace.icon" :size="16" /></span>
+        <span class="ws-icon" aria-hidden="true" :style="{ '--tint': workspace.tint }"><PixelIcon :name="workspace.icon" :size="20" /></span>
         <span v-if="!themeStore.settings.sidebarCollapsed">{{ workspace.label }}</span>
       </button>
     </div>
@@ -225,7 +251,7 @@ onBeforeUnmount(() => {
         :title="item.label"
         :class="{ 'router-link-active': isItemActive(item) }"
       >
-        <span class="nav-icon" aria-hidden="true"><PixelIcon :name="item.icon" :size="15" /></span>
+        <span class="nav-icon" aria-hidden="true" :style="{ '--tint': item.tint }"><PixelIcon :name="item.icon" :size="18" /></span>
         <span v-if="!themeStore.settings.sidebarCollapsed">{{ item.label }}</span>
       </RouterLink>
     </nav>
@@ -244,7 +270,13 @@ onBeforeUnmount(() => {
     <header class="workspace-header">
       <div class="workspace-heading">
         <button class="mini menu-toggle" :aria-expanded="menuOpen" aria-controls="main-navigation" @click="menuOpen = !menuOpen">{{ menuOpen ? '收起导航' : '展开导航' }}</button>
-        <div><div class="eyebrow">怡怡投研 / {{ activeWorkspace.label }}</div><h1>{{ pageTitle }}</h1></div>
+        <div>
+          <div class="eyebrow">怡怡投研 / {{ activeWorkspace.label }}</div>
+          <h1>
+            <span class="page-tint-icon" aria-hidden="true" :style="{ '--tint': activeItem.tint }"><PixelIcon :name="activeItem.icon" :size="20" /></span>
+            {{ pageTitle }}
+          </h1>
+        </div>
       </div>
       <div class="header-tools">
         <form class="stock-search" role="search" @submit.prevent="searchStock">
@@ -311,6 +343,46 @@ onBeforeUnmount(() => {
 .sidebar-footer { margin-top: auto; padding: 28px 12px 4px; color: var(--text-dim); font-size: 12px; }
 .sidebar-footer small { display: block; padding: 8px 0 0 14px; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
+.ws-icon,
+.nav-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tint) 13%, transparent);
+  color: var(--tint);
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.sidebar a:hover .nav-icon,
+.workspace-tab:hover .ws-icon {
+  background: color-mix(in srgb, var(--tint) 22%, transparent);
+  box-shadow: 0 1px 4px -2px color-mix(in srgb, var(--tint) 55%, transparent);
+}
+
+.sidebar a.router-link-active .nav-icon {
+  background: color-mix(in srgb, var(--tint) 26%, transparent);
+  color: var(--tint);
+}
+
+.workspace-tab.active .ws-icon {
+  background: color-mix(in srgb, var(--tint) 26%, transparent);
+}
+
+.page-tint-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  border-radius: 9px;
+  vertical-align: -6px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 18%, transparent);
+}
+
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; background: var(--accent-grad); color: var(--accent-contrast); border-radius: 12px; font-size: 23px; }
 .workspace-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
 .workspace-heading { display: flex; align-items: center; gap: 12px; }

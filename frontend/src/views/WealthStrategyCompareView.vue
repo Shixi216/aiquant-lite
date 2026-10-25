@@ -19,7 +19,7 @@ import type { DataSource } from "../api/wealthLab";
 import { errorMessage } from "../api/client";
 import echarts, { type EChartsCoreOption } from "../charts";
 import { useECharts } from "../composables/useECharts";
-import { useChartTheme } from "../domain/chartTheme";
+import { useChartTheme, withAlpha } from "../domain/chartTheme";
 import { fmtPct, fmtRatio, returnColorClass } from "../domain/wealthFormat";
 import { OPTIMIZATION_METHOD_LABELS } from "../domain/wealthV2Format";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
@@ -158,9 +158,70 @@ const barOption = computed<EChartsCoreOption | null>(() => {
   } satisfies EChartsCoreOption;
 });
 
+// 风险收益散点：横轴年化波动率、纵轴年化收益，点大小按夏普比率（真实 compare 数据）
+const scatterEl = ref<HTMLElement | null>(null);
+const scatterChart = useECharts(scatterEl as Ref<HTMLElement | null>);
+
+const scatterOption = computed<EChartsCoreOption | null>(() => {
+  const rows = comparison.value;
+  if (rows.length < 2) return null;
+  const points = rows.map((row) => ({
+    name: strategyName(row.strategy_id),
+    value: [
+      Number(((row.metrics.annual_volatility ?? 0) * 100).toFixed(2)),
+      Number(((row.metrics.annual_return ?? 0) * 100).toFixed(2)),
+      Number((row.metrics.sharpe_ratio ?? 0).toFixed(2)),
+    ],
+    itemStyle: { color: withAlpha(ct.value.accent, 0.78), borderColor: ct.value.accent, borderWidth: 1 },
+  }));
+  return {
+    animationDuration: 500,
+    tooltip: {
+      trigger: "item",
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
+      formatter: (p: { name: string; value: number[] }) =>
+        `<b>${p.name}</b><br/>年化波动率 ${p.value[0]}%<br/>年化收益 ${p.value[1]}%<br/>夏普比率 ${p.value[2]}`,
+    },
+    grid: { left: 60, right: 30, top: 24, bottom: 42 },
+    xAxis: {
+      name: "年化波动率",
+      nameLocation: "middle",
+      nameGap: 28,
+      nameTextStyle: { color: ct.value.dim, fontSize: 11 },
+      axisLabel: { color: ct.value.dim, formatter: "{value}%" },
+      splitLine: { lineStyle: { color: ct.value.grid } },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      scale: true,
+    },
+    yAxis: {
+      name: "年化收益",
+      nameTextStyle: { color: ct.value.dim, fontSize: 11 },
+      axisLabel: { color: ct.value.dim, formatter: "{value}%" },
+      splitLine: { lineStyle: { color: ct.value.grid } },
+      scale: true,
+    },
+    series: [
+      {
+        type: "scatter",
+        symbolSize: (value: number[]) => Math.max(16, Math.min(42, 14 + value[2] * 14)),
+        label: {
+          show: true,
+          position: "top",
+          color: ct.value.text,
+          fontSize: 11,
+          formatter: (p: { name: string }) => p.name,
+        },
+        data: points,
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
 watchEffect(() => {
-  const opt = barOption.value;
-  if (opt) barChart.setOption(opt, true);
+  const opt = scatterOption.value;
+  if (opt) scatterChart.setOption(opt, true);
 });
 
 /* ---------------- 组合优化 ---------------- */
@@ -355,6 +416,11 @@ onMounted(async () => {
       </div>
       <div v-if="comparison.length" class="chart-caption"><strong>收益-风险对比</strong><span>年化收益（红） / 最大回撤（绿） / 夏普（金，右轴）</span></div>
       <div v-show="comparison.length" ref="barEl" class="chart bar-chart"></div>
+      <div v-show="comparison.length >= 2" class="chart-caption">
+        <strong>风险收益分布</strong>
+        <span>横轴年化波动率、纵轴年化收益；越靠左上越优。点大小表示夏普比率（真实比较结果）</span>
+      </div>
+      <div v-show="comparison.length >= 2" ref="scatterEl" class="chart scatter-chart"></div>
     </section>
 
     <section class="panel" aria-label="组合优化">
@@ -421,8 +487,7 @@ onMounted(async () => {
 .compare-toolbar, .opt-toolbar { align-items: flex-end; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-dim); }
 .field input { min-width: 130px; }
-button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 16px; }
-button.primary:hover:not(:disabled) { background: var(--accent-soft); }
+/* 主按钮样式统一走全局 button.mini.primary */
 .compare-table td.best { color: var(--gold); font-weight: 700; }
 .compare-table th, .compare-table td { padding: 11px 12px; font-size: 13.5px; }
 .chart-caption { display: flex; align-items: baseline; justify-content: space-between; margin-top: 10px; }
@@ -445,4 +510,5 @@ button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 @media (max-width: 1280px) {
   .opt-grid { grid-template-columns: 1fr; }
 }
+.scatter-chart { height: 320px; }
 </style>

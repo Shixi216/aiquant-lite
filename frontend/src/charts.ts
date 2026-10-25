@@ -1,5 +1,5 @@
 import * as echarts from "echarts/core";
-import { BarChart, CandlestickChart, HeatmapChart, LineChart, PieChart, SankeyChart } from "echarts/charts";
+import { BarChart, CandlestickChart, HeatmapChart, LineChart, PieChart, SankeyChart, ScatterChart, TreemapChart } from "echarts/charts";
 import {
   DataZoomComponent,
   GridComponent,
@@ -16,6 +16,8 @@ echarts.use([
   LineChart,
   BarChart,
   PieChart,
+  ScatterChart,
+  TreemapChart,
   CandlestickChart,
   HeatmapChart,
   SankeyChart,

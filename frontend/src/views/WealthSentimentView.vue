@@ -6,10 +6,14 @@
  * 证据口径以后端为准：EXACT=直接证据；CLASS_LEVEL=间接推导（置信度封顶 0.6）；
  * INSUFFICIENT_DATA=证据不足（灰显，不得当作信号）。前端聚合视图均明确标注。
  */
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue";
 
 import { fetchV3Quality } from "../api/wealthLabV3";
 import PixelIcon from "../components/global/PixelIcon.vue";
+import type { Ref } from "vue";
+import echarts, { type EChartsCoreOption } from "../charts";
+import { useECharts } from "../composables/useECharts";
+import { useChartTheme, withAlpha } from "../domain/chartTheme";
 import { fetchJob } from "../api/taskCenter";
 import {
   fetchAssetNews,
@@ -245,6 +249,161 @@ async function loadSources() {
   }
 }
 
+/* ---------------- 情绪可视化（真实数据；聚合口径明确标注） ---------------- */
+
+const trendEl = ref<HTMLElement | null>(null);
+const trendChart = useECharts(trendEl as Ref<HTMLElement | null>);
+const directionPieEl = ref<HTMLElement | null>(null);
+const directionPieChart = useECharts(directionPieEl as Ref<HTMLElement | null>);
+const categoryBarEl = ref<HTMLElement | null>(null);
+const categoryBarChart = useECharts(categoryBarEl as Ref<HTMLElement | null>);
+const ct = useChartTheme();
+
+/** 市场情绪近 30 日变化（GET /market/history 真实快照序列）。 */
+const trendOption = computed<EChartsCoreOption | null>(() => {
+  const history = marketHistory.value;
+  if (history.length < 2) return null;
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
+      valueFormatter: (v: number) => v.toFixed(1),
+    },
+    grid: { left: 44, right: 18, top: 18, bottom: 26 },
+    xAxis: {
+      type: "category",
+      data: history.map((point) => point.asof.slice(5, 10)),
+      boundaryGap: false,
+      axisLabel: { color: ct.value.dim, fontSize: 10 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+    },
+    yAxis: {
+      type: "value",
+      min: -100,
+      max: 100,
+      axisLabel: { color: ct.value.dim, fontSize: 10 },
+      splitLine: { lineStyle: { color: ct.value.grid } },
+    },
+    series: [
+      {
+        name: "市场情绪分",
+        type: "line",
+        data: history.map((point) => Number(point.sentiment_score.toFixed(1))),
+        showSymbol: false,
+        smooth: true,
+        lineStyle: { width: 2.2, color: ct.value.accent },
+        areaStyle: {
+          color: {
+            type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: withAlpha(ct.value.accent, 0.26) },
+              { offset: 1, color: withAlpha(ct.value.accent, 0.02) },
+            ],
+          },
+        },
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+/** 事件方向分布环形图（真实 by_direction 计数）。 */
+const directionPieOption = computed<EChartsCoreOption | null>(() => {
+  const byDirection = marketScore.value?.component_breakdown?.by_direction;
+  if (!byDirection || !Object.keys(byDirection).length) return null;
+  const colorOf = (direction: string) =>
+    direction === "POSITIVE" ? ct.value.up : direction === "NEGATIVE" ? ct.value.down : direction === "NEUTRAL" ? ct.value.dim : ct.value.gold;
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "item",
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
+      formatter: (p: { name: string; value: number; percent: number }) => `${p.name}：${p.value} 条（${p.percent}%）`,
+    },
+    legend: { bottom: 0, icon: "roundRect", itemWidth: 10, itemHeight: 10, textStyle: { color: ct.value.dim, fontSize: 11 } },
+    series: [
+      {
+        type: "pie",
+        radius: ["52%", "76%"],
+        center: ["50%", "44%"],
+        padAngle: 2,
+        itemStyle: { borderColor: ct.value.bgPanel, borderWidth: 2, borderRadius: 5 },
+        label: { show: false },
+        data: Object.entries(byDirection).map(([direction, count]) => ({
+          name: getSentimentDirectionLabel(direction),
+          value: count,
+          itemStyle: { color: colorOf(direction) },
+        })),
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+/** 类别情绪均值条形（前端聚合口径，明确标注；非后端独立评分）。 */
+const categoryBarOption = computed<EChartsCoreOption | null>(() => {
+  const cats = categoryOverview.value.filter((cat) => cat.avgScore !== null);
+  if (cats.length < 2) return null;
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
+      formatter: (params: { name: string; value: number }[]) =>
+        params.map((p) => `${p.name}：<b>${p.value.toFixed(1)}</b>（${catWithSamples(p.name)}）`).join("<br/>"),
+    },
+    grid: { left: 8, right: 30, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "value",
+      min: -100,
+      max: 100,
+      axisLabel: { color: ct.value.dim, fontSize: 10 },
+      splitLine: { lineStyle: { color: ct.value.grid } },
+    },
+    yAxis: {
+      type: "category",
+      data: cats.map((cat) => getAssetCategoryLabelV3(cat.category)).reverse(),
+      axisLabel: { color: ct.value.text, fontSize: 11 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+    },
+    series: [
+      {
+        type: "bar",
+        barWidth: 14,
+        itemStyle: { borderRadius: [0, 5, 5, 0] },
+        data: cats.map((cat) => ({
+          value: Number(cat.avgScore!.toFixed(1)),
+          itemStyle: { color: cat.avgScore! >= 0 ? withAlpha(ct.value.up, 0.75) : withAlpha(ct.value.down, 0.75) },
+        })).reverse(),
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+function catWithSamples(label: string): string {
+  const cat = categoryOverview.value.find((c) => getAssetCategoryLabelV3(c.category) === label);
+  return cat ? `${cat.scored}/${cat.total} 只有评分` : "";
+}
+
+watchEffect(() => {
+  const opt = trendOption.value;
+  if (opt) trendChart.setOption(opt, true);
+});
+watchEffect(() => {
+  const opt = directionPieOption.value;
+  if (opt) directionPieChart.setOption(opt, true);
+});
+watchEffect(() => {
+  const opt = categoryBarOption.value;
+  if (opt) categoryBarChart.setOption(opt, true);
+});
+
 /* ---------------- 受控写任务（Jobs API + 内联真实轮询） ---------------- */
 
 const activeJob = ref<JobPublic | null>(null);
@@ -373,6 +532,11 @@ onMounted(() => {
           <div v-if="marketError" class="error-box">{{ marketError }}</div>
           <div v-if="marketInsufficient" class="empty">证据不足：{{ marketMessage ?? "窗口内无有效观测" }}</div>
           <template v-else-if="marketScore">
+            <div class="viz-caption">
+              <strong>近 30 日情绪走势</strong>
+              <span>每日快照（后端历史接口）</span>
+            </div>
+            <div ref="trendEl" class="viz trend-viz"></div>
             <div class="hero">
               <span class="hero-score" :class="scoreClass(marketScore.sentiment_score)">
                 {{ marketScore.sentiment_score > 0 ? "+" : "" }}{{ marketScore.sentiment_score.toFixed(1) }}
@@ -389,6 +553,11 @@ onMounted(() => {
               <div><span>观测/来源</span><b>{{ marketScore.observation_count }} / {{ marketScore.source_count }}</b></div>
             </div>
             <p class="dim-line">版本 {{ marketScore.sentiment_version }} · 快照 {{ fmtTime(marketScore.asof) }} · 最新证据 {{ fmtTime(marketScore.last_evidence_at) }}</p>
+            <div class="viz-caption">
+              <strong>事件方向分布</strong>
+              <span>窗口内事件计数（真实）</span>
+            </div>
+            <div ref="directionPieEl" class="viz pie-viz"></div>
             <div v-if="marketScore.component_breakdown?.by_direction" class="dir-chips">
               <span v-for="(count, direction) in marketScore.component_breakdown.by_direction" :key="direction" class="chip static">
                 {{ getSentimentDirectionLabel(direction) }} {{ count }}
@@ -449,6 +618,11 @@ onMounted(() => {
             资产类别情绪概览（八大类别）
             <span class="h3-extra">前端按后端资产评分聚合（均值，仅供分化概览；后端无独立类别评分）</span>
           </h3>
+          <div class="viz-caption">
+            <strong>类别情绪均值比较</strong>
+            <span>前端聚合口径（池内资产均值，非后端独立评分）</span>
+          </div>
+          <div ref="categoryBarEl" class="viz catbar-viz"></div>
           <div class="cat-grid">
             <div v-for="cat in categoryOverview" :key="cat.category" class="cat-card">
               <div class="cat-head"><strong>{{ getAssetCategoryLabelV3(cat.category) }}</strong><span class="dim">{{ cat.scored }}/{{ cat.total }} 有分</span></div>
@@ -699,6 +873,13 @@ onMounted(() => {
 .chip.static { cursor: default; }
 .payload { margin: 0; font-size: 11px; max-height: 300px; overflow: auto; background: var(--control-bg); border: 1px solid var(--border-soft); border-radius: var(--radius-ctrl); padding: 8px 10px; white-space: pre-wrap; word-break: break-all; }
 .error-text { color: var(--veto); font-size: 11.5px; }
+.viz-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 12px 0 4px; }
+.viz-caption:first-of-type { margin-top: 2px; }
+.viz-caption strong { font-size: 12.5px; }
+.viz-caption span { font-size: 11px; color: var(--text-dim); }
+.trend-viz { height: 170px; }
+.pie-viz { height: 190px; }
+.catbar-viz { height: 210px; }
 @media (max-width: 1200px) {
   .layout { grid-template-columns: 1fr; }
   .cat-grid { grid-template-columns: repeat(2, 1fr); }

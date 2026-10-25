@@ -19,6 +19,10 @@ import { errorMessage } from "../api/client";
 import { useWealthLabV2Store } from "../stores/wealthLabV2";
 import { fmtPct, fmtRatio } from "../domain/wealthFormat";
 import { getResearchRoleLabel, getResearchStatusLabel } from "../domain/labels";
+import type { Ref } from "vue";
+import echarts, { type EChartsCoreOption } from "../charts";
+import { useECharts } from "../composables/useECharts";
+import { useChartTheme, withAlpha } from "../domain/chartTheme";
 import type {
   NumericVerification,
   ResearchExperiment,
@@ -386,6 +390,110 @@ const metricColumns: { key: string; label: string; fmt: (v: number) => string }[
 
 const modelCalls = computed(() => runRecord.value?.model_calls ?? []);
 
+/* ---------------- 实验与调用可视化（真实数据） ---------------- */
+
+const expScatterEl = ref<HTMLElement | null>(null);
+const expScatterChart = useECharts(expScatterEl as Ref<HTMLElement | null>);
+const latencyBarEl = ref<HTMLElement | null>(null);
+const latencyBarChart = useECharts(latencyBarEl as Ref<HTMLElement | null>);
+const chartTheme = useChartTheme();
+
+/** 实验风险收益散点：横轴年化波动率、纵轴年化收益（真实回测 metrics）。 */
+const expScatterOption = computed<EChartsCoreOption | null>(() => {
+  const list = experiments.value;
+  if (list.length < 2) return null;
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "item",
+      backgroundColor: chartTheme.value.tooltipBg,
+      borderColor: chartTheme.value.border,
+      textStyle: { color: chartTheme.value.tooltipText, fontSize: 12 },
+      formatter: (p: { name: string; value: number[] }) =>
+        `<b>${p.name}</b><br/>年化波动率 ${p.value[0]}%<br/>年化收益 ${p.value[1]}%<br/>夏普比率 ${p.value[2]}`,
+    },
+    grid: { left: 60, right: 24, top: 22, bottom: 40 },
+    xAxis: {
+      name: "年化波动率",
+      nameLocation: "middle",
+      nameGap: 26,
+      nameTextStyle: { color: chartTheme.value.dim, fontSize: 11 },
+      axisLabel: { color: chartTheme.value.dim, formatter: "{value}%" },
+      splitLine: { lineStyle: { color: chartTheme.value.grid } },
+      scale: true,
+    },
+    yAxis: {
+      name: "年化收益",
+      nameTextStyle: { color: chartTheme.value.dim, fontSize: 11 },
+      axisLabel: { color: chartTheme.value.dim, formatter: "{value}%" },
+      splitLine: { lineStyle: { color: chartTheme.value.grid } },
+      scale: true,
+    },
+    series: [
+      {
+        type: "scatter",
+        symbolSize: (value: number[]) => Math.max(18, Math.min(40, 16 + value[2] * 12)),
+        label: { show: true, position: "top", color: chartTheme.value.text, fontSize: 11, formatter: (p: { name: string }) => p.name },
+        itemStyle: { color: withAlpha(chartTheme.value.accent, 0.78), borderColor: chartTheme.value.accent, borderWidth: 1 },
+        data: list.map((experiment) => ({
+          name: experiment.strategy_id,
+          value: [
+            Number(((experiment.metrics?.annual_volatility ?? 0) * 100).toFixed(2)),
+            Number(((experiment.metrics?.annual_return ?? 0) * 100).toFixed(2)),
+            Number((experiment.metrics?.sharpe_ratio ?? 0).toFixed(2)),
+          ],
+        })),
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+/** 模型调用耗时条形（真实审计 latency_ms）。 */
+const latencyBarOption = computed<EChartsCoreOption | null>(() => {
+  const calls = modelCalls.value.filter((call) => typeof call.latency_ms === "number");
+  if (!calls.length) return null;
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      backgroundColor: chartTheme.value.tooltipBg,
+      borderColor: chartTheme.value.border,
+      textStyle: { color: chartTheme.value.tooltipText, fontSize: 12 },
+      valueFormatter: (v: number) => `${(v / 1000).toFixed(1)} 秒`,
+    },
+    grid: { left: 150, right: 40, top: 10, bottom: 24 },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: chartTheme.value.dim, fontSize: 10, formatter: (v: number) => `${(v / 1000).toFixed(0)}s` },
+      splitLine: { lineStyle: { color: chartTheme.value.grid } },
+    },
+    yAxis: {
+      type: "category",
+      data: calls.map((call) => `${getResearchRoleLabel(call.agent_role)} · ${call.display_model_name}`),
+      axisLabel: { color: chartTheme.value.text, fontSize: 11 },
+      axisLine: { lineStyle: { color: chartTheme.value.axisLine } },
+    },
+    series: [
+      {
+        type: "bar",
+        barWidth: 14,
+        itemStyle: { borderRadius: [0, 5, 5, 0], color: withAlpha(chartTheme.value.accent, 0.8) },
+        data: calls.map((call) => Math.round(call.latency_ms as number)),
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+watchEffect(() => {
+  const opt = expScatterOption.value;
+  if (opt) expScatterChart.setOption(opt, true);
+});
+watchEffect(() => {
+  const opt = latencyBarOption.value;
+  if (opt) latencyBarChart.setOption(opt, true);
+});
+
 const statusBadgeCls = computed(() => {
   const status = runRecord.value?.status ?? result.value?.status;
   switch (status) {
@@ -634,6 +742,11 @@ function fmtTime(iso: string | null | undefined): string {
               </tbody>
             </table>
           </div>
+          <div class="viz-caption">
+            <strong>实验风险收益分布</strong>
+            <span>横轴年化波动率、纵轴年化收益，点大小为夏普比率（真实回测指标）</span>
+          </div>
+          <div v-show="experiments.length >= 2" ref="expScatterEl" class="viz exp-scatter-viz"></div>
         </section>
 
         <!-- 7. 风险核查 -->
@@ -705,6 +818,11 @@ function fmtTime(iso: string | null | undefined): string {
             模型调用审计
             <span class="h3-extra">{{ modelCalls.length }} 次 · 全部落库可追溯</span>
           </h3>
+          <div class="viz-caption">
+            <strong>模型调用耗时</strong>
+            <span>每次真实调用的端到端延迟（审计记录）</span>
+          </div>
+          <div ref="latencyBarEl" class="viz latency-viz"></div>
           <div class="table-scroll">
             <table class="data">
               <thead>
@@ -784,6 +902,11 @@ function fmtTime(iso: string | null | undefined): string {
 .mono { font-family: Consolas, monospace; font-size: 11.5px; color: var(--accent-strong); }
 .run-path { display: block; font-size: 10.5px; color: var(--text-faint); }
 .error-text { color: var(--veto); font-size: 11.5px; }
+.viz-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 12px 0 4px; }
+.viz-caption strong { font-size: 12.5px; }
+.viz-caption span { font-size: 11px; color: var(--text-dim); }
+.exp-scatter-viz { height: 300px; }
+.latency-viz { height: 150px; }
 @media (max-width: 1200px) {
   .layout { grid-template-columns: 1fr; }
   .steps { grid-template-columns: 1fr; }

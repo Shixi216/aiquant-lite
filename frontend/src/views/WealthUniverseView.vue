@@ -5,7 +5,7 @@
  * product_form/underlying/market_scope/currency_risk、pit_rebalance_snapshots）。
  * 所有数量与资格判定均来自后端响应；质量状态筛选契约暂无服务端参数，为前端过滤并明确标注。
  */
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watchEffect } from "vue";
 import type { AssetQuality, EligibleData, QualityData, UniversesData, WealthEnvelope } from "../types/wealthLabV3";
 import type { QualityStatus } from "../types/wealthLabV3";
 import { fetchV3Eligible, fetchV3Quality, fetchV3Universes } from "../api/wealthLabV3";
@@ -26,6 +26,10 @@ import {
 } from "../domain/wealthV3Format";
 import WlDateInput from "../components/wealth/WlDateInput.vue";
 import { getAssetCategoryLabelV3 } from "../domain/labels";
+import type { Ref } from "vue";
+import echarts, { type EChartsCoreOption } from "../charts";
+import { useECharts } from "../composables/useECharts";
+import { useChartTheme, withAlpha } from "../domain/chartTheme";
 
 const PAGE_SIZE = 10; // 验收口径：每页 10 条，33 只 = 10+10+10+3
 
@@ -181,6 +185,100 @@ function onSearchInput(): void {
   searchTimer = setTimeout(() => onFilterChange(), 350);
 }
 
+/* ---------------- 资产池质量可视化（真实审计数据） ---------------- */
+
+const treemapEl = ref<HTMLElement | null>(null);
+const treemapChart = useECharts(treemapEl as Ref<HTMLElement | null>);
+const qualityBarEl = ref<HTMLElement | null>(null);
+const qualityBarChart = useECharts(qualityBarEl as Ref<HTMLElement | null>);
+const ct = useChartTheme();
+
+/** 类别分布矩形树图：面积=已验证资产数，颜色=该类别数据合格占比。 */
+const treemapOption = computed<EChartsCoreOption | null>(() => {
+  const stats = categoryStats.value.filter((stat) => stat.total > 0);
+  if (!stats.length) return null;
+  const nodes = stats.map((stat, index) => {
+    const qualifiedRatio = stat.total ? stat.qualified / stat.total : 0;
+    return {
+      name: stat.label,
+      value: stat.total,
+      itemStyle: { color: withAlpha(ct.value.palette[index % ct.value.palette.length]!, 0.82) },
+      qualifiedRatio,
+      stat,
+    };
+  });
+  return {
+    animationDuration: 450,
+    tooltip: {
+      trigger: "item",
+      backgroundColor: ct.value.tooltipBg,
+      borderColor: ct.value.border,
+      textStyle: { color: ct.value.tooltipText, fontSize: 12 },
+      formatter: (p: { name: string; data: { stat: { total: number; qualified: number; degraded: number; rejected: number; avgMissingRatio: number | null } } }) => {
+        const s = p.data.stat;
+        const missing = s.avgMissingRatio === null ? "—" : `${(s.avgMissingRatio * 100).toFixed(2)}%`;
+        return `<b>${p.name}</b><br/>已验证资产 ${s.total} 只<br/>合格 ${s.qualified} · 降级 ${s.degraded} · 拒绝 ${s.rejected}<br/>平均缺失率 ${missing}`;
+      },
+    },
+    series: [
+      {
+        type: "treemap",
+        roam: false,
+        nodeClick: false,
+        breadcrumb: { show: false },
+        label: { color: "#fff", fontSize: 12, formatter: (p: { name: string; value: number }) => `${p.name}\n${p.value} 只` },
+        itemStyle: { borderColor: ct.value.bgPanel, borderWidth: 2, gapWidth: 2, borderRadius: 6 },
+        data: nodes,
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+/** 质量状态圆角柱状图（真实 quality_counts，三状态分类）。 */
+const qualityBarOption = computed<EChartsCoreOption | null>(() => {
+  const counts = qualityCounts.value;
+  if (!Object.keys(counts).length) return null;
+  return {
+    animationDuration: 450,
+    grid: { left: 40, right: 16, top: 24, bottom: 28 },
+    xAxis: {
+      type: "category",
+      data: ["数据合格", "数据降级", "质量拒绝"],
+      axisLabel: { color: ct.value.dim, fontSize: 11.5 },
+      axisLine: { lineStyle: { color: ct.value.axisLine } },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      minInterval: 1,
+      axisLabel: { color: ct.value.dim },
+      splitLine: { lineStyle: { color: ct.value.grid } },
+    },
+    series: [
+      {
+        type: "bar",
+        barWidth: 44,
+        itemStyle: { borderRadius: [6, 6, 0, 0] },
+        label: { show: true, position: "top", color: ct.value.text, fontSize: 12 },
+        data: [
+          { value: counts.QUALIFIED ?? 0, itemStyle: { color: ct.value.down } },
+          { value: counts.DEGRADED ?? 0, itemStyle: { color: ct.value.gold } },
+          { value: counts.REJECTED ?? 0, itemStyle: { color: ct.value.veto } },
+        ],
+      },
+    ],
+  } satisfies EChartsCoreOption;
+});
+
+watchEffect(() => {
+  const opt = treemapOption.value;
+  if (opt) treemapChart.setOption(opt, true);
+});
+watchEffect(() => {
+  const opt = qualityBarOption.value;
+  if (opt) qualityBarChart.setOption(opt, true);
+});
+
 /* ---------------- 历史可投资资产池（PIT，判定全部来自后端） ---------------- */
 
 const eligibleForm = ref({ universe_id: "multi-asset-v2", asof: "2024-01-04" });
@@ -312,6 +410,24 @@ onMounted(load);
           </template>
           <p v-else class="cat-pending">暂无可用数据：该类别尚未接入真实数据池，接入后将显示资产数量与覆盖。</p>
           <p class="cat-risk">主要风险：{{ stat.risk }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1b. 资产池质量可视化（真实审计数据） -->
+    <section class="panel" aria-label="资产池质量可视化">
+      <h3>
+        资产池结构质量可视化
+        <span class="h3-extra">树图面积 = 已验证资产数 · 柱状为后端质量状态计数</span>
+      </h3>
+      <div class="viz-grid">
+        <div>
+          <div class="viz-caption"><strong>资产类别分布</strong><span>悬停查看各类别质量明细（真实审计记录）</span></div>
+          <div ref="treemapEl" class="viz treemap-viz"></div>
+        </div>
+        <div>
+          <div class="viz-caption"><strong>数据质量状态分布</strong><span>合格 / 降级 / 拒绝（后端判定，前端不推断）</span></div>
+          <div ref="qualityBarEl" class="viz quality-viz"></div>
         </div>
       </div>
     </section>
@@ -526,8 +642,7 @@ onMounted(load);
 .eligible-form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; color: var(--text-dim); }
 .field select { min-width: 220px; }
-button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 16px; }
-button.primary:hover:not(:disabled) { background: var(--accent-soft); }
+/* 主按钮样式统一走全局 button.mini.primary */
 .pit-strip {
   display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
   margin-bottom: 12px; padding: 10px 14px;
@@ -549,8 +664,15 @@ button.primary:hover:not(:disabled) { background: var(--accent-soft); }
 .w-chip.proxy { border-color: color-mix(in srgb, var(--warn) 45%, transparent); color: var(--warn); }
 .dim-line { font-size: 12.5px; color: var(--text-dim); margin: 6px 0 0; line-height: 1.65; }
 .research-note { margin: 6px 0 0; font-size: 12px; color: var(--text-dim); text-align: center; }
+.viz-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.viz-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 2px 0 4px; }
+.viz-caption strong { font-size: 13px; }
+.viz-caption span { font-size: 11.5px; color: var(--text-dim); }
+.treemap-viz { height: 260px; }
+.quality-viz { height: 260px; }
 @media (max-width: 1280px) {
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  .viz-grid { grid-template-columns: 1fr; }
   .audit-grid { grid-template-columns: 1fr; }
 }
 </style>

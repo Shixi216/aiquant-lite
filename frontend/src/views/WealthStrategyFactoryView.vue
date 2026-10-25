@@ -503,8 +503,7 @@ onMounted(async () => {
 .override-line code { color: var(--accent-2); font-size: 11px; word-break: break-all; }
 .risk-note { margin: 8px 0 0; font-size: 11.5px; color: var(--warn); }
 .actions { display: flex; align-items: center; gap: 12px; }
-button.primary { border-color: var(--accent); color: var(--accent); padding: 8px 18px; }
-button.primary:hover:not(:disabled) { background: var(--accent-soft); }
+/* 主按钮样式统一走全局 button.mini.primary */
 .dim { color: var(--text-dim); font-size: 12px; }
 .chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .pool-note { margin: 10px 0 0; font-size: 12.5px; color: var(--text-dim); line-height: 1.7; }
