@@ -8,15 +8,25 @@
 
 从全市场扫描到可审计决策，把 A 股投研流程做成一套本地、可解释、可验证的系统。
 
+**新增 Wealth Lab：把多资产配置、策略实验、AI 复核和情绪证据放进同一个中文工作台。**
+
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.139+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-Single--Owner-FFF000?logo=duckdb&logoColor=black)](https://duckdb.org/)
-[![Tests](https://img.shields.io/badge/tests-1%2C285%20passed-brightgreen)](#测试与质量边界)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Release checks](https://img.shields.io/badge/release%20checks-87%20backend%20%7C%2030%20frontend-brightgreen)](#测试与质量边界)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 
 **研究与决策支持，不是自动实盘交易。**
 
 </div>
+
+[看界面](#界面预览) · [本次更新](#2026-10-26-更新) · [快速上手](#quick-start) · [修复记录](docs/releases/2026-10-26-wealth-lab.md)
+
+<p align="center">
+  <a href="docs/screenshots/20261026/strategy-result.png"><img src="docs/screenshots/20261026/strategy-result.png" alt="新版策略工厂：真实历史样本的净值、回撤与策略指标" width="820"></a>
+</p>
+
+<p align="center"><sub>新版前端实跑截图 · 2026-10-26；图中回测为历史研究样本，区间与成本见页面及截图说明。</sub></p>
 
 ## 项目定位
 
@@ -25,6 +35,32 @@
 它将结构化市场数据、确定性规则和多模型 Agent 分工组合在一条可审计链路中：先找事实，再做研究；先检查数据时点与风险，再生成决策包。
 
 > 本项目不是自动实盘交易系统，不提供券商自动下单，不承诺收益，也不构成投资建议。
+
+## 2026-10-26 更新
+
+### 同一份计算证据，串起资产、策略、风险与研究记录
+
+保留原有 A 股研究链路，新增独立的 **Wealth Lab 多资产研究工作台**。先确认资产与数据时点，再运行策略、检查风险，最后生成带计算证据的研究记录。
+
+| 新增能力 | 打开后可以做什么 |
+|---|---|
+| **多资产研究池** | 查看 33 只已登记研究资产的分类、上市时间、数据质量与历史可投资性；支持 ETF、QDII、黄金及商品、可转债、公募 REITs 等研究对象 |
+| **策略工厂与组合实验** | 在 S0–S8 九个策略间切换，比较净值、回撤、现金与换仓成本；动态资产池在每个调仓时点重评 PIT 资格 |
+| **受控 AI 研究** | Flash 规划、Qwen 研究、Pro 独立复核分工；付费调用前确认，实验计划先审批，硬风险与确定性指标校验留在程序侧 |
+| **情绪与任务中心** | 下钻新闻来源和资产关联级别，区分直接证据与类别推导；查看真实任务进度、业务失败、降级和存档报告 |
+
+```mermaid
+flowchart LR
+    A["资产池与 PIT"] --> B["回测、现金与成本"]
+    B --> C{"硬风险检查"}
+    C -->|VETO| X["终止并留证"]
+    C -->|通过或警告| D["AI 研究与独立复核"]
+    D --> E["指标校验与研究决策包"]
+```
+
+Wealth Lab 使用独立数据池；情绪模块仅供当前研究，不注入历史策略回测。当前资产池基于存续产品登记，幸存者偏差仍需保留；AI 数字校验覆盖已识别指标，不能替代人工复核。
+
+本次修复集中在可信度：**首笔成本保留、S4 调仓权重上限、AI 证据关联、重复数字逐项核验、付费确认、业务失败状态、存档报告与近 20 日流动性窗口**。[查看完整更新与验证口径 →](docs/releases/2026-10-26-wealth-lab.md)
 
 ## 为什么是 AIQUANT-LITE
 
@@ -91,7 +127,9 @@ aiquant-lite/
 │  ├─ research/           # 五维研究、PIT、Shadow 与实验
 │  ├─ decision_support/   # DecisionEngine、VETO、DecisionPacket、仓位与计划
 │  ├─ simulation/         # 本地模拟账户和组合研究
+│  ├─ wealth_lab/         # 独立多资产研究、PIT、回测、受控 AI 与情绪
 │  └─ review/             # 只读复盘
+├─ frontend/              # Vue 中文工作台、图表、主题与研究任务中心
 ├─ manual_tracking/       # 用户已在外部完成的成交/持仓事实
 ├─ mcp_servers/           # Finance Data MCP
 ├─ database/migrations/   # 数据库迁移代码
@@ -109,6 +147,7 @@ aiquant-lite/
 | Storage | DuckDB, Single-Owner Router topology |
 | Data | Tushare, AKShare, BaoStock, CNInfo, pandas |
 | Agent routing | LongCat, Qwen, DeepSeek, MiMo（按需配置） |
+| Web workbench | Vue 3, TypeScript, Vite, Pinia, ECharts |
 | Desktop / Delivery | PySide6, PyInstaller, Inno Setup |
 | Quality | pytest, Ruff, deterministic safety checks |
 
@@ -126,6 +165,8 @@ Copy-Item .env.example .env
 ```
 
 只在本地 `.env` 中填写实际使用的凭证。未配置的模型角色会保持禁用或安全降级。
+
+本次更新位于 [`sentiment-v3-recovery-strategy-lab`](https://github.com/Shixi216/aiquant-lite/tree/sentiment-v3-recovery-strategy-lab) 分支；尝鲜可在克隆时加 `--branch sentiment-v3-recovery-strategy-lab`。
 
 ### 2. 启动前检查
 
@@ -160,13 +201,37 @@ uv run python -m scripts.experiment_cli --help
 uv run python -m scripts.history_cli --help
 ```
 
-## Screenshots / Demo
+### 5. 打开新版中文工作台
 
-公开仓库不放置真实持仓、真实交易、聊天记录或个人配置截图。当前主页使用 Mermaid 展示安全的系统流程和数据库拓扑；后续 Demo 只使用合成数据。
+前端在 Node.js 24 环境验证，先启动上面的本地后端服务，再运行：
+
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
+
+打开 Vite 输出的本地地址。先到「策略工厂」选择原四资产池和策略，运行一次回测，再查看指标与风险；AI 研究按需启用，真实模型调用前需要付费确认。
+
+行情库、凭据不会随仓库分发。首次使用可按需执行 `uv run python -m scripts.wealth_lab_backfill`（四资产）或 `uv run python -m scripts.wealth_lab_v3_backfill`（扩展池），这些命令会按本地配置请求外部数据。未准备数据或后端不可达时，页面会显示不可用状态或显著标注的离线契约样例。
+
+## 界面预览
+
+以下为新版前端的本地运行截图。历史行情截至 **2026-10-23**；截图采集于 **2026-10-26**。展示研究资产与系统状态，不含真实账户、持仓、成交或凭据。点击图片查看原图。
+
+| 多资产研究池 · 分类、质量与 PIT | AI 研究 · 角色、确认与流程 |
+|---|---|
+| [![多资产研究池](docs/screenshots/20261026/universe.png)](docs/screenshots/20261026/universe.png) | [![受控 AI 研究](docs/screenshots/20261026/ai-research.png)](docs/screenshots/20261026/ai-research.png) |
+| **情绪证据 · 来源与关联分层** | **任务中心 · 真实进度与结果** |
+| [![多资产情绪证据](docs/screenshots/20261026/sentiment.png)](docs/screenshots/20261026/sentiment.png) | [![任务控制中心](docs/screenshots/20261026/task-center.png)](docs/screenshots/20261026/task-center.png) |
+
+[截图来源、运行口径与限制](docs/screenshots/20261026/README.md) · [本次功能及 Bug 修复记录](docs/releases/2026-10-26-wealth-lab.md)
 
 ## 测试与质量边界
 
-当前工作区已完整通过 **1,285 项测试**，覆盖：
+本次发布在干净候选中复验 **87 项财富后端测试**、**30 项前端测试**，并通过前端类型检查与生产构建；真实本地链路额外验证策略回测、存档报告和硬风险拦截。数字核验的 13 个针对性案例均符合预期。
+
+原有 **1,285 项测试**是历史回归基线，本次没有重跑全仓，不能与上述针对性检查混称为最新全量通过。既有测试范围包括：
 
 - Router 单 Owner 数据库拓扑与并发边界；
 - 无券商依赖、无实盘路由、无决策到真实订单路径；
@@ -219,4 +284,4 @@ uv run ruff check .
 
 ## License
 
-[MIT](LICENSE)
+[Apache-2.0 License](LICENSE)
