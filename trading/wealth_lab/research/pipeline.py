@@ -45,10 +45,52 @@ class ResearchOrchestrator:
         return used
 
     # ---------- 稳定模式 ----------
-    def run_stable(self, backtest_id: str) -> dict:
+    def run_stable(self, backtest_id: str, allow_reuse: bool = True) -> dict:
+        if allow_reuse:
+            cached = self._find_completed_stable(backtest_id)
+            if cached is not None:
+                cached["reused"] = True
+                cached["note"] = "复用同 backtest_id 的已完成研究（相同数据与参数）；如需重跑传 allow_reuse=false"
+                return cached
         run_id = "wlrun_" + uuid.uuid4().hex[:12]
         audit.create_run(run_id, "STABLE", None, MAX_MODEL_CALLS["STABLE"])
-        return asyncio.run(self._stable_pipeline(run_id, backtest_id))
+        result = asyncio.run(self._stable_pipeline(run_id, backtest_id))
+        if result.get("status") == "COMPLETED":
+            self._save_stable_cache(backtest_id, result)
+        return result
+
+    def _find_completed_stable(self, backtest_id: str) -> dict | None:
+        import duckdb as _duckdb
+        from trading.wealth_lab.config import WEALTH_LAB_DB_PATH
+        try:
+            with _duckdb.connect(str(WEALTH_LAB_DB_PATH), read_only=True) as con:
+                row = con.execute(
+                    "SELECT result_json FROM wealth_research_cache "
+                    "WHERE backtest_id=? ORDER BY created_at DESC LIMIT 1",
+                    [backtest_id]).fetchone()
+        except Exception:
+            return None
+        if not row:
+            return None
+        import json as _json
+        return _json.loads(row[0])
+
+    def _save_stable_cache(self, backtest_id: str, result: dict) -> None:
+        import json as _json
+        import duckdb as _duckdb
+        from trading.wealth_lab.config import WEALTH_LAB_DB_PATH
+        from datetime import datetime, timedelta, timezone
+        TZ = timezone(timedelta(hours=8))
+        try:
+            with _duckdb.connect(str(WEALTH_LAB_DB_PATH)) as con:
+                con.execute(
+                    "CREATE TABLE IF NOT EXISTS wealth_research_cache ("
+                    "backtest_id VARCHAR, created_at TIMESTAMPTZ, result_json VARCHAR)")
+                con.execute("INSERT INTO wealth_research_cache VALUES (?,?,?)",
+                            [backtest_id, datetime.now(TZ),
+                             _json.dumps(result, ensure_ascii=False, default=str)])
+        except Exception:
+            pass
 
     async def _stable_pipeline(self, run_id: str, backtest_id: str) -> dict:
         try:
@@ -270,16 +312,24 @@ class ResearchOrchestrator:
 
     def _facts(self, result: dict, backtest_id: str) -> str:
         import json as _json
+        records = result.get("rebalance_records") or []
+        last = records[-1] if records else {}
+        # 瘦身：仅保留 Qwen 研究所需关键字段（压缩重复证据，降低调用耗时）
         return _json.dumps({
             "backtest_id": backtest_id,
             "universe_id": result.get("universe_id"),
-            "strategy": result.get("strategy", {}).get("strategy_id"),
-            "time_semantics": result.get("time_semantics"),
+            "strategy": (result.get("strategy") or {}).get("strategy_id"),
+            "window": {"start": (result.get("time_semantics") or {}).get("effective_start_date"),
+                       "end": (result.get("time_semantics") or {}).get("end_date"),
+                       "days": (result.get("time_semantics") or {}).get("actual_trading_days")},
             "metrics": result.get("metrics"),
-            "last_rebalance": (result.get("rebalance_records") or [{}])[-1],
-            "data_quality": result.get("data_quality"),
-            "pit_note": (result.get("pit_gate") or {}).get("note"),
-        }, ensure_ascii=False, indent=1)[:9000]
+            "last_rebalance": {"date": last.get("decision_date"),
+                               "weights": last.get("target_weights"),
+                               "cash_weight": last.get("cash_weight"),
+                               "eligible_count": len(last.get("eligible_assets", []))},
+            "pit_rule": "每个调仓决策时点重评资格；幸存者偏差未消除",
+            "cost_model": "单边5bps，Σ|Δw|×bps/1e4，现金零收益，rf=2%",
+        }, ensure_ascii=False, indent=1)[:5000]
 
     def _numeric_verification(self, text: str, metrics: dict) -> dict:
         """确定性核验：百分比口径 + 小数口径（AI 常以 0.4595 形式复述指标值）。
@@ -289,8 +339,14 @@ class ResearchOrchestrator:
         """
         import re
         from trading.wealth_lab.config import RF_ANNUAL
+        from trading.wealth_lab.risk import WealthRiskPolicy
+        policy = WealthRiskPolicy()
         known = {**metrics,
-                 "risk_free_rate": RF_ANNUAL, "cost_per_side": 0.0005, "cash_return": 0.0}
+                 "risk_free_rate": RF_ANNUAL, "cost_per_side": 0.0005, "cash_return": 0.0,
+                 "equity_exposure_limit": policy.max_equity_exposure,
+                 "max_single_asset_weight": policy.max_single_asset_weight,
+                 "drawdown_limit": policy.max_portfolio_drawdown,
+                 "volatility_limit": policy.max_volatility}
         values = [abs(float(v)) for v in known.values() if isinstance(v, (int, float))]
         sentences = [s for s in re.split(r"[。\n]", text) if "%" in s or
                      any(k in s for k in ("夏普", "Sharpe", "回撤", "年化", "Sortino", "Calmar"))]
@@ -308,8 +364,14 @@ class ResearchOrchestrator:
         from trading.wealth_lab.risk.engine import _claim_supported
         from trading.wealth_lab.config import RF_ANNUAL
         import re as _re
+        from trading.wealth_lab.risk import WealthRiskPolicy
+        policy = WealthRiskPolicy()
         known = {**metrics, "risk_free_rate": RF_ANNUAL,
-                 "cost_per_side": 0.0005, "cash_return": 0.0}
+                 "cost_per_side": 0.0005, "cash_return": 0.0,
+                 "equity_exposure_limit": policy.max_equity_exposure,
+                 "max_single_asset_weight": policy.max_single_asset_weight,
+                 "drawdown_limit": policy.max_portfolio_drawdown,
+                 "volatility_limit": policy.max_volatility}
         if _claim_supported(sentence, known):
             return True
         # 小数口径：句中小数形式数字与任一指标值近似（相对误差 1e-3）

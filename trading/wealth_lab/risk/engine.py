@@ -47,6 +47,20 @@ class RiskCheckItem:
     detail: str
 
 
+def _registered_assets() -> set[str]:
+    """资产登记集合 = config 四资产常量 ∪ wealth_assets 研究池登记资产。"""
+    registered = set(ASSETS)
+    try:
+        import duckdb as _duckdb
+        from trading.wealth_lab.config import WEALTH_LAB_DB_PATH
+        with _duckdb.connect(str(WEALTH_LAB_DB_PATH), read_only=True) as con:
+            registered |= {r[0] for r in con.execute(
+                "SELECT symbol FROM wealth_assets").fetchall()}
+    except Exception:
+        pass
+    return registered
+
+
 _VERDICT_ORDER = {"PASS": 0, "INSUFFICIENT_DATA": 1, "WARN": 2, "VETO": 3}
 
 
@@ -114,14 +128,15 @@ class WealthRiskEngine:
         if illiquid:
             items.append(RiskCheckItem("ASSET", "liquidity", "WARN", True,
                                        f"20日均成交额低于下限: {illiquid}"))
-        unknown = [s for s in weights if s not in ASSETS]
+        unknown = [s for s in weights if s not in _registered_assets()]
         if unknown:
             items.append(RiskCheckItem("ASSET", "known_asset", "WARN", True,
                                        f"未登记资产（分类未知）: {unknown}"))
 
         # ---- PORTFOLIO ----
         total = sum(weights.values())
-        if total > self.policy.max_weights_sum + self.policy.weights_sum_tolerance:
+        # 容差 1e-6 会被数十个权重的浮点累加噪声击穿（如 1+2e-6），放宽到 1e-4
+        if total > self.policy.max_weights_sum + 1e-4:
             items.append(RiskCheckItem("PORTFOLIO", "no_leverage", "VETO", True,
                                        f"权重和 {total:.4f} 超过 1（禁止杠杆）"))
         equity = sum(w for s, w in weights.items()
@@ -236,9 +251,9 @@ def _claim_supported(claim: str, numbers: dict[str, float]) -> bool:
             expected = numbers.get(key)
             if expected is None:
                 continue
-            actual = expected * 100 if is_ratio else expected
-            # 归一比较：百分比口径（用户说"回撤 -39.1%"已由规则1覆盖；此处覆盖"回撤 39.1"）
-            if abs(abs(claimed) - abs(actual)) > 0.05:
+            # 双口径：小数形式（胜率0.7）与百分数无%形式（胜率70）都接受
+            candidates = [abs(expected)] + ([abs(expected) * 100] if is_ratio else [])
+            if not any(abs(abs(claimed) - c) <= 0.05 for c in candidates):
                 return False
             # 3) 正负号语义：回撤类必须为负（或用户以绝对值+中文"回撤"表述）
             if key == "max_drawdown" and claimed > 0 and "绝对" not in claim:

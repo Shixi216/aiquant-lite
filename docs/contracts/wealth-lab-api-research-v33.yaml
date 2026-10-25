@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: 怡怡投研·三模型受控 AI 研究 API（v3.3/v3.4）
+  version: 3.4.0
+  description: |
+    三模型固定分工（不允许替换/新增/自由辩论）：
+    PLANNER=DeepSeek V4 Flash (deepseek-flash)；RESEARCHER=Qwen 3.8 Max 0902
+    (qwen3.8-max-0902)；REVIEWER=DeepSeek V4 Pro (deepseek-v4-pro)。
+
+    模式：STABLE_RESEARCH（默认，≤2 次调用，不调 Planner）；
+    EXPERIMENTAL_AI_RESEARCH（Feature Flag WEALTH_LAB_EXPERIMENTAL_AI，≤3 次调用、
+    ≤3 组实验，规划需用户确认后才执行）。
+
+    状态机：PLANNING→VALIDATION→APPROVAL→BACKTESTING→HARD_RISK_CHECK→RESEARCH→
+    REVIEW→VERIFICATION→COMPLETED；失败态含 FAILED / VETOED / VERIFICATION_FAILED /
+    MODEL_UNAVAILABLE 记录。硬 VETO 任何模型不可解除；数值核验失败在决策包生成前终止。
+
+    P2（v3.4）：stable 同 backtest_id 结果复用（响应 reused=true）；
+    每次调用含 latency_ms 真实耗时。
+
+servers:
+  - url: http://127.0.0.1:8765
+
+paths:
+  /v1/wealth-lab/v3/research/roles:
+    get:
+      operationId: getResearchRoles
+      summary: 三模型角色映射、可用性与模式开关
+      responses:
+        "200": { description: 角色与模式, content: { application/json: { schema: { $ref: "#/components/schemas/REnvelope" } } } }
+
+  /v1/wealth-lab/v3/research/runs/stable:
+    post:
+      operationId: runStableResearch
+      summary: 稳定模式（数据→回测→VETO→Qwen→Pro→核验→决策包；需确认付费）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [backtest_id, confirm_paid_calls]
+              properties:
+                backtest_id: { type: string }
+                confirm_paid_calls: { type: boolean, description: 必须 true（2 次真实付费调用） }
+                allow_reuse: { type: boolean, default: true, description: 复用同 backtest_id 已完成研究 }
+      responses:
+        "200": { description: COMPLETED / VETOED / VERIFICATION_FAILED / reused, content: { application/json: { schema: { $ref: "#/components/schemas/REnvelope" } } } }
+        "404": { description: 回测不存在 }
+        "422": { description: 未确认付费 }
+
+  /v1/wealth-lab/v3/research/runs/experimental:
+    post:
+      operationId: startExperimentalResearch
+      summary: 实验模式规划（Flash→白名单校验→APPROVAL_PENDING，不自动执行）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [goal]
+              properties:
+                goal: { type: string, minLength: 4, maxLength: 500 }
+      responses:
+        "200": { description: APPROVAL_PENDING + ResearchPlan, content: { application/json: { schema: { $ref: "#/components/schemas/REnvelope" } } } }
+        "403": { description: Feature Flag 未启用 }
+        "422": { description: 计划非法（白名单/日期） }
+
+  /v1/wealth-lab/v3/research/runs/{research_run_id}/approve:
+    post:
+      operationId: approveExperimental
+      summary: 用户确认计划后执行（实验→VETO→Qwen→Pro→核验→包）
+      parameters:
+        - { name: research_run_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: COMPLETED / VETOED / VERIFICATION_FAILED, content: { application/json: { schema: { $ref: "#/components/schemas/REnvelope" } } } }
+
+  /v1/wealth-lab/v3/research/runs/{research_run_id}:
+    get:
+      operationId: getResearchRun
+      summary: 运行状态机轨迹 + 每次模型调用审计（模型/延迟/tokens/状态）
+      parameters:
+        - { name: research_run_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 运行详情, content: { application/json: { schema: { $ref: "#/components/schemas/REnvelope" } } } }
+        "404": { description: 不存在 }
+
+components:
+  schemas:
+    REnvelope:
+      type: object
+      description: 统一信封（api_version=wealth-lab/v3；research_only=true）
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [SUCCESS, DEGRADED, FAILED] }
+        data: { type: object }
+        warnings: { type: array, items: { type: string } }
+        generated_at: { type: string, format: date-time }
+
+    ResearchPlan:
+      type: object
+      properties:
+        research_goal: { type: string }
+        universe_id: { type: string }
+        universe_version: { type: string }
+        strategy_candidates: { type: array, items: { type: string }, maxItems: 3 }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        benchmark: { type: string }
+        experiment_params: { type: object }
+        constraints: { type: array, items: { type: string } }
+        hypotheses: { type: array, items: { type: string } }
+        required_evidence: { type: array, items: { type: string } }
+        limitations: { type: array, items: { type: string } }
+
+    ModelCallAudit:
+      type: object
+      properties:
+        call_id: { type: string }
+        research_run_id: { type: string }
+        agent_role: { type: string, enum: [PLANNER, RESEARCHER, REVIEWER] }
+        display_model_name: { type: string }
+        actual_model_id: { type: string }
+        provider: { type: string }
+        prompt_version: { type: string }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time }
+        latency_ms: { type: integer }
+        input_tokens: { type: [integer, "null"] }
+        output_tokens: { type: [integer, "null"] }
+        status: { type: string, enum: [OK, TIMEOUT, FAILED, MODEL_UNAVAILABLE] }
+        error_reason: { type: [string, "null"] }
+        associated_backtest_id: { type: [string, "null"] }
+        evidence_ids: { type: array, items: { type: string } }
+
+    ResearchRun:
+      type: object
+      properties:
+        research_run_id: { type: string }
+        mode: { type: string, enum: [STABLE, EXPERIMENTAL] }
+        status: { type: string, enum: [PLANNING, VALIDATION, APPROVAL_PENDING, BACKTESTING, HARD_RISK_CHECK, RESEARCH, REVIEW, VERIFICATION, COMPLETED, FAILED, CANCELLED] }
+        stage: { type: [string, "null"] }
+        goal: { type: [string, "null"] }
+        plan_json: { type: [string, "null"], description: ResearchPlan JSON }
+        backtest_id: { type: [string, "null"] }
+        decision_packet_id: { type: [string, "null"] }
+        model_calls_used: { type: integer }
+        model_call_budget: { type: integer }
+        experiments_used: { type: integer }
+        error_reason: { type: [string, "null"] }
+        created_at: { type: string, format: date-time }
+        finished_at: { type: [string, "null"], format: date-time }
+        model_calls: { type: array, items: { $ref: "#/components/schemas/ModelCallAudit" } }
+        risk_check: { type: object, description: WealthRiskEngine 结果（verdict/checks/adjusted_weights/cash） }
+        research: { type: object, description: Qwen 结构化研究（summary/strategy_differences/key_risks/counter_evidence/data_gaps） }
+        review: { type: object, description: Pro 审阅（verdict/unchecked_claims/hallucination_flags/human_review_required/notes） }
+        numeric_verification: { type: object, description: 确定性核验（passed/checked_sentences/unsupported） }
+        reused: { type: boolean, description: v3.4 结果复用标记 }

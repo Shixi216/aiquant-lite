@@ -1,0 +1,55 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "roles": [
+   {
+    "role": "PLANNER",
+    "display_model_name": "DeepSeek V4 Flash",
+    "provider": "deepseek",
+    "actual_model_id": "deepseek-flash",
+    "available": true,
+    "config_source": "env:OPC_DEEPSEEK_FLASH_MODEL（探针验证）",
+    "note": ""
+   },
+   {
+    "role": "RESEARCHER",
+    "display_model_name": "Qwen 3.8 Max 0902",
+    "provider": "qwen",
+    "actual_model_id": "qwen3.8-max-0902",
+    "available": true,
+    "config_source": "router_settings.qwen_model",
+    "note": ""
+   },
+   {
+    "role": "REVIEWER",
+    "display_model_name": "DeepSeek V4 Pro",
+    "provider": "deepseek",
+    "actual_model_id": "deepseek-v4-pro",
+    "available": true,
+    "config_source": "router_settings.deepseek_model",
+    "note": ""
+   }
+  ],
+  "modes": {
+   "STABLE_RESEARCH": {
+    "enabled": true,
+    "model_call_budget": 2
+   },
+   "EXPERIMENTAL_AI_RESEARCH": {
+    "enabled": true,
+    "model_call_budget": 3,
+    "flag": "WEALTH_LAB_EXPERIMENTAL_AI"
+   }
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T10:18:55.426385+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

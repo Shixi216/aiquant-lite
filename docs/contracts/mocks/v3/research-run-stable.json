@@ -1,0 +1,74 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "research_run_id": "wlrun_demo000001",
+  "mode": "STABLE",
+  "status": "COMPLETED",
+  "backtest_id": "wlbt_demo000001",
+  "decision_packet_id": "wldec_demo000001",
+  "model_calls_used": 2,
+  "model_call_budget": 2,
+  "reused": false,
+  "model_calls": [
+   {
+    "call_id": "wlrc_aaaa",
+    "research_run_id": "wlrun_demo000001",
+    "agent_role": "RESEARCHER",
+    "display_model_name": "Qwen 3.8 Max 0902",
+    "actual_model_id": "qwen3.8-max-0902",
+    "provider": "qwen",
+    "prompt_version": "wealth-researcher-qwen-v1",
+    "latency_ms": 90467,
+    "input_tokens": 2400,
+    "output_tokens": 1800,
+    "status": "OK",
+    "error_reason": null,
+    "evidence_ids": [
+     "wlbt_demo000001"
+    ]
+   },
+   {
+    "call_id": "wlrc_bbbb",
+    "research_run_id": "wlrun_demo000001",
+    "agent_role": "REVIEWER",
+    "display_model_name": "DeepSeek V4 Pro",
+    "actual_model_id": "deepseek-v4-pro",
+    "provider": "deepseek",
+    "prompt_version": "wealth-reviewer-pro-v1",
+    "latency_ms": 4987,
+    "status": "OK",
+    "error_reason": null,
+    "evidence_ids": [
+     "wlbt_demo000001"
+    ]
+   }
+  ],
+  "risk_check": {
+   "verdict": "PASS"
+  },
+  "research": {
+   "summary": "S4 在多资产池 2024-04~2026-10 实现 sharpe 1.104……（真实摘要占位）",
+   "key_risks": [
+    "低波动资产长期超配"
+   ]
+  },
+  "review": {
+   "verdict": "SUPPORTED",
+   "human_review_required": false
+  },
+  "numeric_verification": {
+   "passed": true,
+   "checked_sentences": 4,
+   "unsupported": []
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T10:18:55.427388+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

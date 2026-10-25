@@ -1,0 +1,33 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "research_run_id": "wlrun_demo000002",
+  "status": "APPROVAL_PENDING",
+  "plan": {
+   "research_goal": "多资产池低波动配置研究",
+   "universe_id": "multi-asset-v2",
+   "strategy_candidates": [
+    "S4_inverse_volatility",
+    "S3_dual_momentum",
+    "S8_hrp"
+   ],
+   "start_date": "2024-01-01",
+   "end_date": "2026-10-23",
+   "constraints": [
+    "权益类资产（含QDII权益）合计权重不得超过50%"
+   ],
+   "limitations": [
+    "策略候选超 3 个，确定性截断为前 3"
+   ]
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-25T10:18:55.427388+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

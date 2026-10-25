@@ -95,7 +95,10 @@ def _update_market_data(mgr: JobManager, job: Job) -> None:
         frame, source_status = dual.fetch_fund_daily(symbol, start, end)
         written = repo.upsert_daily(frame, symbol)
         total_rows += written
-        job.source = "/".join(sorted(set((job.source or "").split("/") + [f"{k}:{v}" for k, v in source_status.items()])) - {""}) if source_status else job.source
+        if source_status:
+            existing = {part for part in (job.source or "").split("/") if part}
+            merged = existing | {f"{k}:{v}" for k, v in source_status.items()}
+            job.source = "/".join(sorted(merged))
         if not mgr.update(job, 5 + int(90 * (i + 1) / len(symbols)),
                           f"{symbol}: +{written} 行（{start}~{end}）", records=written):
             mgr.update(job, log="取消：已完成部分已入库（幂等，可重跑）")
@@ -122,9 +125,15 @@ def _run_quality_check(mgr: JobManager, job: Job) -> None:
     con.close()
     asof = date(2026, 10, 23)
     rows = assets_report()
+    before = {a["symbol"]: a["quality_status"] for a in rows}
     for i, a in enumerate(rows):
-        start = max(a.get("list_date") or date(2020, 1, 2), date(2020, 1, 2)) \
-            if isinstance(a.get("list_date"), date) else date(2020, 1, 2)
+        # v3.4 修复：assets_report 返回 ISO 字符串（此前被当"无上市日"，
+        # 晚上市资产的缺失率分母错用全日历 1648 天 → 5 只被误降级）
+        raw_list = a.get("list_date")
+        list_date = raw_list if isinstance(raw_list, date) else (
+            date.fromisoformat(str(raw_list)[:10])
+            if raw_list and str(raw_list)[:4].isdigit() else None)
+        start = max(list_date or date(2020, 1, 2), date(2020, 1, 2))
         expected = sum(1 for d in cal if start <= d <= asof)
         valid = a.get("valid_days", 0)
         missing = max(0.0, 1.0 - valid / expected) if expected else 1.0
@@ -142,7 +151,12 @@ def _run_quality_check(mgr: JobManager, job: Job) -> None:
     for a in rows:
         counts[a["quality_status"]] = counts.get(a["quality_status"], 0) + 1
     mgr.update(job, 100, f"完成：{counts}")
-    job.result_ref = {"quality_counts": counts, "total": len(rows)}
+    after = {a["symbol"]: a["quality_status"] for a in rows}
+    changes = [{"symbol": sym, "from": before[sym], "to": after[sym]}
+               for sym in before if before[sym] != after[sym]]
+    job.result_ref = {"quality_counts": counts, "total": len(rows),
+                      "changes_vs_before": changes,
+                      "rule_version": "quality-rules/1.1 (2026-10-25: ISO list_date fix)"}
 
 
 def _rebuild_pit(mgr: JobManager, job: Job) -> None:

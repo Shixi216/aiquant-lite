@@ -17,6 +17,7 @@ class StableRunBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     backtest_id: str
     confirm_paid_calls: bool = False
+    allow_reuse: bool = True
 
 
 class ExperimentalRunBody(BaseModel):
@@ -47,7 +48,7 @@ def run_stable(body: StableRunBody):
         raise HTTPException(status_code=422,
                             detail="stable 研究包含 2 次真实付费模型调用，需 confirm_paid_calls=true")
     try:
-        result = _orchestrator.run_stable(body.backtest_id)
+        result = _orchestrator.run_stable(body.backtest_id, allow_reuse=body.allow_reuse)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except RuntimeError as exc:
