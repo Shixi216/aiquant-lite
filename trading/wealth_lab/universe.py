@@ -209,12 +209,20 @@ def backtest_eligible(
                 [symbol],
             ).fetchone()
             stats = con.execute(
-                """SELECT COUNT(*), MIN(trade_date), AVG(amount)
+                """SELECT COUNT(*), MIN(trade_date)
                    FROM etf_daily WHERE symbol=? AND trade_date <= ?""",
                 [symbol, asof],
             ).fetchone()
-            days, first_used, avg_amount = stats
-            avg_amount = float(avg_amount or 0.0) * 1000.0  # 千元 → 元
+            # 流动性：最近 20 个有效交易日均额（修复全量AVG放行枯竭资产）
+            recent_avg = con.execute(
+                """SELECT CASE WHEN COUNT(*) > 0 THEN SUM(amount)/COUNT(*) END
+                   FROM (SELECT amount FROM etf_daily
+                         WHERE symbol=? AND trade_date <= ? AND amount IS NOT NULL
+                         ORDER BY trade_date DESC LIMIT 20)""",
+                [symbol, asof],
+            ).fetchone()[0]
+            days, first_used = stats
+            avg_amount = float(recent_avg or 0.0) * 1000.0  # 千元 → 元
             reasons = []
             if row is None:
                 reasons.append("未登记资产")

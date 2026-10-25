@@ -241,32 +241,56 @@ def _run_ai_research(mgr: JobManager, job: Job) -> None:
 
 
 def _generate_report(mgr: JobManager, job: Job) -> None:
-    import pandas as pd
-    from trading.wealth_lab.backtest import run_strategy_backtest
-    from trading.wealth_lab.repository import WealthLabRepository
+    """P1-4 修复：严格从存档重放（参数/费率/PIT 全按原始记录），不按默认参数重算。"""
+    import json as _json
+    import numpy as np
+    from trading.wealth_lab.backtest import BacktestResult, RebalanceEvent
     from trading.wealth_lab.report import build_report
-    from trading.wealth_lab.strategies import get_strategy
+    from trading.wealth_lab.repository import WealthLabRepository
     backtest_id = job.params.get("backtest_id")
     record = WealthLabRepository().load_backtest(backtest_id) if backtest_id else None
     if record is None:
         raise ValueError("generate_report 需要 backtest_id")
     result = record["result"]
     params = record["params"]
-    strategy = get_strategy(params.get("strategy_id", "S0_fixed_weight"))
-    members = list({s for snap in result.get("weight_history", [])
-                    for s in snap.get("weights", {})}) or None
-    close = WealthLabRepository().read_close_matrix(members or list(result.get("pit_gate", {}).get("eligible", [])))
-    output = run_strategy_backtest(
-        close, strategy,
-        start_date=date.fromisoformat(result["common_window"]["start_date"]),
-        end_date=date.fromisoformat(result["common_window"]["end_date"]),
-        cost_bps=5.0,
+    series = result.get("series") or {}
+    dates = series.get("dates") or []
+    nav = series.get("portfolio_nav") or []
+    dd = series.get("portfolio_drawdown") or []
+    if len(dates) < 2 or len(nav) < 2:
+        raise ValueError(
+            f"存档 {backtest_id} 缺少精确日收益序列，无法生成可靠报告；请重跑回测"
+        )
+    mgr.update(job, 40, "读取存档序列（不重算）")
+    from datetime import date as _date
+    date_objs = [_date.fromisoformat(d) for d in dates]
+    nav_arr = np.array(nav, dtype=float)
+    dd_arr = np.array(dd, dtype=float)
+    daily = np.zeros(len(nav_arr))
+    daily[1:] = nav_arr[1:] / nav_arr[:-1] - 1.0
+    rebalances = [
+        RebalanceEvent(
+            date=_date.fromisoformat(rb.get("date", dates[0])),
+            trades=rb.get("trades", []),
+            cost=rb.get("cost", 0.0),
+        )
+        for rb in result.get("rebalances", [])
+        if rb.get("date")
+    ]
+    output = BacktestResult(
+        dates=date_objs, nav=nav_arr, drawdown=dd_arr,
+        daily_returns=daily, rebalances=rebalances,
     )
-    mgr.update(job, 70, "从存档重放生成报告")
+    mgr.update(job, 70, "从存档序列构建报告（零参数假设）")
     report = build_report(output, backtest_id)
     mgr.update(job, 100, "完成")
-    job.result_ref = {"backtest_id": backtest_id, "metrics": report["metrics"],
-                      "years": sorted(report["monthly_returns"])}
+    job.result_ref = {
+        "backtest_id": backtest_id,
+        "metrics": report["metrics"],
+        "years": sorted(report["monthly_returns"]),
+        "params_used": "archived（原始参数，未重算）",
+        "cost_bps": params.get("cost_bps"),
+    }
 
 
 # ---------------------------------------------------------------- Wealth Sentiment v1

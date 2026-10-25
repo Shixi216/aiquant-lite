@@ -23,6 +23,7 @@ class StableRunBody(BaseModel):
 class ExperimentalRunBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     goal: str = Field(min_length=4, max_length=500)
+    confirm_paid_calls: bool = False
 
 
 @router.get("/roles")
@@ -64,6 +65,9 @@ def start_experimental(body: ExperimentalRunBody):
     if not experimental_ai_enabled():
         raise HTTPException(status_code=403,
                             detail="EXPERIMENTAL_AI_RESEARCH 未启用（设置 WEALTH_LAB_EXPERIMENTAL_AI=1）")
+    if not body.confirm_paid_calls:
+        raise HTTPException(status_code=422,
+                            detail="实验模式包含 1 次真实付费规划师调用（后续再 2 次），需 confirm_paid_calls=true")
     try:
         result = _orchestrator.start_experimental(body.goal)
     except PermissionError as exc:

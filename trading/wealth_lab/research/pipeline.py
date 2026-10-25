@@ -332,10 +332,11 @@ class ResearchOrchestrator:
         }, ensure_ascii=False, indent=1)[:5000]
 
     def _numeric_verification(self, text: str, metrics: dict) -> dict:
-        """确定性核验：百分比口径 + 小数口径（AI 常以 0.4595 形式复述指标值）。
-
-        值域包含回测指标与系统级已知配置事实（无风险利率 2%、单边成本 5bps、
-        现金收益 0），引用配置假设不属于编造。
+        """确定性核验（v3.5 收紧）：
+        1) 指标名绑定核验：「年化收益45.95%」必须匹配 annual_return 而非 total_return
+        2) 方向核验：正收益不得被表述为负
+        3) 逐数字核验：句中每个数字独立通过，一个正确数字不能使错误数字通过
+        4) 零检查不放行：没有核验到任何数字时 passed=False
         """
         import re
         from trading.wealth_lab.config import RF_ANNUAL
@@ -347,39 +348,85 @@ class ResearchOrchestrator:
                  "max_single_asset_weight": policy.max_single_asset_weight,
                  "drawdown_limit": policy.max_portfolio_drawdown,
                  "volatility_limit": policy.max_volatility}
-        values = [abs(float(v)) for v in known.values() if isinstance(v, (int, float))]
+        text = self._flatten_json_text(text)
         sentences = [s for s in re.split(r"[。\n]", text) if "%" in s or
                      any(k in s for k in ("夏普", "Sharpe", "回撤", "年化", "Sortino", "Calmar"))]
         unsupported = []
+        total_checked = 0
         for sentence in sentences:
-            if self._sentence_supported(sentence, metrics, values):
-                continue
-            unsupported.append(sentence[:80])
+            ok, n = self._sentence_supported_v2(sentence, known)
+            total_checked += n
+            if not ok:
+                unsupported.append(sentence[:80])
+        if total_checked == 0 and sentences:
+            return {"engine": "deterministic", "checked_sentences": len(sentences),
+                    "checked_numbers": 0, "unsupported": ["（零数字核验，不视为通过）"],
+                    "note": "零检查不放行", "passed": False}
         return {"engine": "deterministic", "checked_sentences": len(sentences),
-                "unsupported": unsupported,
-                "note": "AI SUPPORTED 不替代本核验；核验失败即终止，不生成研究结论",
-                "passed": not unsupported}
+                "checked_numbers": total_checked, "unsupported": unsupported,
+                "note": "逐数字+指标名绑定+方向核验", "passed": not unsupported}
 
-    def _sentence_supported(self, sentence: str, metrics: dict, values: list) -> bool:
-        from trading.wealth_lab.risk.engine import _claim_supported
-        from trading.wealth_lab.config import RF_ANNUAL
+    def _flatten_json_text(self, text: str) -> str:
+        """JSON 输出 -> 拼接字符串值为连贯文本。"""
+        from trading.wealth_lab.research.orchestrator import _parse_json
+
+        def walk(node):
+            if isinstance(node, str):
+                return [node]
+            if isinstance(node, dict):
+                return [x for v in node.values() for x in walk(v)]
+            if isinstance(node, list):
+                return [x for v in node for x in walk(v)]
+            return []
+
+        try:
+            return "。".join(walk(_parse_json(text)))
+        except Exception:
+            return text
+
+    def _sentence_supported_v2(self, sentence: str, known: dict) -> tuple[bool, int]:
+        """收紧版：返回 (通过, 核验数字数)。逐数字独立核验。"""
         import re as _re
-        from trading.wealth_lab.risk import WealthRiskPolicy
-        policy = WealthRiskPolicy()
-        known = {**metrics, "risk_free_rate": RF_ANNUAL,
-                 "cost_per_side": 0.0005, "cash_return": 0.0,
-                 "equity_exposure_limit": policy.max_equity_exposure,
-                 "max_single_asset_weight": policy.max_single_asset_weight,
-                 "drawdown_limit": policy.max_portfolio_drawdown,
-                 "volatility_limit": policy.max_volatility}
-        if _claim_supported(sentence, known):
-            return True
-        # 小数口径：句中小数形式数字与任一指标值近似（相对误差 1e-3）
-        for token in _re.findall(r"-?\d+\.\d{3,}", sentence):
-            number = abs(float(token))
-            if any(abs(number - v) <= max(1e-3, v * 1e-3) for v in values):
-                return True
-        return False
+        from trading.wealth_lab.risk.engine import _METRIC_KEYWORDS
+        checked = 0
+        # 1) 指标名绑定核验
+        for keyword, (key, is_ratio) in _METRIC_KEYWORDS.items():
+            pattern = _re.compile(r"(?<![a-zA-Z_])" + _re.escape(keyword)
+                                  + r"[^0-9\-]{0,6}(-?\d+(?:\.\d+)?)(\s*%)?")
+            for match in pattern.finditer(sentence.lower()):
+                claimed = float(match.group(1))
+                is_pct = bool(match.group(2))
+                expected = known.get(key)
+                if expected is None:
+                    continue
+                checked += 1
+                # 方向核验
+                if key in ("total_return", "annual_return") and expected > 0 and claimed < 0:
+                    return False, checked
+                if key == "max_drawdown" and expected < 0 and claimed > 0 and is_pct:
+                    return False, checked
+                # 数值核验（双口径）
+                if is_pct:
+                    actual = abs(expected) * 100
+                    claimed_val = abs(claimed)
+                else:
+                    actual = abs(expected) * (100 if is_ratio and abs(claimed) > 1 else 1)
+                    claimed_val = abs(claimed)
+                if abs(claimed_val - actual) > max(0.05, actual * 0.005):
+                    return False, checked
+        # 2) 独立百分比核验
+        for val_str in _re.findall(r"(-?\d+(?:\.\d+)?)\s*%", sentence):
+            val = float(val_str)
+            checked += 1
+            normalized = abs(val) / 100
+            matched = any(abs(normalized - abs(v)) <= max(5e-4, abs(v) * 5e-3)
+                          for v in known.values() if isinstance(v, (int, float)))
+            if not matched:
+                matched = any(abs(abs(val) - abs(v) * 100) <= max(0.05, abs(v) * 100 * 5e-3)
+                              for v in known.values() if isinstance(v, (int, float)))
+            if not matched:
+                return False, checked
+        return True, checked
 
     def _build_packet(self, run_id, record, risk, researcher, reviewer) -> dict:
         from trading.wealth_lab.decision_packets import WealthDecisionPacketStore

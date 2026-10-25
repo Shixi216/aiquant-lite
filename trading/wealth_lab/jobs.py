@@ -112,8 +112,10 @@ class JobManager:
     def submit(self, operation: str, params: dict, request_id: str | None = None) -> tuple[Job, bool]:
         if operation not in OPERATIONS:
             raise ValueError(f"operation not in whitelist: {OPERATIONS}")
-        if operation in ("run_ai_research", "analyze_wealth_sentiment") and not params.get("confirm"):
-            raise ValueError(f"{operation} 涉及真实付费模型调用，需 params.confirm=true")
+        if operation in ("run_ai_research", "analyze_wealth_sentiment"):
+            confirm = params.get("confirm")
+            if not isinstance(confirm, bool) or not confirm:
+                raise ValueError(f"{operation} 涉及真实付费模型调用，需 params.confirm=true（布尔值）")
         dedup = hashlib.sha256(
             json.dumps({"op": operation, "params": params}, sort_keys=True, ensure_ascii=False).encode()
         ).hexdigest()[:16]
