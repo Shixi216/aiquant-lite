@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from datetime import datetime
 from typing import Any
 
 from pydantic import ValidationError
@@ -10,10 +11,12 @@ from database.db import get_connection
 from router.schemas.audit import (
     AgentResultAudit,
     ModelCallAudit,
+    ModelCallAuditListResponse,
     TaskAuditDetail,
     TaskAuditListResponse,
     TaskAuditSummary,
 )
+from router.integration.sanitization import sanitize_error
 
 
 def decode_json_object(
@@ -259,4 +262,58 @@ class AuditQueryStore:
             count=len(tasks),
             tasks=tasks,
             invalid_record_count=invalid_record_count,
+        )
+
+    def list_model_calls(
+        self, *, since: datetime, until: datetime, limit: int,
+    ) -> ModelCallAuditListResponse:
+        """Read physical calls, including calls outside task-based workflows."""
+        if since.utcoffset() is None or until.utcoffset() is None:
+            raise ValueError("since and until must include timezone")
+        if since > until:
+            raise ValueError("since must not be later than until")
+        if not 1 <= limit <= 1000:
+            raise ValueError("limit must be between 1 and 1000")
+        columns = (
+            "call_id", "task_id", "agent_role", "provider", "model", "input_tokens",
+            "output_tokens", "latency_ms", "estimated_cost", "success", "error_type",
+            "error_message", "prompt_version", "input_hash", "retry_count",
+            "schema_validation", "created_at",
+        )
+        with self._connect() as connection:
+            # Both counts and rows observe the same committed snapshot.
+            connection.execute("BEGIN TRANSACTION")
+            totals = connection.execute(
+                """
+                SELECT COUNT(*),
+                       COUNT(*) FILTER (WHERE mc.success = TRUE),
+                       COUNT(*) FILTER (WHERE mc.success = FALSE),
+                       COUNT(*) FILTER (WHERE t.task_id IS NULL)
+                FROM model_calls mc
+                LEFT JOIN tasks t ON t.task_id = mc.task_id
+                WHERE mc.created_at >= ? AND mc.created_at <= ?
+                """, [since, until],
+            ).fetchone()
+            rows = connection.execute(
+                f"""
+                SELECT {', '.join(columns)} FROM model_calls
+                WHERE created_at >= ? AND created_at <= ?
+                ORDER BY created_at DESC, call_id DESC LIMIT ?
+                """, [since, until, limit],
+            ).fetchall()
+            connection.execute("COMMIT")
+        calls = []
+        invalid_record_count = 0
+        for row in rows:
+            try:
+                values = dict(zip(columns, row, strict=True))
+                if values["error_message"]:
+                    values["error_message"] = sanitize_error(values["error_message"])
+                calls.append(ModelCallAudit(**values))
+            except (ValidationError, TypeError, ValueError):
+                invalid_record_count += 1
+        return ModelCallAuditListResponse(
+            since=since, until=until, count=len(calls), total_count=totals[0],
+            success_count=totals[1], failed_count=totals[2], unlinked_call_count=totals[3],
+            invalid_record_count=invalid_record_count, calls=calls,
         )
