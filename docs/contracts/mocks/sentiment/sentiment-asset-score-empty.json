@@ -1,0 +1,134 @@
+{
+ "request_id": "req_d08ff98cf59a44ab99ab008f",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "symbol": "508056.SH",
+  "score": {
+   "score_id": "wscore_9fd59cf846a042",
+   "level": "ASSET",
+   "symbol": "508056.SH",
+   "asof": "2026-10-25T16:46:49.782012+08:00",
+   "sentiment_score": 66.96,
+   "confidence": 0.2232,
+   "coverage": 0.3333,
+   "coverage_ratio": 0.3333,
+   "observation_count": 2,
+   "source_count": 2,
+   "sentiment_version": "wealth-sentiment/1.1",
+   "evidence_basis": "CLASS_LEVEL_EVIDENCE",
+   "evidence_count": 2,
+   "direct_evidence_count": 0,
+   "class_evidence_count": 2,
+   "last_evidence_at": "2026-10-23T20:53:27+08:00",
+   "evidence_ids": [
+    "wana_32dda1274608",
+    "wana_a19f4523dc30"
+   ],
+   "component_breakdown": {
+    "by_direction": {
+     "POSITIVE": 2,
+     "NEGATIVE": 0,
+     "NEUTRAL": 0,
+     "MIXED": 0
+    },
+    "by_link_level": {
+     "EXACT": 0,
+     "SAME_INDEX": 2,
+     "MODEL_INFERRED": 0,
+     "CLASS_ONLY": 0
+    },
+    "top_contributors": [
+     {
+      "event_id": "wevt_02716ebd8553fc7250a6",
+      "title": "公募REITs双向扩容：老旧街区厂区入池，民企首单商业REITs落地",
+      "direction": "POSITIVE",
+      "signed": 0.1922,
+      "link_level": "SAME_INDEX",
+      "decay": 0.7627,
+      "confidence": 0.72
+     },
+     {
+      "event_id": "wevt_3bdf6de00c9bc56e6f63",
+      "title": "【财经分析】资金端破局迎窗口 国内公募REITs长期配置空间可期",
+      "direction": "POSITIVE",
+      "signed": 0.1684,
+      "link_level": "SAME_INDEX",
+      "decay": 0.7761,
+      "confidence": 0.62
+     }
+    ],
+    "weights": {
+     "impact": {
+      "MINOR": 0.4,
+      "MODERATE": 1.0,
+      "MAJOR": 1.8
+     },
+     "eco_importance": {
+      "1": 0.3,
+      "2": 0.7,
+      "3": 1.4
+     },
+     "half_life_hours": {
+      "MONETARY_POLICY": 240.0,
+      "MACRO_DATA": 240.0,
+      "FUND_ANNOUNCE": 120.0,
+      "GOLD_COMMODITY": 72.0,
+      "BOND_MARKET": 72.0,
+      "QDII_OVERSEAS": 72.0,
+      "GENERAL": 48.0
+     },
+     "source_diversity_cap": 1.5,
+     "source_diversity_step": 0.25,
+     "mixed_direction_scale": 0.15,
+     "asset_target_observations": 6,
+     "market_target_observations": 10,
+     "top_evidence": 10,
+     "risk_appetite_sign": {
+      "EQUITY": 1.0,
+      "OVERSEAS_EQUITY": 1.0,
+      "REIT": 0.8,
+      "CONVERTIBLE": 0.8,
+      "COMMODITY": 0.5,
+      "GOLD": -0.6,
+      "BOND": -0.8,
+      "FX": 0.0
+     },
+     "market_class_weight": {
+      "EQUITY": 1.0,
+      "BOND": 0.9,
+      "GOLD": 0.8,
+      "OVERSEAS_EQUITY": 0.8,
+      "COMMODITY": 0.6,
+      "REIT": 0.6,
+      "CONVERTIBLE": 0.7,
+      "FX": 0.3
+     },
+     "weights_id": "v1.1",
+     "link_weight": {
+      "EXACT": 1.0,
+      "SAME_INDEX": 0.35,
+      "MODEL_INFERRED": 0.35,
+      "CLASS_ONLY": 0.25
+     },
+     "class_only_confidence_cap": 0.6,
+     "min_direct_obs_for_direct_basis": 1
+    },
+    "v1_0_weights_for_reference": {
+     "direct_link_weight": 1.0,
+     "class_link_weight": 0.45
+    },
+    "lookback_hours": 168,
+    "events_in_window": 53
+   }
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": null,
+ "generated_at": "2026-10-25T17:50:42.530837+09:00",
+ "api_version": "wealth-sentiment/v1",
+ "research_only": true
+}
