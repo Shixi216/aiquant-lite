@@ -71,7 +71,7 @@ def news_events(
     rows = repo.list_events(category=category, symbol=symbol, since=since_dt,
                             limit=limit, analysis_status=analysis_status)
     for row in rows:
-        _parse_json_fields(row, "asset_scope")
+        _parse_json_fields(row, "asset_scope", "asset_links")
     return _env({"data_mode": "REAL", "events": rows, "count": len(rows)})
 
 
@@ -93,6 +93,7 @@ def market_sentiment():
     rows = repo.latest_scores("MARKET", None, limit=1)
     if not rows:
         return _env({"data_mode": "REAL", "score": None,
+                     "evidence_basis": "INSUFFICIENT_DATA",
                      "message": "尚无市场情绪快照：请先执行 rebuild_wealth_sentiment_factor 任务"})
     return _env({"data_mode": "REAL", "score": _score_public(rows[0])})
 
@@ -111,7 +112,8 @@ def asset_score(symbol: str):
     rows = repo.latest_scores("ASSET", symbol, limit=1)
     if not rows:
         return _env({"data_mode": "REAL", "symbol": symbol, "score": None,
-                     "message": "该资产暂无情绪快照（窗口内无关联事件或未重建因子）"})
+                     "evidence_basis": "INSUFFICIENT_DATA",
+                     "message": "该资产窗口内无有效观测（evidence_basis=INSUFFICIENT_DATA）"})
     return _env({"data_mode": "REAL", "symbol": symbol, "score": _score_public(rows[0])})
 
 
@@ -191,8 +193,17 @@ def _score_public(row: dict, with_breakdown: bool = True) -> dict:
         "score_id": row["score_id"], "level": row["level"], "symbol": row["symbol"],
         "asof": row["asof"].isoformat() if getattr(row["asof"], "isoformat", None) else row["asof"],
         "sentiment_score": row["sentiment_score"], "confidence": row["confidence"],
-        "coverage": row["coverage"], "observation_count": row["observation_count"],
+        "coverage": row.get("coverage"),
+        "coverage_ratio": row.get("coverage"),
+        "observation_count": row["observation_count"],
         "source_count": row["source_count"], "sentiment_version": row["sentiment_version"],
+        "evidence_basis": row.get("evidence_basis"),
+        "evidence_count": row.get("evidence_count"),
+        "direct_evidence_count": row.get("direct_evidence_count"),
+        "class_evidence_count": row.get("class_evidence_count"),
+        "last_evidence_at": (row["last_evidence_at"].isoformat()
+                             if getattr(row.get("last_evidence_at"), "isoformat", None)
+                             else row.get("last_evidence_at")),
     }
     evidence = row.get("evidence_ids")
     out["evidence_ids"] = json.loads(evidence) if isinstance(evidence, str) else (evidence or [])

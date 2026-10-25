@@ -13,9 +13,21 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SENTIMENT_DB_PATH = PROJECT_ROOT / "database" / "wealth_sentiment.duckdb"
 
-INGEST_VERSION = "sentiment-ingest/1.0"
-SENTIMENT_VERSION = "wealth-sentiment/1.0"
-PROMPT_VERSION = "wealth-sentiment-v1"
+INGEST_VERSION = "sentiment-ingest/1.1"
+SENTIMENT_VERSION = "wealth-sentiment/1.1"
+PROMPT_VERSION = "wealth-sentiment-v1.1"
+
+# ------------------------------------------------------------------ 关联层级（v1.1 P0）
+# EXACT        新闻明确点名该池内产品（出现基金代码或完整登记名称）→ 直接资产证据
+# SAME_INDEX   新闻主题/标的指数与该产品相同（如金价、标普500、另一同类基金产品）
+# CLASS_ONLY   仅命中资产类别（如"利率"→BOND），不指向任何具体产品
+# MODEL_INFERRED LLM 推断关联但确定性规则未找到文本依据（聚合按 SAME_INDEX 加权，
+#                但绝不计入直接证据）
+LINK_LEVELS = ("EXACT", "SAME_INDEX", "CLASS_ONLY", "MODEL_INFERRED")
+LINK_LEVEL_RANK = {lv: i for i, lv in enumerate(LINK_LEVELS)}
+
+# 评分可信度基线（v1.1 P1）
+EVIDENCE_BASIS = ("DIRECT_EVIDENCE", "CLASS_LEVEL_EVIDENCE", "INSUFFICIENT_DATA")
 
 # ------------------------------------------------------------------ 模型
 # 用户指定：deepseek 用 deepseek-flash（不是 v4-pro）；不可用时 qwen 兜底。
@@ -86,14 +98,20 @@ TEXT_LINK_RULES: tuple[tuple[str, str | None, tuple[str, ...]], ...] = (
     ("降准", "BOND", ("511010.SH", "511260.SH", "511090.SH", "511520.SH", "159972.SZ")),
     ("降息", "BOND", ("511010.SH", "511260.SH", "511090.SH", "511520.SH", "159972.SZ")),
     ("逆回购", "BOND", ("511010.SH", "511260.SH", "511090.SH", "511520.SH", "159972.SZ")),
+    ("MLF", "BOND", ("511010.SH", "511260.SH", "511090.SH", "511520.SH", "159972.SZ")),
     ("可转债", "CONVERTIBLE", ("511380.SH",)),
     ("REIT", "REIT", ("180101.SZ", "180201.SZ", "508000.SH", "508056.SH")),
     ("纳斯达克", "OVERSEAS_EQUITY", ("513100.SH",)),
     ("标普", "OVERSEAS_EQUITY", ("513500.SH",)),
-    ("纳斯达克", "OVERSEAS_EQUITY", ("513100.SH",)),
+    ("金龙", "OVERSEAS_EQUITY", ("513050.SH",)),      # 标注反馈：金龙指数=中概，非纳指
+    ("中概", "OVERSEAS_EQUITY", ("513050.SH",)),
+    ("DAX", "OVERSEAS_EQUITY", ("513030.SH",)),       # 标注反馈：欧元区/德国→DAX
+    ("欧元区", "OVERSEAS_EQUITY", ("513030.SH",)),
     ("恒生", "OVERSEAS_EQUITY", ("510900.SH", "513050.SH", "159545.SZ")),
     ("港股", "OVERSEAS_EQUITY", ("510900.SH", "513050.SH", "159545.SZ")),
     ("美股", "OVERSEAS_EQUITY", ("513100.SH", "513500.SH", "162411.SZ")),
+    ("石油", "COMMODITY", ("162411.SZ",)),            # 标注反馈：石油供给冲击→油气LOF
+    ("油价", "COMMODITY", ("162411.SZ",)),
     ("美元指数", "FX", ()),
     ("人民币汇率", "FX", ()),
     ("沪深300", "EQUITY", ("510300.SH",)),
@@ -209,6 +227,37 @@ WEIGHTS_V1: dict = {
         "COMMODITY": 0.6, "REIT": 0.6, "CONVERTIBLE": 0.7, "FX": 0.3,
     },
 }
+
+# ---- v1.1 聚合权重（在 V1 基础上引入关联分层；旧 V1 权重保留用于历史快照核对）----
+WEIGHTS_V1_1: dict = {
+    **{k: v for k, v in WEIGHTS_V1.items()
+       if k not in ("direct_link_weight", "class_link_weight")},
+    "weights_id": "v1.1",
+    # 关联层级权重：只有 EXACT 是直接证据；主题/推断/类别均为间接，低权重
+    "link_weight": {"EXACT": 1.0, "SAME_INDEX": 0.35,
+                    "MODEL_INFERRED": 0.35, "CLASS_ONLY": 0.25},
+    # 仅类别推导的个券情绪不得展示为高可信度
+    "class_only_confidence_cap": 0.6,
+    "min_direct_obs_for_direct_basis": 1,
+}
+
+# ------------------------------------------------------------------ 事件归并（v1.1 P0）
+# 政策/数据类操作的实体识别（标题中出现的主体归一）
+POLICY_ENTITIES = {
+    "央行": "中国人民银行", "中国人民银行": "中国人民银行", "PBoC": "中国人民银行",
+    "美联储": "美联储", "Fed": "美联储", "欧央行": "欧央行", "日本央行": "日本央行",
+    "证监会": "证监会", "国家统计局": "国家统计局", "统计局": "国家统计局",
+    "财政部": "财政部", "外汇局": "国家外汇管理局", "国家外汇管理局": "国家外汇管理局",
+}
+# 操作类型关键词（归并键的一部分：同主体同金额同日但不同操作不得合并）
+OPERATION_KEYWORDS = (
+    "MLF", "逆回购", "降准", "降息", "加息", "LPR", "国债买卖", "买断式逆回购",
+    "CPI", "PPI", "PMI", "GDP", "社融", "M2", "M1", "LPR报价",
+)
+# 允许模糊归并的类别（政策/宏观数据/债券与黄金市场操作类）
+MERGE_CATEGORIES = ("MONETARY_POLICY", "MACRO_DATA", "BOND_MARKET", "GOLD_COMMODITY")
+MERGE_DAY_WINDOW = 1          # 同一操作跨天报道（预告/落地）允许 ±1 天
+MERGE_TITLE_SIMILARITY = 0.8  # 无金额无操作词时，需标题 bigram 相似度 ≥0.8 才归并
 
 # 分析批次默认参数
 ANALYSIS_BATCH_LIMIT = 8

@@ -14,10 +14,10 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 
 from trading.wealth_lab.sentiment import repository as repo
+from trading.wealth_lab.sentiment.linking import extract_codes
 from trading.wealth_lab.sentiment.config import (
     DEFAULT_KEYWORDS, DIRECT_HOSTS, ECO_CALENDAR_DAYS, FUND_ANNOUNCE_LOOKBACK_DAYS,
-    FUND_CODE_TO_SYMBOL, INGEST_VERSION, KEYWORD_TOPICS, REQUEST_SLEEP_SECONDS,
-    SOURCES, SYMBOL_CLASS, TEXT_LINK_RULES,
+    INGEST_VERSION, KEYWORD_TOPICS, REQUEST_SLEEP_SECONDS, SOURCES, SYMBOL_CLASS,
 )
 
 _TZ = timezone(timedelta(hours=8))
@@ -92,39 +92,21 @@ def _detect_language(text: str) -> str:
     return "en" if ascii_letters / max(len(text), 1) > 0.7 else "zh"
 
 
-def link_assets(text: str, hint_category: str | None = None,
-                hint_symbols: tuple[str, ...] = ()) -> tuple[list[str], list[str]]:
-    """确定性资产关联：基金代码正则 + 关键词规则。返回 (asset_classes, symbols)。"""
-    classes: list[str] = []
-    symbols: list[str] = []
-    for code, symbol in FUND_CODE_TO_SYMBOL.items():
-        if re.search(rf"(?<!\d){code}(?!\d)", text or ""):
-            symbols.append(symbol)
-    for keyword, klass, syms in TEXT_LINK_RULES:
-        if keyword in (text or ""):
-            if klass:
-                classes.append(klass)
-            symbols.extend(s for s in syms if s not in symbols)
-    if hint_category:
-        for cat, klass, syms in KEYWORD_TOPICS.values():
-            if cat == hint_category and klass:
-                classes.append(klass)
-    symbols.extend(s for s in hint_symbols if s not in symbols)
-    # 代码命中的资产补齐类别
-    for symbol in symbols:
-        klass = SYMBOL_CLASS.get(symbol)
-        if klass and klass not in classes:
-            classes.append(klass)
-    return list(dict.fromkeys(classes)), [s for s in dict.fromkeys(symbols) if s in SYMBOL_CLASS]
-
-
 def _ingest_item(*, source_name: str, title: str, summary: str | None, url: str | None,
-                 published_raw, category: str, hint_symbols: tuple[str, ...] = (),
+                 published_raw, category: str,
+                 source_symbol: str | None = None,
+                 keyword_theme_symbols: tuple[str, ...] = (),
                  raw_extra: dict | None = None) -> tuple[bool, str]:
-    """标准化+去重+事件归并一条资讯。返回 (是否新条目, quality_status)。"""
+    """标准化+去重+事件归并一条资讯。返回 (是否新条目, quality_status)。
+
+    v1.1：确定性分级关联（EXACT/SAME_INDEX）+ 同一事实操作事件归并
+    （政策/宏观数据类按 主体+操作+金额+日期 归并，防止重复计权）。
+    """
+    from trading.wealth_lab.sentiment.linking import classify_links
     published_at, precision = _parse_time(published_raw)
-    text = f"{title} {summary or ''}"
-    classes, symbols = link_assets(text, hint_symbols=hint_symbols)
+    linked = classify_links(title, summary, source_symbol=source_symbol,
+                            keyword_theme_symbols=keyword_theme_symbols)
+    symbols = sorted(linked["symbols"])
     url_hash = _sha(url) if url else ""
     content_hash = url_hash or _sha("title:" + _normalize_title(title) + "|" + (str(published_raw) or ""))
     quality = "OK" if published_at else "NO_PUBLISH_TIME"
@@ -144,6 +126,7 @@ def _ingest_item(*, source_name: str, title: str, summary: str | None, url: str 
         "content_hash": content_hash,
         "language": _detect_language(title),
         "asset_scope": json.dumps(symbols, ensure_ascii=False),
+        "asset_links": json.dumps(linked["symbols"], ensure_ascii=False),
         "raw_category": category,
         "event_id": None,
         "quality_status": quality,
@@ -151,7 +134,7 @@ def _ingest_item(*, source_name: str, title: str, summary: str | None, url: str 
         "raw_extra": json.dumps(raw_extra or {}, ensure_ascii=False),
     })
     if is_new:
-        event_id = "wevt_" + _sha("event:" + _normalize_title(title))[:20]
+        event_id = _resolve_event_id(title, category, published_at)
         repo.upsert_event({
             "event_id": event_id,
             "representative_news_id": news_id,
@@ -161,13 +144,39 @@ def _ingest_item(*, source_name: str, title: str, summary: str | None, url: str 
             "first_seen_at": now,
             "raw_category": category,
             "asset_scope": json.dumps(symbols, ensure_ascii=False),
+            "asset_links": json.dumps(linked["symbols"], ensure_ascii=False),
             "news_count": 1,
             "source_count": 1,
             "analysis_status": "PENDING",
+            "merged_into": None,
             "updated_at": now,
         })
         repo.link_item_to_event(news_id, event_id)
     return is_new, quality
+
+
+def _resolve_event_id(title: str, category: str, published_at) -> str:
+    """新事件落库前先找"同一事实操作"的既有事件（±1 天），命中则复用其 event_id。"""
+    default_id = "wevt_" + _sha("event:" + _normalize_title(title))[:20]
+    if published_at is None:
+        return default_id
+    from trading.wealth_lab.sentiment.merge import same_factual_operation
+    with repo.connect() as con:
+        rows = con.execute(
+            """SELECT event_id, title, published_at, raw_category
+               FROM wealth_news_events
+               WHERE raw_category=? AND published_at BETWEEN ? AND ?
+                 AND (merged_into IS NULL OR merged_into='')""",
+            [category,
+             published_at - timedelta(days=2), published_at + timedelta(days=2)],
+        ).fetchall()
+    candidate = {"title": title, "raw_category": category, "published_at": published_at}
+    for event_id, other_title, other_published, other_category in rows:
+        other = {"title": other_title, "raw_category": other_category,
+                 "published_at": other_published}
+        if same_factual_operation(candidate, other):
+            return event_id
+    return default_id
 
 
 # ------------------------------------------------------------------ 源适配器
@@ -208,8 +217,9 @@ def _collect_keyword_news(progress=None) -> dict:
                 is_new, quality = _ingest_item(
                     source_name="eastmoney-keyword-news", title=title, summary=summary,
                     url=url, published_raw=published, category=category,
-                    hint_symbols=hint_symbols,
-                    raw_extra={"keyword": kw, "media": source_label},
+                    keyword_theme_symbols=hint_symbols,
+                    raw_extra={"keyword": kw, "media": source_label,
+                               "about_non_pool_fund": bool(extract_codes(f"{title} {summary or ''}"))},
                 )
                 new += int(is_new); dup += int(not is_new)
                 if quality != "OK":
@@ -246,12 +256,13 @@ def _collect_global_flash(progress=None) -> dict:
             published = getattr(row, "发布时间", None)
             key_fields_total += 4
             key_fields_filled += sum(bool(x) for x in (title, summary, url, published))
-            classes, _syms = link_assets(f"{title} {summary or ''}")
-            category = "QDII_OVERSEAS" if "OVERSEAS_EQUITY" in classes else "GENERAL"
+            from trading.wealth_lab.sentiment.linking import classify_links
+            linked = classify_links(title, summary)
+            category = "QDII_OVERSEAS" if "OVERSEAS_EQUITY" in linked["classes"] else "GENERAL"
             is_new, _q = _ingest_item(
                 source_name="eastmoney-global-flash", title=title, summary=summary,
                 url=url, published_raw=published, category=category,
-                raw_extra={},
+                raw_extra={"about_non_pool_fund": linked["about_non_pool_fund"]},
             )
             new += int(is_new); dup += int(not is_new)
             pt, _ = _parse_time(published)
@@ -304,7 +315,7 @@ def _collect_fund_announcements(progress=None, fund_symbols: list[str] | None = 
                         summary=f"{fund_name or ''} 公告（{label}）".strip(),
                         url=f"emfund://{report_id}" if report_id else None,
                         published_raw=announce_date, category="FUND_ANNOUNCE",
-                        hint_symbols=(symbol,),
+                        source_symbol=symbol,
                         raw_extra={"fund_symbol": symbol, "fund_name": fund_name,
                                    "announce_kind": label, "report_id": report_id},
                     )
@@ -348,10 +359,9 @@ def _collect_eco_calendar(progress=None) -> dict:
                 key_fields_total += 4
                 key_fields_filled += sum(bool(x) for x in (event_name, actual, d, region))
                 title = f"{event_name} 公布值{actual}" + (f" 预期{expected}" if expected else "")
-                classes, _s = link_assets(event_name)
+                from trading.wealth_lab.sentiment.linking import classify_links
+                classes = classify_links(event_name)["classes"]
                 category = "MACRO_DATA"
-                if classes and "EQUITY" in classes:
-                    pass
                 is_new, _q = _ingest_item(
                     source_name="baidu-eco-calendar", title=title,
                     summary=(f"前值{previous}。" if previous else None),

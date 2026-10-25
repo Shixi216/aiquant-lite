@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS wealth_news_items (
     content_hash VARCHAR NOT NULL,
     language VARCHAR,
     asset_scope VARCHAR,
+    asset_links VARCHAR,
     raw_category VARCHAR,
     event_id VARCHAR,
     quality_status VARCHAR NOT NULL,
@@ -47,9 +48,11 @@ CREATE TABLE IF NOT EXISTS wealth_news_events (
     first_seen_at TIMESTAMPTZ NOT NULL,
     raw_category VARCHAR,
     asset_scope VARCHAR,
+    asset_links VARCHAR,
     news_count INTEGER DEFAULT 1,
     source_count INTEGER DEFAULT 1,
     analysis_status VARCHAR DEFAULT 'PENDING',
+    merged_into VARCHAR,
     updated_at TIMESTAMPTZ
 );
 CREATE TABLE IF NOT EXISTS wealth_event_analyses (
@@ -88,6 +91,11 @@ CREATE TABLE IF NOT EXISTS wealth_sentiment_scores (
     sentiment_version VARCHAR NOT NULL,
     evidence_ids VARCHAR,
     component_breakdown VARCHAR,
+    evidence_basis VARCHAR,
+    evidence_count INTEGER,
+    direct_evidence_count INTEGER,
+    class_evidence_count INTEGER,
+    last_evidence_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ
 );
 CREATE TABLE IF NOT EXISTS wealth_source_runs (
@@ -122,10 +130,27 @@ CREATE TABLE IF NOT EXISTS wealth_llm_calls (
 """
 
 
+_MIGRATIONS = (
+    ("wealth_news_items", "asset_links", "VARCHAR"),
+    ("wealth_news_events", "asset_links", "VARCHAR"),
+    ("wealth_news_events", "merged_into", "VARCHAR"),
+    ("wealth_sentiment_scores", "evidence_basis", "VARCHAR"),
+    ("wealth_sentiment_scores", "evidence_count", "INTEGER"),
+    ("wealth_sentiment_scores", "direct_evidence_count", "INTEGER"),
+    ("wealth_sentiment_scores", "class_evidence_count", "INTEGER"),
+    ("wealth_sentiment_scores", "last_evidence_at", "TIMESTAMPTZ"),
+)
+
+
 def connect():
     con = duckdb.connect(str(SENTIMENT_DB_PATH))
     con.execute("SET TimeZone='Asia/Shanghai'")  # 展示时区统一 +08，底层仍为 UTC 瞬时值
     con.execute(SCHEMA)
+    for table, column, col_type in _MIGRATIONS:  # 旧库幂等补列（v1.1）
+        try:
+            con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
+        except duckdb.Error:
+            pass  # 列已存在
     return con
 
 
@@ -143,23 +168,31 @@ def upsert_news_item(item: dict) -> bool:
         if exists:
             # 关键词/关联线索合并（同一 URL 多关键词命中）
             row = con.execute(
-                "SELECT asset_scope, raw_extra FROM wealth_news_items WHERE news_id=?",
+                "SELECT asset_scope, raw_extra, asset_links FROM wealth_news_items WHERE news_id=?",
                 [item["news_id"]],
             ).fetchone()
             merged_scope = _json_union(row[0], item.get("asset_scope"))
             merged_extra = _json_union(row[1], item.get("raw_extra"))
+            merged_links = _merge_link_json(row[2], item.get("asset_links"))
             con.execute(
-                "UPDATE wealth_news_items SET asset_scope=?, raw_extra=?, fetched_at=? WHERE news_id=?",
-                [merged_scope, merged_extra, _now(), item["news_id"]],
+                """UPDATE wealth_news_items SET asset_scope=?, raw_extra=?, asset_links=?,
+                   fetched_at=? WHERE news_id=?""",
+                [merged_scope, merged_extra, merged_links, _now(), item["news_id"]],
             )
             return False
         con.execute(
-            """INSERT INTO wealth_news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            """INSERT INTO wealth_news_items
+               (news_id, source_provider, source_name, source_url, title, summary,
+                published_at, published_at_precision, first_seen_at, fetched_at,
+                content_hash, language, asset_scope, asset_links, raw_category,
+                event_id, quality_status, ingest_version, raw_extra)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             [item.get(k) for k in (
                 "news_id", "source_provider", "source_name", "source_url", "title",
                 "summary", "published_at", "published_at_precision", "first_seen_at",
-                "fetched_at", "content_hash", "language", "asset_scope", "raw_category",
-                "event_id", "quality_status", "ingest_version", "raw_extra")],
+                "fetched_at", "content_hash", "language", "asset_scope", "asset_links",
+                "raw_category", "event_id", "quality_status", "ingest_version",
+                "raw_extra")],
         )
         return True
 
@@ -180,31 +213,56 @@ def _json_union(a: str | None, b: str | None) -> str:
     return json.dumps(merged, ensure_ascii=False)
 
 
+def _merge_link_json(a: str | None, b: str | None) -> str:
+    """asset_links JSON 合并：symbol 取最高层级（EXACT > SAME_INDEX > ...）。"""
+    from trading.wealth_lab.sentiment.linking import merge_link_maps
+    try:
+        left = json.loads(a) if a else {}
+    except Exception:
+        left = {}
+    try:
+        right = json.loads(b) if b else {}
+    except Exception:
+        right = {}
+    if not isinstance(left, dict):
+        left = {}
+    if not isinstance(right, dict):
+        right = {}
+    return json.dumps(merge_link_maps(left, right), ensure_ascii=False)
+
+
 # ------------------------------------------------------------------ 事件
 def upsert_event(event: dict) -> str:
     """事件归并写入：按 event_id 幂等，重复报道计数 +1。返回 event_id。"""
     with _LOCK, connect() as con:
         exists = con.execute(
-            "SELECT news_count, source_count, asset_scope FROM wealth_news_events WHERE event_id=?",
+            "SELECT news_count, source_count, asset_scope, asset_links "
+            "FROM wealth_news_events WHERE event_id=?",
             [event["event_id"]],
         ).fetchone()
         if exists:
-            news_count, source_count, scope_json = exists
+            news_count, source_count, scope_json, links_json = exists
             scope = _json_union(scope_json, event.get("asset_scope"))
+            links = _merge_link_json(links_json, event.get("asset_links"))
             con.execute(
                 """UPDATE wealth_news_events SET news_count=news_count+1,
-                   source_count=?, asset_scope=?, updated_at=? WHERE event_id=?""",
+                   source_count=?, asset_scope=?, asset_links=?, updated_at=? WHERE event_id=?""",
                 [max(source_count or 1, event.get("source_count", 1)),
-                 scope, _now(), event["event_id"]],
+                 scope, links, _now(), event["event_id"]],
             )
             return event["event_id"]
         con.execute(
-            """INSERT INTO wealth_news_events VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            """INSERT INTO wealth_news_events
+               (event_id, representative_news_id, title, published_at,
+                published_at_precision, first_seen_at, raw_category, asset_scope,
+                asset_links, news_count, source_count, analysis_status, merged_into,
+                updated_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             [event.get(k) for k in (
                 "event_id", "representative_news_id", "title", "published_at",
                 "published_at_precision", "first_seen_at", "raw_category",
-                "asset_scope", "news_count", "source_count", "analysis_status",
-                "updated_at")],
+                "asset_scope", "asset_links", "news_count", "source_count",
+                "analysis_status", "merged_into", "updated_at")],
         )
         return event["event_id"]
 
@@ -215,11 +273,61 @@ def link_item_to_event(news_id: str, event_id: str) -> None:
                     [event_id, news_id])
 
 
+def recompute_all_links(progress=None) -> dict:
+    """v1.1 存量重算：用分级规则重建全部条目/事件的 asset_links 与 asset_scope。
+
+    幂等、确定性、无 LLM。基金公告条目按其所属基金标 EXACT；
+    关键词/全球快讯按代码/全名/主题分级。
+    """
+    from trading.wealth_lab.sentiment.linking import classify_links, merge_link_maps
+    with _LOCK, connect() as con:
+        rows = con.execute(
+            """SELECT news_id, title, summary, source_name, raw_extra, event_id
+               FROM wealth_news_items""").fetchall()
+        cols = [d[0] for d in con.description]
+    items = [dict(zip(cols, r)) for r in rows]
+    changed_items = 0
+    event_links: dict[str, dict] = {}
+    event_scopes: dict[str, set] = {}
+    for item in items:
+        source_symbol = None
+        if item["source_name"] == "eastmoney-fund-announcements":
+            try:
+                source_symbol = json.loads(item["raw_extra"] or "{}").get("fund_symbol")
+            except Exception:
+                source_symbol = None
+        result = classify_links(item["title"], item["summary"],
+                                source_symbol=source_symbol)
+        links_json = json.dumps(result["symbols"], ensure_ascii=False)
+        scope_json = json.dumps(sorted(result["symbols"]), ensure_ascii=False)
+        if item["event_id"]:
+            event_links[item["event_id"]] = merge_link_maps(
+                event_links.get(item["event_id"]), result["symbols"])
+            event_scopes.setdefault(item["event_id"], set()).update(result["symbols"])
+        with _LOCK, connect() as con:
+            con.execute(
+                "UPDATE wealth_news_items SET asset_links=?, asset_scope=? WHERE news_id=?",
+                [links_json, scope_json, item["news_id"]])
+        changed_items += 1
+        if progress and changed_items % 100 == 0:
+            progress(f"重算关联 {changed_items}/{len(items)}")
+    with _LOCK, connect() as con:
+        for event_id, links in event_links.items():
+            con.execute(
+                "UPDATE wealth_news_events SET asset_links=?, asset_scope=?, updated_at=? "
+                "WHERE event_id=? AND (merged_into IS NULL OR merged_into='')",
+                [json.dumps(links, ensure_ascii=False),
+                 json.dumps(sorted(event_scopes[event_id]), ensure_ascii=False),
+                 _now(), event_id])
+    return {"items_relinked": changed_items, "events_relinked": len(event_links)}
+
+
 def pending_events(limit: int) -> list[dict]:
     with _LOCK, connect() as con:
         rows = con.execute(
             """SELECT e.event_id, e.title, e.published_at, e.published_at_precision,
-                      e.raw_category, e.asset_scope, e.news_count, e.source_count,
+                      e.raw_category, e.asset_scope, e.asset_links,
+                      e.news_count, e.source_count,
                       (SELECT string_agg(n.summary, ' || ' ORDER BY n.first_seen_at)
                        FROM wealth_news_items n WHERE n.event_id=e.event_id) AS summaries,
                       (SELECT string_agg(DISTINCT n.source_name, ',')
@@ -272,11 +380,16 @@ def audit_llm_call(call_id: str, agent: str, model: str | None, provider: str | 
 
 # ------------------------------------------------------------------ 聚合输入与得分
 def analyzed_events_since(since: datetime) -> list[dict]:
-    """取窗口内已分析事件（含最新一次分析结果），供确定性聚合。"""
+    """取窗口内已分析事件（含最新一次分析结果），供确定性聚合。
+
+    v1.1：附带事件级 asset_links（symbol→层级）；已归并的重复事件
+    （merged_into 非空）不参与聚合——一个事实事件只计一次。
+    """
     with _LOCK, connect() as con:
         rows = con.execute(
             """SELECT e.event_id, e.title, e.published_at, e.raw_category,
-                      e.asset_scope AS event_asset_scope, e.news_count, e.source_count,
+                      e.asset_scope AS event_asset_scope, e.asset_links AS event_asset_links,
+                      e.news_count, e.source_count,
                       a.analysis_id, a.event_type, a.affected_asset_classes,
                       a.affected_symbols, a.sentiment_direction, a.estimated_impact,
                       a.confidence, a.created_at AS analyzed_at
@@ -290,6 +403,7 @@ def analyzed_events_since(since: datetime) -> list[dict]:
                    WHERE x.event_id=e.event_id AND x.status='VALID')
                JOIN wealth_event_analyses a ON a.event_id=e.event_id AND a.created_at=m.latest
                WHERE e.published_at IS NOT NULL AND e.published_at >= ?
+                 AND (e.merged_into IS NULL OR e.merged_into='')
                ORDER BY e.published_at DESC""",
             [since],
         ).fetchall()
@@ -300,12 +414,19 @@ def analyzed_events_since(since: datetime) -> list[dict]:
 def save_score(row: dict) -> None:
     with _LOCK, connect() as con:
         con.execute(
-            """INSERT OR REPLACE INTO wealth_sentiment_scores VALUES
-               (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            """INSERT OR REPLACE INTO wealth_sentiment_scores
+               (score_id, level, symbol, asof_at, sentiment_score, confidence,
+                coverage, observation_count, source_count, sentiment_version,
+                evidence_ids, component_breakdown, evidence_basis, evidence_count,
+                direct_evidence_count, class_evidence_count, last_evidence_at,
+                created_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             [row.get(k) for k in (
                 "score_id", "level", "symbol", "asof", "sentiment_score",
                 "confidence", "coverage", "observation_count", "source_count",
-                "sentiment_version", "evidence_ids", "component_breakdown", "created_at")],
+                "sentiment_version", "evidence_ids", "component_breakdown",
+                "evidence_basis", "evidence_count", "direct_evidence_count",
+                "class_evidence_count", "last_evidence_at", "created_at")],
         )
 
 
@@ -336,7 +457,9 @@ def latest_scores(level: str, symbol: str | None = None, limit: int = 1) -> list
 
 _SCORE_SELECT = """SELECT score_id, level, symbol, asof_at AS asof, sentiment_score, confidence,
         coverage, observation_count, source_count, sentiment_version,
-        evidence_ids, component_breakdown, created_at FROM wealth_sentiment_scores"""
+        evidence_ids, component_breakdown, evidence_basis, evidence_count,
+        direct_evidence_count, class_evidence_count, last_evidence_at, created_at
+        FROM wealth_sentiment_scores"""
 
 
 def score_history(level: str, symbol: str | None, since: datetime, limit: int = 200) -> list[dict]:
@@ -367,8 +490,8 @@ def list_events(category: str | None = None, symbol: str | None = None,
     with _LOCK, connect() as con:
         rows = con.execute(
             f"""SELECT e.event_id, e.title, e.published_at, e.published_at_precision,
-                       e.raw_category, e.asset_scope, e.news_count, e.source_count,
-                       e.analysis_status, e.first_seen_at,
+                       e.raw_category, e.asset_scope, e.asset_links, e.news_count,
+                       e.source_count, e.analysis_status, e.merged_into, e.first_seen_at,
                        (SELECT a.sentiment_direction FROM wealth_event_analyses a
                         WHERE a.event_id=e.event_id AND a.status='VALID'
                         ORDER BY a.created_at DESC LIMIT 1) AS sentiment_direction,

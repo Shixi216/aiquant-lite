@@ -1,0 +1,1614 @@
+[
+ {
+  "event_id": "wevt_54c29ad2e4d5d5b785b2",
+  "title": "中国1-9月全国发电装机容量-年初至今(万千瓦) 公布值nan 预期nan",
+  "raw_category": "MACRO_DATA",
+  "published_at": "2026-10-25 14:08:00+08:00",
+  "event_type": "MACRO_DATA",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.2,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "中国1-9月全国发电装机容量-年初至今(万千瓦) 公布值nan 预期nan",
+   "前值410302.0。"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_4827c53f54694aec8689",
+  "title": "中国1-9月全国发电装机容量年率-年初至今(%) 公布值nan 预期nan",
+  "raw_category": "MACRO_DATA",
+  "published_at": "2026-10-25 14:08:00+08:00",
+  "event_type": "MACRO_DATA",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.2,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "中国1-9月全国发电装机容量年率-年初至今(%) 公布值nan 预期nan",
+   "前值11.1。"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_9f328aaf6f770afa6d4c",
+  "title": "中国1-9月发电装机容量之水核风太阳能-年初至今(万千瓦) 公布值nan 预期nan",
+  "raw_category": "MACRO_DATA",
+  "published_at": "2026-10-25 14:08:00+08:00",
+  "event_type": "MACRO_DATA",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.2,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "公布值nan 预期nan",
+   "前值251552.0。"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_ef89049bf564a6d19541",
+  "title": "俄称打击乌能源等设施 乌称打击俄集结区",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-25 01:31:39+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.35,
+  "affected_asset_classes": [
+   "COMMODITY",
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "159985.SZ",
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "俄称打击乌能源等设施 乌称打击俄集结区",
+   "俄军对乌军使用的能源和交通基础设施、远程无人机存储和发射地点等实施打击"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6642486062389fba22b3",
+  "title": "葡萄牙多个城市举行示威游行和民众集会",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-25 01:30:55+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.2,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "葡萄牙多个城市继续举行示威游行和民众集会，要求政府采取措施应对住房危机",
+   "里斯本、波尔图、科英布拉等葡萄牙主要城市均爆发了大规模示威活动"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_528a4ff41e78f55e4c9c",
+  "title": "巴勒斯坦谴责以军强驱希伯伦平民 呼吁国际社会采取威慑措施",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-25 01:22:48+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.2,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "巴勒斯坦谴责以军强驱希伯伦平民 呼吁国际社会采取威慑措施",
+   "以军近期在约旦河西岸希伯伦地区强行驱逐大批平民等行为"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_18eaf49753b637bcc559",
+  "title": "也门胡塞武装称对沙特机场和石油设施等目标发动袭击",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-25 01:09:08+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "COMMODITY"
+  ],
+  "affected_symbols": [
+   "159985.SZ"
+  ],
+  "evidence_spans": [
+   "使用导弹和无人机对沙特境内多处机场、石油设施及一处军事基地发动了7次袭击"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_de0dda4a13c1dd1807a3",
+  "title": "伦康依隆妥单抗III期研究登上《柳叶刀》 HR+/HER2-乳腺癌实现无进展生存期翻倍",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-25 00:54:16+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "伦康依隆妥单抗III期研究登上《柳叶刀》 HR+/HER2-乳腺癌实现无进展生存期翻倍",
+   "百利天恒自主研发的EGFR×HER3双抗ADC伦康依隆妥单抗"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_06bf4b55057c8f3e3f69",
+  "title": "乌克兰对俄导弹及军工供应链实施新一轮制裁",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 19:33:55+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.35,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "512660.SH"
+  ],
+  "evidence_spans": [
+   "乌克兰对俄导弹及军工供应链实施新一轮制裁",
+   "重点精准打击俄罗斯导弹生产及军工供应链体系"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_35c7c4c3c333aaab4551",
+  "title": "亿纬锂能：公司持续推进盈利修复，后续公司将继续推进相关优化工作",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 18:15:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "公司三季度单季毛利率环比有所提升",
+   "公司持续推进盈利修复，通过加强成本管控",
+   "客户结构、出货结构的调整，后续公司将继续推进相关优化工作"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_f248be6b7c36402b6ba9",
+  "title": "央行利率定价“换锚”，利率中枢开始下移",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-24 17:50:57+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ"
+  ],
+  "evidence_spans": [
+   "央行利率定价“换锚”，利率中枢开始下移",
+   "由于DR利率是市场充分交易后的利率，利率更低",
+   "使央行货币政策传导更加畅通"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_dbf6442f02fc8771f705",
+  "title": "综合PMI再度走低 欧元区经济韧性面临考验",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 17:43:11+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "513500.SH"
+  ],
+  "evidence_spans": [
+   "欧元区10月综合采购经理指数（PMI）从9月的53.1降至51.9，创四个月新低",
+   "能源成本上升、通胀压力加大和融资条件收紧正削弱增长动力"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_321ff85bbaee85cef010",
+  "title": "攸关半导体生产！美国能源部将氦气认定为关键材料",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 17:18:26+08:00",
+  "event_type": "REGULATION",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "512480.SH"
+  ],
+  "evidence_spans": [
+   "美国能源部将氦气认定为关键材料",
+   "以加强美国制造业和供应链安全",
+   "攸关半导体生产"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_af46d0bf8cbc1c49b147",
+  "title": "金饰克价1个月跌去100元",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 16:38:18+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.78,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "受国际金价下跌影响，10月24日国内多家品牌足金饰品价格下调",
+   "相比一个月前，金饰克价累计下跌约100元"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_e057d757485f5eb01fb1",
+  "title": "美国一核聚变技术初创公司宣称实现“汞变稳定黄金” 产出水平是欧洲十倍",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 15:03:29+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.25,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "美国核聚变技术初创公司MarathonFusion当地时间周四宣布，上个月已成功将汞嬗变为稳定的黄金",
+   "总共产生了约29皮克黄金，即29万亿分之一克"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_312e141b73dd9adc8f6b",
+  "title": "黄金4000美元“保卫战”再度打响 全球央行仍加速“囤金”",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 14:37:02+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "黄金“跌跌不休”，4000美元保卫战再次打响",
+   "最终收跌0.69%报3995.38美元/盎司，创三个多月新低",
+   "本周累计下跌逾4%",
+   "全球央行仍加速“囤金”"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_00a1e28015d07a624a88",
+  "title": "中国海军“吉祥方舟”号医院船抵达加纳",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 13:59:19+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.9,
+  "affected_asset_classes": [],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "中国海军“吉祥方舟”号医院船抵达加纳",
+   "开始为期7天的友好访问并提供医疗服务"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_500c3be1cc7d9013a592",
+  "title": "一天两场行情！惊慌的尽头是真金白银！",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 13:23:03+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "159915.SZ",
+   "159949.SZ"
+  ],
+  "evidence_spans": [
+   "主要股指继续“携手”低开，且开盘后的跌势也并未快速收敛",
+   "创业板指从跌超3%的深水中直线拉升翻红，全天上涨4.16%",
+   "早盘还在谈论“割肉”的人，下午已经开始讨论要不要加仓"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_80c842af5b744c012574",
+  "title": "歌尔股份前三季度毛利率13.68% 营收净利齐升 垂直整合能力持续兑现",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 12:42:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "前三季度公司累计实现营业收入682.20亿元，同比增长0.17%",
+   "归母净利润26.19亿元，同比增长1.21%",
+   "利润增速跑赢营收增速，盈利能力持续修复"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_c175bcfbb410d0ed3af5",
+  "title": "利好！东岳硅材净利猛增超19400%！多只A股业绩爆发",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 12:14:12+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "512480.SH"
+  ],
+  "evidence_spans": [
+   "东岳硅材净利猛增超19400%",
+   "多只A股业绩爆发",
+   "十余家企业交出了超预期的业绩答卷",
+   "多家公司今年前三季度归母净利润同比增幅突破400%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6fa20334709d85bad31a",
+  "title": "“AI算力过剩论”搅动美股半导体板块：10月市值蒸发2.2万亿美元 马斯克、黄仁勋、IMF接连发声",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 12:11:17+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY",
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "513100.SH",
+   "513500.SH",
+   "162411.SZ",
+   "512480.SH"
+  ],
+  "evidence_spans": [
+   "10月市值蒸发2.2万亿美元",
+   "令“AI算力过剩”的恐慌席卷资本市场",
+   "企业经营数据却截然相反",
+   "韩国10月前20天半导体出口同比增长222.5%",
+   "接连发声反驳算力过剩论调"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_f5f20ca41604a7d2e80b",
+  "title": "国内金饰克价跌穿1200元 1个月下跌约100元",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 11:54:54+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "现货黄金价格跌破每盎司4000美元关口",
+   "国内金饰克价跌穿1200元",
+   "一个月内，金饰价格已下跌约100元"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_b7f8bcfd48fef510e635",
+  "title": "操纵股价 香港证监会出手！严查三高管",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 09:50:23+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.35,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "上述人员涉嫌计划操纵尝·高美股价，以便从香港联交所GEM转往主板上市"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_464a218653b964430242",
+  "title": "公募、外资密集出手！持续布局港股创新药",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 09:49:12+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY",
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "510900.SH",
+   "513050.SH",
+   "159545.SZ"
+  ],
+  "evidence_spans": [
+   "多家公募基金和外资机构密集南下，持续布局创新药龙头股",
+   "未来几年可能是中国创新药关键临床数据读出、海外授权推进及商业化价值兑现的重要阶段"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_724a5ea977c8adccf236",
+  "title": "车企没了 数十万辆新能源“孤儿车”谁来负责修",
+  "raw_category": "GENERAL",
+  "published_at": "2026-10-24 09:43:36+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "515030.SH"
+  ],
+  "evidence_spans": [
+   "一批曾经获得大量融资、社会关注度较高的明星车企宣告破产",
+   "产品会成为失去售后保障、技术迭代、配件供应的“孤儿车”",
+   "保守估计这种“孤儿车”在市场上目前已达数十万辆"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_0187871f8d746f0c4e60",
+  "title": "银行股上演“东升西落” 高利率考验华尔街大行净息差",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 09:08:05+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "EQUITY",
+   "OVERSEAS_EQUITY",
+   "BOND"
+  ],
+  "affected_symbols": [
+   "512800.SH",
+   "513100.SH",
+   "513500.SH"
+  ],
+  "evidence_spans": [
+   "银行股上演“东升西落” 高利率考验华尔街大行净息差",
+   "财报落地并未给银行板块带来明显提振，本周美股整体走势偏弱",
+   "A股银行走出独立行情",
+   "下半年以来中证银行指数震荡走强，区间累计涨幅近14%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_7fbbbf6694b504be082c",
+  "title": "马斯克将向美国儿童赠送股票 AI红利如何惠及普通人？",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 08:49:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "马斯克近日宣称将向美国每个孩子赠送一股SpaceX股票",
+   "这给AI红利的分配与普惠带来了更多思考"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_5eea33417096a60a6925",
+  "title": "标普将希腊评级确认为“BBB/A-2” 展望稳定",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-24 04:06:20+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "标普将希腊评级确认为“BBB/A-2”；展望稳定。"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_3152888297cc855b2350",
+  "title": "美联储周五隔夜逆回购协议（RRP）使用规模为2亿美元",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-24 01:16:36+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "美联储周五隔夜逆回购协议（RRP）使用规模为2亿美元"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_a7d317a2465a008da790",
+  "title": "法国10年期国债风险溢价下降7个基点",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-24 00:03:28+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "法国10年期国债风险溢价下降7个基点",
+   "为10月6日以来最大降幅"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_74026af03b030c49054b",
+  "title": "纳斯达克中国金龙指数跌超0.5%，乐信跌4.20%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 22:23:49+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "513100.SH"
+  ],
+  "evidence_spans": [
+   "纳斯达克中国金龙指数跌超0.5%，乐信跌4.20%",
+   "360数科跌3.02%，信也科技跌2.45%，陆金所控股跌2.39%，诺亚财富跌2.28%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_4db55875a6d55d62547e",
+  "title": "标普500指数和纳斯达克指数触及五周低点",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 21:47:52+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "513100.SH",
+   "513500.SH"
+  ],
+  "evidence_spans": [
+   "标普500指数和纳斯达克指数触及五周低点",
+   "最新分别下跌0.4%和0.2%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_9f486209cb0e78464b56",
+  "title": "6只黄金股三季度业绩披露：紫金矿业净利同比增25.97%，赤峰黄金、山金国际、四川黄金、湖南黄金营利双降，恒邦股份营收降四成",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 21:09:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "紫金矿业净利同比增25.97%",
+   "赤峰黄金、山金国际、四川黄金、湖南黄金营利双降",
+   "主要是由于黄金销量下降"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_87d74c7844758be6f283",
+  "title": "世界黄金协会与 BCG 联合发布报告：数字黄金有望释放 7000 亿美元潜在需求",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 20:55:53+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "数字黄金有望释放 7000 亿美元潜在需求",
+   "到2031年数字黄金将为整个黄金市场带来约950亿美元新增需求"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_3bdf6de00c9bc56e6f63",
+  "title": "【财经分析】资金端破局迎窗口 国内公募REITs长期配置空间可期",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-10-23 20:53:27+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "REIT"
+  ],
+  "affected_symbols": [
+   "180101.SZ",
+   "180201.SZ",
+   "508000.SH",
+   "508056.SH"
+  ],
+  "evidence_spans": [
+   "资金端破局迎窗口 国内公募REITs长期配置空间可期",
+   "当前，国内公募REITs市场供给持续扩容"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6ffd21c1bac5fc3b339c",
+  "title": "博士眼镜：关于预计触发可转债转股价格向下修正条件的提示性公告",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 20:20:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "CONVERTIBLE"
+  ],
+  "affected_symbols": [
+   "511380.SH"
+  ],
+  "evidence_spans": [
+   "预计将触发转股价格向下修正条件",
+   "公司董事会有权提出转股价格向下修正方案并提交股东会表决"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_d51ffab96e6798993043",
+  "title": "央行行长潘功胜会见欧央行前行长马里奥·德拉吉一行",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 20:01:16+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [
+   "EQUITY",
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "双方围绕全球经济形势、金融市场动态、中国宏观经济政策等议题进行了交流"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_1fb1523d879371cf896c",
+  "title": "央行公告，将开展7000亿元MLF操作",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 19:40:25+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "BOND",
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ",
+   "512800.SH"
+  ],
+  "evidence_spans": [
+   "为保持银行体系流动性充裕",
+   "开展7000亿元MLF操作，期限为1年期"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_3d06841c47d30164f1d4",
+  "title": "俄央行继续维持14%基准利率",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 19:22:23+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "继续维持14%基准利率",
+   "此后一直维持在这一水平",
+   "2026年下半年俄罗斯经济温和增长"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_77a31f55c681bc1fea90",
+  "title": "央行出手！7000亿元MLF操作来了",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 18:50:12+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ"
+  ],
+  "evidence_spans": [
+   "央行出手！7000亿元MLF操作来了",
+   "10月MLF缩量，有助于引导货币市场短端利率适度回升，稳定市场预期"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_02716ebd8553fc7250a6",
+  "title": "公募REITs双向扩容：老旧街区厂区入池，民企首单商业REITs落地",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-10-23 17:53:17+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "REIT"
+  ],
+  "affected_symbols": [
+   "180101.SZ",
+   "180201.SZ",
+   "508000.SH",
+   "508056.SH"
+  ],
+  "evidence_spans": [
+   "公募REITs双向扩容：老旧街区厂区入池，民企首单商业REITs落地",
+   "符合条件的城市更新项目被正式纳入REITs发行范畴",
+   "城市更新类资产也成为REITs领域的重要力量"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_247a4f8aca500f6820b8",
+  "title": "央行开展7000亿元1年期MLF操作",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 17:27:00+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "BOND",
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ",
+   "512800.SH"
+  ],
+  "evidence_spans": [
+   "为保持银行体系流动性充裕",
+   "开展7000亿元MLF操作，期限为1年期"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_1ed718d1550f123b1863",
+  "title": "标普500ETF华夏（159655）发布溢价风险提示",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 17:24:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "513500.SH"
+  ],
+  "evidence_spans": [
+   "标普500ETF华夏（159655）发布溢价风险提示公告",
+   "二级市场交易价格明显高于基金份额参考净值，出现较大幅度溢价"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_c28e7b76f76d955ed527",
+  "title": "【财经分析】土耳其时隔9个月重启降息 通胀黏性与金融风险制约宽松空间",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 17:18:59+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.3,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "土耳其时隔9个月重启降息 通胀黏性与金融风险制约宽松空间",
+   "土耳其货币政策能否进入持续降息周期仍存在不确定性"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_5f87327f9aa0cf415850",
+  "title": "央行将开展7000亿元MLF操作",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 17:18:45+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "BOND",
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ",
+   "512800.SH"
+  ],
+  "evidence_spans": [
+   "为保持银行体系流动性充裕",
+   "开展7000亿元MLF操作，期限为1年期"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_9704cc5f7586f76affe1",
+  "title": "赤峰黄金：第三季度净利润同比下降41.84% 黄金销量下降",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 17:14:06+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [
+   "518880.SH"
+  ],
+  "evidence_spans": [
+   "第三季度净利润同比下降41.84% 黄金销量下降",
+   "本报告期业绩同比下降主要是由于黄金销量下降",
+   "年初至报告期末业绩同比增长主要是受益于黄金价格上涨"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_1d567bd04438c2020a5e",
+  "title": "下周央行公开市场将有3380亿元逆回购到期",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 16:46:01+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "INSUFFICIENT_DATA",
+  "estimated_impact": "MINOR",
+  "confidence": 0.35,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ"
+  ],
+  "evidence_spans": [
+   "下周央行公开市场将有3380亿元逆回购到期",
+   "下周二（10月27日）还将有9000亿元1年期MLF到期"
+  ],
+  "status": "INSUFFICIENT_DATA"
+ },
+ {
+  "event_id": "wevt_76196ee0062f9bbe15e6",
+  "title": "标普500指数ETF今日合计成交额9.77亿元，环比增加40.97%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 16:41:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "513500.SH"
+  ],
+  "evidence_spans": [
+   "标普500指数ETF今日合计成交额9.77亿元，环比增加40.97%",
+   "跟踪标普500指数的相关ETF今日平均下跌1.05%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_25b021966ec0ef3c0a44",
+  "title": "港股收评：恒生指数涨0.69%，恒生科技指数涨2.05%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 16:12:43+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.78,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [
+   "510900.SH",
+   "513050.SH",
+   "159545.SZ"
+  ],
+  "evidence_spans": [
+   "恒生指数涨0.69%，恒生科技指数涨2.05%",
+   "科网股部分反弹，小米集团涨近4%",
+   "锂电池概念股反弹，宁德时代涨超5%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6f15ac6915fde116607b",
+  "title": "国债期货收盘 30年期主力合约跌0.11%",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 15:38:51+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511010.SH",
+   "511260.SH",
+   "511090.SH",
+   "511520.SH",
+   "159972.SZ"
+  ],
+  "evidence_spans": [
+   "30年期主力合约跌0.11%，10年期主力合约跌0.01%，5年期主力合约涨0.01%，2年期主力合约基本持平"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_73bdab66f8cfd94d5540",
+  "title": "中证转债指数收涨1.88%，295只可转债收涨",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 15:34:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "CONVERTIBLE"
+  ],
+  "affected_symbols": [
+   "511380.SH"
+  ],
+  "evidence_spans": [
+   "中证转债指数收涨1.88%，295只可转债收涨",
+   "139只可转债涨幅超过2%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_0affe063073d37d44a2a",
+  "title": "第三季度营收、净利同比双降，黄金股ETF华夏（159562）成分股四川黄金、湖南黄金盘中跌幅靠前",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 14:13:57+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "GOLD"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "第三季度营收、净利同比双降",
+   "虽金价仍跌1.6%，但黄金概念股盘中拉升",
+   "中证沪深港黄金产业股票指数盘中翻红涨0.58%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_386b50edf3e1b1e39cef",
+  "title": "恒生指数涨1.0%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 14:11:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "香港恒生指数延续上涨，涨幅扩大至1.0%",
+   "恒生指数涨1.0%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_b3f807c6d36c2f8f799a",
+  "title": "恒生科技指数午后涨逾2%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 13:44:12+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "恒生科技指数午后涨逾2%",
+   "恒指涨0.8%。人工智能板块走强"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_d65e6e5027e64ee0676f",
+  "title": "避险需求推动日元对美元汇率走高",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 13:34:50+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "MIXED",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY",
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "在美股科技股遭遇抛售之际，投资者纷纷转向包括日元、日本国债及美国国债在内的传统避险资产",
+   "日元对美元汇率一度上涨0.4%，最高触及156.08"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_b7530ada12e9b262d509",
+  "title": "摩根大通将纳斯达克目标价从120美元上调至122美元",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 12:14:07+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "摩根大通将纳斯达克目标价从120美元上调至122美元"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6fda18f0a5878a258238",
+  "title": "恒生指数午盘涨0.58%，恒生科技指数涨0.86%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 12:03:37+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "恒生指数午盘涨0.58%，恒生科技指数涨0.86%",
+   "港股午间收盘，恒生指数涨0.58%，恒生科技指数涨0.86%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_4eede3ec35c4ce2aa9d6",
+  "title": "港股午评：恒生指数涨0.58%，恒生科技指数涨0.86%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 12:02:18+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "恒生指数涨0.58%，恒生科技指数涨0.86%",
+   "大模型“双雄”活跃，MINIMAX涨超4%，智谱涨超1%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_8cf4ed89a2d49a52d58b",
+  "title": "国债期货午盘多数上涨",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 11:54:21+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.6,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "国债期货午盘多数上涨",
+   "30年期主力合约涨0.02%报117.860元",
+   "10年期主力合约涨0.02%报109.910元"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_4f6472e72f2626ba94f3",
+  "title": "黄金白银，大跌！",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 10:28:40+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "GOLD",
+   "COMMODITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "现货黄金失守3990美元/盎司，日内跌0.85%",
+   "同花顺黄金现货价格报857.5元/克，现跌0.95%",
+   "现货白银跌超2%，现报53.47美元/盎司"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_b261f3afe0602e9326ac",
+  "title": "本周国内豆粕期价整体呈震荡下跌走势",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 10:26:34+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.6,
+  "affected_asset_classes": [
+   "COMMODITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "本周国内豆粕期价整体呈震荡下跌走势",
+   "受美国大豆收获进展顺利、CBOT大豆期价走势偏弱等影响"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_94d100aa3c04d7f1e1c6",
+  "title": "AI泡沫破裂有多恐怖？分析师推演：标普500暴跌30%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 10:06:47+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.6,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "他预测，标普500指数将下跌30%",
+   "科技股——科技精选行业SPDR基金（XLK）——将下跌40%",
+   "市场集中度高意味着人工智能相关支出的下降将对美国股市造成沉重打击"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_bfefddd5a009e6b73b1d",
+  "title": "10月23日人民银行开展2580亿元隔夜逆回购操作 7天期逆回购操作量为零",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 10:06:10+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.6,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "7天期逆回购操作量为零",
+   "人民银行开展了2580亿元隔夜逆回购操作"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_cdd31f2e88d96c7cb464",
+  "title": "黄金、白银直线跳水！现货黄金失守4000美元关口",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 10:00:09+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "GOLD",
+   "COMMODITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "现货黄金直线跳水，截至发稿，伦敦金现跌0.91％，失守4000美元/盎司关口",
+   "伦敦银现跌超2％，报53.47美元/盎司"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_5238eb35b9050846fa95",
+  "title": "港股黄金股走低 灵宝黄金跌超5%",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 09:40:11+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.62,
+  "affected_asset_classes": [
+   "GOLD",
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "港股黄金股走低 灵宝黄金跌超5%",
+   "灵宝黄金(03330.HK)跌5.50%，紫金黄金国际(02259.HK)跌4.57%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_69e5ec4b16e5b059ffd4",
+  "title": "黄金概念板块下挫",
+  "raw_category": "GOLD_COMMODITY",
+  "published_at": "2026-10-23 09:37:17+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEGATIVE",
+  "estimated_impact": "MODERATE",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "GOLD",
+   "EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "黄金概念板块领跌，下跌3.03%",
+   "四川黄金下跌5.53%，盛达资源下跌5.08%",
+   "湖南黄金、招金黄金、湖南白银跌超4%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_d1a7b78403d05cae54b2",
+  "title": "国债期货开盘多数持平",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 09:32:21+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "国债期货开盘多数持平",
+   "30年期主力合约涨0.05%报117.900元",
+   "10年期主力合约跌0.02%报109.870元"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_165eba002438ce3cdb4f",
+  "title": "央行开展2580亿元隔夜逆回购操作",
+  "raw_category": "MONETARY_POLICY",
+  "published_at": "2026-10-23 09:22:24+08:00",
+  "event_type": "MONETARY_POLICY",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "2026年10月23日7天期逆回购操作量为零",
+   "同时，开展了2580亿元隔夜逆回购操作"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_32445103436cb44f82d3",
+  "title": "恒生指数开盘涨0.41%，恒生科技指数涨0.51%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 09:21:41+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "恒生指数开盘涨0.41%，恒生科技指数涨0.51%",
+   "10月23日，港股开盘，恒生指数涨0.41%，恒生科技指数涨0.51%。"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_51cb0f17a40df716e314",
+  "title": "港股开盘：恒生指数涨0.41% 恒生科技指数涨0.51%",
+  "raw_category": "QDII_OVERSEAS",
+  "published_at": "2026-10-23 09:21:41+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "OVERSEAS_EQUITY"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "港股开盘，恒生指数涨0.41%，恒生科技指数涨0.51%",
+   "科网股反弹，网易、京东涨逾2%，美团、阿里巴巴涨逾1%"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_26daa42385a68f226851",
+  "title": "可转债风险收益比改善 基金调仓布局结构性机会",
+  "raw_category": "BOND_MARKET",
+  "published_at": "2026-10-23 06:18:37+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.55,
+  "affected_asset_classes": [
+   "CONVERTIBLE"
+  ],
+  "affected_symbols": [],
+  "evidence_spans": [
+   "可转债风险收益比改善 基金调仓布局结构性机会",
+   "他选择进一步向价格与转股溢价率相对较低的品种倾斜",
+   "持续优化可转债组合的择券能力"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_338aed8b958aab78c88c",
+  "title": "博时基金管理有限公司关于博时招商蛇口产业园封闭式基础设施证券投资基金收益分配的公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-15 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "REIT"
+  ],
+  "affected_symbols": [
+   "180101.SZ"
+  ],
+  "evidence_spans": [
+   "博时基金管理有限公司关于博时招商蛇口产业园封闭式基础设施证券投资基金收益分配的公告",
+   "蛇口产园 公告（dividend）"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_5558e77636a05b2bc79b",
+  "title": "关于华安张江产业园封闭式基础设施证券投资基金分红的公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-15 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "REIT"
+  ],
+  "affected_symbols": [
+   "508000.SH"
+  ],
+  "evidence_spans": [
+   "关于华安张江产业园封闭式基础设施证券投资基金分红的公告",
+   "张江REIT 公告（dividend）"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_6ac82f8bb2118eb2b07e",
+  "title": "中金基金管理有限公司关于中金普洛斯仓储物流封闭式基础设施证券投资基金2026年第三次分红公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-28 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "POSITIVE",
+  "estimated_impact": "MINOR",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "REIT"
+  ],
+  "affected_symbols": [
+   "508056.SH"
+  ],
+  "evidence_spans": [
+   "中金基金管理有限公司关于中金普洛斯仓储物流封闭式基础设施证券投资基金2026年第三次分红公告"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_4561c60396709da4dfae",
+  "title": "上证5年期国债交易型开放式指数证券投资基金分红公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-15 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511010.SH"
+  ],
+  "evidence_spans": [
+   "上证5年期国债交易型开放式指数证券投资基金分红公告",
+   "国泰上证5年期国债ETF 公告（dividend）"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_8704947be7302cbc93a5",
+  "title": "上证10年期国债交易型开放式指数证券投资基金分红公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-15 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.82,
+  "affected_asset_classes": [
+   "BOND"
+  ],
+  "affected_symbols": [
+   "511260.SH"
+  ],
+  "evidence_spans": [
+   "上证10年期国债交易型开放式指数证券投资基金分红公告",
+   "国泰上证10年期国债ETF 公告（dividend）"
+  ],
+  "status": "VALID"
+ },
+ {
+  "event_id": "wevt_f521b629c782006c275c",
+  "title": "易方达中证红利低波动交易型开放式指数证券投资基金分红公告",
+  "raw_category": "FUND_ANNOUNCE",
+  "published_at": "2026-09-08 00:00:00+08:00",
+  "event_type": "OTHER",
+  "sentiment_direction": "NEUTRAL",
+  "estimated_impact": "MINOR",
+  "confidence": 0.72,
+  "affected_asset_classes": [
+   "EQUITY"
+  ],
+  "affected_symbols": [
+   "563020.SH"
+  ],
+  "evidence_spans": [
+   "易方达中证红利低波动交易型开放式指数证券投资基金分红公告",
+   "易方达中证红利低波动ETF 公告（dividend）"
+  ],
+  "status": "VALID"
+ }
+]
