@@ -5,7 +5,7 @@
  * 原则：所有进度来自真实后端状态（POST 在途 / GET /runs/{id} 轮询），
  *       不模拟思考进度；付费调用必须用户显式确认；取消契约未提供则如实标注。
  */
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from "vue";
 
 import {
   approveResearchRun,

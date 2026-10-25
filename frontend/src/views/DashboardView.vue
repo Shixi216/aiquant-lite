@@ -45,6 +45,18 @@ const visibleWidgets = computed(() =>
   themeStore.settings.dashboardOrder.filter((id) => !themeStore.settings.dashboardHidden.includes(id)),
 );
 
+/** 组件状态分组：有明确判定结果的才逐个展示，unknown 聚合为一枚徽章（悬浮可查看清单）。 */
+const activeComponents = computed(() =>
+  (dashboard.value?.components ?? []).filter(
+    (chip) => chip.status !== "unknown" && String(chip.status ?? "").trim() !== "",
+  ),
+);
+const unknownComponents = computed(() =>
+  (dashboard.value?.components ?? []).filter((chip) => chip.status === "unknown" || String(chip.status ?? "").trim() === ""),
+);
+const unknownComponentCount = computed(() => unknownComponents.value.length);
+const unknownComponentNames = computed(() => unknownComponents.value.map((chip) => chip.name).join("、"));
+
 const widgetNames: Record<string, string> = {
   freshness: "数据新鲜度条",
   components: "数据组件状态",
@@ -95,15 +107,24 @@ function moveWidget(id: string, direction: -1 | 1) {
       <template v-for="widget in visibleWidgets" :key="widget">
         <DataFreshnessBar v-if="widget === 'freshness'" :time-semantics="dashboard.time_semantics" />
         <section v-else-if="widget === 'components'" class="panel">
-          <h3>数据组件状态</h3>
+          <h3>
+            数据组件状态
+            <span class="h3-extra">仅显示已返回判定结果的组件；未探测到的组件聚合展示，避免误读</span>
+          </h3>
           <div class="chips">
             <HealthChip
-              v-for="chip in dashboard.components"
+              v-for="chip in activeComponents"
               :key="chip.name"
               :name="chip.name"
               :status="chip.status"
               :healthy="chip.healthy"
             />
+            <span
+              v-if="unknownComponentCount"
+              class="badge"
+              :title="`未返回状态的组件：${unknownComponentNames}（后端未探测，非故障）`"
+            >另有 {{ unknownComponentCount }} 个组件未返回状态</span>
+            <span v-if="!activeComponents.length && !unknownComponentCount" class="dim">暂无组件状态数据</span>
           </div>
         </section>
         <SummaryCards v-else-if="widget === 'summary'" :breadth="dashboard.market_breadth" />
