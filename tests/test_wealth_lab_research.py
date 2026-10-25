@@ -12,9 +12,14 @@ from trading.wealth_lab.research.roles import build_role_specs
 
 
 def test_role_mapping_uses_configured_models_only():
+    """验证角色使用 router_settings 配置值（环境无关：有 .env 和无 .env 都正确）。"""
+    from router.config import router_settings
     specs = build_role_specs()
-    assert specs["RESEARCHER"].actual_model_id == "qwen3.8-max-0902"
-    assert specs["REVIEWER"].actual_model_id == "deepseek-v4-pro"
+    # RESEARCHER/REVIEWER 的 model_id 必须来自配置（而非硬编码特定版本号）
+    assert specs["RESEARCHER"].actual_model_id == router_settings.qwen_model
+    assert specs["REVIEWER"].actual_model_id == router_settings.deepseek_model
+    assert specs["RESEARCHER"].provider == "qwen"
+    assert specs["REVIEWER"].provider == "deepseek"
     # PLANNER 只在显式配置时可用（禁止猜测 model_id）
     planner = specs["PLANNER"]
     assert planner.actual_model_id in (None, "deepseek-flash")
