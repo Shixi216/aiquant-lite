@@ -109,3 +109,11 @@ def test_model_unavailable_records_and_raises(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="MODEL_UNAVAILABLE"):
         asyncio.run(orch_mod.call_with_audit("wlrun_x", "PLANNER", "s", "p",
                                              temperature=0.1, max_tokens=10))
+
+
+def test_numeric_verification_repeated_values_are_separate_claims():
+    orch = ResearchOrchestrator()
+    metrics = {"total_return": 0.4594701767, "annual_return": 0.061873}
+    assert not orch._numeric_verification("年化收益45.95%，总收益45.95%", metrics)["passed"]
+    assert not orch._numeric_verification("总收益45.95%，年化收益45.95%", metrics)["passed"]
+    assert orch._numeric_verification("总收益45.95%，累计收益45.95%", metrics)["passed"]

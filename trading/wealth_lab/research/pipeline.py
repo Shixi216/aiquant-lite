@@ -393,17 +393,17 @@ class ResearchOrchestrator:
         from trading.wealth_lab.risk.engine import _METRIC_KEYWORDS
 
         # 收集所有匹配，按数字位置分组——同数字取最近（最晚 start）的关键词
-        all_matches = []  # (keyword_start, keyword, key, is_ratio, claimed, is_pct)
+        all_matches = []  # (number_start, keyword_start, keyword, key, is_ratio, claimed, is_pct)
         for keyword, (key, is_ratio) in _METRIC_KEYWORDS.items():
             pattern = _re.compile(r"(?<![a-zA-Z_])" + _re.escape(keyword)
                                   + r"[^0-9\-]{0,6}(-?\d+(?:\.\d+)?)(\s*%)?")
             for match in pattern.finditer(sentence.lower()):
-                all_matches.append((match.start(), keyword, key, is_ratio,
+                all_matches.append((match.start(1), match.start(), keyword, key, is_ratio,
                                     float(match.group(1)), bool(match.group(2))))
         # 同一数字位置取最近关键词（start 最大）
         best = {}
-        for start, keyword, key, is_ratio, claimed, is_pct in all_matches:
-            num_key = str(claimed)
+        for number_start, start, keyword, key, is_ratio, claimed, is_pct in all_matches:
+            num_key = number_start
             if num_key not in best or start > best[num_key][0]:
                 best[num_key] = (start, keyword, key, is_ratio, claimed, is_pct)
 
