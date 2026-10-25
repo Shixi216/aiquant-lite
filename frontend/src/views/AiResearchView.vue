@@ -55,6 +55,7 @@ const result = ref<ResearchRunResult | null>(null);
 const submitError = ref<string | null>(null);
 const submitWarnings = ref<string[]>([]);
 const pendingRunId = ref<string | null>(null);
+const lastPolledAt = ref<string | null>(null);
 let pollTimer: ReturnType<typeof setTimeout> | null = null;
 let pollSeq = 0;
 
@@ -207,6 +208,7 @@ async function pollRunRecord(runId: string, seq: number): Promise<void> {
       const record = await fetchResearchRun(runId);
       if (pollSeq !== seq) return;
       runRecord.value = record;
+      lastPolledAt.value = new Date().toTimeString().slice(0, 8);
       if (["COMPLETED", "VETOED", "VERIFICATION_FAILED", "FAILED"].includes(record.status)) return;
     } catch { /* 单次轮询失败继续重试（后端瞬时不可达） */ }
   }
@@ -529,7 +531,9 @@ function fmtTime(iso: string | null | undefined): string {
             AI 规划请求进行中（真实同步调用，最长 12 分钟）——完成后自动展示结构化方案；期间不显示任何模拟进度。
           </div>
           <div v-else-if="phase === 'executing'" class="phase-note" role="status">
-            后端执行中（实验/风控/模型调用为真实同步链路）；下方阶段来自每 2.5 秒的真实状态轮询。
+            后端执行中（实验/风控/模型调用为真实同步链路，Qwen 阶段可能超过一分钟）；页面不阻塞，
+            下方阶段来自每 2.5 秒的真实状态轮询<template v-if="lastPolledAt">（最近 {{ lastPolledAt }}）</template>。
+            可离开本页稍后按 run_id 查询恢复。
           </div>
           <div v-if="!runRecord && phase === 'idle'" class="empty">发起或查询一次研究后，此处显示十步流程与全部证据。</div>
 

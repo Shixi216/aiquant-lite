@@ -101,6 +101,10 @@
 6. `06-factory-pit-rebalance-audit.png` — 逐调仓 PIT 审计（三日期 + 31 条记录 + 折线）
 7. `07-universe-server-side-filter.png` — 研究池服务端筛选实测
 8. `08-task-center-jobs-queue-real-loop.png` — 后端任务队列 + 本地留痕（job 成功/失败全证据链）
+9. `09-ai-research-workspace.png` — AI 智能研究工作台（v3.3）
+10. `10-ai-research-roles-and-error.png` — 模型角色面板与真实失败提示
+11. `11-sentiment-workspace.png` — 多资产市场情绪工作台（市场卡/类别/33 资产/任务条）
+12. `12-market-data-regression-fixed.png` — 行情增量更新回归：昨日 FAILED vs 今日 SUCCEEDED 同框
 
 ## 七、待后端补充/确认的接口
 
@@ -138,6 +142,30 @@
 5. vue-tsc 0 错误 · vite build 通过 · 19/19 单测。
 
 **待后端/环境**：① DeepSeek 上游连通性（代理配置）恢复后完成成功路径验收；② 建议补 research run 列表端点（当前仅能按 run_id 查询）与取消端点；③ 契约 yaml 补录 `/v3/research/*` 与决策包关联字段。
+
+## 十、第三轮：多资产市场情绪工作区（wealth-sentiment/v1.1）
+
+**新工作区「📡 市场情绪」→ /wealth-sentiment**，1:1 对接 `trading/wealth_lab/sentiment/CONTRACT.md`（v1.1）与 v3.4 jobs 白名单新增的 3 个情绪操作。
+
+**新增文件**：`src/types/sentiment.ts`、`src/api/sentiment.ts`（读端点 + 三写任务；写任务复用 v3 jobs 轮询）、`src/views/WealthSentimentView.vue`；修改 `router/index.ts`、`MainLayout.vue`（第六工作区）、`AiResearchView.vue`（执行中显示真实轮询时间戳与"可离开本页按 run_id 恢复"——非阻塞强化）。
+
+**功能对照验收单**：
+| 验收项 | 实现 |
+|---|---|
+| 市场总体情绪 | 大卡：分数（涨跌配色）、置信度、证据口径徽章、直接/间接/观测/来源计数、版本与快照时间、方向分布、证据下钻按钮 |
+| 八大类别情绪 | 前端按后端资产评分聚合（**明确标注"后端无独立类别评分，仅供分化概览"**）；实际渲染 9 类（v3.1 新增 QDII_LOF），如实展示 |
+| 33 只资产情绪 | 逐只调用后端 `/assets/{symbol}/score`；分数/置信/口径/直接·间接/观测/最新证据 |
+| 证据不足 | `INSUFFICIENT_DATA` → 灰显"证据不足"；`CLASS_LEVEL_EVIDENCE` → "间接推导"徽章（置信封顶 0.6）；`direct_evidence_count=0` 不作强信号展示 |
+| 直接 vs 类别关联证据 | 资产表分列展示 direct/class 计数；事件 `asset_links` 按分级渲染（直接点名=绿、其它=黄） |
+| 新闻与事件列表 | 事件表（时间/标题/方向/分析状态/关联分级/新闻来源数），支持按代码/类别/状态过滤；资产行展开显示该资产资讯（含**原文链接**与逐条关联分级）；MERGED 显示归并指向 |
+| 评分审计 | `/scores/{id}/evidence` 下钻：贡献事件、分析记录、validation_flags 校验标记、完整审计 JSON |
+| 三个写按钮 | 更新资讯/重新分析（付费需确认）/重新计算情绪分数 → `POST /v1/wealth-lab/sentiment/{refresh,analyze,rebuild-factor}`（内部走 Jobs API）→ job_id → 内联真实轮询（3s）→ 终态后自动刷新情绪数据 |
+
+**实测（全部真实）**：市场 +17.3（直接证据口径，53 条观测）；33/33 资产评分加载（债券 +34.1/REITs +67.0 等，全部正确标注间接推导与 60% 置信封顶）；「重新计算情绪分数」UI 提交 → `wljob_7f9debdd9d16` → 排队 → 20% → **成功 100%**（结果含 389 条重关联、373 事件归并的真实维护审计）。截图 `11`。
+
+**开发期修复**：资产评分批量加载曾全量失败——根因是前端 import 遗漏（`fetchAssetScore` 未导入）叠加后端并发连接的瞬态锁竞争；已修复导入、错误信息透出真实原因、并按任务中心既有先例增加一次静默重试。经验教训：此前 vue-tsc 输出被管道截断掩盖了真实类型错误，本轮起类型检查不再截断输出。
+
+**控制中心遗留问题回归**：后端 `723000f` 修复 `_update_market_data` 的 list-set TypeError 后，重跑「增量更新 ETF 行情」→ `wljob_64074752707c` **SUCCEEDED 100%**（rows=0 为正确语义：周末无新增交易日；来源审计 fund_daily/fund_adj 均 OFFICIAL）。任务记录中昨日 FAILED 与今日 SUCCEEDED 同框对照（截图 `12`）。8767 只读门面的 6 个按钮维持如实失败展示，未绕过。
 
 ## 九、已知边界（如实记录）
 

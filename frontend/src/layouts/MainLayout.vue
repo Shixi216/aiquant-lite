@@ -81,6 +81,14 @@ const workspaces: Workspace[] = [
       { key: "ai-research", to: "/ai-research", label: "AI 智能研究工作台", icon: "🧠" },
     ],
   },
+  {
+    id: "sentiment",
+    label: "市场情绪",
+    icon: "📡",
+    items: [
+      { key: "wealth-sentiment", to: "/wealth-sentiment", label: "多资产市场情绪", icon: "📡" },
+    ],
+  },
 ];
 
 const activeWorkspace = computed<Workspace>(() => {
@@ -88,6 +96,7 @@ const activeWorkspace = computed<Workspace>(() => {
   if (path.startsWith("/task-center")) return workspaces[2]!;
   if (path.startsWith("/settings")) return workspaces[3]!;
   if (path.startsWith("/ai-research")) return workspaces[4]!;
+  if (path.startsWith("/wealth-sentiment")) return workspaces[5]!;
   if (path.startsWith("/wealth")) return workspaces[1]!;
   return workspaces[0]!;
 });

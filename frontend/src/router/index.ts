@@ -111,6 +111,13 @@ const router = createRouter({
       meta: { title: "AI 智能研究" },
       component: () => import("../views/AiResearchView.vue"),
     },
+    // 多资产市场情绪（wealth-sentiment/v1.1，CURRENT_RESEARCH_ONLY）
+    {
+      path: "/wealth-sentiment",
+      name: "wealth-sentiment",
+      meta: { title: "多资产市场情绪" },
+      component: () => import("../views/WealthSentimentView.vue"),
+    },
     { path: "/:pathMatch(.*)*", redirect: "/dashboard" },
   ],
 });
