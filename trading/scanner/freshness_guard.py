@@ -18,6 +18,7 @@ from pathlib import Path
 import json
 
 TZ = timezone(timedelta(hours=8))
+COMPLETE_COVERAGE_RATIO = 0.99
 
 
 @dataclass
@@ -42,11 +43,11 @@ class ScannerFreshnessGuard:
     # ------------------------------------------------------------------
     # 规则1：获取最近交易日（Tushare 交易日历，注意返回降序）
     # ------------------------------------------------------------------
-    def _latest_trade_date(self) -> str | None:
+    def _latest_trade_date(self, data_cutoff: datetime | None = None) -> str | None:
         """最近交易日（统一 TradingCalendarService，不依赖返回顺序）"""
         try:
             from data_hub.services.trading_calendar_service import TradingCalendarService
-            return TradingCalendarService().latest_trade_date(as_str=True)
+            return TradingCalendarService().daily_snapshot_target_date(data_cutoff=data_cutoff, as_str=True)
         except Exception:
             return None
 
@@ -73,7 +74,7 @@ class ScannerFreshnessGuard:
         )
 
         # 最近交易日
-        latest_trade = self._latest_trade_date()
+        latest_trade = self._latest_trade_date(result.data_cutoff)
         if latest_trade:
             result.latest_trade_date = latest_trade
         else:
@@ -84,8 +85,11 @@ class ScannerFreshnessGuard:
         try:
             con = open_database(str(db_path), read_only=True)
             rows = con.execute(
-                "SELECT snapshot_id, snapshot_time, data_cutoff FROM market_snapshot_runs "
-                "ORDER BY snapshot_time DESC LIMIT 1"
+                "SELECT snapshot_id, snapshot_time, data_cutoff, completeness_status, coverage_ratio "
+                "FROM market_snapshot_runs "
+                "WHERE snapshot_time <= ? AND data_cutoff <= ? AND completed_at IS NOT NULL "
+                "AND completeness_status <> 'FAILED' ORDER BY snapshot_time DESC LIMIT 1",
+                [result.data_cutoff, result.data_cutoff],
             ).fetchall()
             con.close()
         except Exception:
@@ -98,34 +102,52 @@ class ScannerFreshnessGuard:
                 return self._refresh_and_recheck(result, db_path, force_refresh)
             return result
 
-        snapshot_id, snapshot_time, snapshot_cutoff = rows[0]
+        snapshot_id, snapshot_time, snapshot_cutoff, status, coverage_ratio = rows[0]
         result.snapshot_id = snapshot_id
         result.snapshot_time = snapshot_time
 
-        # 规则1+2：检查覆盖度（明细数 vs 股票池），不足则刷新
-        try:
-            con = open_database(str(db_path), read_only=True)
-            item_count = con.execute(
-                "SELECT COUNT(*) FROM market_snapshot_items WHERE snapshot_id=?",
-                [snapshot_id],
-            ).fetchone()[0]
-            universe_count = con.execute(
-                "SELECT COUNT(*) FROM stock_universe WHERE listing_status='ACTIVE'"
-            ).fetchone()[0]
-            con.close()
-        except Exception:
-            item_count, universe_count = 0, 0
+        if status != "COMPLETE" or coverage_ratio is None or not COMPLETE_COVERAGE_RATIO <= coverage_ratio <= 1:
+            result.reason = "快照完整性未通过校验（需COMPLETE及至少99%覆盖）"
+            return self._refresh_and_recheck(result, db_path, force_refresh)
 
-        # 覆盖不足（<90%股票池）→ 必须刷新（规则2）
-        if universe_count > 0 and item_count < universe_count * 0.9:
+        # Count valid, unique members of the available universe, not arbitrary rows.
+        try:
+            with open_database(str(db_path), read_only=True) as con:
+                universe_count, item_count = con.execute(
+                    """SELECT COUNT(DISTINCT stock.symbol),
+                        COUNT(DISTINCT item.symbol) FILTER (
+                            WHERE item.price > 0 AND item.item_status IN ('VALID', 'OK')
+                              AND NOT COALESCE(item.is_abnormal, FALSE)
+                        )
+                    FROM stock_universe AS stock
+                    LEFT JOIN market_snapshot_items AS item
+                      ON item.symbol = stock.symbol AND item.snapshot_id = ?
+                    WHERE stock.listing_status = 'ACTIVE' AND stock.data_available_time <= ?""",
+                    [snapshot_id, result.data_cutoff],
+                ).fetchone()
+        except Exception:
+            result.reason = "无法核验快照有效覆盖率"
+            return self._refresh_and_recheck(result, db_path, force_refresh)
+
+        if universe_count <= 0 or item_count < universe_count * COMPLETE_COVERAGE_RATIO:
             result.reason = f"快照覆盖不足（{item_count}/{universe_count}只）"
             return self._refresh_and_recheck(result, db_path, force_refresh)
 
-        # 快照日期 < 最近交易日 → 过期
-        snap_date = str(snapshot_time)[:10].replace("-", "")
-        if snap_date < latest_trade:
-            result.reason = f"快照过期（快照 {snap_date}，最近交易日 {latest_trade}）"
-            # 规则2：自动批量刷新
+        # Completion comes from persisted source dates, never collection time.
+        try:
+            with open_database(str(db_path), read_only=True) as connection:
+                dates = connection.execute(
+                    """SELECT DISTINCT COALESCE(
+                        TRY_STRPTIME(JSON_EXTRACT_STRING(payload_json, '$.trade_date'), '%Y%m%d')::DATE,
+                        TRY_CAST(JSON_EXTRACT_STRING(payload_json, '$.trade_date') AS DATE)
+                    ) FROM market_snapshot_items WHERE snapshot_id = ?""",
+                    [snapshot_id],
+                ).fetchall()
+            observed = [row[0].strftime("%Y%m%d") if row[0] is not None else None for row in dates]
+        except Exception:
+            observed = []
+        if observed != [latest_trade]:
+            result.reason = f"行情日期未通过校验（实际 {observed}，需 {latest_trade}）"
             return self._refresh_and_recheck(result, db_path, force_refresh)
 
         # 快照数据截止 < 最近完成交易日 → 需要刷新
@@ -207,6 +229,13 @@ class ScannerFreshnessGuard:
                 result.reason = "数据陈旧（行情交易日期无法确认）"
                 return result
 
+            if snap.coverage_ratio < COMPLETE_COVERAGE_RATIO or not snap.aligned:
+                result.fresh = False
+                result.refresh_failed = True
+                result.refresh_error = "行情覆盖率不足99%或daily/basic未对齐"
+                result.reason = "数据陈旧（行情完整性未通过校验）"
+                return result
+
             # 派生横截面字段（两融净买入 / 龙虎榜净额 / 机构净额）
             margin_map, dragon_map = provider.compute_cross_section_fields(snap)
 
@@ -245,7 +274,7 @@ class ScannerFreshnessGuard:
                         f"payload交易日期不一致：期望 {expected_date}，实际 {observed_dates}"
                     )
                     result.reason = "数据陈旧（持久化行情交易日期无法确认）"
-                elif expected_date >= result.latest_trade_date:
+                elif result.latest_trade_date and expected_date == result.latest_trade_date:
                     result.fresh = True
                     result.reason = (
                         f"批量刷新成功（行情 {expected_date}，Tushare主源，"
@@ -281,6 +310,11 @@ class ScannerFreshnessGuard:
             frame = provider.fetch_market_snapshot(symbols)
             if frame is None or frame.empty:
                 raise RuntimeError("腾讯备用源返回空")
+            observed = set(frame["trade_date"].dropna().astype(str)) if "trade_date" in frame else set()
+            if "trade_date" not in frame or frame["trade_date"].isna().any() or observed != {result.latest_trade_date}:
+                raise RuntimeError("腾讯备用源交易日期缺失或不符")
+            if len(frame) < len(symbols) * COMPLETE_COVERAGE_RATIO:
+                raise RuntimeError("腾讯备用源覆盖率不足99%")
             self._write_snapshot(db_path, frame, "Tencent")
             result.auto_refreshed = True
             result.fresh = True
@@ -297,6 +331,11 @@ class ScannerFreshnessGuard:
         """把 Tushare 四接口数据写入快照表（含两融/龙虎榜派生字段）"""
         import uuid
         import json
+        from data_hub.providers.tushare_snapshot import snapshot_date_errors
+
+        date_errors = snapshot_date_errors(snap)
+        if date_errors:
+            raise ValueError(" | ".join(date_errors))
 
         snapshot_id = f"mkt_{uuid.uuid4().hex[:20]}"
         now = datetime.now(tz=TZ)
@@ -321,7 +360,7 @@ class ScannerFreshnessGuard:
                     snapshot_id, now,
                     len(snap.daily), len(snap.daily), len(snap.daily), 0,
                     coverage,
-                    "COMPLETE" if coverage >= 0.99 else "PARTIAL",
+                    "COMPLETE" if coverage >= COMPLETE_COVERAGE_RATIO else "PARTIAL",
                     now, now, now,
                     f"tushare_{trade_date}_{int(now.timestamp())}",
                     snap.request_count, 0.0, 0, 0,
@@ -351,9 +390,18 @@ class ScannerFreshnessGuard:
                 limit_row = limit_map.get(code)
                 payload = {
                     "trade_date": trade_date,
+                    "source_trade_dates": {
+                        name: str(getattr(snap, name).iloc[0]["trade_date"]).replace("-", "")
+                        for name in ("daily", "daily_basic", "moneyflow", "stk_limit", "margin_detail", "top_list", "top_inst")
+                        if getattr(snap, name, None) is not None and not getattr(snap, name).empty
+                    },
                     "snapshot_time": now.isoformat(),
                     "collected_at": now.isoformat(),
                     "source": "Tushare",
+                    "volume_unit": "LOTS",
+                    "amount_unit": "THOUSAND_CNY",
+                    "change_pct_unit": "PERCENT",
+                    "turnover_rate_unit": "PERCENT",
                     "open": r.get("open"), "high": r.get("high"),
                     "low": r.get("low"), "close": r.get("close"),
                     "pct_chg": r.get("pct_chg"), "volume": r.get("vol"),
@@ -418,7 +466,7 @@ class ScannerFreshnessGuard:
                  coverage_ratio, completeness_status, started_at, completed_at,
                  snapshot_time, content_hash, request_count, elapsed_seconds,
                  peak_memory_bytes, database_growth_bytes, error_message)
-                VALUES (?, 'APPLY', ?, ?, ?, ?, ?, ?, ?, 'COMPLETED', ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+                 VALUES (?, 'APPLY', ?, ?, ?, ?, ?, ?, ?, 'COMPLETE', ?, ?, ?, ?, ?, ?, ?, ?, NULL)
                 """,
                 [
                     snapshot_id, provider_name, now, len(frame),
@@ -433,11 +481,16 @@ class ScannerFreshnessGuard:
             for _, r in frame.iterrows():
                 payload = {
                     "symbol": str(r["symbol"]),
+                    "trade_date": r.get("trade_date"),
                     "price": float(r["close"]) if r["close"] is not None else None,
                     "change_pct": float(r["pct_chg"]) if r["pct_chg"] is not None else None,
                     "volume": float(r.get("volume") or 0),
                     "amount": float(r.get("amount") or 0),
                     "source": provider_name,
+                    "volume_unit": "LOTS",
+                    "amount_unit": "TEN_THOUSAND_CNY",
+                    "change_pct_unit": "PERCENT",
+                    "turnover_rate_unit": "PERCENT",
                 }
                 rows.append((
                     snapshot_id,

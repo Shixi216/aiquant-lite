@@ -1,0 +1,26 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "review_id": "wlrv_2b3c4d5e6f7a",
+    "model": "deepseek-v4-pro",
+    "verdict": "SUPPORTED",
+    "unchecked_claims": [
+      "『动量优势在未来延续』缺乏样本外证据"
+    ],
+    "hallucination_flags": [],
+    "human_review_required": false,
+    "notes": "4/5 结论可对应到计算结果；建议补充 Walk-Forward 验证"
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [
+    "AI_OUTPUT_IS_RESEARCH_ONLY"
+  ],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

@@ -68,4 +68,3 @@ def test_eastmoney_timeout_falls_back_to_cninfo(monkeypatch) -> None:
     assert record.data["disclosure_source"] == "CNInfo"
     eastmoney_run = next(run for run in response.provider_runs if "Eastmoney" in run.provider)
     assert eastmoney_run.success is False
-

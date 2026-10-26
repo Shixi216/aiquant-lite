@@ -65,11 +65,14 @@ def consistency() -> dict[str, Any]:
                 """
             ).fetchone()[0]
         )
+    # An active DuckDB file is neither a stable snapshot nor always readable
+    # through a second Windows file handle. Hash offline exports separately.
     return {
         "owner_pid": os.getpid(),
         "database_path": str(path),
         "size_bytes": path.stat().st_size,
-        "sha256": _sha256(path),
+        "sha256": None,
+        "sha256_status": "UNAVAILABLE_ACTIVE_DATABASE",
         "table_counts": counts,
         "duplicate_decision_packets": duplicate_packets,
     }

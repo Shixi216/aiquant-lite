@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vue-tsc -b && vite build",
+    "typecheck": "vue-tsc -b --force",
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs"
   },

@@ -33,7 +33,6 @@ import {
   formatAmountYi,
   formatPct,
   getQuantReasonLabel,
-  getScanTypeLabel,
   NO_DATA,
   SCAN_TYPE_LABELS,
 } from "../domain/labels";
@@ -199,7 +198,7 @@ function switchTab(tab: string) {
         市场宽度趋势（60交易日）
         <span class="h3-extra">上涨占比 + 涨跌停家数</span>
       </h3>
-      <BreadthTrendChart v-if="breadth?.available && breadth.data.length" :points="breadth.data" />
+      <BreadthTrendChart v-if="breadth?.available && breadth.data && breadth.data.length" :points="breadth.data" />
       <p v-else class="dim">{{ breadth ? getQuantReasonLabel(breadth.reason_code) : "加载中…" }}</p>
     </section>
 
@@ -207,7 +206,7 @@ function switchTab(tab: string) {
       <!-- 两融 -->
       <section class="panel">
         <h3>两融余额趋势（60交易日）</h3>
-        <MarginTrendChart v-if="margin?.available && margin.data.length" :points="margin.data" />
+        <MarginTrendChart v-if="margin?.available && margin.data && margin.data.length" :points="margin.data" />
         <p v-else class="dim">{{ margin ? getQuantReasonLabel(margin.reason_code) : "加载中…" }}</p>
       </section>
 
@@ -220,7 +219,7 @@ function switchTab(tab: string) {
         <div class="pool-cols">
           <div>
             <h4 class="pool-title up">涨停池（前10）</h4>
-            <table v-if="pools?.available" class="data mini-pool">
+            <table v-if="pools?.available && pools.data" class="data mini-pool">
               <tbody>
                 <tr v-for="row in pools.data.limit_up_pool.slice(0, 10)" :key="row.symbol">
                   <td>
@@ -235,7 +234,7 @@ function switchTab(tab: string) {
           </div>
           <div>
             <h4 class="pool-title down">跌停池（前10）</h4>
-            <table v-if="pools?.available" class="data mini-pool">
+            <table v-if="pools?.available && pools.data" class="data mini-pool">
               <tbody>
                 <tr v-for="row in pools.data.limit_down_pool.slice(0, 10)" :key="row.symbol">
                   <td>
@@ -259,7 +258,7 @@ function switchTab(tab: string) {
         <span class="h3-extra">{{ dragon?.data_cutoff ?? "" }} · 按净买额绝对值排序</span>
       </h3>
       <div class="table-scroll dragon-scroll">
-        <DragonTigerTable v-if="dragon?.available" :items="dragon.data" />
+        <DragonTigerTable v-if="dragon?.available && dragon.data" :items="dragon.data" />
         <p v-else class="dim pad">{{ dragon ? getQuantReasonLabel(dragon.reason_code) : "加载中…" }}</p>
       </div>
     </section>
@@ -288,7 +287,7 @@ function switchTab(tab: string) {
 
       <div class="table-scroll scan-scroll">
         <template v-if="activeTab === 'rps60'">
-          <table v-if="rps?.available" class="data">
+          <table v-if="rps?.available && rps.data" class="data">
             <thead>
               <tr>
                 <th>#</th>
@@ -319,7 +318,7 @@ function switchTab(tab: string) {
         </template>
         <template v-else>
           <ScanTable
-            v-if="scan?.available"
+            v-if="scan?.available && scan.data"
             :rows="scan.data.items"
             :show-streak="false"
             :show-rps="false"
@@ -327,7 +326,7 @@ function switchTab(tab: string) {
           <p v-else class="dim pad">{{ scan ? getQuantReasonLabel(scan.reason_code) : "加载中…" }}</p>
         </template>
       </div>
-      <p v-if="scan?.available" class="scan-total">
+      <p v-if="scan?.available && scan.data" class="scan-total">
         命中 <b>{{ scan.data.total }}</b> 只，显示前 {{ scan.data.items.length }} 只（按涨跌幅排序）
       </p>
     </section>

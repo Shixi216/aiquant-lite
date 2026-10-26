@@ -2,14 +2,16 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { BreadthPoint } from "../../types/v2";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { DOWN_COLOR, UP_COLOR } from "../../domain/labels";
 
 const props = defineProps<{ points: BreadthPoint[] }>();
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const option = computed<EChartsCoreOption | null>(() => {
   const data = props.points;
@@ -48,7 +50,7 @@ const option = computed<EChartsCoreOption | null>(() => {
         yAxisIndex: 0,
         smooth: true,
         showSymbol: false,
-        lineStyle: { width: 2.2, color: "#4da3ff" },
+        lineStyle: { width: 2.2, color: ct.value.accent },
         areaStyle: {
           color: {
             type: "linear", x: 0, y: 0, x2: 0, y2: 1,

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { DecisionPacketData } from "../../types/v2";
+import type { DecisionPacketData, ResearchReview } from "../../types/v2";
 import {
   getDecisionLabel,
   formatDateTime,
   NO_DATA,
 } from "../../domain/labels";
 
-const props = defineProps<{ packet: DecisionPacketData | null; reason?: string | null }>();
+const props = defineProps<{ packet: DecisionPacketData | null; reason?: string | null; review?: ResearchReview | null }>();
 
 const zoneText = computed(() => {
   const packet = props.packet;
@@ -24,7 +24,12 @@ const preferredText = computed(() => {
 
 <template>
   <section class="panel decision-card">
-    <div v-if="!packet" class="empty">
+    <template v-if="!packet && review">
+      <div class="head"><span class="symbol">本轮研究结论</span><strong class="action">{{ review.action_zh }}</strong></div>
+      <p class="frozen-note">{{ review.execution_status }} · 行情截至 {{ review.price_as_of }} · 研究生成 {{ formatDateTime(review.generated_at) }}</p>
+      <p class="frozen-note">研究建议，尚未保存为冻结交易计划。最终操作由使用者自行执行。</p>
+    </template>
+    <div v-else-if="!packet" class="empty">
       暂无冻结交易计划
       <span v-if="reason" class="dim">（{{ reason }}）</span>
     </div>

@@ -1,0 +1,169 @@
+{
+ "request_id": "req_a8d1d5d729f54e1cadc7ba71",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "score": {
+   "score_id": "wscore_d34fec77ca674b",
+   "level": "MARKET",
+   "symbol": null,
+   "asof": "2026-10-25T16:46:49.782012+08:00",
+   "sentiment_score": 17.3,
+   "confidence": 0.6429,
+   "coverage": 1.0,
+   "coverage_ratio": 1.0,
+   "observation_count": 53,
+   "source_count": 53,
+   "sentiment_version": "wealth-sentiment/1.1",
+   "evidence_basis": "DIRECT_EVIDENCE",
+   "evidence_count": 53,
+   "direct_evidence_count": 0,
+   "class_evidence_count": 53,
+   "last_evidence_at": "2026-10-25T01:31:39+08:00",
+   "evidence_ids": [
+    "wana_17e1032b9c34",
+    "wana_48fdc604b777",
+    "wana_aa2122f72319",
+    "wana_ad2391012a9b",
+    "wana_f9260663b14e",
+    "wana_b226b7b9d256",
+    "wana_b8369699302a",
+    "wana_5214c347a1bb",
+    "wana_b4a56dcd1354",
+    "wana_40128a1450c2"
+   ],
+   "component_breakdown": {
+    "by_direction": {
+     "POSITIVE": 21,
+     "NEGATIVE": 13,
+     "NEUTRAL": 6,
+     "MIXED": 13
+    },
+    "by_link_level": {
+     "EXACT": 0,
+     "SAME_INDEX": 0,
+     "MODEL_INFERRED": 0,
+     "CLASS_ONLY": 0
+    },
+    "top_contributors": [
+     {
+      "event_id": "wevt_5f87327f9aa0cf415850",
+      "title": "央行将开展7000亿元MLF操作",
+      "direction": "POSITIVE",
+      "signed": 0.6278,
+      "link_level": null,
+      "decay": 0.8719,
+      "confidence": 0.72
+     },
+     {
+      "event_id": "wevt_464a218653b964430242",
+      "title": "公募、外资密集出手！持续布局港股创新药",
+      "direction": "POSITIVE",
+      "signed": 0.4602,
+      "link_level": null,
+      "decay": 0.7423,
+      "confidence": 0.62
+     },
+     {
+      "event_id": "wevt_69e5ec4b16e5b059ffd4",
+      "title": "黄金概念板块下挫",
+      "direction": "NEGATIVE",
+      "signed": -0.4234,
+      "link_level": null,
+      "decay": 0.588,
+      "confidence": 0.72
+     },
+     {
+      "event_id": "wevt_f248be6b7c36402b6ba9",
+      "title": "央行利率定价“换锚”，利率中枢开始下移",
+      "direction": "POSITIVE",
+      "signed": -0.4178,
+      "link_level": null,
+      "decay": 0.9359,
+      "confidence": 0.62
+     },
+     {
+      "event_id": "wevt_c175bcfbb410d0ed3af5",
+      "title": "利好！东岳硅材净利猛增超19400%！多只A股业绩爆发",
+      "direction": "POSITIVE",
+      "signed": 0.4106,
+      "link_level": null,
+      "decay": 0.6622,
+      "confidence": 0.62
+     }
+    ],
+    "weights": {
+     "impact": {
+      "MINOR": 0.4,
+      "MODERATE": 1.0,
+      "MAJOR": 1.8
+     },
+     "eco_importance": {
+      "1": 0.3,
+      "2": 0.7,
+      "3": 1.4
+     },
+     "half_life_hours": {
+      "MONETARY_POLICY": 240.0,
+      "MACRO_DATA": 240.0,
+      "FUND_ANNOUNCE": 120.0,
+      "GOLD_COMMODITY": 72.0,
+      "BOND_MARKET": 72.0,
+      "QDII_OVERSEAS": 72.0,
+      "GENERAL": 48.0
+     },
+     "source_diversity_cap": 1.5,
+     "source_diversity_step": 0.25,
+     "mixed_direction_scale": 0.15,
+     "asset_target_observations": 6,
+     "market_target_observations": 10,
+     "top_evidence": 10,
+     "risk_appetite_sign": {
+      "EQUITY": 1.0,
+      "OVERSEAS_EQUITY": 1.0,
+      "REIT": 0.8,
+      "CONVERTIBLE": 0.8,
+      "COMMODITY": 0.5,
+      "GOLD": -0.6,
+      "BOND": -0.8,
+      "FX": 0.0
+     },
+     "market_class_weight": {
+      "EQUITY": 1.0,
+      "BOND": 0.9,
+      "GOLD": 0.8,
+      "OVERSEAS_EQUITY": 0.8,
+      "COMMODITY": 0.6,
+      "REIT": 0.6,
+      "CONVERTIBLE": 0.7,
+      "FX": 0.3
+     },
+     "weights_id": "v1.1",
+     "link_weight": {
+      "EXACT": 1.0,
+      "SAME_INDEX": 0.35,
+      "MODEL_INFERRED": 0.35,
+      "CLASS_ONLY": 0.25
+     },
+     "class_only_confidence_cap": 0.6,
+     "min_direct_obs_for_direct_basis": 1
+    },
+    "v1_0_weights_for_reference": {
+     "direct_link_weight": 1.0,
+     "class_link_weight": 0.45
+    },
+    "lookback_hours": 168,
+    "events_in_window": 53
+   }
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": null,
+ "generated_at": "2026-10-25T17:50:42.102955+09:00",
+ "api_version": "wealth-sentiment/v1",
+ "research_only": true,
+ "note": "真实响应采样生成（2026-10-25），截断长数组"
+}

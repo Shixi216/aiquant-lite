@@ -18,6 +18,7 @@ const label = computed(() => getHealthStatusLabel(props.status));
 </template>
 
 <style scoped>
+.chip.neutral { color: var(--text-faint); background: var(--bg-hover); }
 .chip {
   display: inline-block;
   padding: 2px 10px;

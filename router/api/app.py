@@ -78,6 +78,13 @@ from trading.decision_support.routes_cross_section import (
 from trading.decision_support.routes_packet_v2 import (
     router as decision_packet_v2_router,
 )
+from trading.wealth_lab.routes import router as wealth_lab_router
+from trading.wealth_lab.routes_v2 import router as wealth_lab_v2_router
+from trading.wealth_lab.routes_v3 import router as wealth_lab_v3_router
+from trading.wealth_lab.routes_jobs import router as wealth_lab_jobs_router
+from trading.wealth_lab.routes_research import router as wealth_lab_research_router
+from trading.wealth_lab.sentiment.routes import router as wealth_sentiment_router
+from trading.wealth_lab.social_sentiment.routes import router as social_sentiment_router
 from router.integration.routes import router as integration_router
 from router.integration.schemas import ErrorCode, ResponseStatus, UnifiedResponse
 from router.integration.identifiers import new_request_id
@@ -410,5 +417,12 @@ app.include_router(historical_bars_router)
 app.include_router(market_breadth_router)
 app.include_router(cross_section_router)
 app.include_router(decision_packet_v2_router)
+app.include_router(wealth_lab_router)
+app.include_router(wealth_lab_v2_router)
+app.include_router(wealth_lab_v3_router)
+app.include_router(wealth_lab_jobs_router)
+app.include_router(wealth_lab_research_router)
+app.include_router(wealth_sentiment_router)
+app.include_router(social_sentiment_router)
 app.include_router(integration_router)
 install_documented_openapi(app)

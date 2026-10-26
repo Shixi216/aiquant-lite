@@ -1,0 +1,13 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "FAILED",
+  "data": null,
+  "error_code": "DATA_UNAVAILABLE",
+  "sanitized_error": "数据不可用：请求区间早于资产上市日",
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T15:00:00+08:00",
+  "api_version": "router-0.10.0",
+  "research_only": true
+}

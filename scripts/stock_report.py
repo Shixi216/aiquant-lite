@@ -178,13 +178,20 @@ def _sync_daily_bar(connection, record) -> None:
     trade_date_str = str(trade_date)[:10]
     if len(trade_date_str) == 8 and trade_date_str.isdigit():
         trade_date_str = f"{trade_date_str[:4]}-{trade_date_str[4:6]}-{trade_date_str[6:8]}"
-    # 检查是否已有该日数据
+    # Append a corrected revision: older incomplete rows remain auditable.
+    import hashlib
+    revision_hash = hashlib.sha256(
+        f"{record.content_hash}:stock-report-sync-v3-units".encode("utf-8")
+    ).hexdigest()
     exists = connection.execute(
-        "SELECT bar_id FROM canonical_historical_bars WHERE symbol=? AND trade_date=? LIMIT 1",
-        [symbol, trade_date_str],
+        "SELECT bar_id FROM canonical_historical_bars "
+        "WHERE symbol=? AND trade_date=? AND adjustment_type='RAW' AND content_hash=? LIMIT 1",
+        [symbol, trade_date_str, revision_hash],
     ).fetchone()
     if exists:
-        return  # 已存在，不覆盖
+        return
+    from data_hub.market_units import daily_quantities
+    volume, amount = daily_quantities(data, record.source_name)
     connection.execute(
         """
         INSERT INTO canonical_historical_bars
@@ -204,21 +211,21 @@ def _sync_daily_bar(connection, record) -> None:
             record.event_time,
             datetime.now(tz=TZ),
             "RAW",
-            float(data.get("open") or close),
-            float(data.get("high") or close),
-            float(data.get("low") or close),
+            data.get("open"),
+            data.get("high"),
+            data.get("low"),
             float(close),
-            float(data.get("volume") or 0),
-            float(data.get("amount") or 0),
-            data.get("volume_unit", "SHARES"),
-            data.get("amount_unit", "CNY"),
+            volume,
+            amount,
+            "SHARES",
+            "CNY",
             record.source_name,
             f'["{record.record_id}"]',
             f'["{record.record_id}"]',
-            "VERIFIED",
-            1.0,
-            record.content_hash,
-            "stock-report-sync-v1",
+            "VERIFIED" if record.verified else "SINGLE_SOURCE",
+            1.0 if record.verified else 0.5,
+            revision_hash,
+            "stock-report-sync-v3-units",
             json.dumps(data, ensure_ascii=False, default=str),
         ],
     )

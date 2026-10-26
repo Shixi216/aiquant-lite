@@ -1,0 +1,42 @@
+{
+ "request_id": "req_0b6318ca414b4a0b90f557fd",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "platforms": {
+   "Tushare Pro 深证易互动问答（持牌数据服务商转授）": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "上证 e 互动（sns.sseinfo.com）": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "东方财富股吧": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "人工导入的授权文件（用户自备且声明已获授权）": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "合成测试数据（仅联调，永不计入研究结论）": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "深交所互动易（irm.cninfo.com.cn）": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "集思录": {
+    "status": "INSUFFICIENT_DATA"
+   },
+   "雪球": {
+    "status": "INSUFFICIENT_DATA"
+   }
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": null,
+ "generated_at": "2026-10-25T17:50:42.481368+09:00",
+ "api_version": "social-sentiment/v1",
+ "research_only": true,
+ "note": "真实响应采样生成（2026-10-25），截断长数组"
+}

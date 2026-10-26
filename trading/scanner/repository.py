@@ -43,7 +43,18 @@ class FeatureSource:
 
 
 _FEATURE_SQL = """
-WITH chosen_universe AS (
+WITH local_calendar AS (
+    SELECT MAX(calendar_date) FILTER (
+        WHERE is_trading_day AND (
+            calendar_date < timezone('Asia/Shanghai', CAST($cutoff AS TIMESTAMPTZ))::DATE
+            OR (
+                calendar_date = timezone('Asia/Shanghai', CAST($cutoff AS TIMESTAMPTZ))::DATE
+                AND timezone('Asia/Shanghai', CAST($cutoff AS TIMESTAMPTZ))::TIME >= TIME '15:00:00'
+            )
+        )
+    ) AS expected_trade_date, MAX(calendar_date) AS calendar_coverage_date
+    FROM trading_calendar_days WHERE data_cutoff <= $cutoff
+), chosen_universe AS (
     SELECT universe_version
     FROM stock_universe_versions
     WHERE data_cutoff <= $cutoff
@@ -72,6 +83,20 @@ market AS (
     FROM market_snapshot_items AS item
     JOIN chosen_snapshot AS run USING (snapshot_id)
 ),
+eligible_bars AS (
+    SELECT *
+    FROM canonical_historical_bars
+    WHERE adjustment_type = 'RAW'
+      AND event_time <= $cutoff
+      AND data_available_time <= $cutoff
+      AND data_cutoff <= $cutoff
+      AND generated_at <= $cutoff
+      AND verification_status <> 'CONFLICT'
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY symbol, trade_date, adjustment_type
+        ORDER BY generated_at DESC, event_time DESC, bar_id DESC
+    ) = 1
+),
 ranked_bars AS (
     SELECT
         bar_id, symbol, trade_date, open, high, low, close, volume, amount,
@@ -79,12 +104,7 @@ ranked_bars AS (
             PARTITION BY symbol
             ORDER BY trade_date DESC, event_time DESC, bar_id DESC
         ) AS row_number
-    FROM canonical_historical_bars
-    WHERE adjustment_type = 'RAW'
-      AND event_time <= $cutoff
-      AND data_available_time <= $cutoff
-      AND data_cutoff <= $cutoff
-      AND verification_status <> 'CONFLICT'
+    FROM eligible_bars
 ),
 history AS (
     SELECT
@@ -184,6 +204,8 @@ shadow AS (
 )
 SELECT
     stock.symbol,
+    (SELECT expected_trade_date FROM local_calendar) AS expected_trade_date,
+    (SELECT calendar_coverage_date FROM local_calendar) AS calendar_coverage_date,
     stock.exchange,
     stock.market,
     stock.board,
@@ -196,18 +218,37 @@ SELECT
     stock.universe_version,
     industry.industry_name AS industry,
     market.snapshot_id,
+    COALESCE(
+        TRY_STRPTIME(JSON_EXTRACT_STRING(market.payload_json, '$.trade_date'), '%Y%m%d')::DATE,
+        TRY_CAST(JSON_EXTRACT_STRING(market.payload_json, '$.trade_date') AS DATE)
+    ) AS snapshot_trade_date,
     market.price AS current_price,
     market.previous_close,
     market.open AS current_open,
     market.high AS current_high,
     market.low AS current_low,
-    market.volume AS current_volume,
-    market.amount,
-    market.change_pct,
-    market.turnover_rate,
+    market.volume * CASE COALESCE(
+        TRY(json_extract_string(market.payload_json, '$.volume_unit')),
+        CASE WHEN market.source IN ('Tushare', 'Tencent') THEN 'LOTS' ELSE 'SHARES' END
+    ) WHEN 'LOTS' THEN 100 WHEN 'SHARES' THEN 1 ELSE NULL END AS current_volume,
+    market.amount * CASE COALESCE(
+        TRY(json_extract_string(market.payload_json, '$.amount_unit')),
+        CASE WHEN market.source = 'Tushare' THEN 'THOUSAND_CNY'
+             WHEN market.source = 'Tencent' THEN 'TEN_THOUSAND_CNY' ELSE 'CNY' END
+    ) WHEN 'THOUSAND_CNY' THEN 1000 WHEN 'TEN_THOUSAND_CNY' THEN 10000
+      WHEN 'CNY' THEN 1 ELSE NULL END AS amount,
+    market.change_pct * CASE COALESCE(
+        TRY(json_extract_string(market.payload_json, '$.change_pct_unit')),
+        CASE WHEN market.source IN ('Tushare', 'Tencent') THEN 'PERCENT' ELSE 'DECIMAL' END
+    ) WHEN 'PERCENT' THEN 0.01 WHEN 'DECIMAL' THEN 1 ELSE NULL END AS change_pct,
+    market.turnover_rate * CASE COALESCE(
+        TRY(json_extract_string(market.payload_json, '$.turnover_rate_unit')),
+        CASE WHEN market.source IN ('Tushare', 'Tencent') THEN 'PERCENT' ELSE 'DECIMAL' END
+    ) WHEN 'PERCENT' THEN 0.01 WHEN 'DECIMAL' THEN 1 ELSE NULL END AS turnover_rate,
     market.snapshot_time,
     market.market_snapshot_hash,
-    market.item_status,
+    CASE WHEN market.item_status = 'OK' AND market.source IN ('Tushare', 'Tencent')
+         THEN 'VALID' ELSE market.item_status END AS item_status,
     market.is_suspended AS snapshot_suspended,
     history.history_count,
     history.history_bar_ids,
@@ -288,6 +329,7 @@ class ScannerRepository:
                     sorted(str(value) for value in frame[column].dropna().unique())
                 )
         metadata = {
+            "feature_contract_version": "scanner-features-v3-pit-revisions-daily-target",
             "cutoff": data_cutoff.isoformat(),
             "universe_version": (
                 None if frame.empty else str(frame.iloc[0]["universe_version"])

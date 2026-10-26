@@ -1,0 +1,62 @@
+{
+ "request_id": "req_0123456789abcdef0123456",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "universes": [
+   {
+    "universe_id": "core4-v1",
+    "universe_version": "1.0",
+    "name": "原四资产基准池",
+    "description": "v1/v2 基线：510300/511010/518880/511380，1587 日口径保持不变",
+    "survivorship_bias_note": "候选池基于当前存续产品名录构建，未包含已退市/清盘的历史产品；2020 年时点的完整市场代表性未经历史全量名录核验，幸存者偏差未被消除，仅被如实记录。",
+    "created_at": "2026-10-24T21:32:01.101597+09:00",
+    "members": 4
+   },
+   {
+    "universe_id": "equity-etf-v1",
+    "universe_version": "1.0",
+    "name": "A股权益ETF池（宽基+行业+风格）",
+    "description": "权益类轮动研究池",
+    "survivorship_bias_note": "候选池基于当前存续产品名录构建，未包含已退市/清盘的历史产品；2020 年时点的完整市场代表性未经历史全量名录核验，幸存者偏差未被消除，仅被如实记录。",
+    "created_at": "2026-10-24T21:32:01.173442+09:00",
+    "members": 15
+   },
+   {
+    "universe_id": "bond-etf-v1",
+    "universe_version": "1.0",
+    "name": "债券与转债ETF池",
+    "description": "固定收益类研究池",
+    "survivorship_bias_note": "候选池基于当前存续产品名录构建，未包含已退市/清盘的历史产品；2020 年时点的完整市场代表性未经历史全量名录核验，幸存者偏差未被消除，仅被如实记录。",
+    "created_at": "2026-10-24T21:32:01.251987+09:00",
+    "members": 6
+   },
+   {
+    "universe_id": "rotation-v1",
+    "universe_version": "1.0",
+    "name": "行业轮动池",
+    "description": "6 行业 ETF + 双宽基基准",
+    "survivorship_bias_note": "候选池基于当前存续产品名录构建，未包含已退市/清盘的历史产品；2020 年时点的完整市场代表性未经历史全量名录核验，幸存者偏差未被消除，仅被如实记录。",
+    "created_at": "2026-10-24T21:32:01.318627+09:00",
+    "members": 8
+   },
+   {
+    "universe_id": "multi-asset-v1",
+    "universe_version": "1.0",
+    "name": "多资产配置池（QUALIFIED）",
+    "description": "八类 29 只合格资产；REITs 因流动性 DEGRADED 不含",
+    "survivorship_bias_note": "候选池基于当前存续产品名录构建，未包含已退市/清盘的历史产品；2020 年时点的完整市场代表性未经历史全量名录核验，幸存者偏差未被消除，仅被如实记录。",
+    "created_at": "2026-10-24T21:32:01.389382+09:00",
+    "members": 29
+   }
+  ]
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": "2026-10-23T15:00:00+08:00",
+ "generated_at": "2026-10-24T20:33:31.426098+08:00",
+ "api_version": "wealth-lab/v3",
+ "research_only": true
+}

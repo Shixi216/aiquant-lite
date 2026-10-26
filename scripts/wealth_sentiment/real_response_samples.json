@@ -1,0 +1,652 @@
+{
+ "market": {
+  "request_id": "req_95ba27c3924d4a9094fac80c",
+  "status": "SUCCESS",
+  "data": {
+   "data_mode": "REAL",
+   "score": {
+    "score_id": "wscore_b915df6d78db42",
+    "level": "MARKET",
+    "symbol": null,
+    "asof": "2026-10-25T10:26:21.429790+08:00",
+    "sentiment_score": 17.4,
+    "confidence": 0.6426,
+    "coverage": 1.0,
+    "coverage_ratio": 1.0,
+    "observation_count": 53,
+    "source_count": 53,
+    "sentiment_version": "wealth-sentiment/1.1",
+    "evidence_basis": "DIRECT_EVIDENCE",
+    "evidence_count": 53,
+    "direct_evidence_count": 53,
+    "class_evidence_count": 0,
+    "last_evidence_at": "2026-10-25T01:31:39+08:00",
+    "evidence_ids": [
+     "wana_17e1032b9c34",
+     "wana_48fdc604b777",
+     "wana_aa2122f72319",
+     "wana_f9260663b14e",
+     "wana_ad2391012a9b",
+     "wana_b226b7b9d256",
+     "wana_b8369699302a",
+     "wana_5214c347a1bb",
+     "wana_b4a56dcd1354",
+     "wana_40128a1450c2"
+    ],
+    "component_breakdown": {
+     "by_direction": {
+      "POSITIVE": 21,
+      "NEGATIVE": 13,
+      "NEUTRAL": 6,
+      "MIXED": 13
+     },
+     "by_link_level": {
+      "EXACT": 0,
+      "SAME_INDEX": 0,
+      "MODEL_INFERRED": 0,
+      "CLASS_ONLY": 0
+     },
+     "top_contributors": [
+      {
+       "event_id": "wevt_5f87327f9aa0cf415850",
+       "title": "央行将开展7000亿元MLF操作",
+       "direction": "POSITIVE",
+       "signed": 0.6394,
+       "link_level": null,
+       "decay": 0.888,
+       "confidence": 0.72
+      },
+      {
+       "event_id": "wevt_464a218653b964430242",
+       "title": "公募、外资密集出手！持续布局港股创新药",
+       "direction": "POSITIVE",
+       "signed": 0.4892,
+       "link_level": null,
+       "decay": 0.789,
+       "confidence": 0.62
+      },
+      {
+       "event_id": "wevt_69e5ec4b16e5b059ffd4",
+       "title": "黄金概念板块下挫",
+       "direction": "NEGATIVE",
+       "signed": -0.45,
+       "link_level": null,
+       "decay": 0.625,
+       "confidence": 0.72
+      },
+      {
+       "event_id": "wevt_c175bcfbb410d0ed3af5",
+       "title": "利好！东岳硅材净利猛增超19400%！多只A股业绩爆发",
+       "direction": "POSITIVE",
+       "signed": 0.4499,
+       "link_level": null,
+       "decay": 0.7257,
+       "confidence": 0.62
+      },
+      {
+       "event_id": "wevt_f248be6b7c36402b6ba9",
+       "title": "央行利率定价“换锚”，利率中枢开始下移",
+       "direction": "POSITIVE",
+       "signed": -0.4255,
+       "link_level": null,
+       "decay": 0.9532,
+       "confidence": 0.62
+      }
+     ],
+     "weights": {
+      "impact": {
+       "MINOR": 0.4,
+       "MODERATE": 1.0,
+       "MAJOR": 1.8
+      },
+      "eco_importance": {
+       "1": 0.3,
+       "2": 0.7,
+       "3": 1.4
+      },
+      "half_life_hours": {
+       "MONETARY_POLICY": 240.0,
+       "MACRO_DATA": 240.0,
+       "FUND_ANNOUNCE": 120.0,
+       "GOLD_COMMODITY": 72.0,
+       "BOND_MARKET": 72.0,
+       "QDII_OVERSEAS": 72.0,
+       "GENERAL": 48.0
+      },
+      "source_diversity_cap": 1.5,
+      "source_diversity_step": 0.25,
+      "mixed_direction_scale": 0.15,
+      "asset_target_observations": 6,
+      "market_target_observations": 10,
+      "top_evidence": 10,
+      "risk_appetite_sign": {
+       "EQUITY": 1.0,
+       "OVERSEAS_EQUITY": 1.0,
+       "REIT": 0.8,
+       "CONVERTIBLE": 0.8,
+       "COMMODITY": 0.5,
+       "GOLD": -0.6,
+       "BOND": -0.8,
+       "FX": 0.0
+      },
+      "market_class_weight": {
+       "EQUITY": 1.0,
+       "BOND": 0.9,
+       "GOLD": 0.8,
+       "OVERSEAS_EQUITY": 0.8,
+       "COMMODITY": 0.6,
+       "REIT": 0.6,
+       "CONVERTIBLE": 0.7,
+       "FX": 0.3
+      },
+      "weights_id": "v1.1",
+      "link_weight": {
+       "EXACT": 1.0,
+       "SAME_INDEX": 0.35,
+       "MODEL_INFERRED": 0.35,
+       "CLASS_ONLY": 0.25
+      },
+      "class_only_confidence_cap": 0.6,
+      "min_direct_obs_for_direct_basis": 1
+     },
+     "v1_0_weights_for_reference": {
+      "direct_link_weight": 1.0,
+      "class_link_weight": 0.45
+     },
+     "lookback_hours": 168,
+     "events_in_window": 53
+    }
+   }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": null,
+  "generated_at": "2026-10-25T11:26:44.930559+09:00",
+  "api_version": "wealth-sentiment/v1",
+  "research_only": true
+ },
+ "asset_score": {
+  "request_id": "req_13e7e5a94fe4476fa9ed35a1",
+  "status": "SUCCESS",
+  "data": {
+   "data_mode": "REAL",
+   "symbol": "518880.SH",
+   "score": {
+    "score_id": "wscore_c1978a71496549",
+    "level": "ASSET",
+    "symbol": "518880.SH",
+    "asof": "2026-10-25T10:26:21.429790+08:00",
+    "sentiment_score": -33.09,
+    "confidence": 0.6,
+    "coverage": 1.0,
+    "coverage_ratio": 1.0,
+    "observation_count": 12,
+    "source_count": 12,
+    "sentiment_version": "wealth-sentiment/1.1",
+    "evidence_basis": "CLASS_LEVEL_EVIDENCE",
+    "evidence_count": 12,
+    "direct_evidence_count": 0,
+    "class_evidence_count": 12,
+    "last_evidence_at": "2026-10-25T01:31:39+08:00",
+    "evidence_ids": [
+     "wana_c5b4f23bb88f",
+     "wana_46281124ff7f",
+     "wana_453b7ea26aca",
+     "wana_fa72855b6238",
+     "wana_aa2122f72319",
+     "wana_d9841c0704e7",
+     "wana_bf59eee39be0",
+     "wana_52b6cab9dd8b",
+     "wana_0b20704fa0ac",
+     "wana_874a1cf30ad7"
+    ],
+    "component_breakdown": {
+     "by_direction": {
+      "POSITIVE": 1,
+      "NEGATIVE": 6,
+      "NEUTRAL": 0,
+      "MIXED": 5
+     },
+     "by_link_level": {
+      "EXACT": 0,
+      "SAME_INDEX": 11,
+      "MODEL_INFERRED": 1,
+      "CLASS_ONLY": 0
+     },
+     "top_contributors": [
+      {
+       "event_id": "wevt_af46d0bf8cbc1c49b147",
+       "title": "金饰克价1个月跌去100元",
+       "direction": "NEGATIVE",
+       "signed": -0.2111,
+       "link_level": "SAME_INDEX",
+       "decay": 0.7733,
+       "confidence": 0.78
+      },
+      {
+       "event_id": "wevt_f5f20ca41604a7d2e80b",
+       "title": "国内金饰克价跌穿1200元 1个月下跌约100元",
+       "direction": "NEGATIVE",
+       "signed": -0.2073,
+       "link_level": "SAME_INDEX",
+       "decay": 0.7223,
+       "confidence": 0.82
+      },
+      {
+       "event_id": "wevt_4f6472e72f2626ba94f3",
+       "title": "黄金白银，大跌！",
+       "direction": "NEGATIVE",
+       "signed": -0.1809,
+       "link_level": "SAME_INDEX",
+       "decay": 0.6302,
+       "confidence": 0.82
+      },
+      {
+       "event_id": "wevt_cdd31f2e88d96c7cb464",
+       "title": "黄金、白银直线跳水！现货黄金失守4000美元关口",
+       "direction": "NEGATIVE",
+       "signed": -0.18,
+       "link_level": "SAME_INDEX",
+       "decay": 0.6273,
+       "confidence": 0.82
+      },
+      {
+       "event_id": "wevt_69e5ec4b16e5b059ffd4",
+       "title": "黄金概念板块下挫",
+       "direction": "NEGATIVE",
+       "signed": -0.1575,
+       "link_level": "SAME_INDEX",
+       "decay": 0.625,
+       "confidence": 0.72
+      }
+     ],
+     "weights": {
+      "impact": {
+       "MINOR": 0.4,
+       "MODERATE": 1.0,
+       "MAJOR": 1.8
+      },
+      "eco_importance": {
+       "1": 0.3,
+       "2": 0.7,
+       "3": 1.4
+      },
+      "half_life_hours": {
+       "MONETARY_POLICY": 240.0,
+       "MACRO_DATA": 240.0,
+       "FUND_ANNOUNCE": 120.0,
+       "GOLD_COMMODITY": 72.0,
+       "BOND_MARKET": 72.0,
+       "QDII_OVERSEAS": 72.0,
+       "GENERAL": 48.0
+      },
+      "source_diversity_cap": 1.5,
+      "source_diversity_step": 0.25,
+      "mixed_direction_scale": 0.15,
+      "asset_target_observations": 6,
+      "market_target_observations": 10,
+      "top_evidence": 10,
+      "risk_appetite_sign": {
+       "EQUITY": 1.0,
+       "OVERSEAS_EQUITY": 1.0,
+       "REIT": 0.8,
+       "CONVERTIBLE": 0.8,
+       "COMMODITY": 0.5,
+       "GOLD": -0.6,
+       "BOND": -0.8,
+       "FX": 0.0
+      },
+      "market_class_weight": {
+       "EQUITY": 1.0,
+       "BOND": 0.9,
+       "GOLD": 0.8,
+       "OVERSEAS_EQUITY": 0.8,
+       "COMMODITY": 0.6,
+       "REIT": 0.6,
+       "CONVERTIBLE": 0.7,
+       "FX": 0.3
+      },
+      "weights_id": "v1.1",
+      "link_weight": {
+       "EXACT": 1.0,
+       "SAME_INDEX": 0.35,
+       "MODEL_INFERRED": 0.35,
+       "CLASS_ONLY": 0.25
+      },
+      "class_only_confidence_cap": 0.6,
+      "min_direct_obs_for_direct_basis": 1
+     },
+     "v1_0_weights_for_reference": {
+      "direct_link_weight": 1.0,
+      "class_link_weight": 0.45
+     },
+     "lookback_hours": 168,
+     "events_in_window": 53
+    }
+   }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": null,
+  "generated_at": "2026-10-25T11:26:44.966020+09:00",
+  "api_version": "wealth-sentiment/v1",
+  "research_only": true
+ },
+ "asset_score_reits": {
+  "request_id": "req_cf8a0b4f0fa9474fb7495925",
+  "status": "SUCCESS",
+  "data": {
+   "data_mode": "REAL",
+   "symbol": "180101.SZ",
+   "score": {
+    "score_id": "wscore_34f29e09e1d74a",
+    "level": "ASSET",
+    "symbol": "180101.SZ",
+    "asof": "2026-10-25T10:26:21.429790+08:00",
+    "sentiment_score": 66.96,
+    "confidence": 0.2232,
+    "coverage": 0.3333,
+    "coverage_ratio": 0.3333,
+    "observation_count": 2,
+    "source_count": 2,
+    "sentiment_version": "wealth-sentiment/1.1",
+    "evidence_basis": "CLASS_LEVEL_EVIDENCE",
+    "evidence_count": 2,
+    "direct_evidence_count": 0,
+    "class_evidence_count": 2,
+    "last_evidence_at": "2026-10-23T20:53:27+08:00",
+    "evidence_ids": [
+     "wana_32dda1274608",
+     "wana_a19f4523dc30"
+    ],
+    "component_breakdown": {
+     "by_direction": {
+      "POSITIVE": 2,
+      "NEGATIVE": 0,
+      "NEUTRAL": 0,
+      "MIXED": 0
+     },
+     "by_link_level": {
+      "EXACT": 0,
+      "SAME_INDEX": 2,
+      "MODEL_INFERRED": 0,
+      "CLASS_ONLY": 0
+     },
+     "top_contributors": [
+      {
+       "event_id": "wevt_02716ebd8553fc7250a6",
+       "title": "公募REITs双向扩容：老旧街区厂区入池，民企首单商业REITs落地",
+       "direction": "POSITIVE",
+       "signed": 0.1994,
+       "link_level": "SAME_INDEX",
+       "decay": 0.7912,
+       "confidence": 0.72
+      },
+      {
+       "event_id": "wevt_3bdf6de00c9bc56e6f63",
+       "title": "【财经分析】资金端破局迎窗口 国内公募REITs长期配置空间可期",
+       "direction": "POSITIVE",
+       "signed": 0.1747,
+       "link_level": "SAME_INDEX",
+       "decay": 0.805,
+       "confidence": 0.62
+      }
+     ],
+     "weights": {
+      "impact": {
+       "MINOR": 0.4,
+       "MODERATE": 1.0,
+       "MAJOR": 1.8
+      },
+      "eco_importance": {
+       "1": 0.3,
+       "2": 0.7,
+       "3": 1.4
+      },
+      "half_life_hours": {
+       "MONETARY_POLICY": 240.0,
+       "MACRO_DATA": 240.0,
+       "FUND_ANNOUNCE": 120.0,
+       "GOLD_COMMODITY": 72.0,
+       "BOND_MARKET": 72.0,
+       "QDII_OVERSEAS": 72.0,
+       "GENERAL": 48.0
+      },
+      "source_diversity_cap": 1.5,
+      "source_diversity_step": 0.25,
+      "mixed_direction_scale": 0.15,
+      "asset_target_observations": 6,
+      "market_target_observations": 10,
+      "top_evidence": 10,
+      "risk_appetite_sign": {
+       "EQUITY": 1.0,
+       "OVERSEAS_EQUITY": 1.0,
+       "REIT": 0.8,
+       "CONVERTIBLE": 0.8,
+       "COMMODITY": 0.5,
+       "GOLD": -0.6,
+       "BOND": -0.8,
+       "FX": 0.0
+      },
+      "market_class_weight": {
+       "EQUITY": 1.0,
+       "BOND": 0.9,
+       "GOLD": 0.8,
+       "OVERSEAS_EQUITY": 0.8,
+       "COMMODITY": 0.6,
+       "REIT": 0.6,
+       "CONVERTIBLE": 0.7,
+       "FX": 0.3
+      },
+      "weights_id": "v1.1",
+      "link_weight": {
+       "EXACT": 1.0,
+       "SAME_INDEX": 0.35,
+       "MODEL_INFERRED": 0.35,
+       "CLASS_ONLY": 0.25
+      },
+      "class_only_confidence_cap": 0.6,
+      "min_direct_obs_for_direct_basis": 1
+     },
+     "v1_0_weights_for_reference": {
+      "direct_link_weight": 1.0,
+      "class_link_weight": 0.45
+     },
+     "lookback_hours": 168,
+     "events_in_window": 53
+    }
+   }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": null,
+  "generated_at": "2026-10-25T11:26:45.001201+09:00",
+  "api_version": "wealth-sentiment/v1",
+  "research_only": true
+ },
+ "events": {
+  "request_id": "req_6c8aca71300e4a5aa1bd6412",
+  "status": "SUCCESS",
+  "data": {
+   "data_mode": "REAL",
+   "events": [
+    {
+     "event_id": "wevt_873ce574ed1305b26975",
+     "title": "人民币汇率，创4年新高！",
+     "published_at": "2026-10-24T19:06:55+08:00",
+     "published_at_precision": "SECOND",
+     "raw_category": "MONETARY_POLICY",
+     "asset_scope": [],
+     "asset_links": {},
+     "news_count": 1,
+     "source_count": 1,
+     "analysis_status": "PENDING",
+     "merged_into": null,
+     "first_seen_at": "2026-10-25T01:34:09.959675+08:00",
+     "sentiment_direction": null,
+     "analysis_id": null
+    },
+    {
+     "event_id": "wevt_f248be6b7c36402b6ba9",
+     "title": "央行利率定价“换锚”，利率中枢开始下移",
+     "published_at": "2026-10-24T17:50:57+08:00",
+     "published_at_precision": "SECOND",
+     "raw_category": "MONETARY_POLICY",
+     "asset_scope": [
+      "159972.SZ",
+      "511010.SH",
+      "511090.SH",
+      "511260.SH",
+      "511520.SH"
+     ],
+     "asset_links": {
+      "511010.SH": {
+       "level": "SAME_INDEX",
+       "rule": "theme:利率"
+      },
+      "511260.SH": {
+       "level": "SAME_INDEX",
+       "rule": "theme:利率"
+      },
+      "511090.SH": {
+       "level": "SAME_INDEX",
+       "rule": "theme:利率"
+      },
+      "511520.SH": {
+       "level": "SAME_INDEX",
+       "rule": "theme:利率"
+      },
+      "159972.SZ": {
+       "level": "SAME_INDEX",
+       "rule": "theme:利率"
+      }
+     },
+     "news_count": 1,
+     "source_count": 1,
+     "analysis_status": "ANALYZED",
+     "merged_into": null,
+     "first_seen_at": "2026-10-25T01:29:30.451473+08:00",
+     "sentiment_direction": "POSITIVE",
+     "analysis_id": "wana_ad2391012a9b"
+    }
+   ],
+   "count": 2
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": null,
+  "generated_at": "2026-10-25T11:26:45.051181+09:00",
+  "api_version": "wealth-sentiment/v1",
+  "research_only": true
+ },
+ "sources": {
+  "request_id": "req_fbecb98ce1664eacb8248530",
+  "status": "SUCCESS",
+  "data": {
+   "data_mode": "REAL",
+   "sources": [
+    {
+     "source_name": "eastmoney-keyword-news",
+     "provider": "akshare",
+     "enabled": true,
+     "description": "东方财富关键词资讯（含正文摘要），覆盖货币政策/黄金/债券/REITs/QDII",
+     "doc": "ak.stock_news_em",
+     "runs": 4,
+     "ok_runs": 2,
+     "last_run_at": "2026-10-25T01:42:52.739622+08:00",
+     "avg_field_completeness": 1.0,
+     "total_new": 129,
+     "latest_published_at": "2026-10-24T19:06:55+08:00"
+    },
+    {
+     "source_name": "eastmoney-global-flash",
+     "provider": "akshare",
+     "enabled": true,
+     "description": "东方财富全球财经快讯（标题+摘要+链接），QDII/海外市场",
+     "doc": "ak.stock_info_global_em",
+     "runs": 3,
+     "ok_runs": 3,
+     "last_run_at": "2026-10-25T01:34:23.884945+08:00",
+     "avg_field_completeness": 1.0,
+     "total_new": 202,
+     "latest_published_at": "2026-10-25T01:31:39+08:00"
+    },
+    {
+     "source_name": "eastmoney-fund-announcements",
+     "provider": "akshare",
+     "enabled": true,
+     "description": "基金定期报告与分红公告（管理人公告转载），逐一覆盖池内基金",
+     "doc": "ak.fund_announcement_report_em / fund_announcement_dividend_em",
+     "runs": 3,
+     "ok_runs": 1,
+     "last_run_at": "2026-10-25T01:34:57.338559+08:00",
+     "avg_field_completeness": 1.0,
+     "total_new": 40,
+     "latest_published_at": "2026-09-28T00:00:00+08:00"
+    },
+    {
+     "source_name": "baidu-eco-calendar",
+     "provider": "akshare",
+     "enabled": true,
+     "description": "宏观经济数据发布日历（含公布值/预期/前值），筛中国区",
+     "doc": "ak.news_economic_baidu",
+     "runs": 4,
+     "ok_runs": 4,
+     "last_run_at": "2026-10-25T01:41:38.610691+08:00",
+     "avg_field_completeness": 1.0,
+     "total_new": 8,
+     "latest_published_at": "2026-10-25T14:08:00+08:00"
+    },
+    {
+     "source_name": "ths-global-flash",
+     "provider": "akshare",
+     "enabled": false,
+     "description": "同花顺全球资讯（备选；一期不启用）",
+     "doc": "ak.stock_info_global_ths",
+     "runs": 0,
+     "ok_runs": 0,
+     "last_run_at": null,
+     "avg_field_completeness": null,
+     "total_new": 0,
+     "latest_published_at": null
+    },
+    {
+     "source_name": "shmet-commodity-flash",
+     "provider": "akshare",
+     "enabled": false,
+     "description": "上海金属网商品快讯（备选；一期不启用）",
+     "doc": "ak.futures_news_shmet",
+     "runs": 0,
+     "ok_runs": 0,
+     "last_run_at": null,
+     "avg_field_completeness": null,
+     "total_new": 0,
+     "latest_published_at": null
+    }
+   ],
+   "rejected": {
+    "cls-telegraph": "实测直连/代理均 45s 超时，网络不可达",
+    "caixin-main": "接口无发布时间字段，违反发布时间必须可核实原则",
+    "cctv-xinwenlianbo": "仅日期粒度且全文过长，信息密度低",
+    "sina-global-flash": "无标题无链接，弱于东财全球快讯",
+    "akshare-fund-nav": "净值数据非资讯，不在资讯采集范围"
+   }
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [],
+  "risk_flags": [],
+  "data_cutoff": null,
+  "generated_at": "2026-10-25T11:26:45.084649+09:00",
+  "api_version": "wealth-sentiment/v1",
+  "research_only": true
+ }
+}

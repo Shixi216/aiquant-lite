@@ -82,7 +82,7 @@ const tempLabel = computed(() => {
   height: 116px;
 }
 .gauge-arc {
-  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.4));
+  filter: drop-shadow(0 0 6px var(--accent-ring));
 }
 .gauge-value {
   font-size: 34px;

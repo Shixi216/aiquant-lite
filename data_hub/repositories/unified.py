@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import nullcontext
 from datetime import datetime, timedelta
 from typing import Any, Generic, TypeVar
 from zoneinfo import ZoneInfo
@@ -120,11 +121,11 @@ def _financial_metadata(
     }
 
 
-def _ensure_raw_records_exist(record_ids: list[str]) -> None:
+def _ensure_raw_records_exist(record_ids: list[str], *, connection: Any = None) -> None:
     unique_ids = list(dict.fromkeys(record_ids))
     if not unique_ids:
         raise EvidenceNotFoundError("at least one raw source record is required")
-    with get_connection() as connection:
+    with (nullcontext(connection) if connection is not None else get_connection()) as connection:
         rows = connection.execute(
             f"""
             SELECT record_id
@@ -195,8 +196,10 @@ class _CanonicalRepository(Generic[CanonicalRecordT]):
         symbol: str,
         data_type: str,
         event_time: datetime,
+        *,
+        connection: Any = None,
     ) -> CanonicalRecordT | None:
-        with get_connection() as connection:
+        with (nullcontext(connection) if connection is not None else get_connection()) as connection:
             row = connection.execute(
                 f"""
                 SELECT {self._select_columns()}
@@ -208,11 +211,34 @@ class _CanonicalRepository(Generic[CanonicalRecordT]):
         return None if row is None else self._row_to_record(row)
 
     def save(self, record: CanonicalRecordT) -> CanonicalRecordT:
-        _ensure_raw_records_exist(record.source_record_ids)
+        return self.save_many([record])[0]
+
+    def save_many(self, records: list[CanonicalRecordT]) -> list[CanonicalRecordT]:
+        """Validate references once and commit a canonical batch atomically."""
+        if not records:
+            return []
+        if any(not record.source_record_ids for record in records):
+            raise EvidenceNotFoundError("at least one raw source record is required")
+        with get_connection() as connection:
+            connection.execute("BEGIN TRANSACTION")
+            try:
+                _ensure_raw_records_exist(
+                    [source_id for record in records for source_id in record.source_record_ids],
+                    connection=connection,
+                )
+                persisted = [self._save(connection, record) for record in records]
+                connection.execute("COMMIT")
+            except Exception:
+                connection.execute("ROLLBACK")
+                raise
+        return persisted
+
+    def _save(self, connection: Any, record: CanonicalRecordT) -> CanonicalRecordT:
         existing = self.get_by_natural_key(
             record.symbol,
             record.data_type,
             record.event_time,
+            connection=connection,
         )
         if existing is not None and existing.content_hash == record.content_hash:
             return existing
@@ -234,12 +260,9 @@ class _CanonicalRepository(Generic[CanonicalRecordT]):
             record.content_hash,
             record.algorithm_version,
         ]
-        with get_connection() as connection:
-            connection.execute("BEGIN TRANSACTION")
-            try:
-                if existing is None:
-                    connection.execute(
-                        f"""
+        if existing is None:
+            connection.execute(
+                f"""
                         INSERT INTO {self.table_name} (
                             canonical_record_id, symbol, data_type, event_time,
                             data_cutoff, generated_at, primary_source,
@@ -251,11 +274,11 @@ class _CanonicalRepository(Generic[CanonicalRecordT]):
                         )
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
-                        values,
-                    )
-                else:
-                    connection.execute(
-                        f"""
+                values,
+            )
+        else:
+            connection.execute(
+                f"""
                         UPDATE {self.table_name}
                         SET data_cutoff = ?, generated_at = ?,
                             primary_source = ?, source_record_ids_json = ?,
@@ -266,34 +289,31 @@ class _CanonicalRepository(Generic[CanonicalRecordT]):
                             algorithm_version = ?
                         WHERE canonical_record_id = ?
                         """,
-                        [
-                            record.data_cutoff,
-                            record.generated_at,
-                            record.primary_source,
-                            _json_dump(record.source_record_ids),
-                            _json_dump(record.verification_source_ids),
-                            record.verification_status.value,
-                            _json_dump(record.field_differences),
-                            _json_dump(record.payload),
-                            record.confidence,
-                            record.content_hash,
-                            record.algorithm_version,
-                            existing.canonical_record_id,
-                        ],
-                    )
-                connection.execute("COMMIT")
-            except Exception:
-                connection.execute("ROLLBACK")
-                raise
+                [
+                    record.data_cutoff,
+                    record.generated_at,
+                    record.primary_source,
+                    _json_dump(record.source_record_ids),
+                    _json_dump(record.verification_source_ids),
+                    record.verification_status.value,
+                    _json_dump(record.field_differences),
+                    _json_dump(record.payload),
+                    record.confidence,
+                    record.content_hash,
+                    record.algorithm_version,
+                    existing.canonical_record_id,
+                ],
+            )
         persisted_id = (
-            existing.canonical_record_id
-            if existing is not None
-            else record.canonical_record_id
+            existing.canonical_record_id if existing is not None else record.canonical_record_id
         )
-        persisted = self.get(persisted_id)
-        if persisted is None:
+        row = connection.execute(
+            f"SELECT {self._select_columns()} FROM {self.table_name} WHERE canonical_record_id = ?",
+            [persisted_id],
+        ).fetchone()
+        if row is None:
             raise UnifiedRepositoryError("canonical record was not persisted")
-        return persisted
+        return self._row_to_record(row)
 
     def list(
         self,

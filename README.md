@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-Apache--2.0-6E7681)](LICENSE)
 
-**[🚀 快速部署](#快速开始) · [🤖 AI 分工](#ai-与策略一起帮你把一只股票看清楚) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [English](README.en.md)**
+**[🚀 快速部署](#快速开始) · [🤖 AI 分工](#ai-与策略一起帮你把一只股票看清楚) · [🖥️ 界面预览](#眼见为实投研工作台) · [🧠 研究证据](docs/knowledge/README.md) · [🏗️ 系统架构](#一套研究内核多种工作入口) · [💬 项目自述](#项目自述从一次比赛开始) · [🧩 Wealth Lab](#新增-wealth-lab把多资产研究接进同一个工作台) · [English](README.en.md)**
 
 </div>
 
@@ -115,7 +115,7 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 
 </details>
 
-### 六个工作区，贯穿研究全程
+### 股票研究的六个环节
 
 | 工作区 | 你可以做什么 | 实现入口 |
 |---|---|---|
@@ -126,11 +126,46 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 | **策略与资金研究** | 比较策略家族、成本敏感性和滚动验证结果 | [Strategy Lab](trading/research/strategy_lab) · [Research](webui/routes/research.py) |
 | **决策与复盘** | 检查风险 VETO、仓位约束、版本化决策与本地模拟 | [Decision Support](trading/decision_support) · [Manual Tracking](manual_tracking) |
 
+## 新增 Wealth Lab：把多资产研究接进同一个工作台
+
+**2026-10-26 更新：保留主线的 A 股研究、AI 分工与证据介绍，融合新版财富工作台。** 股票评分与财富配置各有计算链路，使用同一个前端入口，也各自保留数据、成本和风控口径。
+
+| 新增能力 | 可以核查什么 |
+|---|---|
+| **多资产研究池** | 33 只登记研究资产，覆盖权益、债券、黄金及商品、QDII、可转债、REITs；查看质量、上市日与逐调仓 PIT 资格 |
+| **策略工厂与组合实验** | S0–S8 九策略，净值、回撤、现金、首笔建仓及换仓成本；对比采用相同区间和成本，扩展池逐调仓重评资格 |
+| **受控 AI 研究** | 稳定模式基于存档证据；实验模式由 Flash 规划，经白名单和用户确认后运行实验，再由 Qwen 研究、Pro 复核；硬 VETO 与数字核验独立执行 |
+| **情绪与任务中心** | 区分直接证据、类别推导和证据不足；查看实际快照时点、任务失败/降级与存档报告。付费调用须明确确认 |
+
+```mermaid
+flowchart LR
+    A["资产与历史资格"] --> B["回测、现金与成本"]
+    B --> C{"确定性风控"}
+    C -->|VETO| X["终止并留证"]
+    C -->|通过或警告| D["AI 研究与独立复核"]
+    D --> E["指标核验与研究决策包"]
+```
+
+![新版策略工厂：真实运行的净值、回撤与指标](docs/screenshots/20261026/strategy-result.png)
+
+<table width="100%">
+<tr><td width="50%"><strong>资产池 · 分类与质量</strong><br><a href="docs/screenshots/20261026/universe.png"><img src="docs/screenshots/20261026/universe.png" alt="新版多资产研究池真实截图" width="100%"></a></td><td width="50%"><strong>AI 研究 · 角色与付费确认</strong><br><a href="docs/screenshots/20261026/ai-research.png"><img src="docs/screenshots/20261026/ai-research.png" alt="新版受控 AI 研究真实截图" width="100%"></a></td></tr>
+<tr><td><strong>情绪 · 实际快照与证据</strong><br><a href="docs/screenshots/20261026/sentiment.png"><img src="docs/screenshots/20261026/sentiment.png" alt="多资产情绪快照" width="100%"></a></td><td><strong>任务 · 真实进度与存档报告</strong><br><a href="docs/screenshots/20261026/task-center.png"><img src="docs/screenshots/20261026/task-center.png" alt="真实回测与报告任务" width="100%"></a></td></tr>
+</table>
+
+> 五张截图采集于 2026-10-26；日线截至 10月23日，情绪读取 10月25日既有快照。S4 主图区间为 2020-04-07—2026-10-23、1,587 日、单边 5bps、现金零收益；项目 Sharpe 为 0.9133，最大回撤 -5.3351%，不是早期上限失效版本的 1.086 / -2.99%。[截图来源与限制](docs/screenshots/20261026/README.md)。
+
+股票研究的默认正式分来自 **30/30/25/15 四维横截面**，缺失项按可用权重归一；Wealth Lab 的策略权重另由配置引擎产生。两者不共用一套评分公式。财富情绪只服务当前研究，不进入历史策略回测；存续资产登记仍有幸存者偏差。
+
+六个导航工作区现为股票研究、财富管理、数据中心、系统设置、AI 研究、市场情绪，合计 18 条业务路由。后端凭据与行情库仍需自行配置；首次财富数据初始化见 `scripts/wealth_lab_backfill.py` 和 `scripts/wealth_lab_v3_backfill.py`。
+
+[本地代码与运行状态复核](docs/releases/2026-10-26-main-wealth-integration.md) · [财富功能与 Bug 修复清单](docs/releases/2026-10-26-wealth-lab.md)
+
 ## 研究实力，落在可核对的积累上
 
 ![本地研究数据与实验规模](docs/assets/research-evidence.svg)
 
-**2,782,220 行历史日线、2,625,560 个 Replay 特征包、2,238,764 条 Strategy Lab 对齐输入**，构成本地数据与实验积累。Strategy Lab 保留 **202 个候选定义、0 / 20 / 40 / 60bp 四档成本、144 行 Walk-Forward 指标**，让方案优劣接受统一协议检查。
+图示保留 **2026-10-19** 的研究资产盘点。**2026-10-26 经 Router 只读接口复核，主库历史日线表为 2,789,466 行**（包含复权类型与历史修订，不是独立交易日数）；Replay 的 **2,625,560 个特征包**和 Strategy Lab 的 **2,238,764 条对齐输入**沿用 10月19日侧库盘点，本轮未重新生成。Strategy Lab 保留 **202 个候选定义、0 / 20 / 40 / 60bp 四档成本、144 行 Walk-Forward 指标**，让方案优劣接受统一协议检查。
 
 项目同时沉淀 [8 个研究知识主题](docs/knowledge/README.md)：数据边界、PIT、实验协议、失败案例、故障治理、Hermes 工作流、Forward 观察和记忆治理。把“为什么有效、为什么不采用、下一步缺什么”一并留存。
 
@@ -187,7 +222,7 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 | 路径 | 当前语义 |
 |---|---|
 | `cross_section_4d` | 技术 / 基本面 / 情绪特征 / 两融的横截面 rank，按 30 / 30 / 25 / 15 对可用项归一化；指定 cutoff 时读取不晚于该时点的历史截面 |
-| `legacy_60_40_fallback` | 横截面不可用时回退技术 60% + 基本面 40%，显式标记 `degraded` |
+| `legacy_60_40_fallback` | 仅保留兼容诊断并标记 `degraded`，不是现行正式评分；canonical 路径零分等待，proposal 路径 HOLD，禁止据此新增仓位 |
 | 编排实验接口 | 支持两因子、50 / 35 / 15 三因子及自定义权重研究；与上述横截面分数分开解释 |
 
 动作还受数据状态、持仓上下文、分位数阈值与风险 VETO 约束。更多说明见 [架构文档](docs/architecture.md) 和 [当前限制](docs/limitations.md)。
@@ -198,7 +233,7 @@ AIQUANT-LITE 面向 **A 股研究者、量化开发者与小型研究团队**，
 
 ## 快速开始
 
-需要 **Python 3.11**、[uv](https://docs.astral.sh/uv/)；构建 Web 工作台另需 **Node.js 22.12+** 与 npm。项目提供 Windows 运维脚本；其他系统可分别启动 Python 服务。
+需要 **Python 3.11**、[uv](https://docs.astral.sh/uv/)；构建 Web 工作台另需 **Node.js 22.18+ 或 24** 与 npm。项目提供 Windows 运维脚本；其他系统可分别启动 Python 服务。
 
 ### 1. 安装与配置
 
@@ -246,6 +281,10 @@ uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8877
 访问 `http://127.0.0.1:8877`；市场总览、机会排序与示例个股页面显示契约样本，其余视图会按缺失数据降级。结束演示后在新终端启动正常服务，或清除以上环境变量。
 
 ## 质量验证
+
+本轮整合复核：**后端 1,938 passed / 0 failed / 4 skipped / 8 deselected；前端 30/30**，并通过应用类型检查、构建、Ruff、依赖审计与无实盘边界检查。计数包含修复后的定向补跑并去重，详见[整合审核](docs/releases/2026-10-26-main-wealth-integration.md)。
+
+2026-10-26 的合并验证覆盖主线与 Wealth Lab，另列运行证据和限制；[查看本轮整合审核](docs/releases/2026-10-26-main-wealth-integration.md)。前端增加真正检查应用源码的 `npm --prefix frontend run typecheck`。
 
 软件质量有公开记录：[源码 `53022f7` 的 Windows CI](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) 留存 **后端 1794 passed、0 failed、4 skipped、8 deselected；前端 5 passed，生产构建通过**。当前分支检查见顶部 CI 标识。
 

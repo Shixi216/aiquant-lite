@@ -3,22 +3,16 @@ import { computed, ref, watch } from "vue";
 
 import type { TransitionRow } from "../../api/capitalBehavior";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 
 const props = defineProps<{ rows: TransitionRow[]; topN?: number }>();
 
 const chartEl = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(chartEl);
+const ct = useChartTheme();
 
-const NODE_COLORS = [
-  "#4da3ff",
-  "#e6a23c",
-  "#2ebd85",
-  "#f04848",
-  "#9a7fd8",
-  "#3fbfbf",
-  "#d873b8",
-  "#8ca0b3",
-];
+/** 节点分类色：跟随当前主题图表色盘（含用户自定义色盘）。 */
+const NODE_COLORS = computed(() => ct.value.palette);
 
 function hasPath(adjacency: Map<string, Set<string>>, from: string, to: string): boolean {
   if (from === to) return true;
@@ -65,7 +59,7 @@ const option = computed(() => {
   }
   const nodes = [...nameSet].map((name, index) => ({
     name,
-    itemStyle: { color: NODE_COLORS[index % NODE_COLORS.length] },
+    itemStyle: { color: NODE_COLORS.value[index % NODE_COLORS.value.length] },
   }));
   const links = edges.map((edge) => ({
     source: edge.from_state,
@@ -97,7 +91,7 @@ const option = computed(() => {
         nodeGap: 10,
         data: nodes,
         links,
-        label: { color: "#d8dee6", fontSize: 11 },
+        label: { color: ct.value.text, fontSize: 11 },
         lineStyle: { color: "gradient", curveness: 0.5, opacity: 0.35 },
         emphasis: { focus: "adjacency" },
       },

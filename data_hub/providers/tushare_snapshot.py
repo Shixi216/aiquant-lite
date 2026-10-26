@@ -38,12 +38,35 @@ class TushareSnapshotResult:
     row_counts: dict = field(default_factory=dict)
     coverage_ratio: float = 0.0          # 股票池覆盖率
     aligned: bool = False                # daily/daily_basic 对齐
-    trade_date_consistent: bool = False  # daily payload 与请求交易日一致
+    trade_date_consistent: bool = False  # 所有合并接口的实际交易日与目标一致
     moneyflow_missing: bool = False      # moneyflow 缺失标记
     margin_missing: bool = False         # 两融缺失标记
     top_list_missing: bool = False       # 龙虎榜缺失标记
     error: str = ""
     source: str = "Tushare"
+
+
+def snapshot_date_errors(result) -> list[str]:
+    """Validate source dates before merging; never infer them from collection time."""
+    errors = []
+    expected = str(result.trade_date).replace("-", "")
+    for name in ("daily", "daily_basic", "moneyflow", "stk_limit", "margin_detail", "top_list", "top_inst"):
+        frame = getattr(result, name, None)
+        if frame is None or frame.empty:
+            if name in ("daily", "daily_basic"):
+                errors.append(f"{name}缺少数据")
+            continue
+        if "trade_date" not in frame or frame["trade_date"].isna().any():
+            errors.append(f"{name}缺少可核验trade_date")
+        else:
+            observed = set(frame["trade_date"].astype(str).str.replace("-", "", regex=False))
+            if observed != {expected}:
+                errors.append(f"{name}交易日期不一致（请求 {expected}，实际 {sorted(observed)}）")
+        if name in ("daily", "daily_basic") and (
+            "ts_code" not in frame or frame["ts_code"].isna().any() or frame["ts_code"].duplicated().any()
+        ):
+            errors.append(f"{name}股票代码缺失或重复")
+    return errors
 
 
 class TushareSnapshotProvider:
@@ -63,7 +86,7 @@ class TushareSnapshotProvider:
         """最近交易日（统一 TradingCalendarService，不依赖返回顺序）"""
         from data_hub.services.trading_calendar_service import TradingCalendarService
         as_of = as_of or datetime.now(tz=TZ)
-        return TradingCalendarService().latest_trade_date(
+        return TradingCalendarService().daily_snapshot_target_date(
             data_cutoff=as_of, as_str=True,
         )
 
@@ -235,37 +258,28 @@ class TushareSnapshotProvider:
         if not db_path.is_absolute():
             db_path = Path(__file__).resolve().parents[2] / db_path
         con = open_database(str(db_path), read_only=True)
-        universe = con.execute(
-            "SELECT COUNT(*) FROM stock_universe WHERE listing_status='ACTIVE'"
-        ).fetchone()[0]
+        universe = {row[0] for row in con.execute(
+            "SELECT symbol FROM stock_universe WHERE listing_status='ACTIVE'"
+        ).fetchall()}
         con.close()
 
         # 覆盖率（Tushare 可能比 universe 多出新股/口径差，clamp 到 100%）
-        if universe > 0 and not result.daily.empty:
-            result.coverage_ratio = min(len(result.daily) / universe, 1.0)
+        result.coverage_ratio = 0.0
+        if universe and not result.daily.empty and "ts_code" in result.daily:
+            result.coverage_ratio = len(set(result.daily["ts_code"]) & universe) / len(universe)
 
         # 对齐检查：daily 与 daily_basic 的 ts_code 交集
-        if not result.daily.empty and not result.daily_basic.empty:
+        result.aligned = False
+        if not result.daily.empty and not result.daily_basic.empty and "ts_code" in result.daily and "ts_code" in result.daily_basic:
             daily_codes = set(result.daily["ts_code"])
             basic_codes = set(result.daily_basic["ts_code"])
             overlap = len(daily_codes & basic_codes) / max(len(daily_codes), 1)
             result.aligned = overlap >= 0.99
 
-        # 交易日期必须来自行情 payload，不能用采集时间推断。
-        if not result.daily.empty and "trade_date" in result.daily.columns:
-            observed = {
-                str(value).replace("-", "")
-                for value in result.daily["trade_date"].dropna().unique()
-            }
-            result.trade_date_consistent = observed == {str(result.trade_date)}
-            if not result.trade_date_consistent:
-                result.error += (
-                    f" | daily交易日期不一致（请求 {result.trade_date}，"
-                    f"实际 {sorted(observed) or ['缺失']}）"
-                )
-        else:
-            result.trade_date_consistent = False
-            result.error += " | daily缺少可核验trade_date"
+        date_errors = snapshot_date_errors(result)
+        result.trade_date_consistent = not date_errors
+        if date_errors:
+            result.error += " | " + " | ".join(date_errors)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,242 @@
+openapi: 3.1.0
+info:
+  title: 怡怡投研·市场情绪 API 契约（wealth-sentiment v1.1 + social-sentiment v1）
+  version: 1.1.0
+  description: |
+    以 2026-10-25 运行中 Router 的真实 OpenAPI 与实测响应为准（不猜测字段）。
+    统一信封：request_id/status/data/error_code/sanitized_error/warnings/risk_flags/
+    data_cutoff/generated_at/api_version(=wealth-lab/v1)/research_only=true；
+    data 内含 data_mode（REAL/DEMO/UNAVAILABLE——本模块当前仅 REAL 或 INSUFFICIENT_DATA 空态）。
+
+    修复记录（答辩封板 P0-1）：此前前端首屏 sources/heatmap 404 的根因是
+    social-sentiment 路由晚于服务重启提交、运行进程未加载；重启后
+    81 请求 / 78 并发混合压力 0 失败，写任务运行期间 3×33 并发读全部 200。
+    DuckDB 访问模式：进程内每请求独立连接 + 模块锁 + 幂等 DDL（实测无冲突）。
+
+    付费确认：/analyze、/collect、/summary、/refresh、/rebuild-factor 涉及真实
+    网络采集或 LLM 调用，经任务控制中心（v3.2 jobs）白名单执行并审计。
+
+servers:
+  - url: http://127.0.0.1:8765
+
+paths:
+  # ---------- wealth-sentiment（新闻/事件→资产与市场情绪评分） ----------
+  /v1/wealth-lab/sentiment/assets/{symbol}/score:
+    get:
+      operationId: getAssetSentimentScore
+      summary: 单资产情绪评分（33 只研究资产；无观测时 score=null + INSUFFICIENT_DATA）
+      parameters:
+        - { name: symbol, in: path, required: true, schema: { type: string }, example: "510300.SH" }
+      responses:
+        "200": { description: 评分或空态, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+        "404": { description: 非研究池资产 }
+
+  /v1/wealth-lab/sentiment/assets/{symbol}/history:
+    get:
+      operationId: getAssetSentimentHistory
+      summary: 资产评分历史（默认 30 天）
+      parameters:
+        - { name: symbol, in: path, required: true, schema: { type: string } }
+        - { name: days, in: query, schema: { type: integer, default: 30, minimum: 1, maximum: 365 } }
+      responses:
+        "200": { description: 历史序列, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/assets/{symbol}/news:
+    get:
+      operationId: getAssetNews
+      summary: 资产关联新闻事件（已核链接）
+      parameters:
+        - { name: symbol, in: path, required: true, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 30, minimum: 1, maximum: 100 } }
+      responses:
+        "200": { description: 新闻列表, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/market:
+    get:
+      operationId: getMarketSentiment
+      summary: 全市场情绪（研究池聚合）
+      responses:
+        "200": { description: 市场评分, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/market/history:
+    get:
+      operationId: getMarketSentimentHistory
+      summary: 市场情绪历史（默认 30 天）
+      parameters:
+        - { name: days, in: query, schema: { type: integer, default: 30, minimum: 1, maximum: 365 } }
+      responses:
+        "200": { description: 历史序列, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/news/events:
+    get:
+      operationId: getNewsEvents
+      summary: 新闻事件流（可按 symbol/platform 过滤）
+      parameters:
+        - { name: symbol, in: query, schema: { type: string } }
+        - { name: platform, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        "200": { description: 事件列表, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/scores/{score_id}/evidence:
+    get:
+      operationId: getScoreEvidence
+      summary: 评分证据链（评分→事件→新闻溯源）
+      parameters:
+        - { name: score_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 证据明细, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+        "404": { description: 评分不存在 }
+
+  /v1/wealth-lab/sentiment/sources:
+    get:
+      operationId: getSentimentSources
+      summary: 情绪数据源清单与状态
+      responses:
+        "200": { description: 数据源, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/refresh:
+    post:
+      operationId: submitSentimentRefresh
+      summary: 提交新闻增量采集任务（jobs 白名单 refresh_wealth_news）
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/analyze:
+    post:
+      operationId: submitSentimentAnalyze
+      summary: 提交 LLM 情绪分析任务（deepseek-flash 优先；付费调用，经任务中心审计）
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/sentiment/rebuild-factor:
+    post:
+      operationId: submitSentimentRebuild
+      summary: 提交情绪因子重算任务（rebuild_wealth_sentiment_factor）
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  # ---------- social-sentiment（合规社区评论情绪） ----------
+  /v1/wealth-lab/social-sentiment/sources:
+    get:
+      operationId: getSocialSources
+      summary: 合规社区数据源（互动易/上证 e 互动等）
+      responses:
+        "200": { description: 数据源, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/heatmap:
+    get:
+      operationId: getSocialHeatmap
+      summary: 资产×平台情绪热力图（无已分析真实评论时 cells=[]）
+      responses:
+        "200": { description: 热力图, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/platform-comparison:
+    get:
+      operationId: getPlatformComparison
+      summary: 平台间情绪对比
+      responses:
+        "200": { description: 对比数据, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/sentiment/distribution:
+    get:
+      operationId: getSentimentDistribution
+      summary: 单资产情绪分布
+      parameters:
+        - { name: symbol, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 分布, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/research:
+    get:
+      operationId: getSocialResearch
+      summary: 社区情绪研究输出（可按 symbol/platform 过滤）
+      parameters:
+        - { name: symbol, in: query, schema: { type: string } }
+        - { name: platform, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        "200": { description: 研究输出, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/coverage:
+    get:
+      operationId: getSocialCoverage
+      summary: 采集覆盖统计
+      responses:
+        "200": { description: 覆盖统计, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/wordcloud:
+    get:
+      operationId: getWordcloud
+      summary: 词云数据
+      parameters:
+        - { name: symbol, in: query, schema: { type: string } }
+        - { name: platform, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 词频, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/collect:
+    post:
+      operationId: submitSocialCollect
+      summary: 提交合规采集任务（授权数据源；jobs 审计）
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/import:
+    post:
+      operationId: importSocialComments
+      summary: 导入评论（合成标注 include_synthetic；真实评论须授权来源）
+      responses:
+        "200": { description: 导入结果, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/analyze:
+    post:
+      operationId: submitSocialAnalyze
+      summary: 提交社区评论 LLM 分析（付费；合规优先）
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/summary:
+    post:
+      operationId: submitSocialSummary
+      summary: 提交汇总研究任务
+      responses:
+        "200": { description: 任务受理, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+  /v1/wealth-lab/social-sentiment/registry/status:
+    post:
+      operationId: setRegistryStatus
+      summary: 设置数据源启用状态（管理操作）
+      responses:
+        "200": { description: 状态更新, content: { application/json: { schema: { $ref: "#/components/schemas/SEnvelope" } } } }
+
+components:
+  schemas:
+    SEnvelope:
+      type: object
+      description: 统一信封；data.data_mode=REAL；空态以 score=null+evidence_basis 表达
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [SUCCESS, DEGRADED, FAILED] }
+        data: { type: object }
+        error_code: { type: [string, "null"] }
+        sanitized_error: { type: [string, "null"] }
+        warnings: { type: array, items: { type: string } }
+        generated_at: { type: string, format: date-time }
+        api_version: { type: string, example: "wealth-lab/v1" }
+        research_only: { const: true }
+
+    SentimentScore:
+      type: object
+      properties:
+        score_id: { type: string }
+        symbol: { type: string }
+        asof: { type: string, format: date-time }
+        sentiment_score: { type: number, description: "0-100（实测示例 23.34）" }
+        confidence: { type: number }
+        coverage: { type: number }
+        observation_count: { type: integer }
+        source_count: { type: integer }
+        evidence_basis: { type: string, enum: [DIRECT_EVIDENCE, CLASS_LEVEL_EVIDENCE, INSUFFICIENT_DATA], description: v1.1 证据分级 }
+        evidence_count: { type: integer }
+        component_breakdown: { type: object }

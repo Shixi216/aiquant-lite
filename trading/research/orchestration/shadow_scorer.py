@@ -76,6 +76,12 @@ def _risk_flags(
     return list(dict.fromkeys(flags))
 
 
+class NoUsableFactorError(ValueError):
+    def __init__(self, bundle: FactorBundle) -> None:
+        self.bundle = bundle
+        super().__init__("no usable factor is available for shadow scoring")
+
+
 def score_shadow_bundle(
     bundle: FactorBundle,
     *,
@@ -104,7 +110,7 @@ def score_shadow_bundle(
         adjusted_scores[factor_type] = directional_score(factor)
     denominator = sum(weighted.values())
     if denominator <= 0:
-        raise ValueError("no usable factor is available for shadow scoring")
+        raise NoUsableFactorError(bundle)
     effective = {
         factor_type: weight / denominator
         for factor_type, weight in weighted.items()

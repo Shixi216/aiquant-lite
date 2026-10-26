@@ -38,8 +38,8 @@ async function loadExperiment() {
   }
 }
 
-function onPoll() {
-  if (activeTab.value === "health") healthPanel.value?.refresh(true);
+async function onPoll() {
+  if (activeTab.value === "health") await healthPanel.value?.refresh(true);
 }
 
 usePolling(onPoll, 60_000, 300_000);

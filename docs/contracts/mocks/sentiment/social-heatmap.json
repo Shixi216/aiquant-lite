@@ -1,0 +1,18 @@
+{
+ "request_id": "req_6cdbbb2c53a04ebdb49d2ab3",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "cells": [],
+  "note": "无已分析真实评论时 cells 为空（不编造热力）"
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": null,
+ "generated_at": "2026-10-25T17:50:42.255083+09:00",
+ "api_version": "social-sentiment/v1",
+ "research_only": true,
+ "note": "真实响应采样生成（2026-10-25），截断长数组"
+}

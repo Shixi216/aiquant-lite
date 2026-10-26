@@ -86,6 +86,31 @@ class TradingCalendarService:
     # ------------------------------------------------------------------
     # 概念2：latest_completed_trade_date（日线/指标/快照/回测用）
     # ------------------------------------------------------------------
+    def daily_snapshot_target_date(
+        self,
+        data_cutoff: Optional[date | datetime] = None,
+        as_str: bool = False,
+    ) -> Optional[date | str]:
+        """Date to request, never proof that the requested data is available.
+
+        Request today's daily snapshot only after close. Completion must still
+        be established from the provider payload, not this calendar candidate.
+        """
+        now = self._now()
+        if isinstance(data_cutoff, datetime):
+            cutoff = data_cutoff.replace(tzinfo=TZ) if data_cutoff.tzinfo is None else data_cutoff.astimezone(TZ)
+            as_of = min(cutoff, now)
+        elif isinstance(data_cutoff, date) and data_cutoff < now.date():
+            as_of = datetime.combine(data_cutoff, _CLOSE_TIME, tzinfo=TZ)
+        else:
+            as_of = now
+        candidate = self.current_or_latest_open_date(data_cutoff=as_of)
+        if candidate == as_of.date() and as_of.time() < _CLOSE_TIME:
+            candidate = self.current_or_latest_open_date(data_cutoff=as_of.date() - timedelta(days=1))
+        if candidate is None:
+            return None
+        return candidate.strftime("%Y%m%d") if as_str else candidate
+
     def latest_completed_trade_date(
         self,
         data_cutoff: Optional[date | datetime] = None,
@@ -114,7 +139,6 @@ class TradingCalendarService:
             cutoff_date = data_cutoff
 
         today = self._now().date()
-        _now = self._now()
 
         # 上限 = min(今天, cutoff)
         upper = cutoff_date if (cutoff_date and cutoff_date < today) else today
@@ -163,7 +187,6 @@ class TradingCalendarService:
 
         # 开盘前/盘中判断（不写死15:00，用数据可用性）
         # 仅当 cutoff == 今天（或 cutoff 极接近当前）时才考虑"当日未完成"
-        _now = self._now()
         is_recent = (upper >= today) or (
             cutoff_date is not None and cutoff_date == today
         )

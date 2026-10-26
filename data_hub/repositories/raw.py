@@ -52,24 +52,31 @@ def resolve_persisted_raw_records(
 ) -> list[MarketRecord]:
     """Resolve repeat fetches to the original persisted record IDs."""
 
-    resolved: list[MarketRecord] = []
+    if not records:
+        return []
+    record_ids = list(dict.fromkeys(record.record_id for record in records))
+    hashes = list(dict.fromkeys(record.content_hash for record in records if record.content_hash))
     with get_connection() as connection:
-        for record in records:
-            row = connection.execute(
-                """
-                SELECT record_id, symbol, data_type, event_time, fetched_at,
-                       source_name, source_url, source_level, verified,
-                       content_hash, payload_json
-                FROM data_records
-                WHERE record_id = ?
-                   OR (content_hash IS NOT NULL AND content_hash = ?)
-                ORDER BY CASE WHEN record_id = ? THEN 0 ELSE 1 END
-                LIMIT 1
-                """,
-                [record.record_id, record.content_hash, record.record_id],
-            ).fetchone()
-            resolved.append(_row_to_record(row) if row is not None else record)
-    return resolved
+        rows = connection.execute(
+            """
+            SELECT record_id, symbol, data_type, event_time, fetched_at,
+                   source_name, source_url, source_level, verified,
+                   content_hash, payload_json
+            FROM data_records
+            WHERE record_id IN (SELECT UNNEST(?::VARCHAR[]))
+               OR content_hash IN (SELECT UNNEST(?::VARCHAR[]))
+            ORDER BY fetched_at, record_id
+            """,
+            [record_ids, hashes],
+        ).fetchall()
+    by_id: dict[str, MarketRecord] = {}
+    by_hash: dict[str, MarketRecord] = {}
+    for row in rows:
+        persisted = _row_to_record(row)
+        by_id[persisted.record_id] = persisted
+        if persisted.content_hash:
+            by_hash.setdefault(persisted.content_hash, persisted)
+    return [by_id.get(record.record_id) or by_hash.get(record.content_hash) or record for record in records]
 
 
 __all__ = ["load_raw_records", "resolve_persisted_raw_records"]

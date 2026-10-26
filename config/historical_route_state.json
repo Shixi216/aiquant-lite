@@ -1,0 +1,7 @@
+{
+  "policy_version": "historical-route-v3.0.0-stage1",
+  "stage": "shadow",
+  "reason": "Jinniu API key has no endpoint permissions; Jinniu reserved for backtest/history only (user-confirmed 2026-10-12); live daily bars via Tushare",
+  "updated_by": "hermes-agent",
+  "updated_at": "2026-10-12T10:50:00+08:00"
+}

@@ -33,8 +33,11 @@ class DeepSeekProvider:
             system_prompt=system_prompt,
             temperature=temperature,
             max_tokens=max_tokens,
-            extra_body={
-                "thinking": {"type": "enabled"},
-                "reasoning_effort": "high",
-            },
+            # Keep the caller's token cap: small structured completions cannot
+            # also fund an unbounded reasoning preamble. Never raise the budget.
+            extra_body=(
+                {"thinking": {"type": "enabled"}, "reasoning_effort": "high"}
+                if max_tokens >= 4096
+                else {"thinking": {"type": "disabled"}}
+            ),
         )

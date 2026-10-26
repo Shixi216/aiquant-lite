@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from config.settings import Settings, settings
+from data_hub.market_units import daily_quantities
 from data_hub.repositories import (
     CanonicalFinancialRepository,
     CanonicalMarketRepository,
@@ -21,7 +22,7 @@ from data_hub.schemas.unified import (
 )
 
 
-CANONICAL_ALGORITHM_VERSION = "canonical-facts-v1"
+CANONICAL_ALGORITHM_VERSION = "canonical-facts-v2-units"
 MARKET_PRICE_FIELDS = ("open", "high", "low", "close")
 MARKET_VOLUME_FIELDS = ("volume", "amount")
 
@@ -89,16 +90,7 @@ def _market_payload(record: MarketRecord) -> dict[str, Any]:
         volume = record.data.get("vol")
     amount = record.data.get("amount")
     if record.data_type == DataType.DAILY_BAR:
-        raw_volume = _as_number(volume)
-        raw_amount = _as_number(amount)
-        source = record.source_name.casefold()
-        if raw_volume is not None and (
-            source.startswith("tushare pro")
-            or source.startswith("akshare / eastmoney")
-        ):
-            volume = raw_volume * 100
-        if raw_amount is not None and source.startswith("tushare pro"):
-            amount = raw_amount * 1000
+        volume, amount = daily_quantities(record.data, record.source_name)
     if volume is not None:
         payload["volume"] = volume
     if amount is not None:
@@ -405,6 +397,17 @@ class CanonicalizationService:
         if self.market_repository is None:
             raise RuntimeError("market repository is not initialized")
         return self.market_repository.save(record)
+
+    def canonicalize_market_batch(self, records: list[MarketRecord]) -> list[CanonicalMarketRecord]:
+        """Resolve repeated raw fetches once for the entire daily-bar window."""
+        if self.market_repository is None:
+            raise RuntimeError("market repository is not initialized")
+        resolved = resolve_persisted_raw_records(records)
+        groups: dict[tuple[str, DataType, datetime], list[MarketRecord]] = {}
+        for raw in resolved:
+            groups.setdefault((raw.symbol, raw.data_type, raw.event_time), []).append(raw)
+        canonical = [self.canonicalize_market(group, persist=False) for group in groups.values()]
+        return self.market_repository.save_many(canonical)
 
     def canonicalize_financial(
         self,

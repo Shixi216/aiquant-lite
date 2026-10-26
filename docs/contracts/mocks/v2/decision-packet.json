@@ -1,0 +1,71 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "packet_id": "wldec_3c4d5e6f7a8b",
+    "portfolio_id": "wealth-lab-default",
+    "version": 1,
+    "supersedes_version": null,
+    "strategy_id": "S2_cross_momentum",
+    "strategy_version": "1.0",
+    "weights": {
+      "510300.SH": 0.5,
+      "518880.SH": 0.5
+    },
+    "backtest_window": {
+      "start_date": "2020-04-08",
+      "end_date": "2026-10-23"
+    },
+    "data_cutoff": "2026-10-23T15:00:00+08:00",
+    "data_sources": [
+      "xiaodefa-tushare/fund_daily",
+      "xiaodefa-tushare/fund_adj"
+    ],
+    "metrics": {
+      "total_return": 0.6233,
+      "annual_return": 0.0792,
+      "annual_volatility": 0.0987,
+      "sharpe_ratio": 0.608,
+      "sortino_ratio": 0.891,
+      "calmar_ratio": 0.87,
+      "max_drawdown": -0.0903,
+      "monthly_win_rate": 0.6125,
+      "avg_turnover_per_rebalance": 0.1834,
+      "trading_days": 1587
+    },
+    "cost_assumptions": {
+      "cost_bps": 5,
+      "model": "sum|delta_w|*bps/1e4",
+      "currency": "CNY"
+    },
+    "risk_check": {
+      "verdict": "WARN"
+    },
+    "ai_research": {
+      "research_id": "wlrs_1a2b3c4d5e6f"
+    },
+    "ai_risk_review": {
+      "review_id": "wlrv_2b3c4d5e6f7a"
+    },
+    "model_call_ids": [
+      "call_wl_0123456789abcdef"
+    ],
+    "evidence_ids": [
+      "wlbt_9a8b7c6d5e4f"
+    ],
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "created_at": "2026-10-24T20:00:00+08:00",
+    "research_only": true
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [
+    "RESEARCH_ONLY_NO_EXECUTION"
+  ],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

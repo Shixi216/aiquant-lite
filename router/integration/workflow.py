@@ -9,6 +9,8 @@ from trading.research.orchestration.schemas import (
     ResearchRequest,
 )
 from trading.research.orchestration.service import OrchestrationService
+from trading.research.orchestration.models import FORMAL_STRATEGY_VERSION, FORMAL_WEIGHTS
+from trading.research.orchestration.shadow_scorer import NoUsableFactorError
 from trading.scanner.schemas import (
     ScannerParseRequest,
     ScannerScanRequest,
@@ -170,13 +172,34 @@ class InteractionWorkflowService:
             "decision_shadow_with_canonical_audit",
             None,
         )
-        if canonical_audit is None:
-            result = orchestration.decision_shadow(decision_request)
-        else:
-            result = canonical_audit(
-                decision_request,
-                request_id=request_id,
-                user_context=UserContext.finance_mcp_shadow(),
+        try:
+            if canonical_audit is None:
+                result = orchestration.decision_shadow(decision_request)
+            else:
+                result = canonical_audit(
+                    decision_request,
+                    request_id=request_id,
+                    user_context=UserContext.finance_mcp_shadow(),
+                )
+        except NoUsableFactorError as exc:
+            bundle = exc.bundle
+            weights = {factor.value: weight for factor, weight in FORMAL_WEIGHTS.items()}
+            return DecisionWorkflowResult(
+                workflow=WorkflowContext(step=WorkflowStep.DECISION,
+                    parent_request_id=request.parent_request_id, decision_called=True),
+                formal_result={
+                    "status": "INSUFFICIENT_COVERAGE", "strategy_version": FORMAL_STRATEGY_VERSION,
+                    "score": None, "confidence": None, "proposal_action": None,
+                    "final_action": "veto" if request.hard_veto else None,
+                    "hard_veto": request.hard_veto, "formal_weights": weights,
+                    "shadow_used_for_action": False, "shadow_used_for_veto": False,
+                    "reason": "no usable point-in-time factor evidence; no formal action was produced",
+                },
+                shadow_composite={"status": "UNAVAILABLE", "reason": str(exc)},
+                factor_coverage=bundle.factor_coverage.model_dump(mode="json"),
+                available_factors=[factor.value for factor in bundle.available_factor_types],
+                missing_factors=[factor.value for factor in bundle.missing_factor_types],
+                evidence_ids=bundle.evidence_ids, formal_weights=weights,
             )
         missing_factors = [
             item.value for item in result.missing_factors

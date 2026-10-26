@@ -38,7 +38,7 @@ def test_retired_mimo_stays_disabled_even_with_complete_legacy_configuration():
 
 
 @pytest.mark.asyncio
-async def test_deepseek_provider_enables_reasoning(monkeypatch: pytest.MonkeyPatch):
+async def test_deepseek_provider_enables_reasoning_with_sufficient_budget(monkeypatch: pytest.MonkeyPatch):
     captured: dict[str, Any] = {}
 
     async def fake_invoke(**payload: Any) -> RouterInvokeResponse:
@@ -61,13 +61,14 @@ async def test_deepseek_provider_enables_reasoning(monkeypatch: pytest.MonkeyPat
         prompt="review",
         system_prompt="system",
         temperature=0,
-        max_tokens=512,
+        max_tokens=4096,
     )
 
     assert captured["extra_body"] == {
         "thinking": {"type": "enabled"},
         "reasoning_effort": "high",
     }
+    assert captured["max_tokens"] == 4096
 
 
 @pytest.mark.asyncio

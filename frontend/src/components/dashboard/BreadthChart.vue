@@ -2,14 +2,16 @@
 import { computed, ref, watchEffect } from "vue";
 import type { Ref } from "vue";
 import type { MarketBreadthData } from "../../types/v2";
-import echarts, { type EChartsCoreOption } from "../../charts";
+import type { EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { DOWN_COLOR, UP_COLOR } from "../../domain/labels";
 
 const props = defineProps<{ breadth: MarketBreadthData | null }>();
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
 const option = computed<EChartsCoreOption | null>(() => {
   const data = props.breadth;
@@ -23,7 +25,7 @@ const option = computed<EChartsCoreOption | null>(() => {
     buckets.n0_2, buckets.n2_5, buckets.n5_7, buckets.lt7,
   ];
   const colors = [
-    UP_COLOR, UP_COLOR, UP_COLOR, UP_COLOR, "#8494a7",
+    UP_COLOR, UP_COLOR, UP_COLOR, UP_COLOR, ct.value.dim,
     DOWN_COLOR, DOWN_COLOR, DOWN_COLOR, DOWN_COLOR,
   ];
   return {

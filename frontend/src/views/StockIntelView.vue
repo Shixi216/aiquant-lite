@@ -99,7 +99,7 @@ const showDegradedChartHint = computed(() => {
     <template v-if="intel || chart || chartLoading || chartError">
       <h2 class="page-title">{{ intel?.identity.name ? `${intel.identity.name} · ` : '' }}{{ symbol }} <span class="stock-caption">个股研究</span></h2>
       <StockDatabaseContext v-if="intel" :context="intel.database_context" />
-      <DecisionCard :packet="zonePacket" :reason="decisionReason" />
+      <DecisionCard :packet="zonePacket" :reason="decisionReason" :review="intel?.research_review" />
       <div class="two-col">
         <FourDimensionBars
           :data="intel?.four_dimensions.available ? intel.four_dimensions.data : null"
@@ -108,12 +108,13 @@ const showDegradedChartHint = computed(() => {
         <RiskPanel
           :risks="intel?.risk.available ? (intel.risk.data?.risks ?? []) : []"
           :reason="!intel?.risk.available ? getBlockReasonLabel(intel?.risk.reason_code ?? 'not_found') : null"
+          :research-time="intel?.research_review?.generated_at"
         />
       </div>
 
       <section class="panel">
         <div class="chart-head">
-          <h3>日K（{{ days }}日）</h3>
+          <h3>日K（{{ days }}日）· {{ intel?.identity.name || symbol }}</h3>
           <div class="range">
             <button
               v-for="option in [20, 60, 120, 250]"

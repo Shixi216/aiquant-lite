@@ -3,12 +3,14 @@ import { computed, ref, watch } from "vue";
 
 import type { CandidatesPayload } from "../../api/capitalBehavior";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { getStrategyRoleLabel } from "../../domain/labels";
 
 const props = defineProps<{ payload: CandidatesPayload }>();
 
 const chartEl = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(chartEl);
+const ct = useChartTheme();
 
 const METRIC_LABELS: [keyof CandidateChartValue, string, (value: number) => string][] = [
   ["annualized_return", "年化收益", (v) => `${(v * 100).toFixed(1)}%`],
@@ -29,11 +31,11 @@ type CandidateChartValue = {
 const option = computed(() => {
   const labels = METRIC_LABELS.map(([, label]) => label);
   const strategies = [
-    { id: `${props.payload.baseline.candidate_id}（基准）`, metrics: props.payload.baseline.metrics, color: "#8ca0b3" },
+    { id: `${props.payload.baseline.candidate_id}（基准）`, metrics: props.payload.baseline.metrics, color: ct.value.faint },
     ...props.payload.research_candidates.map((candidate) => ({
       id: candidate.candidate_id,
       metrics: candidate.metrics,
-      color: candidate.promotion_passed ? "#2ebd85" : "#4da3ff",
+      color: candidate.promotion_passed ? ct.value.down : ct.value.accent,
     })),
   ];
   return {
@@ -47,10 +49,10 @@ const option = computed(() => {
           )
           .join("<br/>"),
     },
-    legend: { data: strategies.map((item) => item.id), textStyle: { color: "#8494a7" }, top: 0 },
+    legend: { data: strategies.map((item) => item.id), textStyle: { color: ct.value.dim }, top: 0 },
     grid: { left: 48, right: 20, top: 40, bottom: 28 },
-    xAxis: { type: "category", data: labels, axisLabel: { color: "#8494a7" } },
-    yAxis: { type: "value", axisLabel: { color: "#8494a7" } },
+    xAxis: { type: "category", data: labels, axisLabel: { color: ct.value.dim } },
+    yAxis: { type: "value", axisLabel: { color: ct.value.dim } },
     series: strategies.map((item) => ({
       name: item.id,
       type: "bar" as const,

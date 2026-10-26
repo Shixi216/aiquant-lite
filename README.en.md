@@ -12,7 +12,7 @@ From market context to company research. From factor ideas to inspectable eviden
 
 [![CI](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/Shixi216/aiquant-lite/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](pyproject.toml) [![Vue](https://img.shields.io/badge/Vue-3-42B883?logo=vuedotjs&logoColor=white)](frontend/package.json) [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](router/api/app.py) [![DuckDB](https://img.shields.io/badge/Data-DuckDB-FFF000?logo=duckdb&logoColor=black)](database/connection_manager.py) [![MCP](https://img.shields.io/badge/Agent-MCP-9AABF7)](docs/hermes-integration.md) [![License](https://img.shields.io/badge/License-Apache--2.0-6E7681)](LICENSE)
 
-**[🚀 Quick start](#quick-start) · [🤖 AI roles](#ai-and-quantitative-rules-working-on-the-same-research-question) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [简体中文](README.md)**
+**[🚀 Quick start](#quick-start) · [🤖 AI roles](#ai-and-quantitative-rules-working-on-the-same-research-question) · [🖥️ Product tour](#see-the-workspace) · [🧠 Research evidence](docs/knowledge/README.md) · [🏗️ Architecture](#one-research-core-multiple-interfaces) · [💬 Our story](#the-story-behind-the-project) · [🧩 Wealth Lab](#new-wealth-lab-multi-asset-research-in-the-same-workspace) · [简体中文](README.md)**
 
 </div>
 
@@ -111,7 +111,7 @@ Users choose different timing, sizing, prices and costs. Their gains and losses 
 
 </details>
 
-### Six connected workspaces
+### Six stages of stock research
 
 | Workspace | What you can investigate | Implementation |
 |---|---|---|
@@ -122,11 +122,46 @@ Users choose different timing, sizing, prices and costs. Their gains and losses 
 | **Strategy and capital research** | Candidate families, cost sensitivity and Walk-Forward evidence | [Strategy Lab](trading/research/strategy_lab) · [Research](webui/routes/research.py) |
 | **Decisions and review** | Risk VETO, sizing, versioned decisions and local simulation | [Decision Support](trading/decision_support) · [Manual Tracking](manual_tracking) |
 
+## New Wealth Lab: multi-asset research in the same workspace
+
+**2026-10-26: the main branch's stock research, AI roles and evidence narrative now include the Wealth Lab workbench.** The stock and allocation engines share a frontend while keeping their data, costs, scoring and risk contracts separate.
+
+| Capability | What you can inspect |
+|---|---|
+| **Research universe** | 33 registered research assets across equity, bonds, gold/commodities, QDII, convertible bonds and REITs; quality, listing dates and eligibility at each rebalance |
+| **Strategy factory** | Nine strategies, S0–S8; NAV, drawdown, cash, initial and subsequent transaction costs; comparable windows/costs and per-rebalance PIT checks for expanded universes |
+| **Controlled AI research** | Stable mode uses archived evidence. Experimental mode adds Flash planning, whitelist validation and approval before experiments, Qwen research and Pro review; deterministic VETO and metric checks remain independent |
+| **Sentiment and jobs** | Direct versus class-level evidence, actual snapshot timestamps, real failure/degraded states and archived reports; explicit consent before paid calls |
+
+```mermaid
+flowchart LR
+    A["Assets and historical eligibility"] --> B["Backtest, cash and costs"]
+    B --> C{"Deterministic risk check"}
+    C -->|VETO| X["Stop and retain evidence"]
+    C -->|Pass or warning| D["AI research and independent review"]
+    D --> E["Metric verification and research packet"]
+```
+
+![Updated strategy factory: real historical NAV, drawdown and metrics](docs/screenshots/20261026/strategy-result.png)
+
+<table width="100%">
+<tr><td width="50%"><strong>Universe and data quality</strong><br><a href="docs/screenshots/20261026/universe.png"><img src="docs/screenshots/20261026/universe.png" alt="Real multi-asset universe UI" width="100%"></a></td><td width="50%"><strong>AI roles and paid-call consent</strong><br><a href="docs/screenshots/20261026/ai-research.png"><img src="docs/screenshots/20261026/ai-research.png" alt="Controlled AI research UI" width="100%"></a></td></tr>
+<tr><td><strong>Sentiment snapshots and evidence</strong><br><a href="docs/screenshots/20261026/sentiment.png"><img src="docs/screenshots/20261026/sentiment.png" alt="Real sentiment snapshot" width="100%"></a></td><td><strong>Real jobs and archived reports</strong><br><a href="docs/screenshots/20261026/task-center.png"><img src="docs/screenshots/20261026/task-center.png" alt="Completed backtest and report jobs" width="100%"></a></td></tr>
+</table>
+
+> Captured on 2026-10-26, with daily prices through October 23 and an existing October 25 sentiment snapshot. The S4 hero uses 2020-04-07–2026-10-23, 1,587 days, 5bps per side and zero cash return: project Sharpe 0.9133, maximum drawdown −5.3351%. The old 1.086 / −2.99% sample predates the weight-cap fix. [Screenshot provenance](docs/screenshots/20261026/README.md).
+
+The stock engine prioritizes the **30/30/25/15 cross-sectional composite**, renormalized over available inputs. Allocation strategies produce separate portfolio weights. Wealth sentiment is for current research and is excluded from historical returns; the registered surviving universe still carries survivorship bias.
+
+The six navigation groups are stock research, wealth management, data, settings, AI research and sentiment, with 18 business routes. Credentials and datasets are configured locally; the four-asset and expanded bootstrap entrypoints are `scripts/wealth_lab_backfill.py` and `scripts/wealth_lab_v3_backfill.py`.
+
+[Code/runtime reconciliation audit](docs/releases/2026-10-26-main-wealth-integration.md) · [Wealth features and bug fixes](docs/releases/2026-10-26-wealth-lab.md)
+
 ## Research depth, in inspectable assets
 
 ![Local data and experiment inventory](docs/assets/research-evidence.svg)
 
-The local inventory contains **2,782,220 historical bar rows, 2,625,560 Replay feature packets and 2,238,764 aligned Strategy Lab input rows**. Strategy Lab retains **202 candidate definitions, four cost scenarios at 0 / 20 / 40 / 60bp and 144 Walk-Forward metric rows**.
+The figure retains the **2026-10-19** research inventory. A read-only Router query on **2026-10-26** counted **2,789,466 rows in the primary historical-bar table**, including adjustment types and revisions, rather than unique trading days. The **2,625,560 Replay feature packets** and **2,238,764 aligned Strategy Lab rows** retain their October 19 sidecar inventory date; they were not regenerated in this review. Strategy Lab retains **202 candidate definitions, four cost scenarios at 0 / 20 / 40 / 60bp and 144 Walk-Forward metric rows**.
 
 [Eight curated knowledge topics](docs/knowledge/README.md) cover data scope, PIT, experiment protocols, negative findings, operations, Hermes workflows, Forward observations and memory governance. Rejection reasons and unresolved questions remain part of the research record. Detailed knowledge articles are currently in Chinese.
 
@@ -179,7 +214,7 @@ These are design references. Feature, coverage, performance and investment-retur
 | Path | Meaning |
 |---|---|
 | `cross_section_4d` | Technical / fundamental / sentiment features / margin-financing ranks, weighted 30 / 30 / 25 / 15 over available inputs; cutoff queries read a historical section at or before that time |
-| `legacy_60_40_fallback` | 60% technical + 40% fundamental fallback, explicitly marked `degraded` when the cross section is unavailable |
+| `legacy_60_40_fallback` | Compatibility diagnostics only, marked `degraded`; the canonical path waits with a zero score and the proposal path holds, without opening a position |
 | Orchestration experiments | Separate two-factor, 50 / 35 / 15 three-factor and custom-weight research paths |
 
 Actions also depend on data state, position context, percentile thresholds and Risk VETO. See [architecture](docs/architecture.md) and [limitations](docs/limitations.md).
@@ -190,7 +225,7 @@ Model roles and provider access depend on local configuration and credentials. T
 
 ## Quick start
 
-Requires **Python 3.11** and [uv](https://docs.astral.sh/uv/). Web builds also require **Node.js 22.12+** and npm. Managed operations scripts target Windows; Python services can be launched individually on other systems.
+Requires **Python 3.11** and [uv](https://docs.astral.sh/uv/). Web builds also require **Node.js 22.18+ or 24** and npm. Managed operations scripts target Windows; Python services can be launched individually on other systems.
 
 ```powershell
 git clone https://github.com/Shixi216/aiquant-lite.git
@@ -234,6 +269,10 @@ uv run python -m scripts.run_web_ui --host 127.0.0.1 --port 8877
 Visit `http://127.0.0.1:8877`. Dashboard, opportunities and the sample stock view use fixtures; other views degrade with missing data. Use a fresh terminal or clear those variables before normal operation.
 
 ## Validation
+
+Integration validation: **backend 1,938 passed / 0 failed / 4 skipped / 8 deselected; frontend 30/30**, plus application type checking, production build, Ruff, dependency audit and execution-boundary checks. Counts deduplicate targeted reruns after repairs; see the [integration audit](docs/releases/2026-10-26-main-wealth-integration.md).
+
+The 2026-10-26 integration checks both the mainline and Wealth Lab. [See the reconciliation audit](docs/releases/2026-10-26-main-wealth-integration.md) for current results, runtime evidence and limits. `npm --prefix frontend run typecheck` now explicitly checks application sources.
 
 The [hosted Windows CI at source commit `53022f7`](https://github.com/Shixi216/aiquant-lite/actions/runs/39104295548) records **1,794 backend passes, zero failures, four skips and eight deselections; five frontend passes and a successful production build**. The top CI badge shows the current branch status.
 

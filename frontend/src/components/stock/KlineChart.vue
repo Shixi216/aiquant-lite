@@ -4,6 +4,7 @@ import type { Ref } from "vue";
 import type { ChartBar, DecisionPacketData } from "../../types/v2";
 import { type EChartsCoreOption } from "../../charts";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme, withAlpha } from "../../domain/chartTheme";
 import { DOWN_COLOR, UP_COLOR, formatAmount, formatVolume, formatPct, hasInconsistentTurnover } from "../../domain/labels";
 
 const props = defineProps<{
@@ -13,20 +14,22 @@ const props = defineProps<{
 
 const el = ref<HTMLElement | null>(null);
 const { setOption } = useECharts(el as Ref<HTMLElement | null>);
+const ct = useChartTheme();
 
-const MARK_COLORS = {
-  entry: "rgba(77, 163, 255, 0.18)", // 允许建仓区（半透明蓝）
-  preferred: "rgba(230, 162, 60, 0.22)", // 优选建仓区（半透明金）
-  stop: "#f04848",
-  takeProfit: "#2ebd85",
-};
+/** 决策区间/止损止盈取色：computed 随主题联动（切换主题后重绘自动生效）。 */
+const MARK_COLORS = computed(() => ({
+  entry: withAlpha(ct.value.accent, 0.18),
+  preferred: withAlpha(ct.value.warn, 0.22),
+  stop: ct.value.up,
+  takeProfit: ct.value.down,
+}));
 
 function zoneMarkLine(packet: DecisionPacketData) {
   const lines: Record<string, unknown>[] = [];
   if (packet.frozen_stop_loss_price !== null) {
     lines.push({
       yAxis: packet.frozen_stop_loss_price,
-      lineStyle: { color: MARK_COLORS.stop, type: "solid" },
+      lineStyle: { color: MARK_COLORS.value.stop, type: "solid" },
       label: { formatter: `止损 ${packet.frozen_stop_loss_price}`, position: "insideEndTop" },
     });
   }
@@ -39,7 +42,7 @@ function zoneMarkAreas(packet: DecisionPacketData) {
     areas.push([
       {
         yAxis: packet.frozen_entry_zone.low,
-        itemStyle: { color: MARK_COLORS.entry },
+        itemStyle: { color: MARK_COLORS.value.entry },
         label: { formatter: "允许建仓区", position: "insideTopRight" },
       },
       { yAxis: packet.frozen_entry_zone.high },
@@ -49,7 +52,7 @@ function zoneMarkAreas(packet: DecisionPacketData) {
     areas.push([
       {
         yAxis: packet.frozen_preferred_zone.low,
-        itemStyle: { color: MARK_COLORS.preferred },
+        itemStyle: { color: MARK_COLORS.value.preferred },
         label: { formatter: "优选建仓区", position: "insideTopRight" },
       },
       { yAxis: packet.frozen_preferred_zone.high },
@@ -119,7 +122,7 @@ const option = computed<EChartsCoreOption | null>(() => {
   }
   return {
     animation: false,
-    legend: { data: legendNames.sort((a, b) => Number(a.slice(2)) - Number(b.slice(2))), top: 0, textStyle: { color: "#a8b7c9" }, inactiveColor: "#536274" },
+    legend: { data: legendNames.sort((a, b) => Number(a.slice(2)) - Number(b.slice(2))), top: 0, textStyle: { color: ct.value.text }, inactiveColor: ct.value.faint },
     tooltip: {
       trigger: "axis",
       confine: true,
@@ -151,11 +154,11 @@ const option = computed<EChartsCoreOption | null>(() => {
       { left: 60, right: 20, top: "74%", height: "16%" },
     ],
     xAxis: [
-      { type: "category", data: dates, gridIndex: 0, boundaryGap: true, axisLabel: { color: "#8494a7" }, axisLine: { lineStyle: { color: "#263140" } } },
+      { type: "category", data: dates, gridIndex: 0, boundaryGap: true, axisLabel: { color: ct.value.dim }, axisLine: { lineStyle: { color: ct.value.axisLine } } },
       { type: "category", data: dates, gridIndex: 1, axisLabel: { show: false } },
     ],
     yAxis: [
-      { scale: true, gridIndex: 0, splitLine: { lineStyle: { color: "#1c2530" } } },
+      { scale: true, gridIndex: 0, splitLine: { lineStyle: { color: ct.value.grid } } },
       { gridIndex: 1, axisLabel: { show: false }, splitLine: { show: false } },
     ],
     dataZoom: [

@@ -1,0 +1,42 @@
+{
+  "request_id": "req_0123456789abcdef0123456",
+  "status": "SUCCESS",
+  "data": {
+    "data_mode": "REAL",
+    "research_id": "wlrs_1a2b3c4d5e6f",
+    "model": "deepseek-v4-pro",
+    "model_call_ids": [
+      "call_wl_0123456789abcdef"
+    ],
+    "prompt_version": "wealth-research-v1",
+    "summary": "横截面动量策略在 2020-2026 窗口跑赢固定权重约 29 个百分点，主要来自 2024-2025 趋势行情中的黄金与权益切换；代价是更高的换手（单次调仓平均 18.3%）。风险调整后优势收敛：夏普 0.61 vs 0.32。",
+    "strategy_differences": [
+      "动量策略集中持有 2 只资产，行业暴露随动量漂移",
+      "固定权重天然分散，回撤来源更稳定"
+    ],
+    "key_risks": [
+      "动量崩溃：2022 年式震荡市可能连续止损",
+      "黄金 2024-2025 强趋势不可外推"
+    ],
+    "counter_evidence": [
+      "等权基准同期 +47.6%，动量优势并非唯一来源",
+      "511380 上市晚，早期动量排名样本不足"
+    ],
+    "data_gaps": [
+      "缺少申赎佣金阶梯与冲击成本",
+      "无宏观状态变量佐证动量环境"
+    ],
+    "used_backtest_id": "wlbt_9a8b7c6d5e4f",
+    "schema_valid": true
+  },
+  "error_code": null,
+  "sanitized_error": null,
+  "warnings": [
+    "AI_OUTPUT_IS_RESEARCH_ONLY"
+  ],
+  "risk_flags": [],
+  "data_cutoff": "2026-10-23T15:00:00+08:00",
+  "generated_at": "2026-10-24T20:00:00+08:00",
+  "api_version": "wealth-lab/v2",
+  "research_only": true
+}

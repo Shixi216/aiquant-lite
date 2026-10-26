@@ -142,6 +142,7 @@ class TencentSnapshotProvider:
                         "symbol": f"{fields[2]}.{'SH' if code.startswith('sh') else 'SZ' if code.startswith('sz') else 'BJ'}",
                         "code": fields[2],
                         "name": fields[1],
+                        "trade_date": fields[30][:8] if len(fields[30]) >= 8 and fields[30][:8].isdigit() else None,
                         "close": float(fields[3]) if fields[3] else None,
                         "pct_chg": float(fields[32]) if fields[32] else None,
                         "volume": float(fields[6]) if fields[6] else 0,  # 手

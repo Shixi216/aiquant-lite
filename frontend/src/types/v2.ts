@@ -160,10 +160,25 @@ export interface StockIntelResponse {
   identity: StockIdentity;
   database_context: Block<StockDatabaseContext>;
   decision_card: Block<DecisionPacketData>;
+  research_review?: ResearchReview | null;
   four_dimensions: Block<CrossSectionSymbolData>;
   risk: Block<{ risks: { code: string; value: unknown }[] }>;
   provenance: Record<string, string | null>;
   fixture_mode: boolean;
+}
+
+export interface ResearchReview {
+  symbol: string;
+  source: "stock_report_service";
+  research_only: true;
+  frozen_plan_saved: false;
+  generated_at: string;
+  price_as_of: string;
+  action_zh: string;
+  execution_status: string;
+  confidence: number;
+  risk_messages: string[];
+  sha256: string;
 }
 
 export interface SectorContext {
@@ -348,18 +363,6 @@ export interface LimitPoolsData {
   trade_date: string;
   limit_up_pool: LimitPoolRow[];
   limit_down_pool: LimitPoolRow[];
-}
-
-export interface DragonTigerItem {
-  symbol: string;
-  name: string;
-  buy_amount: number | null;
-  sell_amount: number | null;
-  net_amount: number | null;
-  institution_net_amount: number | null;
-  seat_count: number | null;
-  institution_seat_count: number | null;
-  reasons: string[];
 }
 
 export interface ScanItem {

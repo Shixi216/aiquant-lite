@@ -10,6 +10,7 @@ import {
   type SentimentRun,
 } from "../../api/research";
 import { useECharts } from "../../composables/useECharts";
+import { useChartTheme } from "../../domain/chartTheme";
 import { getAlphaConclusionLabel } from "../../domain/labels";
 
 const decayEl = ref<HTMLElement | null>(null);
@@ -18,6 +19,7 @@ const stratEl = ref<HTMLElement | null>(null);
 const decayChart = useECharts(decayEl);
 const icChart = useECharts(icEl);
 const stratChart = useECharts(stratEl);
+const ct = useChartTheme();
 
 const runs = ref<SentimentRun[]>([]);
 const run = ref("");
@@ -42,14 +44,14 @@ function decayOption() {
   const methods = [...new Set(decay.value.map((point) => point.score_method))];
   const hs = horizons.value;
   return {
-    title: { text: "IC 衰减曲线", textStyle: { color: "#8494a7", fontSize: 13 }, top: 0 },
+    title: { text: "IC 衰减曲线", textStyle: { color: ct.value.dim, fontSize: 13 }, top: 0 },
     tooltip: { trigger: "axis" },
-    legend: { data: methods, textStyle: { color: "#8494a7" }, top: 22 },
+    legend: { data: methods, textStyle: { color: ct.value.dim }, top: 22 },
     grid: { left: 56, right: 56, top: 56, bottom: 28 },
-    xAxis: { type: "category", data: hs.map((h) => `${h}d`), axisLabel: { color: "#8494a7" } },
+    xAxis: { type: "category", data: hs.map((h) => `${h}d`), axisLabel: { color: ct.value.dim } },
     yAxis: [
-      { type: "value", name: "平均 IC", axisLabel: { color: "#8494a7" } },
-      { type: "value", name: "信息比率 (IC_IR)", axisLabel: { color: "#8494a7" } },
+      { type: "value", name: "平均 IC", axisLabel: { color: ct.value.dim } },
+      { type: "value", name: "信息比率 (IC_IR)", axisLabel: { color: ct.value.dim } },
     ],
     series: methods.flatMap((method) => {
       const points = hs.map((h) =>
@@ -60,7 +62,7 @@ function decayOption() {
           name: method,
           type: "line",
           data: points.map((point) => point?.mean_ic ?? null),
-          itemStyle: { color: "#4da3ff" },
+          itemStyle: { color: ct.value.accent },
           smooth: true,
         },
         {
@@ -68,7 +70,7 @@ function decayOption() {
           type: "line",
           yAxisIndex: 1,
           data: points.map((point) => point?.ic_ir ?? null),
-          itemStyle: { color: "#e6a23c" },
+          itemStyle: { color: ct.value.warn },
           smooth: true,
           lineStyle: { type: "dashed" },
         },
@@ -81,7 +83,7 @@ function icOption() {
   const hs = horizons.value;
   const methods = [...new Set(icRows.value.map((row) => String(row.score_method)))];
   return {
-    title: { text: "IC 矩阵（score_method × horizon，mean_ic）", textStyle: { color: "#8494a7", fontSize: 13 }, top: 0 },
+    title: { text: "IC 矩阵（score_method × horizon，mean_ic）", textStyle: { color: ct.value.dim, fontSize: 13 }, top: 0 },
     tooltip: {
       formatter: (params: { dataIndex: number }) => {
         const row = icRows.value[params.dataIndex];
@@ -96,8 +98,8 @@ function icOption() {
       },
     },
     grid: { left: 120, right: 80, top: 48, bottom: 40 },
-    xAxis: { type: "category", data: hs.map((h) => `${h}d`), axisLabel: { color: "#8494a7" } },
-    yAxis: { type: "category", data: methods, axisLabel: { color: "#8494a7" } },
+    xAxis: { type: "category", data: hs.map((h) => `${h}d`), axisLabel: { color: ct.value.dim } },
+    yAxis: { type: "category", data: methods, axisLabel: { color: ct.value.dim } },
     visualMap: {
       min: 0,
       max: Math.max(...icRows.value.map((row) => Number(row.mean_ic ?? 0)), 0.01),
@@ -105,8 +107,8 @@ function icOption() {
       orient: "vertical",
       right: 4,
       top: "center",
-      textStyle: { color: "#8494a7" },
-      inRange: { color: ["#10161f", "#1c4d80", "#2f7ed8", "#7fc3ff"] },
+      textStyle: { color: ct.value.dim },
+      inRange: { color: [...ct.value.heat] },
     },
     series: [
       {
@@ -124,17 +126,17 @@ function icOption() {
 function stratOption() {
   const rows = stratForHorizon.value;
   return {
-    title: { text: `分层累计收益（horizon=${horizon.value}d）`, textStyle: { color: "#8494a7", fontSize: 13 }, top: 0 },
+    title: { text: `分层累计收益（horizon=${horizon.value}d）`, textStyle: { color: ct.value.dim, fontSize: 13 }, top: 0 },
     tooltip: { trigger: "axis" },
     grid: { left: 56, right: 20, top: 44, bottom: 32 },
-    xAxis: { type: "category", data: rows.map((row) => String(row.group)), axisLabel: { color: "#8494a7", rotate: 30 } },
-    yAxis: { type: "value", axisLabel: { color: "#8494a7", formatter: "{value}%" } },
+    xAxis: { type: "category", data: rows.map((row) => String(row.group)), axisLabel: { color: ct.value.dim, rotate: 30 } },
+    yAxis: { type: "value", axisLabel: { color: ct.value.dim, formatter: "{value}%" } },
     series: [
       {
         type: "bar",
         data: rows.map((row) => ({
           value: Number((Number(row.cumulative_return ?? 0) * 100).toFixed(2)),
-          itemStyle: { color: Number(row.cumulative_return ?? 0) >= 0 ? "#f04848" : "#2ebd85" },
+          itemStyle: { color: Number(row.cumulative_return ?? 0) >= 0 ? ct.value.up : ct.value.down },
         })),
         barMaxWidth: 30,
       },
@@ -176,6 +178,8 @@ async function load() {
 
 watch(run, load);
 watch(horizon, () => stratChart.setOption(stratOption(), true));
+// 主题切换 → 取色重算 → 重绘三图
+watch(ct, () => redraw());
 onMounted(load);
 </script>
 

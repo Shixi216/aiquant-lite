@@ -34,3 +34,12 @@ test("missing and nonfinite values do not become numeric claims", () => {
     }
   }
 });
+
+test("risk explanations distinguish pending research from service failure", () => {
+  assert.equal(labels.getRiskLabel("decision_not_generated"), "尚未生成个股决策记录");
+  assert.match(labels.getRiskDetail("decision_not_generated", "not_found"), /VETO.*尚未完成复核/);
+  assert.equal(labels.getRiskDetail("decision_unavailable", "upstream_timeout"), "上游超时");
+  assert.equal(labels.getRiskDetail("veto_triggered", {veto_reason:"停牌"}), "停牌");
+  assert.equal(labels.getRiskDetail("veto_triggered", {veto_reason:null}), null);
+  assert.match(labels.getRiskDetail("veto_unchecked", null), /不能视为通过检查/);
+});

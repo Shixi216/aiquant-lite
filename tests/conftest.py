@@ -4,9 +4,23 @@ import hashlib
 import json
 import os
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
+
+
+def pytest_configure(config):
+    """Keep Wealth Lab sidecars inside the offline runner's per-module sandbox."""
+    main_database = os.environ.get("OPC_DATABASE_PATH")
+    if os.environ.get("HERMES_ENV") != "testing" or not main_database:
+        return
+    from trading.wealth_lab import config as wealth_config
+    from trading.wealth_lab.social_sentiment import config as social_config
+
+    folder = Path(main_database).parent
+    wealth_config.WEALTH_LAB_DB_PATH = folder / "isolated-wealth.duckdb"
+    social_config.SOCIAL_DB_PATH = folder / "isolated-social.duckdb"
 
 
 @pytest.fixture(scope="session", autouse=True)

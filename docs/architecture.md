@@ -15,7 +15,7 @@ WebUI may read explicitly approved research sidecars and file artifacts, but mus
 
 ## Scoring sources
 
-The current score resolver first uses `cross_section_4d`, a centered rank composite over technical, fundamental, sentiment and margin inputs with available-input weighting 30/30/25/15. When given `data_cutoff`, it queries a historical section at or before that cutoff. If unavailable, it returns `legacy_60_40_fallback` with `degraded=True`.
+The current score resolver first uses `cross_section_4d`, a centered rank composite over technical, fundamental, structured sentiment and margin inputs with available-input weighting 30/30/25/15. When given `data_cutoff`, it queries a historical section at or before that cutoff. If unavailable, the resolver retains `legacy_60_40_fallback` for compatibility diagnostics with `degraded=True`. The canonical decision path uses a zero score and waits; the proposal path forces HOLD and prevents a new position. Legacy 60/40 is not the current formal strategy.
 
 The orchestration experiment interface separately supports legacy 60/40, three-factor 50/35/15 and custom weights. These experimental scores must not be interpreted as the same quantity as a cross-sectional rank. Sentiment features can participate in current cross-sectional and experimental paths; the older blanket statement that all sentiment inputs have formal weight zero is obsolete.
 
@@ -32,3 +32,7 @@ Observe market facts -> deterministic screening -> select a symbol
 The repository contains no broker adapter or automated live-order path. Paper-account updates and manual trade facts are separate from real broker activity. Online provider availability and strategy validity require their own evidence beyond offline tests.
 
 See [limitations](limitations.md), [API](api-reference.md) and the [publication audit](release-audit-2026-10-18.md).
+
+## Wealth Lab boundary
+
+The same Vue workspace also hosts an independent multi-asset research engine. Its portfolio weights and ETF factor scores are separate from the stock cross-sectional composite. Wealth Lab keeps initial/rebalance costs, cash, per-rebalance historical eligibility and archived metrics in its own calculation chain. Current wealth sentiment is not included in historical strategy returns. Stable AI research consumes archived backtest evidence; experimental planning requires explicit paid-call consent and plan approval. Deterministic risk VETO and numerical verification remain independent of model opinions. See the [integration audit](releases/2026-10-26-main-wealth-integration.md).

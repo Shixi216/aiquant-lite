@@ -24,6 +24,45 @@ const router = createRouter({
       meta: { title: "量化实验室" },
       component: () => import("../views/QuantLabView.vue"),
     },
+    // 财富管理实验室（大类资产配置，契约 wealth-lab/v1）
+    {
+      path: "/wealth-lab",
+      name: "wealth-lab",
+      meta: { title: "大类资产配置" },
+      component: () => import("../views/WealthLabView.vue"),
+    },
+    // 财富实验室 v2 扩展工作区（契约 wealth-lab-api-v2.yaml）
+    {
+      path: "/wealth-factors",
+      name: "wealth-factors",
+      meta: { title: "ETF 多因子研究" },
+      component: () => import("../views/WealthFactorsView.vue"),
+    },
+    // 多资产研究池（v3 契约）
+    {
+      path: "/wealth-universe",
+      name: "wealth-universe",
+      meta: { title: "多资产研究池" },
+      component: () => import("../views/WealthUniverseView.vue"),
+    },
+    {
+      path: "/wealth-strategy-factory",
+      name: "wealth-strategy-factory",
+      meta: { title: "策略工厂" },
+      component: () => import("../views/WealthStrategyFactoryView.vue"),
+    },
+    {
+      path: "/wealth-strategy-compare",
+      name: "wealth-strategy-compare",
+      meta: { title: "策略对比与优化" },
+      component: () => import("../views/WealthStrategyCompareView.vue"),
+    },
+    {
+      path: "/wealth-ai-risk",
+      name: "wealth-ai-risk",
+      meta: { title: "AI 研究与风控" },
+      component: () => import("../views/WealthAiRiskView.vue"),
+    },
     {
       path: "/stocks/:symbol",
       name: "stock-intel",
@@ -50,6 +89,34 @@ const router = createRouter({
       path: "/research-health",
       meta: { title: "实验与系统状态" },
       component: () => import("../views/ResearchHealthView.vue"),
+    },
+    // 数据与研究任务中心（阶段二：按钮→真实后端控制 API）
+    {
+      path: "/task-center",
+      name: "task-center",
+      meta: { title: "数据与研究任务中心" },
+      component: () => import("../views/TaskCenterView.vue"),
+    },
+    // 系统设置：主题与布局定制中心
+    {
+      path: "/settings",
+      name: "settings",
+      meta: { title: "外观与布局设置" },
+      component: () => import("../views/SettingsView.vue"),
+    },
+    // AI 智能研究工作台（v3.3 三模型受控研究）
+    {
+      path: "/ai-research",
+      name: "ai-research",
+      meta: { title: "AI 智能研究" },
+      component: () => import("../views/AiResearchView.vue"),
+    },
+    // 多资产市场情绪（wealth-sentiment/v1.1，CURRENT_RESEARCH_ONLY）
+    {
+      path: "/wealth-sentiment",
+      name: "wealth-sentiment",
+      meta: { title: "多资产市场情绪" },
+      component: () => import("../views/WealthSentimentView.vue"),
     },
     { path: "/:pathMatch(.*)*", redirect: "/dashboard" },
   ],

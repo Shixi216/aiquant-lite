@@ -1,0 +1,3597 @@
+{
+  "schema_version": 1,
+  "count": 201,
+  "candidates": [
+    {
+      "candidate_id": "legacy_6dddfda9687d",
+      "family": "LEGACY",
+      "parameters": {
+        "fund": 0.4,
+        "sentiment": 0.0,
+        "tech": 0.6
+      },
+      "reasons": [
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8153130611083276,
+      "rank_ic_20d": 0.0006100337626768682,
+      "fdr_q_value": 0.9552661997782163
+    },
+    {
+      "candidate_id": "static_21294a512570",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "ZERO",
+        "sentiment": 0.05,
+        "tech": 0.7
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9329305414388502,
+      "rank_ic_20d": -0.003913053898940218,
+      "fdr_q_value": 0.8534933870967331
+    },
+    {
+      "candidate_id": "static_021935cca271",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "ZERO",
+        "sentiment": 0.05,
+        "tech": 0.6499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9421988404219548,
+      "rank_ic_20d": -0.000856303883182981,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_748dba0e465a",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "ZERO",
+        "sentiment": 0.05,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8816559437951632,
+      "rank_ic_20d": 0.00252865357847526,
+      "fdr_q_value": 0.9167957388969538
+    },
+    {
+      "candidate_id": "static_96892f43f997",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "ZERO",
+        "sentiment": 0.05,
+        "tech": 0.5499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8874998218537706,
+      "rank_ic_20d": 0.006392818257606773,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_b32d24c3229f",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "ZERO",
+        "sentiment": 0.1,
+        "tech": 0.65
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0134184020680836,
+      "rank_ic_20d": 0.001214987518251773,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_4b50872857e7",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "ZERO",
+        "sentiment": 0.1,
+        "tech": 0.6000000000000001
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.950182470780171,
+      "rank_ic_20d": 0.004714684375226269,
+      "fdr_q_value": 0.8510434030900799
+    },
+    {
+      "candidate_id": "static_a8cde88986a7",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "ZERO",
+        "sentiment": 0.1,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9534804008935256,
+      "rank_ic_20d": 0.008710417615626317,
+      "fdr_q_value": 0.6541103922977763
+    },
+    {
+      "candidate_id": "static_c5ed31d25580",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "ZERO",
+        "sentiment": 0.1,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.936012327737177,
+      "rank_ic_20d": 0.01295922418628002,
+      "fdr_q_value": 0.39459393225848355
+    },
+    {
+      "candidate_id": "static_a5321c549e8d",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "ZERO",
+        "sentiment": 0.15,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9650310823305214,
+      "rank_ic_20d": 0.0071427201821302475,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_bd5ff7fb8ca9",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "ZERO",
+        "sentiment": 0.15,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9619330503137656,
+      "rank_ic_20d": 0.01129579567773523,
+      "fdr_q_value": 0.4957235648695885
+    },
+    {
+      "candidate_id": "static_68ed88fed153",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "ZERO",
+        "sentiment": 0.15,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 0.9819798720489773,
+      "rank_ic_20d": 0.015661428400397488,
+      "fdr_q_value": 0.2966153138208286
+    },
+    {
+      "candidate_id": "static_6ad650a0998c",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "ZERO",
+        "sentiment": 0.15,
+        "tech": 0.44999999999999996
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.008055396491303,
+      "rank_ic_20d": 0.020167286046822278,
+      "fdr_q_value": 0.12318302000467041
+    },
+    {
+      "candidate_id": "static_d1f5444ad9c3",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "ZERO",
+        "sentiment": 0.2,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.1147776151643878,
+      "rank_ic_20d": 0.013870707509376445,
+      "fdr_q_value": 0.3787756337516669
+    },
+    {
+      "candidate_id": "static_65172a3d4f0a",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "ZERO",
+        "sentiment": 0.2,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.029412136299012,
+      "rank_ic_20d": 0.01854736395125949,
+      "fdr_q_value": 0.1717786985475842
+    },
+    {
+      "candidate_id": "static_a22b5eb0e693",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "ZERO",
+        "sentiment": 0.2,
+        "tech": 0.45000000000000007
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0617207943777005,
+      "rank_ic_20d": 0.023518820916951715,
+      "fdr_q_value": 0.06547858040273977
+    },
+    {
+      "candidate_id": "static_d8317ae82043",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "ZERO",
+        "sentiment": 0.2,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1516152674557476,
+      "rank_ic_20d": 0.028174617771090094,
+      "fdr_q_value": 0.017103362769069312
+    },
+    {
+      "candidate_id": "static_466962faf9e4",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "ZERO",
+        "sentiment": 0.25,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.147962478575389,
+      "rank_ic_20d": 0.021381130722318304,
+      "fdr_q_value": 0.10146700846330411
+    },
+    {
+      "candidate_id": "static_87d23d358371",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "ZERO",
+        "sentiment": 0.25,
+        "tech": 0.45
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1555526086249324,
+      "rank_ic_20d": 0.026674671740786263,
+      "fdr_q_value": 0.02456185673430276
+    },
+    {
+      "candidate_id": "static_4f41de99772a",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "ZERO",
+        "sentiment": 0.25,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1523057159319054,
+      "rank_ic_20d": 0.031814981431440834,
+      "fdr_q_value": 0.004644754710598313
+    },
+    {
+      "candidate_id": "static_ecce32389477",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "ZERO",
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1723467452435479,
+      "rank_ic_20d": 0.03620274487892337,
+      "fdr_q_value": 0.000446151185088848
+    },
+    {
+      "candidate_id": "static_0f1ad10e869a",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.05,
+        "tech": 0.7
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9544500488820317,
+      "rank_ic_20d": -0.004012785074169427,
+      "fdr_q_value": 0.8534933870967331
+    },
+    {
+      "candidate_id": "static_1b785b422f1d",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.05,
+        "tech": 0.6499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9434603151629821,
+      "rank_ic_20d": -0.0009803011509694171,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_af9b595ad328",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.05,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8785524029570787,
+      "rank_ic_20d": 0.002403667891757151,
+      "fdr_q_value": 0.9167957388969538
+    },
+    {
+      "candidate_id": "static_d8dad91a1fda",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.05,
+        "tech": 0.5499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8869049338061259,
+      "rank_ic_20d": 0.00625461658812601,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_3cdf0fd24223",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.1,
+        "tech": 0.65
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0134184020680836,
+      "rank_ic_20d": 0.0009679780737999663,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_64506f8040d6",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.1,
+        "tech": 0.6000000000000001
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.945318077856414,
+      "rank_ic_20d": 0.004447244503140352,
+      "fdr_q_value": 0.8510434030900799
+    },
+    {
+      "candidate_id": "static_d7c2e8d2db68",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.1,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9539734473083793,
+      "rank_ic_20d": 0.008441649296079738,
+      "fdr_q_value": 0.6541103922977763
+    },
+    {
+      "candidate_id": "static_814427dd83c4",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.1,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9344547512973178,
+      "rank_ic_20d": 0.012664453285023889,
+      "fdr_q_value": 0.39459393225848355
+    },
+    {
+      "candidate_id": "static_2204f2af4352",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.15,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 0.9713006229547364,
+      "rank_ic_20d": 0.006731409908095268,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_b662aeb5c19b",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.15,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9639362876426532,
+      "rank_ic_20d": 0.010846697340873852,
+      "fdr_q_value": 0.5006799457438055
+    },
+    {
+      "candidate_id": "static_1af23ab95484",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.15,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0054073663478549,
+      "rank_ic_20d": 0.015210631919223012,
+      "fdr_q_value": 0.29946620313905253
+    },
+    {
+      "candidate_id": "static_7441a278e1d7",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.15,
+        "tech": 0.44999999999999996
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0152648477687656,
+      "rank_ic_20d": 0.019693327869365448,
+      "fdr_q_value": 0.12526330278492873
+    },
+    {
+      "candidate_id": "static_d590125c6561",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.2,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.1544515521497236,
+      "rank_ic_20d": 0.01323846496063579,
+      "fdr_q_value": 0.3945583624914193
+    },
+    {
+      "candidate_id": "static_cfbfa50ffbb6",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.2,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0691144935738526,
+      "rank_ic_20d": 0.017893230842914543,
+      "fdr_q_value": 0.18208667096706385
+    },
+    {
+      "candidate_id": "static_033875f88ad6",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.2,
+        "tech": 0.45000000000000007
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0598586267580004,
+      "rank_ic_20d": 0.02283603382027372,
+      "fdr_q_value": 0.06900960188001058
+    },
+    {
+      "candidate_id": "static_8b88cf158dff",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.2,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1584030896360644,
+      "rank_ic_20d": 0.027518257654383177,
+      "fdr_q_value": 0.017103362769069312
+    },
+    {
+      "candidate_id": "static_8d6fee623a40",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.25,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1424864073229324,
+      "rank_ic_20d": 0.020564985499478147,
+      "fdr_q_value": 0.1115933728561665
+    },
+    {
+      "candidate_id": "static_6ecafd3ed34e",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.25,
+        "tech": 0.45
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1668415834899482,
+      "rank_ic_20d": 0.025813242484356905,
+      "fdr_q_value": 0.02735062293470417
+    },
+    {
+      "candidate_id": "static_f96f40c4fb14",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "sentiment": 0.25,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1650491811547268,
+      "rank_ic_20d": 0.030920677929704606,
+      "fdr_q_value": 0.004644754710598313
+    },
+    {
+      "candidate_id": "static_e8b9ac4feae9",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.05,
+        "tech": 0.7
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9544500488820317,
+      "rank_ic_20d": -0.004012785074169427,
+      "fdr_q_value": 0.8534933870967331
+    },
+    {
+      "candidate_id": "static_326658c28c8c",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.05,
+        "tech": 0.6499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9434603151629821,
+      "rank_ic_20d": -0.0009803011509694171,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_68384179d3f6",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.05,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8785524029570787,
+      "rank_ic_20d": 0.002403667891757151,
+      "fdr_q_value": 0.9167957388969538
+    },
+    {
+      "candidate_id": "static_bb6012aa3673",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.05,
+        "tech": 0.5499999999999999
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8869049338061259,
+      "rank_ic_20d": 0.00625461658812601,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_340f7db9884a",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.1,
+        "tech": 0.65
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0134184020680836,
+      "rank_ic_20d": 0.0009679780737999663,
+      "fdr_q_value": 0.938189869005423
+    },
+    {
+      "candidate_id": "static_9013e96b2093",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.1,
+        "tech": 0.6000000000000001
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.945318077856414,
+      "rank_ic_20d": 0.004447244503140352,
+      "fdr_q_value": 0.8510434030900799
+    },
+    {
+      "candidate_id": "static_b063c17a6ab8",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.1,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9539734473083793,
+      "rank_ic_20d": 0.008441649296079738,
+      "fdr_q_value": 0.6541103922977763
+    },
+    {
+      "candidate_id": "static_76ac092b7d7e",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.1,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9344547512973178,
+      "rank_ic_20d": 0.012664453285023889,
+      "fdr_q_value": 0.39459393225848355
+    },
+    {
+      "candidate_id": "static_afb5bd75fe03",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.15,
+        "tech": 0.6
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 0.9713006229547364,
+      "rank_ic_20d": 0.006731409908095268,
+      "fdr_q_value": 0.7412878926384002
+    },
+    {
+      "candidate_id": "static_cdd8f0019b93",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.15,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9639362876426532,
+      "rank_ic_20d": 0.010846697340873852,
+      "fdr_q_value": 0.5006799457438055
+    },
+    {
+      "candidate_id": "static_568ada008325",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.15,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0054073663478549,
+      "rank_ic_20d": 0.015210631919223012,
+      "fdr_q_value": 0.29946620313905253
+    },
+    {
+      "candidate_id": "static_a5675efb1084",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.15,
+        "tech": 0.44999999999999996
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0152648477687656,
+      "rank_ic_20d": 0.019693327869365448,
+      "fdr_q_value": 0.12526330278492873
+    },
+    {
+      "candidate_id": "static_8c086affbd3e",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.2,
+        "tech": 0.55
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.1544515521497236,
+      "rank_ic_20d": 0.01323846496063579,
+      "fdr_q_value": 0.3945583624914193
+    },
+    {
+      "candidate_id": "static_befd96cb4532",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.2,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0691144935738526,
+      "rank_ic_20d": 0.017893230842914543,
+      "fdr_q_value": 0.18208667096706385
+    },
+    {
+      "candidate_id": "static_b3b41cd994c7",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.2,
+        "tech": 0.45000000000000007
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0598586267580004,
+      "rank_ic_20d": 0.02283603382027372,
+      "fdr_q_value": 0.06900960188001058
+    },
+    {
+      "candidate_id": "static_76f997e2b87f",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.2,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1584030896360644,
+      "rank_ic_20d": 0.027518257654383177,
+      "fdr_q_value": 0.017103362769069312
+    },
+    {
+      "candidate_id": "static_010fec7ed353",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.25,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.25,
+        "tech": 0.5
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1424864073229324,
+      "rank_ic_20d": 0.020564985499478147,
+      "fdr_q_value": 0.1115933728561665
+    },
+    {
+      "candidate_id": "static_b918cdd39fd1",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.3,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.25,
+        "tech": 0.45
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1668415834899482,
+      "rank_ic_20d": 0.025813242484356905,
+      "fdr_q_value": 0.02735062293470417
+    },
+    {
+      "candidate_id": "static_b8d8e066390e",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.35,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.25,
+        "tech": 0.4
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.1650491811547268,
+      "rank_ic_20d": 0.030920677929704606,
+      "fdr_q_value": 0.004644754710598313
+    },
+    {
+      "candidate_id": "static_974033e55283",
+      "family": "STATIC",
+      "parameters": {
+        "fund": 0.4,
+        "mode": "EVENT_GATED",
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.183375699249509,
+      "rank_ic_20d": 0.035360288311439766,
+      "fdr_q_value": 0.000446151185088848
+    },
+    {
+      "candidate_id": "risk_overlay_f88d5bd84dca",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.1,
+        "risk_scale": 0.0
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8126264053580398,
+      "rank_ic_20d": 0.0010371484782104846,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_4f0a9191d140",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.1,
+        "risk_scale": 0.25
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8108743268408811,
+      "rank_ic_20d": 0.0010371484782104846,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_7ca9307396fe",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.1,
+        "risk_scale": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8091207576125851,
+      "rank_ic_20d": 0.0010371484782104846,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_1195bf7d74cf",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.1,
+        "risk_scale": 0.75
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8073657087900081,
+      "rank_ic_20d": 0.0010371484782104846,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_a7f632d47c3b",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.2,
+        "risk_scale": 0.0
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8168437071664436,
+      "rank_ic_20d": 0.0014804590944153648,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_5e5d66231f6d",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.2,
+        "risk_scale": 0.25
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8160083323733822,
+      "rank_ic_20d": 0.0014804590944153648,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_e8de843da1af",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.2,
+        "risk_scale": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8151725832059379,
+      "rank_ic_20d": 0.0014804590944153648,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_892c91b17954",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.2,
+        "risk_scale": 0.75
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8143364618982699,
+      "rank_ic_20d": 0.0014804590944153648,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_b48af0881c27",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.3,
+        "risk_scale": 0.0
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0019068948668910595,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_3d40a62a14ab",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.3,
+        "risk_scale": 0.25
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0019068948668910595,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_716f2a8ba864",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.3,
+        "risk_scale": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0019068948668910595,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_c268a3c596a7",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.3,
+        "risk_scale": 0.75
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0019068948668910595,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_d8578c9965bf",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.5,
+        "risk_scale": 0.0
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0026650082756867403,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_a0b6170da726",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.5,
+        "risk_scale": 0.25
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0026650082756867403,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_e35217952c9a",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.5,
+        "risk_scale": 0.5
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0026650082756867403,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "risk_overlay_1f3b90bb1655",
+      "family": "RISK_OVERLAY",
+      "parameters": {
+        "penalty": 0.5,
+        "risk_scale": 0.75
+      },
+      "reasons": [
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.8195828578612737,
+      "rank_ic_20d": 0.0026650082756867403,
+      "fdr_q_value": 0.9239681915279943
+    },
+    {
+      "candidate_id": "dynamic_79afaeed8a0b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2424962756769902,
+      "rank_ic_20d": 0.03586702872330917,
+      "fdr_q_value": 0.003142174272261572
+    },
+    {
+      "candidate_id": "dynamic_aca86e5b4674",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1737502261787276,
+      "rank_ic_20d": 0.0353508082848999,
+      "fdr_q_value": 0.0037009607995476964
+    },
+    {
+      "candidate_id": "dynamic_1512d2ddca26",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.0014693684381248,
+      "rank_ic_20d": 0.026629524106938474,
+      "fdr_q_value": 0.035579300694899355
+    },
+    {
+      "candidate_id": "dynamic_69346b3a7797",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.10227679004253,
+      "rank_ic_20d": 0.03642576236463093,
+      "fdr_q_value": 0.006632149617098651
+    },
+    {
+      "candidate_id": "dynamic_d8bca486e7b6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1845663087397835,
+      "rank_ic_20d": 0.03434630920992303,
+      "fdr_q_value": 0.01230299565631852
+    },
+    {
+      "candidate_id": "dynamic_e6e770e09d6b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9734984489018114,
+      "rank_ic_20d": 0.0316493336717315,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_a2c987d0acfe",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.15947380004897185,
+      "rank_ic_20d": 0.09288732004701121,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_c05a487a42a6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.014088737177139078,
+      "rank_ic_20d": 0.09405152956323297,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_35edc0495ec9",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.17732889806616448,
+      "rank_ic_20d": 0.10002103462976947,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_af96cbc476d6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1998993010374515,
+      "rank_ic_20d": 0.0368410416192153,
+      "fdr_q_value": 0.0019502660465377675
+    },
+    {
+      "candidate_id": "dynamic_875bd64a6a6b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1378773175982686,
+      "rank_ic_20d": 0.036161295862834585,
+      "fdr_q_value": 0.0026290716282268297
+    },
+    {
+      "candidate_id": "dynamic_risk_07772020eeb8",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1622631513610964,
+      "rank_ic_20d": 0.03713364058105601,
+      "fdr_q_value": 0.0014507096985318195
+    },
+    {
+      "candidate_id": "dynamic_c6824ef4fe03",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9964382673799163,
+      "rank_ic_20d": 0.027219523030155537,
+      "fdr_q_value": 0.03227849309495734
+    },
+    {
+      "candidate_id": "dynamic_92c0a17cc619",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1341401834478477,
+      "rank_ic_20d": 0.03969722526782977,
+      "fdr_q_value": 0.0026290716282268297
+    },
+    {
+      "candidate_id": "dynamic_89afe3325f71",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.164345328262507,
+      "rank_ic_20d": 0.036542453242322595,
+      "fdr_q_value": 0.006632149617098651
+    },
+    {
+      "candidate_id": "dynamic_risk_ab2628ba3f75",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1593654596258003,
+      "rank_ic_20d": 0.03767706781484691,
+      "fdr_q_value": 0.00385142322830515
+    },
+    {
+      "candidate_id": "dynamic_e4c0722a0f5b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9799434866872354,
+      "rank_ic_20d": 0.03262402439293326,
+      "fdr_q_value": 0.033369217479540435
+    },
+    {
+      "candidate_id": "dynamic_3cf911c3f6c1",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.16529555443122587,
+      "rank_ic_20d": 0.09223707080801608,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_5d53c28f0a34",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.027306941254423397,
+      "rank_ic_20d": 0.09445101100043571,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_risk_956431ae2fd1",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.02858377522414323,
+      "rank_ic_20d": 0.09578635728457227,
+      "fdr_q_value": 0.00015665596353070123
+    },
+    {
+      "candidate_id": "dynamic_152adb28529a",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.16743334876939225,
+      "rank_ic_20d": 0.10011846305761378,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_3664b1db5fcb",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2303833864005798,
+      "rank_ic_20d": 0.03598834384547961,
+      "fdr_q_value": 0.002916450002696854
+    },
+    {
+      "candidate_id": "dynamic_e0e239109474",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1743386388361103,
+      "rank_ic_20d": 0.03548254914498862,
+      "fdr_q_value": 0.003499893365456086
+    },
+    {
+      "candidate_id": "dynamic_997ba63bf618",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.0042864259533075,
+      "rank_ic_20d": 0.026710280986427186,
+      "fdr_q_value": 0.035579300694899355
+    },
+    {
+      "candidate_id": "dynamic_25ca2282ae86",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.10227679004253,
+      "rank_ic_20d": 0.03677644501036566,
+      "fdr_q_value": 0.006018878371816135
+    },
+    {
+      "candidate_id": "dynamic_6ed093e9ff1e",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1886113046546534,
+      "rank_ic_20d": 0.03456993123769718,
+      "fdr_q_value": 0.011622799019719745
+    },
+    {
+      "candidate_id": "dynamic_af2de0b2c94d",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9734984489018114,
+      "rank_ic_20d": 0.03175330441894693,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_d5d5d1ae265f",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.15947380004897185,
+      "rank_ic_20d": 0.09281309656365726,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_036407f2e41e",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.05744015235735771,
+      "rank_ic_20d": 0.09410145870510489,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_4d6f7a061678",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "ZERO",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.17732889806616448,
+      "rank_ic_20d": 0.10006025552987952,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_2bb739b6f5b0",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2060853229760071,
+      "rank_ic_20d": 0.03504797283045669,
+      "fdr_q_value": 0.003301189049713038
+    },
+    {
+      "candidate_id": "dynamic_651803ae381c",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.191731706665279,
+      "rank_ic_20d": 0.03448690933921195,
+      "fdr_q_value": 0.004371032396593157
+    },
+    {
+      "candidate_id": "dynamic_a96a30cea100",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9944011476779178,
+      "rank_ic_20d": 0.026027121005687423,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_0eb2c9bc5a9b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.10576719832736,
+      "rank_ic_20d": 0.03483104661124549,
+      "fdr_q_value": 0.00889410603891993
+    },
+    {
+      "candidate_id": "dynamic_b1fb00cb8f1f",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.208585992768895,
+      "rank_ic_20d": 0.033007095654872344,
+      "fdr_q_value": 0.01553041711711792
+    },
+    {
+      "candidate_id": "dynamic_b507ab130231",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9611959307693322,
+      "rank_ic_20d": 0.030810086608290103,
+      "fdr_q_value": 0.0385774914551831
+    },
+    {
+      "candidate_id": "dynamic_ace6cd8bbfbe",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.2177532311797278,
+      "rank_ic_20d": 0.09128172333678401,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_80eaf06481b6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.05576793633905026,
+      "rank_ic_20d": 0.0922905092086177,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_ccad6da86019",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.16787000342902017,
+      "rank_ic_20d": 0.0989332967535527,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_62a9f4de34a9",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1771711260865858,
+      "rank_ic_20d": 0.035966884554720635,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_5006995d1b6f",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1417156439083194,
+      "rank_ic_20d": 0.0352330818698904,
+      "fdr_q_value": 0.0031433861256687395
+    },
+    {
+      "candidate_id": "dynamic_risk_21af806f51cb",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1336532018658017,
+      "rank_ic_20d": 0.03631742364843601,
+      "fdr_q_value": 0.0014507096985318195
+    },
+    {
+      "candidate_id": "dynamic_23f5f6515695",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.0027244087340963,
+      "rank_ic_20d": 0.02660247921813447,
+      "fdr_q_value": 0.03499098224319912
+    },
+    {
+      "candidate_id": "dynamic_fc42b98649ff",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.120675020612056,
+      "rank_ic_20d": 0.03816407793618646,
+      "fdr_q_value": 0.003258407894130294
+    },
+    {
+      "candidate_id": "dynamic_57638923909d",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1321919552031454,
+      "rank_ic_20d": 0.03518030527798868,
+      "fdr_q_value": 0.008471396912557274
+    },
+    {
+      "candidate_id": "dynamic_risk_1ceb68bb2b78",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1135205703888682,
+      "rank_ic_20d": 0.03645676767965441,
+      "fdr_q_value": 0.004109159068221267
+    },
+    {
+      "candidate_id": "dynamic_575bfaf7782e",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9959919268786895,
+      "rank_ic_20d": 0.03178481164137283,
+      "fdr_q_value": 0.035579300694899355
+    },
+    {
+      "candidate_id": "dynamic_5d3a4b8d54b8",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.16654118071416082,
+      "rank_ic_20d": 0.09053039401003371,
+      "fdr_q_value": 0.0005490048043691679
+    },
+    {
+      "candidate_id": "dynamic_e877136964d9",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.06980323376930014,
+      "rank_ic_20d": 0.09268635686886577,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_risk_2a2c2acc083f",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.06980323376930014,
+      "rank_ic_20d": 0.09422463725161966,
+      "fdr_q_value": 0.00015665596353070123
+    },
+    {
+      "candidate_id": "dynamic_9eefac70c5b6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.15792013591737697,
+      "rank_ic_20d": 0.0990378686827264,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_4ce0d071ed77",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2132623558965183,
+      "rank_ic_20d": 0.035161112615456326,
+      "fdr_q_value": 0.003258407894130294
+    },
+    {
+      "candidate_id": "dynamic_0b4a79a9e6e7",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.196065484306227,
+      "rank_ic_20d": 0.03457630986448001,
+      "fdr_q_value": 0.004279867038468693
+    },
+    {
+      "candidate_id": "dynamic_a3e13db72232",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9949148994769922,
+      "rank_ic_20d": 0.026111679111435998,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_fe1240c028b5",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1064542987853216,
+      "rank_ic_20d": 0.035179251507336765,
+      "fdr_q_value": 0.008421855856691925
+    },
+    {
+      "candidate_id": "dynamic_3fc77544e303",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1851209221245558,
+      "rank_ic_20d": 0.03322512545516854,
+      "fdr_q_value": 0.01495087599428569
+    },
+    {
+      "candidate_id": "dynamic_63850e6b2e05",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9611959307693322,
+      "rank_ic_20d": 0.030924273448576747,
+      "fdr_q_value": 0.0385774914551831
+    },
+    {
+      "candidate_id": "dynamic_05471a228f68",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.2177532311797278,
+      "rank_ic_20d": 0.09117396919136164,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_4b7af780f5e5",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.05576793633905026,
+      "rank_ic_20d": 0.09236116924114593,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_a033fa256adc",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.16787000342902017,
+      "rank_ic_20d": 0.09895409469622148,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_5957418c0928",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2060853229760071,
+      "rank_ic_20d": 0.03504797283045669,
+      "fdr_q_value": 0.003301189049713038
+    },
+    {
+      "candidate_id": "dynamic_8c106e4c4a7d",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.191731706665279,
+      "rank_ic_20d": 0.03448690933921195,
+      "fdr_q_value": 0.004371032396593157
+    },
+    {
+      "candidate_id": "dynamic_63133f0c3820",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9944011476779178,
+      "rank_ic_20d": 0.026027121005687423,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_52bcb541b32d",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.10576719832736,
+      "rank_ic_20d": 0.03483104661124549,
+      "fdr_q_value": 0.00889410603891993
+    },
+    {
+      "candidate_id": "dynamic_d90b8463206c",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.208585992768895,
+      "rank_ic_20d": 0.033007095654872344,
+      "fdr_q_value": 0.01553041711711792
+    },
+    {
+      "candidate_id": "dynamic_c6731583ec55",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9611959307693322,
+      "rank_ic_20d": 0.030810086608290103,
+      "fdr_q_value": 0.0385774914551831
+    },
+    {
+      "candidate_id": "dynamic_ac24bf3ae6d4",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.2177532311797278,
+      "rank_ic_20d": 0.09128172333678401,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_3310741afd50",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.05576793633905026,
+      "rank_ic_20d": 0.0922905092086177,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_e1869a2b97f1",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "ROLLING_RANK_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.16787000342902017,
+      "rank_ic_20d": 0.0989332967535527,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_a87b9811a1f1",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1771711260865858,
+      "rank_ic_20d": 0.035966884554720635,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_56d5577b8287",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1417156439083194,
+      "rank_ic_20d": 0.0352330818698904,
+      "fdr_q_value": 0.0031433861256687395
+    },
+    {
+      "candidate_id": "dynamic_risk_bbc049640af2",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1336532018658017,
+      "rank_ic_20d": 0.03631742364843601,
+      "fdr_q_value": 0.0014507096985318195
+    },
+    {
+      "candidate_id": "dynamic_0a931f0cf867",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.0027244087340963,
+      "rank_ic_20d": 0.02660247921813447,
+      "fdr_q_value": 0.03499098224319912
+    },
+    {
+      "candidate_id": "dynamic_097f8717f434",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.120675020612056,
+      "rank_ic_20d": 0.03816407793618646,
+      "fdr_q_value": 0.003258407894130294
+    },
+    {
+      "candidate_id": "dynamic_6fb6644f7bdb",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1321919552031454,
+      "rank_ic_20d": 0.03518030527798868,
+      "fdr_q_value": 0.008471396912557274
+    },
+    {
+      "candidate_id": "dynamic_risk_7ca8a00d47c2",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1135205703888682,
+      "rank_ic_20d": 0.03645676767965441,
+      "fdr_q_value": 0.004109159068221267
+    },
+    {
+      "candidate_id": "dynamic_2b1a42288ab4",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9959919268786895,
+      "rank_ic_20d": 0.03178481164137283,
+      "fdr_q_value": 0.035579300694899355
+    },
+    {
+      "candidate_id": "dynamic_239a1f9b08e9",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.16654118071416082,
+      "rank_ic_20d": 0.09053039401003371,
+      "fdr_q_value": 0.0005490048043691679
+    },
+    {
+      "candidate_id": "dynamic_9424671bdafb",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.06980323376930014,
+      "rank_ic_20d": 0.09268635686886577,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_risk_b2154071e883",
+      "family": "DYNAMIC_RISK",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "penalty": 0.2,
+        "risk_scale": 0.5,
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.06980323376930014,
+      "rank_ic_20d": 0.09422463725161966,
+      "fdr_q_value": 0.00015665596353070123
+    },
+    {
+      "candidate_id": "dynamic_10373833c11a",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "RANK_IC_IR",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.15792013591737697,
+      "rank_ic_20d": 0.0990378686827264,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "dynamic_c6a8f43f2f65",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.2132623558965183,
+      "rank_ic_20d": 0.035161112615456326,
+      "fdr_q_value": 0.003258407894130294
+    },
+    {
+      "candidate_id": "dynamic_f522db957c41",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.196065484306227,
+      "rank_ic_20d": 0.03457630986448001,
+      "fdr_q_value": 0.004279867038468693
+    },
+    {
+      "candidate_id": "dynamic_33b7f2e02488",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9949148994769922,
+      "rank_ic_20d": 0.026111679111435998,
+      "fdr_q_value": 0.036939424570875706
+    },
+    {
+      "candidate_id": "dynamic_9bd1452758d5",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1064542987853216,
+      "rank_ic_20d": 0.035179251507336765,
+      "fdr_q_value": 0.008421855856691925
+    },
+    {
+      "candidate_id": "dynamic_f0d6e008665c",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1851209221245558,
+      "rank_ic_20d": 0.03322512545516854,
+      "fdr_q_value": 0.01495087599428569
+    },
+    {
+      "candidate_id": "dynamic_1bfdbdd0f58b",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.9611959307693322,
+      "rank_ic_20d": 0.030924273448576747,
+      "fdr_q_value": 0.0385774914551831
+    },
+    {
+      "candidate_id": "dynamic_99c15f91d074",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.25,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.2177532311797278,
+      "rank_ic_20d": 0.09117396919136164,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_6a7649cf02c6",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.5,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.05576793633905026,
+      "rank_ic_20d": 0.09236116924114593,
+      "fdr_q_value": 0.0005265328672091758
+    },
+    {
+      "candidate_id": "dynamic_1efd6f365912",
+      "family": "DYNAMIC",
+      "parameters": {
+        "method": "STABILITY_WEIGHTED_IC",
+        "mode": "EVENT_GATED",
+        "shrink": 0.75,
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -0.16787000342902017,
+      "rank_ic_20d": 0.09895409469622148,
+      "fdr_q_value": 0.0021946437922906606
+    },
+    {
+      "candidate_id": "regime_bf7dad8e7f59",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "ZERO",
+        "profile": 1,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.35,
+            0.05
+          ],
+          "RISK_OFF": [
+            0.4,
+            0.5,
+            0.1
+          ],
+          "RISK_ON": [
+            0.55,
+            0.25,
+            0.2
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0781516514353209,
+      "rank_ic_20d": 0.013859807982958317,
+      "fdr_q_value": 0.2678686261085826
+    },
+    {
+      "candidate_id": "regime_3612a9eac01e",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "AVAILABLE_RENORMALIZE",
+        "profile": 1,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.35,
+            0.05
+          ],
+          "RISK_OFF": [
+            0.4,
+            0.5,
+            0.1
+          ],
+          "RISK_ON": [
+            0.55,
+            0.25,
+            0.2
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0939473358460747,
+      "rank_ic_20d": 0.013490236516456455,
+      "fdr_q_value": 0.2678686261085826
+    },
+    {
+      "candidate_id": "regime_197bba98dbc1",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "EVENT_GATED",
+        "profile": 1,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.35,
+            0.05
+          ],
+          "RISK_OFF": [
+            0.4,
+            0.5,
+            0.1
+          ],
+          "RISK_ON": [
+            0.55,
+            0.25,
+            0.2
+          ]
+        }
+      },
+      "reasons": [
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0939473358460747,
+      "rank_ic_20d": 0.013490236516456455,
+      "fdr_q_value": 0.2678686261085826
+    },
+    {
+      "candidate_id": "regime_60f9a844dc10",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "ZERO",
+        "profile": 2,
+        "weights": {
+          "NEUTRAL": [
+            0.55,
+            0.35,
+            0.1
+          ],
+          "RISK_OFF": [
+            0.35,
+            0.5,
+            0.15
+          ],
+          "RISK_ON": [
+            0.5,
+            0.25,
+            0.25
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0811152553704864,
+      "rank_ic_20d": 0.02080083177144212,
+      "fdr_q_value": 0.10058314931266464
+    },
+    {
+      "candidate_id": "regime_dad34c013713",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "AVAILABLE_RENORMALIZE",
+        "profile": 2,
+        "weights": {
+          "NEUTRAL": [
+            0.55,
+            0.35,
+            0.1
+          ],
+          "RISK_OFF": [
+            0.35,
+            0.5,
+            0.15
+          ],
+          "RISK_ON": [
+            0.5,
+            0.25,
+            0.25
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0779026454514715,
+      "rank_ic_20d": 0.020258899530521932,
+      "fdr_q_value": 0.10058314931266464
+    },
+    {
+      "candidate_id": "regime_9d670d5e2fe0",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "EVENT_GATED",
+        "profile": 2,
+        "weights": {
+          "NEUTRAL": [
+            0.55,
+            0.35,
+            0.1
+          ],
+          "RISK_OFF": [
+            0.35,
+            0.5,
+            0.15
+          ],
+          "RISK_ON": [
+            0.5,
+            0.25,
+            0.25
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0779026454514715,
+      "rank_ic_20d": 0.020258899530521932,
+      "fdr_q_value": 0.10058314931266464
+    },
+    {
+      "candidate_id": "regime_5c4b64ba34d7",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "ZERO",
+        "profile": 3,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.4,
+            0.0
+          ],
+          "RISK_OFF": [
+            0.45,
+            0.45,
+            0.1
+          ],
+          "RISK_ON": [
+            0.6,
+            0.25,
+            0.15
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9509164514361088,
+      "rank_ic_20d": 0.008819514626484361,
+      "fdr_q_value": 0.4061727373639329
+    },
+    {
+      "candidate_id": "regime_b0aba4707bce",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "AVAILABLE_RENORMALIZE",
+        "profile": 3,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.4,
+            0.0
+          ],
+          "RISK_OFF": [
+            0.45,
+            0.45,
+            0.1
+          ],
+          "RISK_ON": [
+            0.6,
+            0.25,
+            0.15
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9481753086490767,
+      "rank_ic_20d": 0.008574622767466643,
+      "fdr_q_value": 0.4061727373639329
+    },
+    {
+      "candidate_id": "regime_cb508bbe2b2f",
+      "family": "REGIME",
+      "parameters": {
+        "mode": "EVENT_GATED",
+        "profile": 3,
+        "weights": {
+          "NEUTRAL": [
+            0.6,
+            0.4,
+            0.0
+          ],
+          "RISK_OFF": [
+            0.45,
+            0.45,
+            0.1
+          ],
+          "RISK_ON": [
+            0.6,
+            0.25,
+            0.15
+          ]
+        }
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9481753086490767,
+      "rank_ic_20d": 0.008574622767466643,
+      "fdr_q_value": 0.4061727373639329
+    },
+    {
+      "candidate_id": "interaction_78326dba3368",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "ZERO",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9570698203954897,
+      "rank_ic_20d": 0.00887717891429136,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_65ce8cc142ee",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "ZERO",
+        "strength": 0.2
+      },
+      "reasons": [
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0086743262176006,
+      "rank_ic_20d": 0.009217820132634901,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_9c4a046fd919",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "ZERO",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9652473600590581,
+      "rank_ic_20d": 0.0075558010621723576,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_b30144a1823a",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "ZERO",
+        "strength": 0.2
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9570903973464614,
+      "rank_ic_20d": 0.006354782329207362,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_2a52706df535",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9388913699773866,
+      "rank_ic_20d": 0.008533473347823426,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_03d62f4e2d8f",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "strength": 0.2
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0073515301307836,
+      "rank_ic_20d": 0.008772386376342917,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_cb4231ab7ce7",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 0.9690029506275522,
+      "rank_ic_20d": 0.00732209587965503,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_e3515678c9e6",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "AVAILABLE_RENORMALIZE",
+        "strength": 0.2
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9608815405850034,
+      "rank_ic_20d": 0.0061383157066996165,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_8448ba800b97",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "EVENT_GATED",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9388913699773866,
+      "rank_ic_20d": 0.008533473347823426,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_8f284b1d5a89",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "TECH_SENT",
+        "mode": "EVENT_GATED",
+        "strength": 0.2
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0073515301307836,
+      "rank_ic_20d": 0.008772386376342917,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_620e545bf06c",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "EVENT_GATED",
+        "strength": 0.1
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 0.9690029506275522,
+      "rank_ic_20d": 0.00732209587965503,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "interaction_a542201de86a",
+      "family": "INTERACTION",
+      "parameters": {
+        "interaction": "FUND_SENT",
+        "mode": "EVENT_GATED",
+        "strength": 0.2
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9608815405850034,
+      "rank_ic_20d": 0.0061383157066996165,
+      "fdr_q_value": 0.5584624214702133
+    },
+    {
+      "candidate_id": "ablation_6924d38745fd",
+      "family": "ABLATION",
+      "parameters": {
+        "component": "FULL_AVAILABLE",
+        "fund": 0.4,
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "simpler static candidate preferred by complexity rule"
+      ],
+      "sharpe_40bp": 1.183375699249509,
+      "rank_ic_20d": 0.035360288311439766,
+      "fdr_q_value": 5.5768898136106e-05
+    },
+    {
+      "candidate_id": "ablation_812b084fc50c",
+      "family": "ABLATION",
+      "parameters": {
+        "component": "NO_DRAGON",
+        "fund": 0.4,
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family"
+      ],
+      "sharpe_40bp": 1.0520258755245855,
+      "rank_ic_20d": 0.026657543363902386,
+      "fdr_q_value": 0.0051987390748130585
+    },
+    {
+      "candidate_id": "ablation_17b55f270fb3",
+      "family": "ABLATION",
+      "parameters": {
+        "component": "TURNOVER_ONLY",
+        "fund": 0.4,
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9522985048370947,
+      "rank_ic_20d": 0.039073532260668106,
+      "fdr_q_value": 5.5768898136106e-05
+    },
+    {
+      "candidate_id": "ablation_5cf44807abad",
+      "family": "ABLATION",
+      "parameters": {
+        "component": "GAP_ONLY",
+        "fund": 0.4,
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold"
+      ],
+      "sharpe_40bp": 1.0491220075023944,
+      "rank_ic_20d": 0.013390869855731305,
+      "fdr_q_value": 0.14319924331779604
+    },
+    {
+      "candidate_id": "ablation_b37077ee592c",
+      "family": "ABLATION",
+      "parameters": {
+        "component": "DRAGON_EVENT_ONLY",
+        "fund": 0.4,
+        "sentiment": 0.25,
+        "tech": 0.35
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy"
+      ],
+      "sharpe_40bp": 0.9025685964928682,
+      "rank_ic_20d": 0.010771804692155053,
+      "fdr_q_value": 0.28224272467332
+    },
+    {
+      "candidate_id": "ml_ridge_c17922a56f25",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "ZERO",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1561253377105114,
+      "rank_ic_20d": 0.026588753653771825,
+      "fdr_q_value": 0.005675050390284204
+    },
+    {
+      "candidate_id": "ml_ridge_17f1d854a10e",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "ZERO",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.48542680716560577,
+      "rank_ic_20d": 0.04053402335178836,
+      "fdr_q_value": 0.003909085541777809
+    },
+    {
+      "candidate_id": "ml_ridge_1341f1039349",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "ZERO",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -2.1336572879955447,
+      "rank_ic_20d": -0.021715478407472087,
+      "fdr_q_value": 0.3552838206454115
+    },
+    {
+      "candidate_id": "ml_ridge_a68c42604b18",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 60
+      },
+      "reasons": [
+        "not best within family",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1871092386143425,
+      "rank_ic_20d": 0.026482289643975625,
+      "fdr_q_value": 0.005675050390284204
+    },
+    {
+      "candidate_id": "ml_ridge_5a2e0b8398a6",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.4865126958764113,
+      "rank_ic_20d": 0.04061268798845875,
+      "fdr_q_value": 0.003909085541777809
+    },
+    {
+      "candidate_id": "ml_ridge_ece470e02a64",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "AVAILABLE_RENORMALIZE",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -2.1219066420028003,
+      "rank_ic_20d": -0.021193706178821773,
+      "fdr_q_value": 0.3552838206454115
+    },
+    {
+      "candidate_id": "ml_ridge_7d6633252931",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "EVENT_GATED",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 60
+      },
+      "reasons": [
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 1.1871092386143425,
+      "rank_ic_20d": 0.026482289643975625,
+      "fdr_q_value": 0.005675050390284204
+    },
+    {
+      "candidate_id": "ml_ridge_d9e86e144f74",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "EVENT_GATED",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 120
+      },
+      "reasons": [
+        "not best within family",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": 0.4865126958764113,
+      "rank_ic_20d": 0.04061268798845875,
+      "fdr_q_value": 0.003909085541777809
+    },
+    {
+      "candidate_id": "ml_ridge_1c5ed8e6f5ed",
+      "family": "ML_RIDGE",
+      "parameters": {
+        "alpha": 1.0,
+        "mode": "EVENT_GATED",
+        "model": "RIDGE_CLOSED_FORM",
+        "window": 240
+      },
+      "reasons": [
+        "not best within family",
+        "rank_ic below frozen threshold",
+        "insufficient Sharpe improvement versus Legacy",
+        "time instability / 2026 weakness"
+      ],
+      "sharpe_40bp": -2.1219066420028003,
+      "rank_ic_20d": -0.021193706178821773,
+      "fdr_q_value": 0.3552838206454115
+    }
+  ]
+}

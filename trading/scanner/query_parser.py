@@ -725,14 +725,14 @@ class LocalChineseQueryParser:
         ambiguity: list[ScannerRiskFlag] = []
         questions: list[str] = []
         unsupported: list[str] = []
-        if re.search(rf"成交额(?:大于|超过|小于|低于){_NUMBER}(?![万亿元])", normalized):
+        if re.search(rf"成交额(?:大于|超过|小于|低于){_NUMBER}(?![\d.万亿元])", normalized):
             ambiguity.append(ScannerRiskFlag.QUERY_AMBIGUOUS)
             questions.append("成交额缺少元、万元或亿元单位。")
-        if re.search(rf"(?:价格|股价)(?:大于|小于|超过|低于){_NUMBER}(?!元)", normalized):
+        if re.search(rf"(?:价格|股价)(?:大于|小于|超过|低于){_NUMBER}(?![\d.元])", normalized):
             ambiguity.append(ScannerRiskFlag.QUERY_AMBIGUOUS)
             questions.append("价格缺少元单位。")
         if re.search(
-            rf"换手率(?:大于|小于|超过|低于){_NUMBER}(?!%)",
+            rf"换手率(?:大于|小于|超过|低于){_NUMBER}(?![\d.%])",
             normalized,
         ):
             ambiguity.append(ScannerRiskFlag.QUERY_AMBIGUOUS)

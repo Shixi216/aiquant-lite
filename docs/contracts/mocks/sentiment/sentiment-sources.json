@@ -1,0 +1,91 @@
+{
+ "request_id": "req_49dc83955b8641b8a71ed5fa",
+ "status": "SUCCESS",
+ "data": {
+  "data_mode": "REAL",
+  "sources": [
+   {
+    "source_name": "eastmoney-keyword-news",
+    "provider": "akshare",
+    "enabled": true,
+    "description": "东方财富关键词资讯（含正文摘要），覆盖货币政策/黄金/债券/REITs/QDII",
+    "doc": "ak.stock_news_em",
+    "runs": 4,
+    "ok_runs": 2,
+    "last_run_at": "2026-10-25T01:42:52.739622+08:00",
+    "avg_field_completeness": 1.0,
+    "total_new": 129,
+    "latest_published_at": "2026-10-24T19:06:55+08:00"
+   },
+   {
+    "source_name": "eastmoney-global-flash",
+    "provider": "akshare",
+    "enabled": true,
+    "description": "东方财富全球财经快讯（标题+摘要+链接），QDII/海外市场",
+    "doc": "ak.stock_info_global_em",
+    "runs": 3,
+    "ok_runs": 3,
+    "last_run_at": "2026-10-25T01:34:23.884945+08:00",
+    "avg_field_completeness": 1.0,
+    "total_new": 202,
+    "latest_published_at": "2026-10-25T01:31:39+08:00"
+   },
+   {
+    "source_name": "eastmoney-fund-announcements",
+    "provider": "akshare",
+    "enabled": true,
+    "description": "基金定期报告与分红公告（管理人公告转载），逐一覆盖池内基金",
+    "doc": "ak.fund_announcement_report_em / fund_announcement_dividend_em",
+    "runs": 3,
+    "ok_runs": 1,
+    "last_run_at": "2026-10-25T01:34:57.338559+08:00",
+    "avg_field_completeness": 1.0,
+    "total_new": 40,
+    "latest_published_at": "2026-09-28T00:00:00+08:00"
+   },
+   {
+    "source_name": "baidu-eco-calendar",
+    "provider": "akshare",
+    "enabled": true,
+    "description": "宏观经济数据发布日历（含公布值/预期/前值），筛中国区",
+    "doc": "ak.news_economic_baidu",
+    "runs": 4,
+    "ok_runs": 4,
+    "last_run_at": "2026-10-25T01:41:38.610691+08:00",
+    "avg_field_completeness": 1.0,
+    "total_new": 8,
+    "latest_published_at": "2026-10-25T14:08:00+08:00"
+   },
+   {
+    "source_name": "ths-global-flash",
+    "provider": "akshare",
+    "enabled": false,
+    "description": "同花顺全球资讯（备选；一期不启用）",
+    "doc": "ak.stock_info_global_ths",
+    "runs": 0,
+    "ok_runs": 0,
+    "last_run_at": null,
+    "avg_field_completeness": null,
+    "total_new": 0,
+    "latest_published_at": null
+   },
+   "... 共 6 条，完整见接口"
+  ],
+  "rejected": {
+   "cls-telegraph": "实测直连/代理均 45s 超时，网络不可达",
+   "caixin-main": "接口无发布时间字段，违反发布时间必须可核实原则",
+   "cctv-xinwenlianbo": "仅日期粒度且全文过长，信息密度低",
+   "sina-global-flash": "无标题无链接，弱于东财全球快讯",
+   "akshare-fund-nav": "净值数据非资讯，不在资讯采集范围"
+  }
+ },
+ "error_code": null,
+ "sanitized_error": null,
+ "warnings": [],
+ "risk_flags": [],
+ "data_cutoff": null,
+ "generated_at": "2026-10-25T17:50:42.145380+09:00",
+ "api_version": "wealth-sentiment/v1",
+ "research_only": true,
+ "note": "真实响应采样生成（2026-10-25），截断长数组"
+}
