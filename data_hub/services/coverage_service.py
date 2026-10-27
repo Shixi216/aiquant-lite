@@ -18,7 +18,7 @@ def _metric(numerator: int, denominator: int) -> CoverageMetric:
     return CoverageMetric(
         numerator=numerator,
         denominator=denominator,
-        ratio=numerator / denominator if denominator else 0.0,
+        ratio=min(numerator / denominator, 1.0) if denominator else 0.0,
     )
 
 
@@ -384,6 +384,11 @@ class DataCoverageService:
         if not history_report.calendar_providers:
             warnings.append(
                 "history coverage has no audited trading-calendar provider"
+            )
+        if active_total and realtime_count > active_total:
+            warnings.append(
+                "latest market snapshot count exceeds active universe; "
+                "coverage ratio capped at 1.0"
             )
         metrics = {
             "active_listing": _metric(active_total, universe_total),

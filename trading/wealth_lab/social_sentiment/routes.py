@@ -133,7 +133,7 @@ def research(symbol: str | None = None, platform: str | None = None,
 def cloud(symbol: str | None = None, platform: str | None = None,
           top_k: int = Query(default=50, ge=5, le=200),
           include_synthetic: bool = False):
-    """确定性词频（jieba 分词，非 LLM 生成）。"""
+    """确定性词频（内置金融词典与规则切分，非 LLM 生成）。"""
     return _env({"data_mode": "REAL",
                  **wordcloud.word_frequency(symbol=symbol, platform=platform,
                                             top_k=top_k,

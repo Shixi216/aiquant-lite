@@ -122,12 +122,14 @@ def compute_fundamental_scores(con, cutoff) -> dict[str, float]:
         grouped.setdefault(str(row[1]), []).append(
             FundamentalRepository._financial_record(row)
         )
-    prices = con.execute(
-        "SELECT symbol, close FROM canonical_historical_bars WHERE close IS NOT NULL "
-        "ORDER BY symbol, trade_date"
-    ).fetchdf()
-    latest_price = prices.groupby("symbol", sort=False).tail(1)
-    price_map = dict(zip(latest_price["symbol"], latest_price["close"]))
+    # 只需要每只股票最新一条收盘价。此前把全部历史价格（当前约 279 万行）
+    # 拉入 Pandas 后再 groupby，会与技术分计算争抢内存并在盘后刷新时失败。
+    # 在 DuckDB 内完成分组，结果规模降到股票数量，评分语义保持不变。
+    latest_prices = con.execute(
+        "SELECT symbol, arg_max(close, trade_date) AS close "
+        "FROM canonical_historical_bars WHERE close IS NOT NULL GROUP BY symbol"
+    ).fetchall()
+    price_map = {str(symbol): close for symbol, close in latest_prices}
 
     out: dict[str, float] = {}
     for symbol, recs in grouped.items():

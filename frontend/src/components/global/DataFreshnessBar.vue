@@ -10,13 +10,14 @@ import {
 const props = defineProps<{ timeSemantics: DashboardResponse["time_semantics"] }>();
 
 const rows = computed(() =>
-  Object.entries(props.timeSemantics).map(([key, field]) => {
-    let display = "暂无数据";
-    if (field.value) {
-      display = key === "market_trade_date" ? formatDate(field.value) : formatDateTime(field.value);
-    }
-    return { key, label: getTimeSemanticLabel(key), display, source: field.source };
-  })
+  Object.entries(props.timeSemantics)
+    .filter(([, field]) => Boolean(field.value))
+    .map(([key, field]) => ({
+      key,
+      label: getTimeSemanticLabel(key),
+      display: key === "market_trade_date" ? formatDate(field.value!) : formatDateTime(field.value!),
+      source: field.source,
+    }))
 );
 </script>
 
@@ -25,7 +26,7 @@ const rows = computed(() =>
     <small class="timezone-note">数据时点 · 北京时间</small>
     <div v-for="row in rows" :key="row.key" class="freshness-row">
       <span class="label">{{ row.label }}</span>
-      <span class="value" :class="{ missing: row.display === '暂无数据' }">{{ row.display }}</span>
+      <span class="value">{{ row.display }}</span>
       <span class="source" :title="row.source ?? undefined">数据来源</span>
     </div>
   </div>
@@ -54,9 +55,6 @@ const rows = computed(() =>
   color: var(--text-dim);
 }
 @media (max-width: 760px) { .source { display: none; } .freshness-row { flex-wrap: wrap; } }
-.value.missing {
-  color: var(--text-dim);
-}
 .timezone-note { color: var(--text-dim); margin-bottom: 4px; }
 .source {
   color: var(--text-dim);

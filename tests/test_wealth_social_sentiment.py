@@ -200,6 +200,13 @@ class TestNoDataNoFabrication:
 
 # ---------------------------------------------------------------- 词频确定性
 class TestWordFrequency:
+    def test_builtin_tokenizer_requires_no_external_segmenter(self):
+        tokens = wordcloud._tokens("黄金ETF回调后继续定投，https://example.com 免费领加群")
+        assert "黄金" in tokens
+        assert "etf" in tokens
+        assert "定投" in tokens
+        assert all("加群" not in token and "免费领" not in token for token in tokens)
+
     def test_deterministic_and_filtered(self):
         a = wordcloud.word_frequency(include_synthetic=True, top_k=30)
         b = wordcloud.word_frequency(include_synthetic=True, top_k=30)

@@ -41,21 +41,29 @@ onMounted(load);
 usePolling(load, 5 * 60 * 1000, 5 * 60 * 1000);
 
 /** 按「外观与布局」设置渲染：顺序 + 显隐可定制（市场总览组件）。 */
-const visibleWidgets = computed(() =>
-  themeStore.settings.dashboardOrder.filter((id) => !themeStore.settings.dashboardHidden.includes(id)),
-);
-
 /** 组件状态分组：有明确判定结果的才逐个展示，unknown 聚合为一枚徽章（悬浮可查看清单）。 */
 const activeComponents = computed(() =>
   (dashboard.value?.components ?? []).filter(
     (chip) => chip.status !== "unknown" && String(chip.status ?? "").trim() !== "",
   ),
 );
-const unknownComponents = computed(() =>
-  (dashboard.value?.components ?? []).filter((chip) => chip.status === "unknown" || String(chip.status ?? "").trim() === ""),
+
+function widgetHasDisplayData(id: string): boolean {
+  const data = dashboard.value;
+  if (!data) return false;
+  if (id === "freshness") return Object.values(data.time_semantics).some((field) => Boolean(field.value));
+  if (id === "components") return activeComponents.value.length > 0;
+  if (id === "summary" || id === "breadth") return data.market_breadth.available && Boolean(data.market_breadth.data);
+  if (id === "context") return data.market_context.available && Boolean(data.market_context.data);
+  if (id === "dragon-tiger") return data.dragon_tiger.available && Boolean(data.dragon_tiger.data?.items.length);
+  return true;
+}
+
+const visibleWidgets = computed(() =>
+  themeStore.settings.dashboardOrder.filter(
+    (id) => !themeStore.settings.dashboardHidden.includes(id) && widgetHasDisplayData(id),
+  ),
 );
-const unknownComponentCount = computed(() => unknownComponents.value.length);
-const unknownComponentNames = computed(() => unknownComponents.value.map((chip) => chip.name).join("、"));
 
 const widgetNames: Record<string, string> = {
   freshness: "数据新鲜度条",
@@ -109,7 +117,7 @@ function moveWidget(id: string, direction: -1 | 1) {
         <section v-else-if="widget === 'components'" class="panel">
           <h3>
             数据组件状态
-            <span class="h3-extra">仅显示已返回判定结果的组件；未探测到的组件聚合展示，避免误读</span>
+            <span class="h3-extra">仅展示已验证状态</span>
           </h3>
           <div class="chips">
             <HealthChip
@@ -119,12 +127,6 @@ function moveWidget(id: string, direction: -1 | 1) {
               :status="chip.status"
               :healthy="chip.healthy"
             />
-            <span
-              v-if="unknownComponentCount"
-              class="badge"
-              :title="`未返回状态的组件：${unknownComponentNames}（后端未探测，非故障）`"
-            >另有 {{ unknownComponentCount }} 个组件未返回状态</span>
-            <span v-if="!activeComponents.length && !unknownComponentCount" class="dim">暂无组件状态数据</span>
           </div>
         </section>
         <SummaryCards v-else-if="widget === 'summary'" :breadth="dashboard.market_breadth" />

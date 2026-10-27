@@ -3,6 +3,7 @@ import { computed } from "vue";
 import type { DashboardResponse } from "../../types/v2";
 import BlockState from "../global/BlockState.vue";
 import { formatDate, getRiskLabel, getComponentLabel, getHealthStatusLabel } from "../../domain/labels";
+import { acceptedMarketBreadth } from "../../domain/dashboardDisplay";
 void formatDate;
 
 const props = defineProps<{
@@ -14,23 +15,23 @@ const props = defineProps<{
 const risks = computed(() => {
   const list: { code: string; text: string }[] = [];
   const coverageData = props.coverage.data as { data_cutoff?: string } | null;
-  if (!props.coverage.available) {
-    list.push({ code: "stale_data", text: `覆盖报告不可用` });
-  } else if (coverageData?.data_cutoff) {
+  if (props.coverage.available && props.coverage.stale && coverageData?.data_cutoff) {
     const cutoff = coverageData.data_cutoff.slice(0, 10);
     list.push({
       code: "stale_data",
-      text: `覆盖报告截至 ${cutoff}${props.coverage.stale ? "（数据过期）" : ""}`,
+      text: `覆盖报告截至 ${cutoff}（数据过期）`,
     });
   }
   const breadthData = props.breadth.data;
-  if (breadthData?.partial_universe) {
+  if (breadthData?.partial_universe && !acceptedMarketBreadth(breadthData)) {
     list.push({ code: "partial_universe", text: getRiskLabel("partial_universe") });
   }
   if (props.breadth.stale) {
     list.push({ code: "stale_data", text: "行情快照已过期，请核对业务交易日与来源状态" });
   }
-  const unhealthy = props.components.filter((chip) => !chip.healthy);
+  const unhealthy = props.components.filter(
+    (chip) => !chip.healthy && chip.status !== "unknown" && String(chip.status ?? "").trim() !== "",
+  );
   for (const chip of unhealthy) {
     list.push({ code: "stale_data", text: `${getComponentLabel(chip.name)}：${getHealthStatusLabel(chip.status)}` });
   }

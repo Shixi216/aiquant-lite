@@ -1200,6 +1200,16 @@ def test_49_coverage_has_numerator_and_denominator(foundation_db: Path) -> None:
     )
 
 
+def test_49b_coverage_ratio_is_capped_when_snapshot_exceeds_universe() -> None:
+    from data_hub.services.coverage_service import _metric
+
+    metric = _metric(101, 100)
+
+    assert metric.numerator == 101
+    assert metric.denominator == 100
+    assert metric.ratio == 1.0
+
+
 def test_50_partial_sample_is_not_called_full_a_share(
     foundation_db: Path,
 ) -> None:

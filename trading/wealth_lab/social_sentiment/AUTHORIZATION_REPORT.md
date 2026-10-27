@@ -87,7 +87,7 @@
 
 ## 七、API（12 端点，`/v1/wealth-lab/social-sentiment/*`）
 
-sources（注册表+禁用原因+申请渠道）/ import / collect（未授权→403 带原因）/ analyze（deepseek-flash，confirm）/ summary（qwen，confirm）/ research（分布/多空理由/话题/热度/分歧/变化/证据覆盖度）/ wordcloud（jieba 确定性词频，非 LLM）/ sentiment/distribution / platform-comparison / heatmap / coverage / registry/status（管理）。
+sources（注册表+禁用原因+申请渠道）/ import / collect（未授权→403 带原因）/ analyze（deepseek-flash，confirm）/ summary（qwen，confirm）/ research（分布/多空理由/话题/热度/分歧/变化/证据覆盖度）/ wordcloud（内置金融词典与规则切分的确定性词频，非 LLM）/ sentiment/distribution / platform-comparison / heatmap / coverage / registry/status（管理）。
 
 ## 八、验证记录
 
