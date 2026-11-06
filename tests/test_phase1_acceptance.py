@@ -141,11 +141,11 @@ class TestPriority:
             point_in_time_ok=True,             formal_score=0.70, confidence=0.40, data_status=DataStatus.FRESH))
         assert out.action == Action.STRONG_BUY
 
-    def test_formal_60_40_not_replaced(self):
-        """正式60/40不被影子五维替换（结构测试）"""
-        # 增强分仅用于观察，formal_score 独立
-        formal = 0.6 * 0.8 + 0.4 * 0.5  # 0.68
-        assert abs(formal - 0.68) < 1e-9
+    def test_formal_four_dimensional_weights_are_fixed(self):
+        from trading.research.orchestration.models import FORMAL_WEIGHTS
+        assert {k.value: v for k, v in FORMAL_WEIGHTS.items()} == {
+            "TECHNICAL": .30, "FUNDAMENTAL": .30, "SENTIMENT": .25, "MARGIN": .15,
+        }
 
 
 # =====================================================================

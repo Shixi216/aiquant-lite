@@ -237,11 +237,14 @@ class FormalStrategyReplayService:
                 persist_shadow=False,
             )
         )
+        if formal.status != "AVAILABLE":
+            missing.append("PIT_FOUR_DIMENSIONAL_SNAPSHOT_UNAVAILABLE")
         if not value.risk_event_coverage_complete:
             missing.append("PIT_RISK_EVENT_COVERAGE_INCOMPLETE")
         if not value.historical_universe_complete:
             missing.append("HISTORICAL_UNIVERSE_INCOMPLETE")
         coverage_missing = {
+            "PIT_FOUR_DIMENSIONAL_SNAPSHOT_UNAVAILABLE",
             "PIT_RISK_EVENT_COVERAGE_INCOMPLETE",
             "HISTORICAL_UNIVERSE_INCOMPLETE",
         }
@@ -321,7 +324,7 @@ class FormalStrategyReplayService:
             csi300_returns=value.csi300_returns,
             csi300_returns_by_exit_date=value.csi300_returns_by_exit_date,
             point_in_time_valid=point_in_time_valid,
-            score_source="FORMAL_60_40",
+            score_source=formal.score_source,
             market_regime=value.market_regime,
             survivorship_bias_possible=(
                 not value.historical_universe_complete

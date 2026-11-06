@@ -84,7 +84,7 @@ def _generate_strategy(
     cross_score: float | None = None,
     score_source: str = "cross_section_4d",
 ) -> StrategyProposal:
-    if score_source == "legacy_60_40_fallback":
+    if score_source != CROSS_SECTION_SOURCE or cross_score is None:
         # G 守卫（P0）：legacy 60/40 分数无区分能力（封顶 0.8、技术分占位 0.418），
         # 强制 HOLD、禁止新增，不产出 BUY/SELL。
         return StrategyProposal(
@@ -95,19 +95,19 @@ def _generate_strategy(
                 0.5, technical.confidence * 0.6 + fundamental.confidence * 0.4
             ),
             entry_rule=(
-                "Legacy 60/40 fallback disabled by G guard "
-                "(score_source=legacy_60_40_fallback); forced HOLD, no new position."
+                "Four-dimensional formal score unavailable "
+                "; forced HOLD, no new position."
             ),
             exit_rule="Score <= -0.20, stop loss, take profit, or risk veto.",
             invalidation_rules=[
-                "legacy 60/40 fallback disabled (G guard)",
+                "four-dimensional formal score unavailable",
                 "stale or contradictory market data",
                 "daily loss or exposure limit reached",
                 "risk controller veto",
             ],
             evidence=[*technical.evidence, *fundamental.evidence],
         )
-    combined = cross_score if cross_score is not None else technical.score * 0.6 + fundamental.score * 0.4
+    combined = cross_score
     confidence = technical.confidence * 0.6 + fundamental.confidence * 0.4
     if combined >= 0.2:
         action = Action.BUY
@@ -123,7 +123,7 @@ def _generate_strategy(
         action=action,
         target_weight=target,
         confidence=max(0, min(1, confidence)),
-        entry_rule="Technical/fundamental weighted score >= 0.20 and all safety gates pass.",
+        entry_rule="Four-dimensional cross-section score >= 0.20 and all safety gates pass.",
         exit_rule="Score <= -0.20, stop loss, take profit, or risk veto.",
         invalidation_rules=[
             "stale or contradictory market data",
@@ -138,13 +138,15 @@ def _generate_strategy(
 class TradingDecisionService:
     """Run deterministic decision agents without any persistence dependency."""
 
-    async def decide(self, request: DecisionRequest) -> DecisionTrace:
+    async def decide(
+        self, request: DecisionRequest, *, data_cutoff: datetime | None = None,
+    ) -> DecisionTrace:
         technical, fundamental = await asyncio.gather(
             asyncio.to_thread(technical_signal, request.bars),
             asyncio.to_thread(fundamental_signal, request.fundamentals),
         )
         cross_score = _formal_score_resolver.resolve(
-            request.symbol, technical.score, fundamental.score
+            request.symbol, technical.score, fundamental.score, data_cutoff=data_cutoff,
         )
         score_source = cross_score.source
         proposal = _generate_strategy(
@@ -169,7 +171,7 @@ class TradingDecisionService:
         stance_score = (
             cross_score.score
             if cross_score.source == CROSS_SECTION_SOURCE
-            else technical.score * 0.6 + fundamental.score * 0.4
+            else 0.0
         )
         opinions.append(
             AgentOpinion(
@@ -455,7 +457,7 @@ class DecisionService:
     ) -> DecisionPacket:
         source_record_ids = self._source_ids(request.evidence_refs)
         records = self.repository.get_source_records(source_record_ids)
-        trace = await self.decision_engine.decide(request)
+        trace = await self.decision_engine.decide(request, data_cutoff=data_cutoff_time)
         generated_at = datetime.now().astimezone()
         inferred_cutoff = max(
             record["event_time"] for record in records

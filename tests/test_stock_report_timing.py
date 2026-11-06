@@ -12,6 +12,10 @@ def test_stock_report_times_all_stages_and_never_repeats_pipeline(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import trading.research.stock_report_service as module
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.3, None),
+    )
 
     bars = [
         Bar(

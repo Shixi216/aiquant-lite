@@ -189,6 +189,7 @@ class InteractionWorkflowService:
                     parent_request_id=request.parent_request_id, decision_called=True),
                 formal_result={
                     "status": "INSUFFICIENT_COVERAGE", "strategy_version": FORMAL_STRATEGY_VERSION,
+                    "score_source": "cross_section_4d_unavailable",
                     "score": None, "confidence": None, "proposal_action": None,
                     "final_action": "veto" if request.hard_veto else None,
                     "hard_veto": request.hard_veto, "formal_weights": weights,
@@ -205,9 +206,10 @@ class InteractionWorkflowService:
             item.value for item in result.missing_factors
         ]
         formal_payload = result.formal_result.model_dump(mode="json")
-        if "FUNDAMENTAL" in missing_factors:
+        if result.formal_result.status != "AVAILABLE":
             formal_payload = {
-                "status": "INSUFFICIENT_COVERAGE",
+                "status": "UNAVAILABLE",
+                "score_source": result.formal_result.score_source,
                 "strategy_version": result.formal_result.strategy_version,
                 "score": None,
                 "confidence": None,
@@ -220,8 +222,8 @@ class InteractionWorkflowService:
                 "shadow_used_for_action": False,
                 "shadow_used_for_veto": False,
                 "reason": (
-                    "point-in-time fundamental input is missing; "
-                    "no formal 60/40 action was produced"
+                    "point-in-time four-dimensional snapshot is missing; "
+                    "no formal action was produced"
                 ),
             }
         else:

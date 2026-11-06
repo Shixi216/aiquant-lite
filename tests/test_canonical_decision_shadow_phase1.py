@@ -400,10 +400,10 @@ def test_score_source_guard_uses_factor_bundle_and_records_mismatch() -> None:
 
     # G 守卫：无四维 composite → 回退 legacy 60/40，formal_score 强制 0.0（WAIT）
     assert built.decision_input.formal_score == pytest.approx(0.0)
-    assert built.score_source == "legacy_60_40_fallback"
+    assert built.score_source == "cross_section_4d_unavailable"
     assert built.score_source_mismatch is True
     assert built.score_source_reason == (
-        "legacy_60_40_fallback:SCORE_SOURCE_MISMATCH:"
+        "cross_section_4d_unavailable:SCORE_SOURCE_MISMATCH:"
         "technical_score,fundamental_score,formal_score"
     )
     assert built.veto_input_complete is False

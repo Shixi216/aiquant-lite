@@ -924,8 +924,8 @@ def test_32_shard_transaction_rolls_back_on_audit_error(
 
 def test_33_formal_weights_and_shadow_factors_are_unchanged() -> None:
     source = inspect.getsource(_generate_strategy)
-    assert "technical.score * 0.6" in source
-    assert "fundamental.score * 0.4" in source
+    assert "technical.score * 0.6" not in source
+    assert "fundamental.score * 0.4" not in source
     assert sentiment_policy(AnalysisMode.RESEARCH).shadow_mode is True
     assert policy_news_policy(AnalysisMode.RESEARCH).shadow_mode is True
     assert capital_policy(AnalysisMode.RESEARCH).shadow_mode is True

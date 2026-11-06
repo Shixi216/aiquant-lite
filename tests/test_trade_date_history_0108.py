@@ -608,10 +608,10 @@ def test_22_date_batch_naturally_repairs_existing_cohort_gap(
         ).fetchone()[0] == 2
 
 
-def test_23_formal_strategy_weights_remain_60_40() -> None:
+def test_23_formal_strategy_has_no_legacy_fallback() -> None:
     source = inspect.getsource(_generate_strategy)
-    assert "technical.score * 0.6" in source
-    assert "fundamental.score * 0.4" in source
+    assert "technical.score * 0.6" not in source
+    assert "fundamental.score * 0.4" not in source
 
 
 def test_24_research_factors_remain_shadow() -> None:

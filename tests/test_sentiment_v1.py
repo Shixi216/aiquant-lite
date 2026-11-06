@@ -1040,8 +1040,8 @@ def test_42_decision_factor_is_always_shadow(
 
 def test_43_sentiment_does_not_change_formal_action_weights() -> None:
     source = inspect.getsource(_generate_strategy)
-    assert "technical.score * 0.6" in source
-    assert "fundamental.score * 0.4" in source
+    assert "technical.score * 0.6" not in source
+    assert "fundamental.score * 0.4" not in source
     assert "sentiment" not in source.casefold()
 
 

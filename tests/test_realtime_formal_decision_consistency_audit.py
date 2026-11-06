@@ -253,8 +253,12 @@ def _engine(case: AuditCase):
 
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case.name)
 def test_current_realtime_formal_core_is_not_decision_engine_equivalent(
-    case: AuditCase,
+    case: AuditCase, monkeypatch,
 ) -> None:
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (case.technical_score * .6 + case.fundamental_score * .4, None),
+    )
     realtime = _formal(case)
     expected_score = case.technical_score * 0.60 + case.fundamental_score * 0.40
     if case.engine_error is not None:
@@ -265,7 +269,7 @@ def test_current_realtime_formal_core_is_not_decision_engine_equivalent(
         return
     historical_core = _engine(case)
 
-    # The only fully shared semantics are formal 60/40 score and confidence.
+    # A controlled snapshot score isolates downstream action/risk differences.
     assert realtime.score == pytest.approx(expected_score)
     assert historical_core.formal_score == pytest.approx(expected_score)
     assert realtime.confidence == pytest.approx(case.confidence)

@@ -970,12 +970,13 @@ def test_original_technical_and_risk_modules_are_unchanged() -> None:
             confidence=0,
             summary="fundamental",
         ),
+        cross_score=0.6,
     )
     assert proposal.action.value == "buy"
     assert proposal.target_weight == pytest.approx(0.12)
 
 
-def test_formal_weights_remain_sixty_forty() -> None:
+def test_formal_strategy_requires_cross_section_score() -> None:
     from trading.decision_support.orchestrator.service import (
         _generate_strategy,
     )
@@ -985,8 +986,8 @@ def test_formal_weights_remain_sixty_forty() -> None:
         Signal(role="t", score=0, confidence=1, summary="t"),
         Signal(role="f", score=1, confidence=0, summary="f"),
     )
-    assert proposal.action.value == "buy"
-    assert proposal.target_weight == pytest.approx(0.08)
+    assert proposal.action.value == "hold"
+    assert proposal.target_weight == 0
 
 
 def test_old_api_request_shape_remains_valid() -> None:

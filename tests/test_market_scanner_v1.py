@@ -714,10 +714,12 @@ def test_0110_records_its_migration_id(tmp_path: Path) -> None:
     assert row[0] == MIGRATION_ID
 
 
-def test_formal_strategy_weights_remain_60_40() -> None:
+def test_formal_strategy_weights_are_four_dimensional() -> None:
     assert FORMAL_WEIGHTS == {
-        next(key for key in FORMAL_WEIGHTS if key.value == "TECHNICAL"): 0.60,
-        next(key for key in FORMAL_WEIGHTS if key.value == "FUNDAMENTAL"): 0.40,
+        next(key for key in FORMAL_WEIGHTS if key.value == "TECHNICAL"): 0.30,
+        next(key for key in FORMAL_WEIGHTS if key.value == "FUNDAMENTAL"): 0.30,
+        next(key for key in FORMAL_WEIGHTS if key.value == "SENTIMENT"): 0.25,
+        next(key for key in FORMAL_WEIGHTS if key.value == "MARGIN"): 0.15,
     }
 
 

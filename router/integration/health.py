@@ -230,7 +230,7 @@ class SystemHealthService:
             ComponentHealth(
                 name="formal_evaluation",
                 status=HealthStatus.DEGRADED,
-                detail="formal 60/40 evaluation has insufficient fundamental coverage",
+                detail="formal four-dimensional evaluation has insufficient fundamental coverage",
                 required=False,
             )
         )
@@ -327,7 +327,7 @@ class SystemHealthService:
                 "Configure WeCom only if message delivery is required; simulation is available."
             )
         recommendations.append(
-            "Increase point-in-time fundamental coverage before formal 60/40 evaluation."
+            "Increase point-in-time fundamental coverage before formal four-dimensional evaluation."
         )
         return DoctorReport(
             health=health,

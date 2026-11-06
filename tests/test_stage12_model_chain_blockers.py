@@ -555,10 +555,12 @@ def test_12_model_stage_log_has_fixed_fields_and_no_credential(
     assert "synthetic-sensitive-value" not in caplog.text
 
 
-def test_13_formal_weights_remain_60_40() -> None:
+def test_13_formal_weights_are_four_dimensional() -> None:
     assert FORMAL_WEIGHTS == {
-        FactorType.TECHNICAL: 0.60,
-        FactorType.FUNDAMENTAL: 0.40,
+        FactorType.TECHNICAL: 0.30,
+        FactorType.FUNDAMENTAL: 0.30,
+        FactorType.SENTIMENT: 0.25,
+        FactorType.MARGIN: 0.15,
     }
 
 
@@ -575,7 +577,7 @@ def test_14_hard_veto_remains_final() -> None:
             persist_shadow=False,
         )
     )
-    assert result.proposal_action == Action.BUY
+    assert result.proposal_action == Action.HOLD
     assert result.final_action == Action.VETO
     assert result.hard_veto is True
 

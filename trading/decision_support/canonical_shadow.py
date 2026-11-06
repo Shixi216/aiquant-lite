@@ -17,7 +17,7 @@ from trading.decision_support.canonical_input import (
 )
 from trading.decision_support.decision_engine import DecisionEngine
 from trading.decision_support.decision_response import DecisionResponse
-from trading.decision_support.formal_score_resolver import LEGACY_SOURCE
+from trading.decision_support.formal_score_resolver import CROSS_SECTION_SOURCE
 from trading.decision_support.manual_position_manager import ManualPositionManager
 from trading.decision_support.portfolio_context import PortfolioContext
 from trading.decision_support.user_context import UserContext
@@ -543,8 +543,8 @@ class CanonicalDecisionShadowService:
                 "canonical_pit": built.decision_input.point_in_time_ok,
                 "canonical_data_status": response.data_status.value,
                 "score_source_status": (
-                    "G_GUARD_FORCE_WAIT"
-                    if built.score_source == LEGACY_SOURCE
+                    "FOUR_DIMENSIONAL_SCORE_UNAVAILABLE"
+                    if built.score_source != CROSS_SECTION_SOURCE
                     else (
                         "SCORE_SOURCE_MISMATCH"
                         if built.score_source_mismatch

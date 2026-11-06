@@ -441,10 +441,12 @@ def test_31_sensitive_config_keys_are_removed_from_reports() -> None:
     ) == {"nested": {"safe": 1}}
 
 
-def test_32_formal_strategy_weights_remain_60_40() -> None:
+def test_32_formal_strategy_weights_are_four_dimensional() -> None:
     assert FORMAL_WEIGHTS == {
-        FactorType.TECHNICAL: 0.60,
-        FactorType.FUNDAMENTAL: 0.40,
+        FactorType.TECHNICAL: 0.30,
+        FactorType.FUNDAMENTAL: 0.30,
+        FactorType.SENTIMENT: 0.25,
+        FactorType.MARGIN: 0.15,
     }
 
 

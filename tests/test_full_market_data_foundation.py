@@ -1234,8 +1234,8 @@ def test_51_migration_preserves_raw_records(tmp_path: Path) -> None:
 
 def test_52_formal_strategy_weights_are_unchanged() -> None:
     source = inspect.getsource(_generate_strategy)
-    assert "technical.score * 0.6" in source
-    assert "fundamental.score * 0.4" in source
+    assert "technical.score * 0.6" not in source
+    assert "fundamental.score * 0.4" not in source
 
 
 def test_53_shadow_factors_remain_shadow() -> None:

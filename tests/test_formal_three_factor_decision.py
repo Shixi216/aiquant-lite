@@ -12,7 +12,6 @@ from trading.decision_support.action_resolver import (
 from trading.research.orchestration.decision import formal_result
 from trading.research.orchestration.models import (
     FORMAL_STRATEGY_VERSION,
-    FORMAL_THREE_FACTOR_STRATEGY_VERSION,
 )
 from trading.research.orchestration.schemas import DecisionShadowRequest
 from trading.schemas import Action as OrchestrationAction
@@ -20,88 +19,41 @@ from trading.schemas import Action as OrchestrationAction
 TZ = timezone(timedelta(hours=8))
 
 
-def test_formal_result_two_factor_fallback_when_sentiment_none():
+def test_request_scores_and_custom_weights_cannot_replace_four_dimensional_snapshot(monkeypatch):
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.31, None),
+    )
+    for overrides in ({}, {"sentiment_score": 0.9}, {"custom_formal_weights": {"technical": 1.0}}):
+        req = DecisionShadowRequest(
+            symbol="000001", data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
+            technical_score=-1, technical_confidence=0.9,
+            fundamental_score=-1, fundamental_confidence=0.8, **overrides,
+        )
+        res = formal_result(req)
+        assert res.strategy_version == FORMAL_STRATEGY_VERSION
+        assert res.score == 0.31
+        assert res.score_source == "cross_section_4d"
+        assert res.formal_weights == {"TECHNICAL": .30, "FUNDAMENTAL": .30, "SENTIMENT": .25, "MARGIN": .15}
+        assert res.proposal_action == OrchestrationAction.BUY
+
+
+def test_no_four_dimensional_snapshot_does_not_fall_back_to_two_or_three_factors(monkeypatch):
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: None,
+    )
     req = DecisionShadowRequest(
-        symbol="000001",
-        data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
-        technical_score=0.8,
-        technical_confidence=0.9,
-        fundamental_score=0.4,
-        fundamental_confidence=0.8,
-        sentiment_score=None,
+        symbol="000001", data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
+        technical_score=1, technical_confidence=1,
+        fundamental_score=1, fundamental_confidence=1, sentiment_score=1,
     )
     res = formal_result(req)
-    assert res.strategy_version == FORMAL_STRATEGY_VERSION
-    assert res.formal_weights == {"TECHNICAL": 0.6, "FUNDAMENTAL": 0.4}
-    expected_score = 0.8 * 0.6 + 0.4 * 0.4  # 0.64
-    assert abs(res.score - expected_score) < 1e-4
-    assert res.proposal_action == OrchestrationAction.BUY
-
-
-def test_formal_result_three_factor_scoring():
-    req = DecisionShadowRequest(
-        symbol="000001",
-        data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
-        technical_score=0.8,
-        technical_confidence=0.9,
-        fundamental_score=0.4,
-        fundamental_confidence=0.8,
-        sentiment_score=0.6,
-        sentiment_confidence=0.7,
-    )
-    res = formal_result(req)
-    assert res.strategy_version == FORMAL_THREE_FACTOR_STRATEGY_VERSION
-    assert res.formal_weights == {
-        "TECHNICAL": 0.50,
-        "FUNDAMENTAL": 0.35,
-        "SENTIMENT": 0.15,
-    }
-    expected_score = 0.8 * 0.50 + 0.4 * 0.35 + 0.6 * 0.15  # 0.40 + 0.14 + 0.09 = 0.63
-    assert abs(res.score - expected_score) < 1e-4
-    assert res.proposal_action == OrchestrationAction.BUY
-
-
-def test_formal_result_with_custom_dynamic_weights():
-    req = DecisionShadowRequest(
-        symbol="000001",
-        data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
-        technical_score=0.8,
-        technical_confidence=0.9,
-        fundamental_score=0.4,
-        fundamental_confidence=0.8,
-        sentiment_score=0.6,
-        sentiment_confidence=0.7,
-        custom_formal_weights={
-            "technical": 0.45,
-            "fundamental": 0.30,
-            "sentiment": 0.25,
-        },
-    )
-    res = formal_result(req)
-    assert res.strategy_version == FORMAL_THREE_FACTOR_STRATEGY_VERSION
-    assert res.formal_weights == {
-        "TECHNICAL": 0.45,
-        "FUNDAMENTAL": 0.30,
-        "SENTIMENT": 0.25,
-    }
-    expected_score = 0.8 * 0.45 + 0.4 * 0.30 + 0.6 * 0.25  # 0.36 + 0.12 + 0.15 = 0.63
-    assert abs(res.score - expected_score) < 1e-4
-
-
-def test_hard_veto_overrides_three_factor_score():
-    req = DecisionShadowRequest(
-        symbol="000001",
-        data_cutoff=datetime(2026, 8, 1, 15, 0, tzinfo=TZ),
-        technical_score=0.9,
-        technical_confidence=0.9,
-        fundamental_score=0.9,
-        fundamental_confidence=0.9,
-        sentiment_score=0.9,
-        hard_veto=True,
-    )
-    res = formal_result(req)
-    assert res.proposal_action == OrchestrationAction.BUY
-    assert res.final_action == OrchestrationAction.VETO
+    assert res.status == "UNAVAILABLE"
+    assert res.score == 0
+    assert res.confidence == 0
+    assert res.proposal_action == OrchestrationAction.HOLD
+    assert formal_result(req.model_copy(update={"hard_veto": True})).final_action == OrchestrationAction.VETO
 
 
 def test_three_factor_with_risk_reminder_safety_net():

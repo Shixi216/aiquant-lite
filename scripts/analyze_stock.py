@@ -2,7 +2,7 @@
 
 五维：技术面 / 基本面 / 情绪面 / 政策新闻面 / 资金面
 数据源：Tushare Pro / 腾讯 / BaoStock / 巨潮（本地 DuckDB 缓存）
-正式决策：技术面60% + 基本面40%，风险 VETO 由决策层执行。
+正式评分：四维横截面30/30/25/15，风险 VETO 由决策层执行。
 """
 from __future__ import annotations
 
@@ -667,11 +667,18 @@ def main():
     for n in policy["notes"]:
         print(f"   {n}")
 
-    combined = tech["score"] * 0.6 + fund["score"] * 0.4
-    conf = tech["confidence"] * 0.6 + fund["confidence"] * 0.4
-    stance = "看多(≥0.2)" if combined >= 0.2 else "看空(≤-0.2)" if combined <= -0.2 else "中性"
+    from trading.decision_support.formal_score_resolver import FormalScoreResolver
+    resolved = FormalScoreResolver().resolve(
+        symbol, tech["score"], fund["score"], data_cutoff=cutoff,
+    )
     print(f"\n{'=' * 56}")
-    print(f"【正式决策 60/40】综合分 {combined:.4f} | 置信 {conf:.3f} | 立场: {stance}")
+    if resolved.degraded:
+        print("【正式评分 四维】综合分 N/A（缺少截止时间内的四维截面，停止正式决策）")
+    else:
+        combined = resolved.score
+        conf = min(tech["confidence"], fund["confidence"])
+        stance = "看多(≥0.2)" if combined >= 0.2 else "看空(≤-0.2)" if combined <= -0.2 else "中性"
+        print(f"【正式评分 四维】综合分 {combined:.4f} | 置信 {conf:.3f} | 立场: {stance}")
     print(f"{'=' * 56}")
     print("\n⚠️ 本报告仅为系统规则计算的信息整理，不构成投资建议。")
 

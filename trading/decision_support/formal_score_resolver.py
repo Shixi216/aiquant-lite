@@ -7,16 +7,17 @@
 1. cross_section_4d —— 四维横截面 composite（技术30/基本30/情绪25/资金15
    的 rank 加权，rank 分位数语义），由 scripts.compute_cross_section_snapshot.py
    盘后预计算写入。带 data_cutoff 时按 PIT 语义读 history 表（不读未来截面）。
-2. legacy_60_40_fallback —— 技术分*0.6 + 基本分*0.4（绝对评分语义降级路径，
-   degraded=True 明确标注，供对照与告警）。
+缺少四维截面时返回 unavailable；0 仅为内部中性占位，禁止用于正式动作。
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from math import isfinite
 
 CROSS_SECTION_SOURCE = "cross_section_4d"
 LEGACY_SOURCE = "legacy_60_40_fallback"
+UNAVAILABLE_SOURCE = "cross_section_4d_unavailable"
 
 
 @dataclass(frozen=True)
@@ -40,7 +41,7 @@ class FormalScoreResolver:
         cross = self.read_cross_section(
             symbol, data_cutoff=data_cutoff, with_detail=with_detail
         )
-        if cross is not None:
+        if cross is not None and isfinite(cross[0]) and -1 <= cross[0] <= 1:
             score, detail = cross
             return FormalScoreResult(
                 score=score,
@@ -49,8 +50,8 @@ class FormalScoreResolver:
                 detail=detail,
             )
         return FormalScoreResult(
-            score=technical_score * 0.60 + fundamental_score * 0.40,
-            source=LEGACY_SOURCE,
+            score=0.0,
+            source=UNAVAILABLE_SOURCE,
             degraded=True,
         )
 
@@ -111,4 +112,5 @@ __all__ = [
     "FormalScoreResolver",
     "FormalScoreResult",
     "LEGACY_SOURCE",
+    "UNAVAILABLE_SOURCE",
 ]

@@ -5,7 +5,7 @@
 阶段2 候选研究：日线/基本面/公告/新闻/风控 → formal_score + 盘中强度 + 波段质量
 输出：数据时间 / 市场概况 / 候选列表 / 正式研究 / 明确动作
 
-正式方向：formal_score = 技术×0.6 + 基本×0.4（不修改）
+正式方向：formal_score = 四维横截面（30/30/25/15），缺失时停止正式评分
 情绪/政策/资金只调置信度/仓位/节奏/风险
 硬VETO 最高优先级
 """
@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import sys
 import time
-from datetime import timezone, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -63,7 +63,7 @@ class IntradayPipeline:
     # 阶段2：候选研究（日线/基本面/风控）
     # ------------------------------------------------------------------
     def stage2_research(self, candidates: list[dict], limit: int = 15) -> list[dict]:
-        """对候选调用五维研究（技术/基本为正式分，情绪/政策/资金为增强）"""
+        """对候选调用五维研究（正式分统一读取四维横截面）"""
         results = []
         for c in candidates[:limit]:
             symbol = c["symbol"].split(".")[0]
@@ -79,15 +79,16 @@ class IntradayPipeline:
 
     def _research_one(self, symbol: str, realtime: dict) -> dict:
         """单只研究：五维因子 + 盘中强度 + 波段质量 + 候选级VETO"""
-        import duckdb
+        from database.db import get_connection
+        from trading.decision_support.formal_score_resolver import FormalScoreResolver
         from trading.research.technical.analysis import technical_signal
         from scripts.analyze_stock import (
             load_bars, load_financials, load_news, fundamental_factor,
         )
         from trading.decision_support.candidate_veto import CandidateVetoService
 
-        db_path = Path(__file__).resolve().parents[1] / "database" / "hermes_opc.duckdb"
-        con = duckdb.connect(str(db_path), read_only=True)
+        cutoff = datetime.now(TZ)
+        con = get_connection(read_only=True)
         try:
             bars = load_bars(con, symbol)
             fin = load_financials(con, symbol)
@@ -117,9 +118,16 @@ class IntradayPipeline:
         # Signal 对象用属性访问（.score/.confidence）
         tech_score = tech.score if hasattr(tech, "score") else 0
         tech_conf = tech.confidence if hasattr(tech, "confidence") else 0.5
-        fund_score = fund.score if hasattr(fund, "score") else 0
-        fund_conf = fund.confidence if hasattr(fund, "confidence") else 0.5
-        formal = tech_score * 0.6 + fund_score * 0.4
+        fund_score = float(fund.get("score", 0))
+        fund_conf = float(fund.get("confidence", 0))
+        resolved = FormalScoreResolver().resolve(
+            symbol, tech_score, fund_score, data_cutoff=cutoff,
+        )
+        if resolved.degraded:
+            return {**realtime, "status": "UNAVAILABLE", "formal_score": None,
+                    "score_source": resolved.source, "confidence": 0.,
+                    "error": "缺少截止时间内的四维截面，停止正式评分"}
+        formal = resolved.score
 
         # 盘中强度（实时）
         intraday = self.pipeline.intraday_strength(realtime)
@@ -132,6 +140,7 @@ class IntradayPipeline:
             "technical_score": round(tech_score, 3),
             "fundamental_score": round(fund_score, 3),
             "formal_score": round(formal, 3),
+            "score_source": resolved.source,
             "confidence": round(tech_conf * 0.6 + fund_conf * 0.4, 3),
             "intraday_strength": intraday,
             "swing_quality": swing,
@@ -193,7 +202,7 @@ class IntradayPipeline:
     @staticmethod
     def formal_action_only() -> dict:
         """说明：正式交易动作（建仓/小仓试错/加仓/持有/减仓/止盈/止损/清仓/回避）
-        必须通过 DecisionEngine 完成：数据状态检查 → point-in-time → 正式60/40
+        必须通过 DecisionEngine 完成：数据状态检查 → point-in-time → 正式四维
         → 完整VETO → 用户持仓 → PositionSizer 后才输出。"""
         return {
             "note": "正式交易动作仅由DECISION层输出（DecisionEngine），"

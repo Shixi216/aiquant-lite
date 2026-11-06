@@ -28,7 +28,7 @@ def _decision(*, factors=None, stop=8.0):
         score=0.7, signal_close=10.0, atr14=1.0,
         entry_zone=(9.5, 10.5), future_bars=bars,
         csi300_returns_by_exit_date={bar.trade_date: 0.01 for bar in bars},
-        point_in_time_valid=True, score_source="FORMAL_60_40",
+        point_in_time_valid=True, score_source="cross_section_4d",
     )
     return FormalReplayDecision(
         symbol="000001.SZ", signal_date=date(2025, 10, 31),

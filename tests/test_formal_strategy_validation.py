@@ -140,12 +140,14 @@ def replay_input(**updates) -> FormalReplayInput:
     return FormalReplayInput(**payload)
 
 
-def test_replay_uses_formal_60_40_and_frozen_zones() -> None:
-    result = FormalStrategyReplayService().replay_one(replay_input())
-    assert result.formal_score == pytest.approx(
-        result.technical_score * 0.60 + result.fundamental_score * 0.40
+def test_replay_uses_four_dimensional_score_and_frozen_zones(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.7, None),
     )
-    assert result.observation.score_source == "FORMAL_60_40"
+    result = FormalStrategyReplayService().replay_one(replay_input())
+    assert result.formal_score == pytest.approx(0.7)
+    assert result.observation.score_source == "cross_section_4d"
     assert result.frozen_entry_zone
     assert result.frozen_preferred_zone
     assert not result.missing_data
@@ -174,7 +176,11 @@ def test_incomplete_risk_event_coverage_blocks_formal_sample() -> None:
     assert not result.point_in_time_valid
     assert "PIT_RISK_EVENT_COVERAGE_INCOMPLETE" in result.missing_data
 
-def test_partial_pit_fundamentals_are_degraded_not_failed() -> None:
+def test_partial_pit_fundamentals_are_degraded_not_failed(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: (0.7, None),
+    )
     partial = tuple(
         item for item in financials() if item.statement_type != "cashflow"
     )
@@ -189,3 +195,14 @@ def test_formal_replay_trade_plan_boundary_is_explicitly_read_only() -> None:
     service = FormalStrategyReplayService()
     with pytest.raises(RuntimeError, match="read-only"):
         service.engine.plan_repo.create_plan(None)
+
+def test_missing_four_dimensional_snapshot_excluded_from_formal_replay(monkeypatch):
+    monkeypatch.setattr(
+        "trading.decision_support.formal_score_resolver.FormalScoreResolver.read_cross_section",
+        lambda self, symbol, **kwargs: None,
+    )
+    result = FormalStrategyReplayService().replay_one(replay_input())
+    assert result.data_status == "FAILED"
+    assert not result.point_in_time_valid
+    assert "PIT_FOUR_DIMENSIONAL_SNAPSHOT_UNAVAILABLE" in result.missing_data
+    assert result.observation.score_source == "cross_section_4d_unavailable"

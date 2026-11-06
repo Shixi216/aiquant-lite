@@ -230,7 +230,7 @@ def test_11_validation_errors_use_sanitized_envelope() -> None:
     assert "wrong" not in payload["sanitized_error"]
 
 
-def test_12_formal_decision_remains_60_40() -> None:
+def test_12_formal_decision_requires_four_dimensions() -> None:
     result = formal_result(
         DecisionShadowRequest(
             symbol="600000.SH",
@@ -242,8 +242,9 @@ def test_12_formal_decision_remains_60_40() -> None:
             persist_shadow=False,
         )
     )
-    assert result.formal_weights == {"TECHNICAL": 0.6, "FUNDAMENTAL": 0.4}
-    assert result.score == pytest.approx(0.6)
+    assert result.formal_weights == {"TECHNICAL": .3, "FUNDAMENTAL": .3, "SENTIMENT": .25, "MARGIN": .15}
+    assert result.status == "UNAVAILABLE"
+    assert result.score == 0
     assert result.shadow_used_for_action is False
 
 
@@ -260,7 +261,7 @@ def test_13_hard_veto_is_final() -> None:
             persist_shadow=False,
         )
     )
-    assert result.proposal_action == Action.BUY
+    assert result.proposal_action == Action.HOLD
     assert result.final_action == Action.VETO
 
 

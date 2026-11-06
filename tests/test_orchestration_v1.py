@@ -306,14 +306,17 @@ def _decision_request(**updates: Any) -> DecisionShadowRequest:
     return DecisionShadowRequest(**values)
 
 
-def test_17_formal_score_remains_exactly_60_40() -> None:
+def test_17_formal_score_requires_four_dimensional_snapshot() -> None:
     result = formal_result(_decision_request())
-    assert result.score == pytest.approx(0.5 * 0.6 - 0.25 * 0.4)
+    assert result.status == "UNAVAILABLE"
+    assert result.score == 0
     assert result.formal_weights == {
-        FactorType.TECHNICAL.value: 0.6,
-        FactorType.FUNDAMENTAL.value: 0.4,
+        FactorType.TECHNICAL.value: 0.3,
+        FactorType.FUNDAMENTAL.value: 0.3,
+        FactorType.SENTIMENT.value: 0.25,
+        FactorType.MARGIN.value: 0.15,
     }
-    assert FORMAL_WEIGHTS[FactorType.TECHNICAL] == 0.6
+    assert FORMAL_WEIGHTS[FactorType.TECHNICAL] == 0.3
 
 
 def test_18_shadow_is_not_used_for_formal_action() -> None:
@@ -330,7 +333,7 @@ def test_19_hard_veto_is_not_bypassed() -> None:
             hard_veto=True,
         )
     )
-    assert result.proposal_action == Action.BUY
+    assert result.proposal_action == Action.HOLD
     assert result.final_action == Action.VETO
     assert result.shadow_used_for_veto is False
 

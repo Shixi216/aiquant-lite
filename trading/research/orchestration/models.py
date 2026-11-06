@@ -3,13 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from data_hub.schemas.unified import FactorType
+from trading.research.orchestration.cross_section import FACTOR_WEIGHTS
 
 
 ORCHESTRATION_ALGORITHM_VERSION = "five-factor-orchestration-v1"
 EVIDENCE_GRAPH_VERSION = "five-factor-evidence-graph-v1"
 CORRELATION_ALGORITHM_VERSION = "five-factor-correlation-v1"
 SHADOW_SCORER_VERSION = "shadow-composite-v1"
-FORMAL_STRATEGY_VERSION = "auditable_multi_factor_v1"
+FORMAL_STRATEGY_VERSION = "cross_section_4d_v1"
 FORMAL_THREE_FACTOR_STRATEGY_VERSION = "auditable_three_factor_v1"
 
 BASE_FACTOR_TYPES: tuple[FactorType, ...] = (
@@ -29,8 +30,10 @@ SHADOW_CONFIGURED_WEIGHTS: dict[FactorType, float] = {
 }
 
 FORMAL_WEIGHTS: dict[FactorType, float] = {
-    FactorType.TECHNICAL: 0.60,
-    FactorType.FUNDAMENTAL: 0.40,
+    FactorType.TECHNICAL: FACTOR_WEIGHTS["tech"],
+    FactorType.FUNDAMENTAL: FACTOR_WEIGHTS["fund"],
+    FactorType.SENTIMENT: FACTOR_WEIGHTS["sent"],
+    FactorType.MARGIN: FACTOR_WEIGHTS["margin"],
 }
 
 FORMAL_THREE_FACTOR_WEIGHTS: dict[FactorType, float] = {

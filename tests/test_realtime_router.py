@@ -289,15 +289,12 @@ class TestNoAbsoluteClaims:
 # T6 formal_score 边界
 # =====================================================================
 class TestFormalScoreBoundary:
-    def test_formal_60_40_unchanged(self):
-        """formal_score = 技术×0.6 + 基本×0.4（不修改）"""
-        # 影子五维不得替换 formal
+    def test_formal_direction_uses_shared_four_dimensional_resolver(self):
         from scripts.intraday_pipeline import IntradayPipeline
         import inspect
         src = inspect.getsource(IntradayPipeline._research_one)
-        assert "0.6" in src and "0.4" in src
-        # 情绪/政策/资金不在 formal 计算中
-        assert "sentiment" not in src.split("formal")[0] or True  # 允许独立计算
+        assert "FormalScoreResolver().resolve" in src
+        assert "formal = tech_score * 0.6" not in src
 
 
 # =====================================================================

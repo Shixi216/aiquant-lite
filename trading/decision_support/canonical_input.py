@@ -236,7 +236,7 @@ class CanonicalDecisionInputBuilder:
             policy_score=_score(factor_map.get(FactorType.POLICY_NEWS)),
             capital_score=_score(factor_map.get(FactorType.CAPITAL_FLOW)),
             confidence=max(0.0, min(1.0, confidence)),
-            data_status=_data_status(bundle),
+            data_status=DataStatus.FAILED if resolved.degraded else _data_status(bundle),
             veto=veto_context.result,
             current_price=current_price,
             bars=bars,
@@ -255,8 +255,8 @@ class CanonicalDecisionInputBuilder:
                 f"{score_source}:"
                 + ("SCORE_SOURCE_MISMATCH:" + ",".join(mismatch_fields)
                    if mismatch_fields
-                   else ("LEGACY_60_40_FALLBACK_FORCE_WAIT"
-                         if score_source == "legacy_60_40_fallback"
+                   else ("FOUR_DIMENSIONAL_SCORE_UNAVAILABLE"
+                         if score_source != CROSS_SECTION_SOURCE
                          else "PIT_FACTOR_BUNDLE_MATCH"))
             ),
             veto_source=veto_context.source,

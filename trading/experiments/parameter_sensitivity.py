@@ -39,7 +39,7 @@ class HistoricalParameterObservation:
     csi300_returns: dict[int, float] = field(default_factory=dict)
     csi300_returns_by_exit_date: dict[date, float] = field(default_factory=dict)
     point_in_time_valid: bool = True
-    score_source: str = "FORMAL_60_40"
+    score_source: str = "UNVERIFIED"
     market_regime: str = "UNKNOWN"
     survivorship_bias_possible: bool = False
 
@@ -306,6 +306,9 @@ class ParameterSensitivityService:
         observations: list[HistoricalParameterObservation],
         scenario: ParameterScenario,
     ) -> ParameterBacktestResult:
+        sources = {item.score_source for item in observations if item.point_in_time_valid}
+        if len(sources) > 1:
+            raise ValueError("cannot mix formal scoring baselines in one evaluation")
         started = perf_counter()
         horizon_results: dict[int, HorizonMetrics] = {}
         benchmark_available = False
@@ -355,7 +358,7 @@ class ParameterSensitivityService:
         if primary.sample_count < 30:
             flags.append("SAMPLE_TOO_SMALL")
         if any(
-            item.score_source != "FORMAL_60_40"
+            item.score_source != "cross_section_4d"
             for item in observations
         ):
             flags.extend(

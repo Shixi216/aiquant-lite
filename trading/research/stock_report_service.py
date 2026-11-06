@@ -253,15 +253,13 @@ class StockReportService:
                             )
                 with performance.measure("policy_ms"):
                     policy = policy_factor(announcements)
-                combined = technical["score"] * 0.6 + fundamental["score"] * 0.4
-                # 四维横截面 composite（技术30/基本30/情绪25/资金15 rank加权）优先；
-                # 读不到时保留 60/40（报告为分析展示，不走 G 守卫）。
-                cross = _formal_score_resolver.read_cross_section(code, with_detail=True)
-                score_source = "60/40"
-                cross_detail = None
-                if cross is not None:
-                    combined, cross_detail = cross
-                    score_source = "四维"
+                resolved = _formal_score_resolver.resolve(
+                    code, technical["score"], fundamental["score"],
+                    data_cutoff=report_cutoff, with_detail=True,
+                )
+                combined = resolved.score
+                score_source = "四维" if not resolved.degraded else "四维不可用"
+                cross_detail = resolved.detail
                 confidence = (
                     technical["confidence"] * 0.6
                     + fundamental["confidence"] * 0.4
@@ -316,6 +314,9 @@ class StockReportService:
                 veto = fund_veto or top_veto or None
 
             data_status = DataStatus.STALE if stale else DataStatus.FRESH
+            if resolved.degraded:
+                data_status = DataStatus.FAILED
+                confidence = 0.0
             point_in_time_ok = all(
                 bar.trade_date <= report_cutoff.date() for bar in bars
             )
@@ -508,7 +509,11 @@ class StockReportService:
                             "     （公告日期=巨潮+东财双源交叉（取更早披露时间）；"
                             "无法交叉时以巨潮口径为准）"
                         ),
-                        f"  {score_source}综合分 {combined:+.4f} | 置信度 {confidence:.3f}",
+                        (
+                            "  四维综合分 N/A（缺少截止时间内的四维截面，停止正式决策）"
+                            if resolved.degraded else
+                            f"  {score_source}综合分 {combined:+.4f} | 置信度 {confidence:.3f}"
+                        ),
                         f"  正式动作(DecisionEngine): {decision.action_zh}",
                         f"  执行状态: {decision.execution_status}",
                         f"  仓位: 当前{decision.current_position_ratio:.1%} → 目标{decision.target_position_ratio:.1%}（分{decision.recommended_batches}批）",

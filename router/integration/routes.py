@@ -217,7 +217,7 @@ def workflow_research(
     "/workflow/decision",
     response_model=UnifiedResponse[DecisionWorkflowResult],
     summary="Run one explicitly confirmed formal and shadow decision evaluation",
-    description="Formal 60/40 and shadow outputs remain separate; no packet or order is created.",
+    description="Formal four-dimensional and shadow outputs remain separate; no packet or order is created.",
 )
 def workflow_decision(
     request: DecisionWorkflowRequest,
@@ -394,7 +394,7 @@ def experiment_report(
             request_id=request_id,
             data_cutoff=result.run.data_cutoff,
             status=ResponseStatus.DEGRADED,
-            warnings=["FORMAL_60_40_INSUFFICIENT_COVERAGE"],
+            warnings=["FORMAL_4D_INSUFFICIENT_COVERAGE"],
             risk_flags=["NOT_PROOF_OF_PROFITABILITY"],
         )
     except Exception as exc:

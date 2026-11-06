@@ -163,6 +163,9 @@ class ShadowComposite(OrchestrationModel):
 
 
 class FormalResult(OrchestrationModel):
+    status: Literal["AVAILABLE", "UNAVAILABLE"] = "AVAILABLE"
+    score_source: Literal["cross_section_4d", "cross_section_4d_unavailable"] = "cross_section_4d"
+    reason: str = ""
     strategy_version: str
     score: float = Field(ge=-1, le=1)
     confidence: float = Field(ge=0, le=1)
@@ -263,7 +266,9 @@ class DecisionShadowRequest(OrchestrationModel):
     fundamental_confidence: float = Field(ge=0, le=1)
     sentiment_score: float | None = Field(default=None, ge=-1, le=1)
     sentiment_confidence: float | None = Field(default=None, ge=0, le=1)
-    custom_formal_weights: dict[str, float] | None = None
+    custom_formal_weights: dict[str, float] | None = Field(
+        default=None, description="Deprecated compatibility input; formal four-dimensional weights are fixed.",
+    )
     hard_veto: bool = False
     persist_shadow: bool = True
 
